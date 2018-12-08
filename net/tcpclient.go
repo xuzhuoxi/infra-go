@@ -1,8 +1,6 @@
 package net
 
 import (
-	"bytes"
-	"fmt"
 	"net"
 )
 
@@ -12,7 +10,7 @@ type ITCPClient interface {
 
 	Send(data []byte) bool
 
-	SetReceivingHandler(handler func(data []byte))
+	SetReceivingHandler(handler func(conn net.Conn, data []byte))
 	StartReceiving()
 	StopReceiving()
 }
@@ -50,7 +48,7 @@ func (c *TCPClient) Send(data []byte) bool {
 	return c.transceiver.SendData(data)
 }
 
-func (c *TCPClient) SetReceivingHandler(handler func(data []byte)) {
+func (c *TCPClient) SetReceivingHandler(handler func(conn net.Conn, data []byte)) {
 	c.transceiver.SetReceivingHandler(handler)
 }
 
@@ -60,11 +58,4 @@ func (c *TCPClient) StartReceiving() {
 
 func (c *TCPClient) StopReceiving() {
 	c.transceiver.StopReceiving()
-}
-
-//private ----------------------
-
-func handleData(buff *bytes.Buffer) {
-	fmt.Println("\t", buff.Bytes())
-	buff.Reset()
 }

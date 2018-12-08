@@ -7,8 +7,14 @@ import (
 )
 
 const (
-	NetworkTCP = "tcp"
+	RpcNetworkTCP  = "tcp"
+	RpcNetworkHttp = "http"
 )
+
+func NewRPCServer() IRPCServer {
+	rs := &RPCServer{Server: rpc.NewServer()}
+	return rs
+}
 
 type IRPCServer interface {
 	Register(rcvr interface{}) error
@@ -35,7 +41,7 @@ func (s *RPCServer) StartServer(addr string) {
 	if nil == s.Server {
 		return
 	}
-	l, newServerAddr := listenRPC(NetworkTCP, addr)
+	l, newServerAddr := listenRPC(RpcNetworkTCP, addr)
 	log.Println("\tRPC server listening on:", newServerAddr)
 	s.Listener = l
 	s.Server.Accept(l)
@@ -43,11 +49,6 @@ func (s *RPCServer) StartServer(addr string) {
 
 func (s *RPCServer) StopServer() {
 	s.Listener.Close()
-}
-
-func NewRPCServer() IRPCServer {
-	rs := &RPCServer{Server: rpc.NewServer()}
-	return rs
 }
 
 func listenRPC(network string, address string) (net.Listener, string) {
