@@ -4,20 +4,25 @@ import (
 	"net/rpc"
 )
 
+func NewRPCClient() IRPCClient {
+	return &RPCClient{}
+}
+
 type IRPCClient interface {
-	Dial(network, address string) error
+	Dial(address string) error
 	IsConnected() bool
 	Call(serviceMethod string, args interface{}, reply interface{})
 	Close()
 }
 
 type RPCClient struct {
+	Network   string
 	client    *rpc.Client
 	connected bool
 }
 
-func (c *RPCClient) Dial(network, address string) error {
-	client, err := rpc.Dial(network, address)
+func (c *RPCClient) Dial(address string) error {
+	client, err := rpc.Dial(c.Network, address)
 	if nil != err {
 		return err
 	}
@@ -42,8 +47,4 @@ func (c *RPCClient) Close() {
 		return
 	}
 	c.client.Close()
-}
-
-func NewRPCClient() IRPCClient {
-	return &RPCClient{}
 }

@@ -5,8 +5,14 @@ import (
 	"net"
 )
 
+const (
+	TcpNetwork  = "tcp"
+	TcpNetwork4 = "tcp4"
+	TcpNetwork6 = "tcp6"
+)
+
 func NewTCPServer(maxLinkNum int) ITCPServer {
-	rs := &TCPServer{maxLinkNum: maxLinkNum}
+	rs := &TCPServer{Network: "tcp", maxLinkNum: maxLinkNum}
 	rs.mapTransceiver = make(map[string]ITransceiver)
 	return rs
 }
@@ -19,6 +25,7 @@ type ITCPServer interface {
 }
 
 type TCPServer struct {
+	Network    string
 	maxLinkNum int
 	timeout    int
 	serverSem  chan bool
@@ -28,16 +35,16 @@ type TCPServer struct {
 }
 
 func (s *TCPServer) StartServer(address string) {
-	listener, _ := listenTCP("tcp", address)
+	listener, _ := listenTCP(s.Network, address)
 	s.listener = listener
 	s.serverSem = make(chan bool, s.maxLinkNum)
 	for {
+		s.serverSem <- true
 		tcpConn, err := listener.AcceptTCP()
 		if nil != err { //Listener已经关闭
 			log.Fatalln(err)
 			break
 		}
-		s.serverSem <- true
 		key := tcpConn.RemoteAddr().String()
 		log.Println("New Connection:", key)
 		go s.processTCPConn(key, tcpConn)
@@ -66,7 +73,9 @@ func (s *TCPServer) GetTransceiver(key string) ITransceiver {
 
 func (s *TCPServer) processTCPConn(key string, conn *net.TCPConn) {
 	defer func() {
+		conn.Close()
 		delete(s.mapTransceiver, key)
+		<-s.serverSem
 	}()
 	transceiver := NewTransceiver(conn)
 	s.mapTransceiver[key] = transceiver

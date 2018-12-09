@@ -10,7 +10,7 @@ func TestTCPServer(t *testing.T) {
 	go server.StartServer(":9999")
 
 	client := NewTCPClient()
-	client.Dial("tcp", "127.0.0.1:9999")
+	client.Dial("127.0.0.1:9999")
 	time.Sleep(500 * time.Millisecond)
 	client.Send([]byte{1, 2, 3, 4})
 	client.Send([]byte{0, 0, 0, 0})

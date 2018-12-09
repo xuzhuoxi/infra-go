@@ -4,8 +4,13 @@ import (
 	"net"
 )
 
+func NewTCPClient() ITCPClient {
+	client := &TCPClient{Network: "tcp"}
+	return client
+}
+
 type ITCPClient interface {
-	Dial(network string, address string) error
+	Dial(address string) error
 	Close()
 
 	Send(data []byte) bool
@@ -15,18 +20,14 @@ type ITCPClient interface {
 	StopReceiving()
 }
 
-func NewTCPClient() ITCPClient {
-	client := &TCPClient{}
-	return client
-}
-
 type TCPClient struct {
+	Network     string
 	Conn        net.Conn
 	transceiver ITransceiver
 }
 
-func (c *TCPClient) Dial(network string, address string) error {
-	conn, err := net.Dial(network, address)
+func (c *TCPClient) Dial(address string) error {
+	conn, err := net.Dial(c.Network, address)
 	if nil != err {
 		return err
 	}

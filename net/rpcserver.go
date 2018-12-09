@@ -12,7 +12,7 @@ const (
 )
 
 func NewRPCServer() IRPCServer {
-	rs := &RPCServer{Server: rpc.NewServer()}
+	rs := &RPCServer{Network: "tcp", Server: rpc.NewServer()}
 	return rs
 }
 
@@ -25,6 +25,7 @@ type IRPCServer interface {
 }
 
 type RPCServer struct {
+	Network  string
 	Server   *rpc.Server
 	Listener net.Listener
 }
@@ -41,7 +42,7 @@ func (s *RPCServer) StartServer(addr string) {
 	if nil == s.Server {
 		return
 	}
-	l, newServerAddr := listenRPC(RpcNetworkTCP, addr)
+	l, newServerAddr := listenRPC(s.Network, addr)
 	log.Println("\tRPC server listening on:", newServerAddr)
 	s.Listener = l
 	s.Server.Accept(l)

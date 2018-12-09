@@ -5,6 +5,12 @@ import (
 	"time"
 )
 
+func NewHttpServer() IHttpServer {
+	rs := &HttpServer{Network: "http", ServeMux: http.NewServeMux(), Server: nil}
+	rs.MapFunc("/time", timeHandler)
+	return rs
+}
+
 type IHttpServer interface {
 	StartServer(addr string)
 	StopServer()
@@ -13,6 +19,7 @@ type IHttpServer interface {
 }
 
 type HttpServer struct {
+	Network  string
 	ServeMux *http.ServeMux
 	Server   *http.Server
 }
@@ -39,12 +46,6 @@ func (s *HttpServer) MapHandle(pattern string, handler http.Handler) {
 
 func (s *HttpServer) MapFunc(pattern string, f func(w http.ResponseWriter, r *http.Request)) {
 	s.MapHandle(pattern, http.HandlerFunc(f))
-}
-
-func NewHttpServer() IHttpServer {
-	rs := &HttpServer{http.NewServeMux(), nil}
-	rs.MapFunc("/time", timeHandler)
-	return rs
 }
 
 func timeHandler(w http.ResponseWriter, r *http.Request) {
