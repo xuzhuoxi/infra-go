@@ -2,7 +2,6 @@ package net
 
 import (
 	"bytes"
-	"io/ioutil"
 	"log"
 	"net"
 )
@@ -15,7 +14,7 @@ func NewTransceiver(conn net.Conn) ITransceiver {
 	rs := &Transceiver{conn: conn}
 	rs.buff = bytes.NewBuffer(make([]byte, TransceiverBuffLength))
 	rs.buff.Reset()
-	rs.handler = defaultHandler
+	rs.handler = defaultTransceiverHandler
 	return rs
 }
 
@@ -51,9 +50,7 @@ func (t *Transceiver) StartReceiving() {
 		return
 	}
 	t.receiving = true
-	defer func() {
-		t.receiving = false
-	}()
+	defer t.StopReceiving()
 	var buff [128]byte
 	for t.receiving {
 		n, err := t.conn.Read(buff[:])
@@ -70,8 +67,8 @@ func (t *Transceiver) StopReceiving() {
 }
 
 func (t *Transceiver) handleData(newData []byte) {
-	//这里分包
 	t.buff.Write(newData)
+	//这里分包
 	t.handler(t.conn, t.buff.Bytes())
 }
 
@@ -85,26 +82,27 @@ func sendMsg(c net.Conn, data []byte) bool {
 	return true
 }
 
-func recvMsg(c net.Conn, buff []byte) bool {
-	for read := 0; read != len(buff); {
-		n, err := c.Read(buff)
-		read += n
-		if err != nil {
-			return false
-		}
-	}
-	return true
-}
+//
+//func recvMsg(c net.Conn, buff []byte) bool {
+//	for read := 0; read != len(buff); {
+//		n, err := c.Read(buff)
+//		read += n
+//		if err != nil {
+//			return false
+//		}
+//	}
+//	return true
+//}
+//
+//func recvMsg2(c net.Conn, buff *[]byte) bool {
+//	data, err := ioutil.ReadAll(c)
+//	if nil != err {
+//		return false
+//	}
+//	buff = &data
+//	return true
+//}
 
-func recvMsg2(c net.Conn, buff *[]byte) bool {
-	data, err := ioutil.ReadAll(c)
-	if nil != err {
-		return false
-	}
-	buff = &data
-	return true
-}
-
-func defaultHandler(conn net.Conn, buffData []byte) {
+func defaultTransceiverHandler(conn net.Conn, buffData []byte) {
 	log.Println("Receive Data[Sender:", conn.RemoteAddr(), "Receiver:", conn.LocalAddr(), "buff:", buffData, "buffLen:", len(buffData), "]")
 }

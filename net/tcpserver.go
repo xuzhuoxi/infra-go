@@ -12,7 +12,7 @@ const (
 )
 
 func NewTCPServer(maxLinkNum int) ITCPServer {
-	rs := &TCPServer{Network: "tcp", maxLinkNum: maxLinkNum}
+	rs := &TCPServer{Network: TcpNetwork, maxLinkNum: maxLinkNum}
 	rs.mapTransceiver = make(map[string]ITransceiver)
 	return rs
 }
@@ -28,17 +28,23 @@ type TCPServer struct {
 	Network    string
 	maxLinkNum int
 	timeout    int
-	serverSem  chan bool
 
 	listener       *net.TCPListener
 	mapTransceiver map[string]ITransceiver
+	running        bool
+	serverSem      chan bool
 }
 
 func (s *TCPServer) StartServer(address string) {
+	if s.running {
+		return
+	}
+	defer s.StopServer()
+	s.running = true
 	listener, _ := listenTCP(s.Network, address)
 	s.listener = listener
 	s.serverSem = make(chan bool, s.maxLinkNum)
-	for {
+	for s.running {
 		s.serverSem <- true
 		tcpConn, err := listener.AcceptTCP()
 		if nil != err { //Listener已经关闭
@@ -58,7 +64,9 @@ func (s *TCPServer) StopServer() {
 		}
 		s.mapTransceiver = make(map[string]ITransceiver)
 	}()
-	s.listener.Close()
+	if nil != s.listener {
+		s.listener.Close()
+	}
 }
 
 func (s *TCPServer) GetTransceiver(key string) ITransceiver {
