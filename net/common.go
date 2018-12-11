@@ -21,7 +21,7 @@ func NewTransceiver(conn net.Conn) ITransceiver {
 type ITransceiver interface {
 	GetConnection() net.Conn
 	SendData(data []byte) bool
-	SetReceivingHandler(handler func(conn net.Conn, data []byte))
+	SetReceivingHandler(handler func(data []byte, conn net.Conn))
 	StartReceiving()
 	StopReceiving()
 }
@@ -30,7 +30,7 @@ type ITransceiver interface {
 type Transceiver struct {
 	conn      net.Conn
 	buff      *bytes.Buffer
-	handler   func(conn net.Conn, data []byte)
+	handler   func(data []byte, conn net.Conn)
 	receiving bool
 }
 
@@ -42,7 +42,7 @@ func (t *Transceiver) SendData(data []byte) bool {
 	return sendMsg(t.conn, data)
 }
 
-func (t *Transceiver) SetReceivingHandler(handler func(conn net.Conn, data []byte)) {
+func (t *Transceiver) SetReceivingHandler(handler func(data []byte, conn net.Conn)) {
 	t.handler = handler
 }
 func (t *Transceiver) StartReceiving() {
@@ -69,7 +69,9 @@ func (t *Transceiver) StopReceiving() {
 func (t *Transceiver) handleData(newData []byte) {
 	t.buff.Write(newData)
 	//这里分包
-	t.handler(t.conn, t.buff.Bytes())
+	if nil != t.handler {
+		t.handler(t.buff.Bytes(), t.conn)
+	}
 }
 
 //private ------------------------
@@ -103,6 +105,6 @@ func sendMsg(c net.Conn, data []byte) bool {
 //	return true
 //}
 
-func defaultTransceiverHandler(conn net.Conn, buffData []byte) {
+func defaultTransceiverHandler(buffData []byte, conn net.Conn) {
 	log.Println("Receive Data[Sender:", conn.RemoteAddr(), "Receiver:", conn.LocalAddr(), "buff:", buffData, "buffLen:", len(buffData), "]")
 }

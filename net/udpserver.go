@@ -25,6 +25,7 @@ type IUDPServer interface {
 	StartServer(address string)
 	StopServer()
 	SendData(data []byte, rAddr *net.UDPAddr)
+	SetReceivingHandler(handler func(data []byte, rAddr *net.UDPAddr))
 }
 
 type UDPServer struct {
@@ -32,7 +33,7 @@ type UDPServer struct {
 
 	conn    *net.UDPConn
 	mapBuff map[string]*bytes.Buffer
-	handler func(rAddr *net.UDPAddr, data []byte)
+	handler func(data []byte, rAddr *net.UDPAddr)
 	running bool
 }
 
@@ -40,10 +41,8 @@ func (s *UDPServer) StartServer(address string) {
 	if s.running {
 		return
 	}
-	defer func() {
-		s.running = false
-	}()
 	s.running = true
+	defer s.StopServer()
 	conn, _ := listenUDP(s.Network, address)
 	s.conn = conn
 	s.mapBuff = make(map[string]*bytes.Buffer)
@@ -58,13 +57,22 @@ func (s *UDPServer) StartServer(address string) {
 }
 
 func (s *UDPServer) StopServer() {
+	defer func() {
+		s.running = false
+	}()
 	if nil != s.conn {
 		s.conn.Close()
 	}
 }
 
 func (s *UDPServer) SendData(data []byte, rAddr *net.UDPAddr) {
-	panic("implement me")
+	if s.running {
+		s.conn.WriteToUDP(data, rAddr)
+	}
+}
+
+func (s *UDPServer) SetReceivingHandler(handler func(data []byte, rAddr *net.UDPAddr)) {
+	s.handler = handler
 }
 
 //private ----------
@@ -73,11 +81,14 @@ func (s *UDPServer) handleData(data []byte, rAddr *net.UDPAddr) {
 	buff, ok := s.mapBuff[key]
 	if !ok {
 		buff = bytes.NewBuffer(make([]byte, UDPBuffLength))
+		buff.Reset()
 		s.mapBuff[key] = buff
 	}
 	buff.Write(data)
 	//这里分包
-	s.handler(rAddr, buff.Bytes())
+	if nil != s.handler {
+		s.handler(buff.Bytes(), rAddr)
+	}
 }
 
 func listenUDP(network string, address string) (*net.UDPConn, string) {
@@ -89,6 +100,6 @@ func listenUDP(network string, address string) (*net.UDPConn, string) {
 	return listener, listener.LocalAddr().String()
 }
 
-func defaultUDPHandler(rAddr *net.UDPAddr, data []byte) {
+func defaultUDPHandler(data []byte, rAddr *net.UDPAddr) {
 	log.Println("defaultUDPHandler[Sender:", rAddr.String(), "data:", data, "]")
 }

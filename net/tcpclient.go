@@ -15,7 +15,7 @@ type ITCPClient interface {
 
 	Send(data []byte) bool
 
-	SetReceivingHandler(handler func(conn net.Conn, data []byte))
+	SetReceivingHandler(handler func(data []byte, conn net.Conn))
 	StartReceiving()
 	StopReceiving()
 }
@@ -49,7 +49,7 @@ func (c *TCPClient) Send(data []byte) bool {
 	return c.transceiver.SendData(data)
 }
 
-func (c *TCPClient) SetReceivingHandler(handler func(conn net.Conn, data []byte)) {
+func (c *TCPClient) SetReceivingHandler(handler func(data []byte, conn net.Conn)) {
 	c.transceiver.SetReceivingHandler(handler)
 }
 

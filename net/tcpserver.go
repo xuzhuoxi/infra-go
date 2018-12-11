@@ -63,6 +63,7 @@ func (s *TCPServer) StopServer() {
 			value.GetConnection().Close()
 		}
 		s.mapTransceiver = make(map[string]ITransceiver)
+		close(s.serverSem)
 	}()
 	if nil != s.listener {
 		s.listener.Close()
