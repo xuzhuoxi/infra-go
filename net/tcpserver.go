@@ -13,13 +13,15 @@ const (
 
 func NewTCPServer(maxLinkNum int) ITCPServer {
 	rs := &TCPServer{Network: TcpNetwork, maxLinkNum: maxLinkNum}
-	rs.mapTransceiver = make(map[string]ITransceiver)
+	rs.splitHandler = DefaultSplitHandler
+	rs.messageHandler = DefaultMessageHandler
 	return rs
 }
 
 type ITCPServer interface {
-	//会阻塞
-	StartServer(address string)
+	SetSplitHandler(handler func(buff []byte) ([]byte, []byte))
+	SetMessageHandler(handler func(data []byte, sender string, receiver string))
+	StartServer(address string) //会阻塞
 	StopServer()
 	GetTransceiver(key string) ITransceiver
 }
@@ -31,8 +33,18 @@ type TCPServer struct {
 
 	listener       *net.TCPListener
 	mapTransceiver map[string]ITransceiver
+	splitHandler   func(buff []byte) ([]byte, []byte)
+	messageHandler func(data []byte, sender string, receiver string)
 	running        bool
 	serverSem      chan bool
+}
+
+func (s *TCPServer) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) {
+	s.splitHandler = handler
+}
+
+func (s *TCPServer) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+	s.messageHandler = handler
 }
 
 func (s *TCPServer) StartServer(address string) {
@@ -44,6 +56,7 @@ func (s *TCPServer) StartServer(address string) {
 	listener, _ := listenTCP(s.Network, address)
 	s.listener = listener
 	s.serverSem = make(chan bool, s.maxLinkNum)
+	s.mapTransceiver = make(map[string]ITransceiver)
 	for s.running {
 		s.serverSem <- true
 		tcpConn, err := listener.AcceptTCP()
@@ -62,7 +75,7 @@ func (s *TCPServer) StopServer() {
 		for _, value := range s.mapTransceiver {
 			value.GetConnection().Close()
 		}
-		s.mapTransceiver = make(map[string]ITransceiver)
+		s.mapTransceiver = nil
 		close(s.serverSem)
 	}()
 	if nil != s.listener {
@@ -88,11 +101,13 @@ func (s *TCPServer) processTCPConn(key string, conn *net.TCPConn) {
 	}()
 	transceiver := NewTransceiver(conn)
 	s.mapTransceiver[key] = transceiver
+	transceiver.SetSplitHandler(s.splitHandler)
+	transceiver.SetMessageHandler(s.messageHandler)
 	transceiver.StartReceiving()
 }
 
 func listenTCP(network string, address string) (*net.TCPListener, string) {
-	tcpAddr, _ := net.ResolveTCPAddr(network, address)
+	tcpAddr, _ := getTCPAddr(network, address)
 	listener, err := net.ListenTCP(network, tcpAddr)
 	if err != nil {
 		log.Fatalln("\tnet.ListenTCP:", network, address, ": %v", err)

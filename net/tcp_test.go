@@ -22,5 +22,5 @@ func TestTCPServer(t *testing.T) {
 	client.Send([]byte{1, 1, 1, 1})
 	client.Close()
 
-	time.Sleep(50 * time.Second)
+	time.Sleep(3 * time.Second)
 }

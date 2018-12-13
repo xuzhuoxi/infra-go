@@ -1,7 +1,6 @@
 package net
 
 import (
-	"bytes"
 	"log"
 	"net"
 )
@@ -15,26 +14,36 @@ const (
 )
 
 func NewUDPServer() IUDPServer {
-	rs := &UDPServer{Network: "udp", handler: defaultUDPHandler}
+	rs := &UDPServer{Network: "udp"}
+	rs.splitHandler = DefaultSplitHandler
+	rs.messageHandler = DefaultMessageHandler
 	return rs
 }
 
 //unconnected
 type IUDPServer interface {
-	//会阻塞
-	StartServer(address string)
+	SetSplitHandler(handler func(buff []byte) ([]byte, []byte))
+	SetMessageHandler(handler func(data []byte, sender string, receiver string))
+	StartServer(address string) //会阻塞
 	StopServer()
-	SendData(data []byte, rAddr *net.UDPAddr)
-	SetReceivingHandler(handler func(data []byte, rAddr *net.UDPAddr))
+	SendData(data []byte, rAddress ...string)
 }
 
 type UDPServer struct {
-	Network string
+	Network        string
+	conn           *net.UDPConn
+	mapBuff        map[string]*MessageBuff
+	splitHandler   func(buff []byte) ([]byte, []byte)
+	messageHandler func(data []byte, sender string, receiver string)
+	running        bool
+}
 
-	conn    *net.UDPConn
-	mapBuff map[string]*bytes.Buffer
-	handler func(data []byte, rAddr *net.UDPAddr)
-	running bool
+func (s *UDPServer) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) {
+	s.splitHandler = handler
+}
+
+func (s *UDPServer) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+	s.messageHandler = handler
 }
 
 func (s *UDPServer) StartServer(address string) {
@@ -45,7 +54,7 @@ func (s *UDPServer) StartServer(address string) {
 	defer s.StopServer()
 	conn, _ := listenUDP(s.Network, address)
 	s.conn = conn
-	s.mapBuff = make(map[string]*bytes.Buffer)
+	s.mapBuff = make(map[string]*MessageBuff)
 	data := make([]byte, 2048)
 	for s.running {
 		n, rAddr, err := conn.ReadFromUDP(data)
@@ -65,14 +74,10 @@ func (s *UDPServer) StopServer() {
 	}
 }
 
-func (s *UDPServer) SendData(data []byte, rAddr *net.UDPAddr) {
-	if s.running {
-		s.conn.WriteToUDP(data, rAddr)
+func (s *UDPServer) SendData(data []byte, rAddress ...string) {
+	if s.running && len(rAddress) > 0 {
+		sendDataFromListen(s.conn, data, rAddress...)
 	}
-}
-
-func (s *UDPServer) SetReceivingHandler(handler func(data []byte, rAddr *net.UDPAddr)) {
-	s.handler = handler
 }
 
 //private ----------
@@ -80,19 +85,18 @@ func (s *UDPServer) handleData(data []byte, rAddr *net.UDPAddr) {
 	key := rAddr.String()
 	buff, ok := s.mapBuff[key]
 	if !ok {
-		buff = bytes.NewBuffer(make([]byte, UDPBuffLength))
-		buff.Reset()
+		buff = NewMessageBuff()
 		s.mapBuff[key] = buff
+		buff.SetCheckMessageHandler(s.splitHandler)
 	}
-	buff.Write(data)
-	//这里分包
-	if nil != s.handler {
-		s.handler(buff.Bytes(), rAddr)
+	buff.AppendBytes(data)
+	for buff.CheckMessage() {
+		s.messageHandler(buff.FrontMessage(), rAddr.String(), s.conn.LocalAddr().String())
 	}
 }
 
 func listenUDP(network string, address string) (*net.UDPConn, string) {
-	udpAddr, _ := net.ResolveUDPAddr(network, address)
+	udpAddr, _ := getUDPAddr(network, address)
 	listener, err := net.ListenUDP(network, udpAddr)
 	if err != nil {
 		log.Fatalln("\tnet.ListenUDP:", network, address, ": %v", err)
@@ -100,6 +104,6 @@ func listenUDP(network string, address string) (*net.UDPConn, string) {
 	return listener, listener.LocalAddr().String()
 }
 
-func defaultUDPHandler(data []byte, rAddr *net.UDPAddr) {
-	log.Println("defaultUDPHandler[Sender:", rAddr.String(), "data:", data, "]")
+func (s *UDPServer) defaultUDPHandler(data []byte, rAddr *net.UDPAddr) {
+	log.Println("defaultUDPHandler[S:", rAddr.String(), "R:", s.conn.LocalAddr().String(), "data:", data, "]")
 }

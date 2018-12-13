@@ -18,18 +18,31 @@ func NewUDPClientForMultiRemote() IUDPClient {
 }
 
 type IUDPClient interface {
+	SetSplitHandler(handler func(buff []byte) ([]byte, []byte))
+	SetMessageHandler(handler func(data []byte, sender string, receiver string))
+
 	Connected() bool
 	Setup(lAddress string, rAddress string) bool
 	Close() bool
-	SendData(data []byte, rAddress ...string) bool
-	SetReceivingHandler(handler func(data []byte, rAddr *net.UDPAddr))
+	StartReceiving()
+	StopReceiving()
+	SendData(data []byte, rAddress string)
+	SendDataToMulti(data []byte, rAddress ...string)
 }
 
 //UDPDialClient
 type UDPDialClient struct {
-	Network string
-	conn    *net.UDPConn
-	handler func(data []byte, rAddr *net.UDPAddr)
+	Network     string
+	conn        *net.UDPConn
+	transceiver ITransceiver
+}
+
+func (c *UDPDialClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) {
+	c.transceiver.SetSplitHandler(handler)
+}
+
+func (c *UDPDialClient) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+	c.transceiver.SetMessageHandler(handler)
 }
 
 func (c *UDPDialClient) Connected() bool {
@@ -41,10 +54,9 @@ func (c *UDPDialClient) Setup(lAddress string, rAddress string) bool {
 		log.Fatalln("UDPDialClient-Repeated Setup!")
 		return false
 	}
-	lAddr, _ := net.ResolveUDPAddr(c.Network, lAddress)
-	rAddr, err := net.ResolveUDPAddr(c.Network, rAddress)
+	lAddr, _ := getUDPAddr(c.Network, lAddress)
+	rAddr, err := getUDPAddr(c.Network, rAddress)
 	if nil != err {
-		logCreateAddrErr(rAddress, err)
 		return false
 	}
 	conn, cErr := net.DialUDP(c.Network, lAddr, rAddr)
@@ -53,6 +65,7 @@ func (c *UDPDialClient) Setup(lAddress string, rAddress string) bool {
 		return false
 	}
 	c.conn = conn
+	c.transceiver = NewTransceiver(conn)
 	return true
 }
 
@@ -60,31 +73,42 @@ func (c *UDPDialClient) Close() bool {
 	return closeConn(c.conn)
 }
 
-func (c *UDPDialClient) SendData(data []byte, rAddress ...string) bool {
-	if len(rAddress) > 0 {
-		log.Fatalln("UDPDialClient can net SendData to rAddress!")
-		return false
-	}
+func (c *UDPDialClient) SendData(data []byte, rAddress string) {
 	_, err := c.conn.Write(data)
 	if nil != err {
 		log.Fatalln(err)
-		return false
 	}
-	return true
 }
 
-func (c *UDPDialClient) SetReceivingHandler(handler func(data []byte, rAddr *net.UDPAddr)) {
-	c.handler = handler
+func (c *UDPDialClient) SendDataToMulti(data []byte, rAddress ...string) {
+	log.Fatalln("UDPDialClient does not support the method!")
+}
+
+func (c *UDPDialClient) StartReceiving() {
+	c.transceiver.StartReceiving()
+}
+
+func (c *UDPDialClient) StopReceiving() {
+	c.transceiver.StopReceiving()
 }
 
 //UDPListenClient
 type UDPListenClient struct {
-	Network string
-	conn    *net.UDPConn
-	handler func(data []byte, rAddr *net.UDPAddr)
+	Network    string
+	conn       *net.UDPConn
+	remoteAddr *net.UDPAddr
 
-	remoteAddress string
-	remoteAddr    *net.UDPAddr
+	messageBuff    *MessageBuff
+	messageHandler func(data []byte, sender string, receiver string)
+	receiving      bool
+}
+
+func (c *UDPListenClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) {
+	c.messageBuff.SetCheckMessageHandler(handler)
+}
+
+func (c *UDPListenClient) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+	c.messageHandler = handler
 }
 
 func (c *UDPListenClient) Connected() bool {
@@ -92,9 +116,8 @@ func (c *UDPListenClient) Connected() bool {
 }
 
 func (c *UDPListenClient) Setup(lAddress string, rAddress string) bool {
-	lAddr, err := net.ResolveUDPAddr(c.Network, lAddress)
+	lAddr, err := getUDPAddr(c.Network, lAddress)
 	if nil != err {
-		logCreateAddrErr(lAddress, err)
 		return false
 	}
 	conn, cErr := net.ListenUDP(c.Network, lAddr)
@@ -103,15 +126,10 @@ func (c *UDPListenClient) Setup(lAddress string, rAddress string) bool {
 		return false
 	}
 	c.conn = conn
-	if "" != rAddress {
-		rAddr, err := net.ResolveUDPAddr(c.Network, rAddress)
-		if nil != err {
-			logCreateAddrErr(rAddress, err)
-			c.remoteAddr = nil
-		} else {
-			c.remoteAddress = rAddress
-			c.remoteAddr = rAddr
-		}
+	c.messageBuff = NewMessageBuff()
+	rAddr, rErr := getUDPAddr(c.Network, rAddress)
+	if nil == rErr {
+		c.remoteAddr = rAddr
 	}
 	return true
 }
@@ -120,33 +138,50 @@ func (c *UDPListenClient) Close() bool {
 	return closeConn(c.conn)
 }
 
-func (c *UDPListenClient) SendData(data []byte, rAddress ...string) bool {
-	rLen := len(rAddress)
-	if rLen > 1 {
-		log.Fatalln("UDPListenClient can not SendData to multi address!")
-		return false
-	}
+func (c *UDPListenClient) SendData(data []byte, rAddress string) {
 	if nil == c.remoteAddr {
-		if rLen == 0 {
-			log.Fatalln("UDPListenClient: No remote address!")
-			return false
-		}
-		rAddr, err := net.ResolveUDPAddr(c.Network, rAddress[0])
+		rAddr, err := getUDPAddr(c.Network, rAddress)
 		if nil != err {
-			logCreateAddrErr(rAddress[0], err)
-			return false
+			return
 		}
 		c.remoteAddr = rAddr
-		c.remoteAddress = rAddress[0]
 	}
 	c.conn.WriteToUDP(data, c.remoteAddr)
-	return true
 }
 
-func (c *UDPListenClient) SetReceivingHandler(handler func(data []byte, rAddr *net.UDPAddr)) {
-	c.handler = handler
+func (c *UDPListenClient) SendDataToMulti(data []byte, rAddress ...string) {
+	log.Fatalln("UDPListenClient does not support the method!")
 }
 
+func (c *UDPListenClient) StartReceiving() {
+	if nil == c.conn || c.receiving {
+		return
+	}
+	c.receiving = true
+	defer c.StopReceiving()
+	var buffCache [1024]byte
+	for {
+		n, addr, err := c.conn.ReadFromUDP(buffCache[:])
+		if err != nil {
+			break
+		}
+		if !UDPAddrEqual(addr, c.remoteAddr) {
+			continue
+		}
+		c.messageBuff.AppendBytes(buffCache[:n])
+		for c.messageBuff.CheckMessage() {
+			c.messageHandler(c.messageBuff.FrontMessage(), c.remoteAddr.String(), c.conn.LocalAddr().String())
+		}
+	}
+}
+
+func (c *UDPListenClient) StopReceiving() {
+	if c.receiving {
+		c.receiving = false
+	}
+}
+
+//UDPMultiRemoteClient
 type UDPMultiRemoteClient struct {
 	Network string
 	conn    *net.UDPConn
@@ -154,14 +189,21 @@ type UDPMultiRemoteClient struct {
 	handler func(data []byte, rAddr *net.UDPAddr)
 }
 
+func (c *UDPMultiRemoteClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) {
+	log.Fatalln("UDPMultiRemoteClient does not support the method[SetSplitHandler]!")
+}
+
+func (c *UDPMultiRemoteClient) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+	log.Fatalln("UDPMultiRemoteClient does not support the method[SetMessageHandler]!")
+}
+
 func (c *UDPMultiRemoteClient) Connected() bool {
 	return false
 }
 
 func (c *UDPMultiRemoteClient) Setup(lAddress string, rAddress string) bool {
-	lAddr, err := net.ResolveUDPAddr(c.Network, lAddress)
+	lAddr, err := getUDPAddr(c.Network, lAddress)
 	if nil != err {
-		logCreateAddrErr(lAddress, err)
 		return false
 	}
 	conn, cErr := net.ListenUDP(c.Network, lAddr)
@@ -178,36 +220,26 @@ func (c *UDPMultiRemoteClient) Close() bool {
 	return closeConn(c.conn)
 }
 
-func (c *UDPMultiRemoteClient) SendData(data []byte, rAddress ...string) bool {
-	if len(rAddress) == 0 {
-		return false
-	}
-	var err error
-	count := 0
-	for _, address := range rAddress {
-		addr, ok := c.mapAddr[address]
-		if !ok {
-			addr, err = net.ResolveUDPAddr(c.Network, address)
-			if nil != err {
-				logCreateAddrErr(address, err)
-				continue
-			}
-		}
-		c.conn.WriteToUDP(data, addr)
-		count++
-	}
-	return count > 0
+func (c *UDPMultiRemoteClient) SendData(data []byte, rAddress string) {
+	sendDataFromListen(c.conn, data, rAddress)
 }
 
-func (c *UDPMultiRemoteClient) SetReceivingHandler(handler func(data []byte, rAddr *net.UDPAddr)) {
-	log.Fatalln("UDPMultiRemoteClient does not support Receiving!")
+func (c *UDPMultiRemoteClient) SendDataToMulti(data []byte, rAddress ...string) {
+	if len(rAddress) == 0 {
+		return
+	}
+	sendDataFromListen(c.conn, data, rAddress...)
+}
+
+func (c *UDPMultiRemoteClient) StartReceiving() {
+	log.Fatalln("UDPMultiRemoteClient does not support the method[StartReceiving]!")
+}
+
+func (c *UDPMultiRemoteClient) StopReceiving() {
+	log.Fatalln("UDPMultiRemoteClient does not support the method[StopReceiving]!")
 }
 
 //private ---------------
-
-func logCreateAddrErr(address string, err error) {
-	log.Fatalln("ResolveUDPAddr Error: ", address, ": %v", err)
-}
 
 func closeConn(conn *net.UDPConn) bool {
 	if nil != conn {

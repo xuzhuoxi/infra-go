@@ -12,12 +12,8 @@ func NewTCPClient() ITCPClient {
 type ITCPClient interface {
 	Dial(address string) error
 	Close()
-
 	Send(data []byte) bool
-
-	SetReceivingHandler(handler func(data []byte, conn net.Conn))
-	StartReceiving()
-	StopReceiving()
+	GetTransceiver() ITransceiver
 }
 
 type TCPClient struct {
@@ -49,14 +45,6 @@ func (c *TCPClient) Send(data []byte) bool {
 	return c.transceiver.SendData(data)
 }
 
-func (c *TCPClient) SetReceivingHandler(handler func(data []byte, conn net.Conn)) {
-	c.transceiver.SetReceivingHandler(handler)
-}
-
-func (c *TCPClient) StartReceiving() {
-	c.transceiver.StartReceiving()
-}
-
-func (c *TCPClient) StopReceiving() {
-	c.transceiver.StopReceiving()
+func (c *TCPClient) GetTransceiver() ITransceiver {
+	return c.transceiver
 }
