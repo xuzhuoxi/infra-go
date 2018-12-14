@@ -23,7 +23,7 @@ func NewUDPServer() IUDPServer {
 //unconnected
 type IUDPServer interface {
 	SetSplitHandler(handler func(buff []byte) ([]byte, []byte))
-	SetMessageHandler(handler func(data []byte, sender string, receiver string))
+	SetMessageHandler(handler func(data []byte, conn net.Conn))
 	StartServer(address string) //会阻塞
 	StopServer()
 	SendData(data []byte, rAddress ...string)
@@ -34,7 +34,7 @@ type UDPServer struct {
 	conn           *net.UDPConn
 	mapBuff        map[string]*MessageBuff
 	splitHandler   func(buff []byte) ([]byte, []byte)
-	messageHandler func(data []byte, sender string, receiver string)
+	messageHandler func(data []byte, conn net.Conn)
 	running        bool
 }
 
@@ -42,7 +42,7 @@ func (s *UDPServer) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) 
 	s.splitHandler = handler
 }
 
-func (s *UDPServer) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+func (s *UDPServer) SetMessageHandler(handler func(data []byte, conn net.Conn)) {
 	s.messageHandler = handler
 }
 
@@ -82,6 +82,7 @@ func (s *UDPServer) SendData(data []byte, rAddress ...string) {
 
 //private ----------
 func (s *UDPServer) handleData(data []byte, rAddr *net.UDPAddr) {
+	//fmt.Println("handleData:", data, rAddr)
 	key := rAddr.String()
 	buff, ok := s.mapBuff[key]
 	if !ok {
@@ -91,7 +92,7 @@ func (s *UDPServer) handleData(data []byte, rAddr *net.UDPAddr) {
 	}
 	buff.AppendBytes(data)
 	for buff.CheckMessage() {
-		s.messageHandler(buff.FrontMessage(), rAddr.String(), s.conn.LocalAddr().String())
+		s.messageHandler(buff.FrontMessage(), s.conn)
 	}
 }
 

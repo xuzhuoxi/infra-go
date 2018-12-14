@@ -17,12 +17,12 @@ func TestUDP(t *testing.T) {
 	client1.Setup(":9998", "")
 	go func() {
 		for {
-			client1.SendData([]byte{1, 3}, "127.0.0.1:9999")
+			client1.SendData([]byte{1, 3, 3, 21, 5, 6, 7}, "127.0.0.1:9999")
 		}
 	}()
 
 	client2 := NewUDPClient(true)
-	client2.Setup("", ":9999")
+	client2.Setup("", "127.0.0.1:9999")
 	go func() {
 		for {
 			client2.SendData([]byte{2, 0}, "")
@@ -32,7 +32,8 @@ func TestUDP(t *testing.T) {
 }
 
 func TestUDP2(t *testing.T) {
-	ports := []int{9990, 9991, 9992, 9993, 9994, 9995, 9996, 9997, 9998, 9999}
+	//ports := []int{9990, 9991, 9992, 9993, 9994, 9995, 9996, 9997, 9998, 9999}
+	ports := []int{9990}
 	addrs := []string{}
 	for _, port := range ports {
 		server := NewUDPServer()
@@ -47,7 +48,7 @@ func TestUDP2(t *testing.T) {
 	client1.Setup(":9900", "")
 	go func() {
 		for {
-			client1.SendDataToMulti([]byte{1, 3}, addrs...)
+			client1.SendDataToMulti([]byte{2, 4}, addrs...)
 		}
 	}()
 	time.Sleep(10 * time.Millisecond)

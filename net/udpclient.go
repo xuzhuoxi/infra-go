@@ -19,7 +19,7 @@ func NewUDPClientForMultiRemote() IUDPClient {
 
 type IUDPClient interface {
 	SetSplitHandler(handler func(buff []byte) ([]byte, []byte))
-	SetMessageHandler(handler func(data []byte, sender string, receiver string))
+	SetMessageHandler(handler func(data []byte, conn net.Conn))
 
 	Connected() bool
 	Setup(lAddress string, rAddress string) bool
@@ -41,7 +41,7 @@ func (c *UDPDialClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byt
 	c.transceiver.SetSplitHandler(handler)
 }
 
-func (c *UDPDialClient) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+func (c *UDPDialClient) SetMessageHandler(handler func(data []byte, conn net.Conn)) {
 	c.transceiver.SetMessageHandler(handler)
 }
 
@@ -99,7 +99,7 @@ type UDPListenClient struct {
 	remoteAddr *net.UDPAddr
 
 	messageBuff    *MessageBuff
-	messageHandler func(data []byte, sender string, receiver string)
+	messageHandler func(data []byte, conn net.Conn)
 	receiving      bool
 }
 
@@ -107,7 +107,7 @@ func (c *UDPListenClient) SetSplitHandler(handler func(buff []byte) ([]byte, []b
 	c.messageBuff.SetCheckMessageHandler(handler)
 }
 
-func (c *UDPListenClient) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+func (c *UDPListenClient) SetMessageHandler(handler func(data []byte, conn net.Conn)) {
 	c.messageHandler = handler
 }
 
@@ -170,7 +170,7 @@ func (c *UDPListenClient) StartReceiving() {
 		}
 		c.messageBuff.AppendBytes(buffCache[:n])
 		for c.messageBuff.CheckMessage() {
-			c.messageHandler(c.messageBuff.FrontMessage(), c.remoteAddr.String(), c.conn.LocalAddr().String())
+			c.messageHandler(c.messageBuff.FrontMessage(), c.conn)
 		}
 	}
 }
@@ -193,7 +193,7 @@ func (c *UDPMultiRemoteClient) SetSplitHandler(handler func(buff []byte) ([]byte
 	log.Fatalln("UDPMultiRemoteClient does not support the method[SetSplitHandler]!")
 }
 
-func (c *UDPMultiRemoteClient) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+func (c *UDPMultiRemoteClient) SetMessageHandler(handler func(data []byte, conn net.Conn)) {
 	log.Fatalln("UDPMultiRemoteClient does not support the method[SetMessageHandler]!")
 }
 

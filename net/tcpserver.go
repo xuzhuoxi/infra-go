@@ -20,7 +20,7 @@ func NewTCPServer(maxLinkNum int) ITCPServer {
 
 type ITCPServer interface {
 	SetSplitHandler(handler func(buff []byte) ([]byte, []byte))
-	SetMessageHandler(handler func(data []byte, sender string, receiver string))
+	SetMessageHandler(handler func(data []byte, conn net.Conn))
 	StartServer(address string) //会阻塞
 	StopServer()
 	GetTransceiver(key string) ITransceiver
@@ -34,7 +34,7 @@ type TCPServer struct {
 	listener       *net.TCPListener
 	mapTransceiver map[string]ITransceiver
 	splitHandler   func(buff []byte) ([]byte, []byte)
-	messageHandler func(data []byte, sender string, receiver string)
+	messageHandler func(data []byte, conn net.Conn)
 	running        bool
 	serverSem      chan bool
 }
@@ -43,7 +43,7 @@ func (s *TCPServer) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) 
 	s.splitHandler = handler
 }
 
-func (s *TCPServer) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+func (s *TCPServer) SetMessageHandler(handler func(data []byte, conn net.Conn)) {
 	s.messageHandler = handler
 }
 

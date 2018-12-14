@@ -1,6 +1,7 @@
 package net
 
 import (
+	"fmt"
 	"log"
 	"net"
 )
@@ -17,7 +18,7 @@ type ITransceiver interface {
 	SendData(data []byte) bool
 
 	SetSplitHandler(handler func(buff []byte) ([]byte, []byte))
-	SetMessageHandler(handler func(msgData []byte, sender string, receiver string))
+	SetMessageHandler(handler func(msgData []byte, conn net.Conn))
 	StartReceiving()
 	StopReceiving()
 }
@@ -26,7 +27,7 @@ type ITransceiver interface {
 type Transceiver struct {
 	conn        net.Conn
 	messageBuff *MessageBuff
-	msgHandler  func(data []byte, sender string, receiver string)
+	msgHandler  func(data []byte, conn net.Conn)
 	receiving   bool
 }
 
@@ -35,6 +36,7 @@ func (t *Transceiver) GetConnection() net.Conn {
 }
 
 func (t *Transceiver) SendData(data []byte) bool {
+	fmt.Println("SendData:", data, t.conn.LocalAddr().String(), t.conn.RemoteAddr().String())
 	return sendData(t.conn, data)
 }
 
@@ -42,7 +44,7 @@ func (t *Transceiver) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)
 	t.messageBuff.SetCheckMessageHandler(handler)
 }
 
-func (t *Transceiver) SetMessageHandler(handler func(data []byte, sender string, receiver string)) {
+func (t *Transceiver) SetMessageHandler(handler func(data []byte, conn net.Conn)) {
 	t.msgHandler = handler
 }
 func (t *Transceiver) StartReceiving() {
@@ -69,13 +71,12 @@ func (t *Transceiver) StopReceiving() {
 func (t *Transceiver) handleData(newData []byte) {
 	t.messageBuff.AppendBytes(newData)
 	for t.messageBuff.CheckMessage() {
-		t.msgHandler(t.messageBuff.FrontMessage(), t.conn.RemoteAddr().String(), t.conn.LocalAddr().String())
+		t.msgHandler(t.messageBuff.FrontMessage(), t.conn)
 	}
 }
 
-func sendData(c net.Conn, data []byte) bool {
-	n, err := c.Write(data)
-	log.Println("Send Data[Sender:", c.LocalAddr(), "Receiver:", c.RemoteAddr(), "data:", data, "len:", n, "]")
+func sendData(conn net.Conn, data []byte) bool {
+	n, err := conn.Write(data)
 	if n != len(data) || err != nil {
 		return false
 	}
@@ -84,6 +85,6 @@ func sendData(c net.Conn, data []byte) bool {
 
 //------------------------------------
 
-func DefaultMessageHandler(msgData []byte, sender string, receiver string) {
-	log.Println("DefaultMessageHandler[Sender:"+sender+",Receiver:"+receiver+"]msgData:", msgData, "dataLen:", len(msgData), "]")
+func DefaultMessageHandler(msgData []byte, conn net.Conn) {
+	log.Println("DefaultMessageHandler[Sender:"+conn.RemoteAddr().String()+",Receiver:"+conn.LocalAddr().String()+"]msgData:", msgData, "dataLen:", len(msgData), "]")
 }

@@ -21,6 +21,9 @@ func UDPAddrEqual(addr1 *net.UDPAddr, addr2 *net.UDPAddr) bool {
 }
 
 func getUDPAddr(network string, address string) (*net.UDPAddr, error) {
+	if "" == address {
+		return nil, net.InvalidAddrError("Empty UDP Address String!")
+	}
 	addr, ok := mapUDPAddr[address]
 	if ok {
 		return addr, nil
