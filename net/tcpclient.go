@@ -12,7 +12,7 @@ func NewTCPClient() ITCPClient {
 type ITCPClient interface {
 	Dial(address string) error
 	Close()
-	Send(data []byte) bool
+	Send(data []byte) error
 	GetTransceiver() ITransceiver
 }
 
@@ -41,7 +41,7 @@ func (c *TCPClient) Close() {
 	c.transceiver.StopReceiving()
 }
 
-func (c *TCPClient) Send(data []byte) bool {
+func (c *TCPClient) Send(data []byte) error {
 	return c.transceiver.SendData(data)
 }
 

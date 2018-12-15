@@ -22,7 +22,7 @@ func TCPAddrEqual(addr1 *net.TCPAddr, addr2 *net.TCPAddr) bool {
 
 func getTCPAddr(network string, address string) (*net.TCPAddr, error) {
 	if "" == address {
-		return nil, net.InvalidAddrError("Empty TCP Address String!")
+		return nil, EmptyAddrError("net.getTCPAddr")
 	}
 	addr, ok := mapTCPAddr[address]
 	if ok {

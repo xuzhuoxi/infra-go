@@ -22,7 +22,7 @@ func UDPAddrEqual(addr1 *net.UDPAddr, addr2 *net.UDPAddr) bool {
 
 func getUDPAddr(network string, address string) (*net.UDPAddr, error) {
 	if "" == address {
-		return nil, net.InvalidAddrError("Empty UDP Address String!")
+		return nil, EmptyAddrError("net.getUDPAddr")
 	}
 	addr, ok := mapUDPAddr[address]
 	if ok {
@@ -38,6 +38,9 @@ func getUDPAddr(network string, address string) (*net.UDPAddr, error) {
 }
 
 func sendDataFromListen(listenConn *net.UDPConn, data []byte, rAddress ...string) {
+	if nil == listenConn {
+		return
+	}
 	if len(rAddress) > 0 {
 		for _, address := range rAddress {
 			addr, err := getUDPAddr(listenConn.LocalAddr().Network(), address)
@@ -50,5 +53,5 @@ func sendDataFromListen(listenConn *net.UDPConn, data []byte, rAddress ...string
 }
 
 func logResolveUDPAddrErr(address string, err error) {
-	log.Fatalln("ResolveUDPAddr Error:[addirss="+address+"],err=", err)
+	log.Fatalln("\tResolveUDPAddr Error:[addirss="+address+"],err=", err)
 }

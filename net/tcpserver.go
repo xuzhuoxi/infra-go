@@ -1,8 +1,10 @@
 package net
 
 import (
+	"github.com/xuzhuoxi/util"
 	"log"
 	"net"
+	"sync"
 )
 
 const (
@@ -19,10 +21,11 @@ func NewTCPServer(maxLinkNum int) ITCPServer {
 }
 
 type ITCPServer interface {
-	SetSplitHandler(handler func(buff []byte) ([]byte, []byte))
-	SetMessageHandler(handler func(data []byte, conn net.Conn))
-	StartServer(address string) //会阻塞
-	StopServer()
+	SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error
+	SetMessageHandler(handler func(data []byte, conn net.Conn, senderAddress string)) error
+	StartServer(address string) error //会阻塞
+	StopServer() error
+	Running() bool
 	GetTransceiver(key string) ITransceiver
 }
 
@@ -31,56 +34,85 @@ type TCPServer struct {
 	maxLinkNum int
 	timeout    int
 
-	listener       *net.TCPListener
-	mapTransceiver map[string]ITransceiver
 	splitHandler   func(buff []byte) ([]byte, []byte)
-	messageHandler func(data []byte, conn net.Conn)
+	messageHandler func(data []byte, conn net.Conn, senderAddress string)
+
+	listener       *net.TCPListener
+	serverLinkSem  chan bool
+	mapTransceiver map[string]ITransceiver
+	mapLock        sync.RWMutex
 	running        bool
-	serverSem      chan bool
+	runningLock    sync.Mutex
 }
 
-func (s *TCPServer) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) {
+func (s *TCPServer) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
 	s.splitHandler = handler
+	return nil
 }
 
-func (s *TCPServer) SetMessageHandler(handler func(data []byte, conn net.Conn)) {
+func (s *TCPServer) SetMessageHandler(handler func(data []byte, conn net.Conn, senderAddress string)) error {
 	s.messageHandler = handler
+	return nil
 }
 
-func (s *TCPServer) StartServer(address string) {
+func (s *TCPServer) StartServer(address string) error {
+	funcName := "TCPServer.StartServer"
+	s.runningLock.Lock()
 	if s.running {
-		return
+		return util.FuncRepeatedCallError(funcName)
 	}
-	defer s.StopServer()
+	log.Println(funcName + "()")
 	s.running = true
-	listener, _ := listenTCP(s.Network, address)
+	listener, err := listenTCP(s.Network, address)
+	if nil != err {
+		log.Fatalln(err)
+		s.runningLock.Unlock()
+		return err
+	}
 	s.listener = listener
-	s.serverSem = make(chan bool, s.maxLinkNum)
+	s.serverLinkSem = make(chan bool, s.maxLinkNum)
 	s.mapTransceiver = make(map[string]ITransceiver)
+	s.runningLock.Unlock()
+	defer s.StopServer()
 	for s.running {
-		s.serverSem <- true
-		tcpConn, err := listener.AcceptTCP()
-		if nil != err { //Listener已经关闭
-			log.Fatalln(err)
+		s.serverLinkSem <- true
+		if !s.running {
 			break
 		}
-		key := tcpConn.RemoteAddr().String()
-		log.Println("New Connection:", key)
-		go s.processTCPConn(key, tcpConn)
+		tcpConn, err := listener.AcceptTCP()
+		if nil != err { //Listener已经关闭
+			return err
+		}
+		rAddress := tcpConn.RemoteAddr().String()
+		log.Println("New Connection:", rAddress)
+		go s.processTCPConn(rAddress, tcpConn)
 	}
+	return nil
 }
 
-func (s *TCPServer) StopServer() {
+func (s *TCPServer) StopServer() error {
+	funcName := "TCPServer.StopServer"
+	s.runningLock.Lock()
+	defer s.runningLock.Unlock()
+	if !s.running {
+		return util.FuncRepeatedCallError(funcName)
+	}
+	log.Println(funcName + "()")
 	defer func() {
 		for _, value := range s.mapTransceiver {
 			value.GetConnection().Close()
 		}
-		s.mapTransceiver = nil
-		close(s.serverSem)
+		s.running = false
+		close(s.serverLinkSem)
 	}()
 	if nil != s.listener {
 		s.listener.Close()
 	}
+	return nil
+}
+
+func (s *TCPServer) Running() bool {
+	return s.running
 }
 
 func (s *TCPServer) GetTransceiver(key string) ITransceiver {
@@ -96,21 +128,27 @@ func (s *TCPServer) GetTransceiver(key string) ITransceiver {
 func (s *TCPServer) processTCPConn(key string, conn *net.TCPConn) {
 	defer func() {
 		conn.Close()
-		delete(s.mapTransceiver, key)
-		<-s.serverSem
+		s.setMapValue(key, nil)
+		<-s.serverLinkSem
 	}()
 	transceiver := NewTransceiver(conn)
-	s.mapTransceiver[key] = transceiver
+	s.setMapValue(key, transceiver)
 	transceiver.SetSplitHandler(s.splitHandler)
 	transceiver.SetMessageHandler(s.messageHandler)
 	transceiver.StartReceiving()
 }
 
-func listenTCP(network string, address string) (*net.TCPListener, string) {
-	tcpAddr, _ := getTCPAddr(network, address)
-	listener, err := net.ListenTCP(network, tcpAddr)
-	if err != nil {
-		log.Fatalln("\tnet.ListenTCP:", network, address, ": %v", err)
+func (s *TCPServer) setMapValue(key string, value ITransceiver) {
+	s.mapLock.Lock()
+	defer s.mapLock.Unlock()
+	if nil == value {
+		delete(s.mapTransceiver, key)
+	} else {
+		s.mapTransceiver[key] = value
 	}
-	return listener, listener.Addr().String()
+}
+
+func listenTCP(network string, address string) (*net.TCPListener, error) {
+	tcpAddr, _ := getTCPAddr(network, address)
+	return net.ListenTCP(network, tcpAddr)
 }

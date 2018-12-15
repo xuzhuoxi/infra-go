@@ -2,6 +2,7 @@ package net
 
 import (
 	"bytes"
+	"sync"
 )
 
 func NewMessageBuff() *MessageBuff {
@@ -12,11 +13,13 @@ func NewMessageBuff() *MessageBuff {
 }
 
 type MessageBuff struct {
-	buff *bytes.Buffer
+	buff     *bytes.Buffer
+	buffLock sync.RWMutex
 
 	msgSplitHandler func(buff []byte) ([]byte, []byte)
 	frontLen        []byte
 	frontMsg        []byte
+	frontLock       sync.Mutex
 }
 
 func (b *MessageBuff) SetCheckMessageHandler(handler func(buff []byte) ([]byte, []byte)) {
@@ -24,6 +27,8 @@ func (b *MessageBuff) SetCheckMessageHandler(handler func(buff []byte) ([]byte, 
 }
 
 func (b *MessageBuff) AppendBytes(data []byte) {
+	b.buffLock.Lock()
+	defer b.buffLock.Unlock()
 	b.buff.Write(data)
 }
 
@@ -34,18 +39,25 @@ func (b *MessageBuff) CheckMessage() bool {
 	if nil != b.frontLen && nil != b.frontMsg {
 		return true
 	}
-	len, msg := b.msgSplitHandler(b.buff.Bytes())
-	if nil != len {
-		b.frontLen = len
+	l, msg := b.msgSplitHandler(b.buff.Bytes())
+	if nil != l {
+		b.buffLock.Lock()
+		defer b.buffLock.Unlock()
+		b.frontLen = l
 		b.frontMsg = msg
+		b.buff.Next(len(l) + len(msg))
 		return true
 	}
 	return false
 }
 
 func (b *MessageBuff) FrontMessage() []byte {
+	b.frontLock.Lock()
+	defer b.frontLock.Unlock()
+	if nil == b.frontMsg {
+		return nil
+	}
 	rs := b.frontMsg
-	b.buff.Next(len(b.frontLen) + len(b.frontMsg))
 	b.frontLen = nil
 	b.frontMsg = nil
 	return rs
