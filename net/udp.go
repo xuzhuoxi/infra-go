@@ -3,10 +3,12 @@ package net
 import (
 	"log"
 	"net"
+	"sync"
 )
 
 var (
 	mapUDPAddr map[string]*net.UDPAddr
+	mapUDPLock sync.RWMutex
 )
 
 func init() {
@@ -21,6 +23,8 @@ func UDPAddrEqual(addr1 *net.UDPAddr, addr2 *net.UDPAddr) bool {
 }
 
 func getUDPAddr(network string, address string) (*net.UDPAddr, error) {
+	mapUDPLock.Lock()
+	defer mapUDPLock.Unlock()
 	if "" == address {
 		return nil, EmptyAddrError("net.getUDPAddr")
 	}

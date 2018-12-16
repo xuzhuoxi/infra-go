@@ -2,6 +2,7 @@ package net
 
 import (
 	"net"
+	"sync"
 )
 
 func NewTCPClient() ITCPClient {
@@ -20,9 +21,12 @@ type TCPClient struct {
 	Network     string
 	Conn        net.Conn
 	transceiver ITransceiver
+	clientLock  sync.Mutex
 }
 
 func (c *TCPClient) Dial(address string) error {
+	c.clientLock.Lock()
+	defer c.clientLock.Unlock()
 	conn, err := net.Dial(c.Network, address)
 	if nil != err {
 		return err
@@ -37,7 +41,9 @@ func (c *TCPClient) Close() {
 		c.Conn.Close()
 		c.Conn = nil
 		c.transceiver = nil
+		c.clientLock.Unlock()
 	}()
+	c.clientLock.Lock()
 	c.transceiver.StopReceiving()
 }
 

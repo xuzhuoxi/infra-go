@@ -4,6 +4,7 @@ import (
 	"github.com/xuzhuoxi/util"
 	"log"
 	"net"
+	"sync"
 )
 
 func NewUDPClient(connected bool) IUDPClient {
@@ -36,6 +37,7 @@ type UDPDialClient struct {
 	Network     string
 	conn        *net.UDPConn
 	transceiver ITransceiver
+	clientLock  sync.RWMutex
 }
 
 func (c *UDPDialClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
@@ -51,6 +53,8 @@ func (c *UDPDialClient) SetMessageHandler(handler func(data []byte, conn net.Con
 func (c *UDPDialClient) Connected() bool { return true }
 
 func (c *UDPDialClient) Setup(lAddress string, rAddress string) bool {
+	c.clientLock.Lock()
+	defer c.clientLock.Unlock()
 	if nil != c.conn {
 		log.Fatalln("\tUDPDialClient:Repeated Setup!")
 		return false
@@ -71,8 +75,12 @@ func (c *UDPDialClient) Setup(lAddress string, rAddress string) bool {
 }
 
 func (c *UDPDialClient) Close() bool {
+	c.clientLock.Lock()
+	defer func() {
+		c.conn = nil
+		c.clientLock.Unlock()
+	}()
 	rs := closeConn(c.conn)
-	c.conn = nil
 	log.Println("UDPDialClient:Close()")
 	return rs
 }
@@ -106,6 +114,7 @@ type UDPListenClient struct {
 	messageBuff    *MessageBuff
 	messageHandler func(data []byte, conn net.Conn, senderAddress string)
 	receiving      bool
+	clientLock     sync.RWMutex
 }
 
 func (c *UDPListenClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
@@ -121,6 +130,8 @@ func (c *UDPListenClient) SetMessageHandler(handler func(data []byte, conn net.C
 func (c *UDPListenClient) Connected() bool { return false }
 
 func (c *UDPListenClient) Setup(lAddress string, rAddress string) bool {
+	c.clientLock.Lock()
+	defer c.clientLock.Unlock()
 	if nil != c.conn {
 		log.Fatalln("\tUDPListenClient:Repeated Setup!")
 		return false
@@ -144,8 +155,12 @@ func (c *UDPListenClient) Setup(lAddress string, rAddress string) bool {
 }
 
 func (c *UDPListenClient) Close() bool {
+	c.clientLock.Lock()
+	defer func() {
+		c.conn = nil
+		c.clientLock.Unlock()
+	}()
 	rs := closeConn(c.conn)
-	c.conn = nil
 	log.Println("UDPListenClient:Close()")
 	return rs
 }
@@ -171,13 +186,22 @@ func (c *UDPListenClient) SendDataToMulti(data []byte, rAddress ...string) error
 
 func (c *UDPListenClient) StartReceiving() error {
 	funcName := "UDPListenClient.StartReceiving"
+	c.clientLock.Lock()
 	if nil == c.conn {
+		c.clientLock.Unlock()
 		return ConnNilError(funcName)
 	}
 	if c.receiving {
+		c.clientLock.Unlock()
 		return util.FuncRepeatedCallError(funcName)
 	}
 	c.receiving = true
+	c.clientLock.Unlock()
+	c.doReceiving()
+	return nil
+}
+
+func (c *UDPListenClient) doReceiving() {
 	defer c.StopReceiving()
 	var buffCache [1024]byte
 	for {
@@ -193,10 +217,11 @@ func (c *UDPListenClient) StartReceiving() error {
 			c.messageHandler(c.messageBuff.FrontMessage(), c.conn, addr.String())
 		}
 	}
-	return nil
 }
 
 func (c *UDPListenClient) StopReceiving() error {
+	c.clientLock.Lock()
+	defer c.clientLock.Unlock()
 	if c.receiving {
 		c.receiving = false
 		return nil
@@ -206,10 +231,10 @@ func (c *UDPListenClient) StopReceiving() error {
 
 //UDPMultiRemoteClient
 type UDPMultiRemoteClient struct {
-	Network string
-	conn    *net.UDPConn
-	mapAddr map[string]*net.UDPAddr
-	handler func(data []byte, rAddr *net.UDPAddr)
+	Network    string
+	conn       *net.UDPConn
+	handler    func(data []byte, rAddr *net.UDPAddr)
+	clientLock sync.RWMutex
 }
 
 func (c *UDPMultiRemoteClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
@@ -223,6 +248,8 @@ func (c *UDPMultiRemoteClient) SetMessageHandler(handler func(data []byte, conn 
 func (c *UDPMultiRemoteClient) Connected() bool { return false }
 
 func (c *UDPMultiRemoteClient) Setup(lAddress string, rAddress string) bool {
+	c.clientLock.Lock()
+	defer c.clientLock.Unlock()
 	if nil != c.conn {
 		log.Fatalln("\tUDPMultiRemoteClient:Repeated Setup!")
 		return false
@@ -237,13 +264,16 @@ func (c *UDPMultiRemoteClient) Setup(lAddress string, rAddress string) bool {
 		return false
 	}
 	c.conn = conn
-	c.mapAddr = make(map[string]*net.UDPAddr)
 	return true
 }
 
 func (c *UDPMultiRemoteClient) Close() bool {
+	c.clientLock.Lock()
+	defer func() {
+		c.conn = nil
+		c.clientLock.Unlock()
+	}()
 	rs := closeConn(c.conn)
-	c.conn = nil
 	log.Println("UDPMultiRemoteClient:Close()")
 	return rs
 }

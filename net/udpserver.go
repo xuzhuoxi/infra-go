@@ -57,6 +57,7 @@ func (s *UDPServer) SetMessageHandler(handler func(data []byte, conn net.Conn, s
 func (s *UDPServer) StartServer(address string) error {
 	s.runningLock.Lock()
 	if s.running {
+		s.runningLock.Unlock()
 		return util.FuncRepeatedCallError("UDPServer.StartServer")
 	}
 	s.running = true

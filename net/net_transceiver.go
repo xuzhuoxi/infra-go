@@ -54,9 +54,11 @@ func (t *Transceiver) SetMessageHandler(handler func(data []byte, conn net.Conn,
 	t.msgHandler = handler
 }
 func (t *Transceiver) StartReceiving() error {
+	funcName := "Transceiver.StartReceiving"
 	t.lock.Lock()
 	if t.receiving {
-		return util.FuncRepeatedCallError("Transceiver.StartReceiving")
+		t.lock.Unlock()
+		return util.FuncRepeatedCallError(funcName)
 	}
 	t.receiving = true
 	t.lock.Unlock()

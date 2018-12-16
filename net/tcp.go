@@ -3,10 +3,12 @@ package net
 import (
 	"log"
 	"net"
+	"sync"
 )
 
 var (
 	mapTCPAddr map[string]*net.TCPAddr
+	mapTCPLock sync.RWMutex
 )
 
 func init() {
@@ -21,6 +23,8 @@ func TCPAddrEqual(addr1 *net.TCPAddr, addr2 *net.TCPAddr) bool {
 }
 
 func getTCPAddr(network string, address string) (*net.TCPAddr, error) {
+	mapTCPLock.Lock()
+	defer mapTCPLock.Unlock()
 	if "" == address {
 		return nil, EmptyAddrError("net.getTCPAddr")
 	}
