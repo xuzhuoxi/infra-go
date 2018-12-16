@@ -1,7 +1,7 @@
 package net
 
 import (
-	"github.com/xuzhuoxi/util"
+	"github.com/xuzhuoxi/util/errs"
 	"log"
 	"net"
 	"sync"
@@ -59,7 +59,7 @@ func (s *TCPServer) StartServer(address string) error {
 	funcName := "TCPServer.StartServer"
 	s.runningLock.Lock()
 	if s.running {
-		return util.FuncRepeatedCallError(funcName)
+		return errs.FuncRepeatedCallError(funcName)
 	}
 	log.Println(funcName + "()")
 	s.running = true
@@ -95,7 +95,7 @@ func (s *TCPServer) StopServer() error {
 	s.runningLock.Lock()
 	defer s.runningLock.Unlock()
 	if !s.running {
-		return util.FuncRepeatedCallError(funcName)
+		return errs.FuncRepeatedCallError(funcName)
 	}
 	log.Println(funcName + "()")
 	defer func() {

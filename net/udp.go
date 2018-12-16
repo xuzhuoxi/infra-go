@@ -57,5 +57,5 @@ func sendDataFromListen(listenConn *net.UDPConn, data []byte, rAddress ...string
 }
 
 func logResolveUDPAddrErr(address string, err error) {
-	log.Fatalln("\tResolveUDPAddr Error:[addirss="+address+"],err=", err)
+	log.Fatalln("\tResolveUDPAddr Error:[addirss="+address+"],errs=", err)
 }

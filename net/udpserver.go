@@ -1,7 +1,7 @@
 package net
 
 import (
-	"github.com/xuzhuoxi/util"
+	"github.com/xuzhuoxi/util/errs"
 	"log"
 	"net"
 	"sync"
@@ -58,7 +58,7 @@ func (s *UDPServer) StartServer(address string) error {
 	s.runningLock.Lock()
 	if s.running {
 		s.runningLock.Unlock()
-		return util.FuncRepeatedCallError("UDPServer.StartServer")
+		return errs.FuncRepeatedCallError("UDPServer.StartServer")
 	}
 	s.running = true
 	conn, err := listenUDP(s.Network, address)
@@ -87,7 +87,7 @@ func (s *UDPServer) StopServer() error {
 	s.runningLock.Lock()
 	defer s.runningLock.Unlock()
 	if !s.running {
-		return util.FuncRepeatedCallError(funcName)
+		return errs.FuncRepeatedCallError(funcName)
 	}
 	defer func() {
 		s.running = false
@@ -102,7 +102,7 @@ func (s *UDPServer) StopServer() error {
 func (s *UDPServer) SendData(data []byte, rAddress ...string) error {
 	funcName := "UDPServer.SendData"
 	if !s.running {
-		return util.FuncNotPreparedError(funcName)
+		return errs.FuncNotPreparedError(funcName)
 	}
 	if len(rAddress) == 0 {
 		return NoAddrError(funcName)

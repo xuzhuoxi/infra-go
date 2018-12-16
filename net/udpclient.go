@@ -1,7 +1,7 @@
 package net
 
 import (
-	"github.com/xuzhuoxi/util"
+	"github.com/xuzhuoxi/util/errs"
 	"log"
 	"net"
 	"sync"
@@ -94,7 +94,7 @@ func (c *UDPDialClient) SendData(data []byte, rAddress string) error {
 }
 
 func (c *UDPDialClient) SendDataToMulti(data []byte, rAddress ...string) error {
-	return util.FuncUnavailableError("UDPDialClient.SendDataToMulti")
+	return errs.FuncUnavailableError("UDPDialClient.SendDataToMulti")
 }
 
 func (c *UDPDialClient) StartReceiving() error {
@@ -181,7 +181,7 @@ func (c *UDPListenClient) SendData(data []byte, rAddress string) error {
 }
 
 func (c *UDPListenClient) SendDataToMulti(data []byte, rAddress ...string) error {
-	return util.FuncUnavailableError("UDPListenClient.SendDataToMulti")
+	return errs.FuncUnavailableError("UDPListenClient.SendDataToMulti")
 }
 
 func (c *UDPListenClient) StartReceiving() error {
@@ -193,7 +193,7 @@ func (c *UDPListenClient) StartReceiving() error {
 	}
 	if c.receiving {
 		c.clientLock.Unlock()
-		return util.FuncRepeatedCallError(funcName)
+		return errs.FuncRepeatedCallError(funcName)
 	}
 	c.receiving = true
 	c.clientLock.Unlock()
@@ -226,7 +226,7 @@ func (c *UDPListenClient) StopReceiving() error {
 		c.receiving = false
 		return nil
 	}
-	return util.FuncRepeatedCallError("UDPListenClient.StopReceiving")
+	return errs.FuncRepeatedCallError("UDPListenClient.StopReceiving")
 }
 
 //UDPMultiRemoteClient
@@ -238,11 +238,11 @@ type UDPMultiRemoteClient struct {
 }
 
 func (c *UDPMultiRemoteClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
-	return util.FuncUnavailableError("UDPMultiRemoteClient.SetSplitHandler")
+	return errs.FuncUnavailableError("UDPMultiRemoteClient.SetSplitHandler")
 }
 
 func (c *UDPMultiRemoteClient) SetMessageHandler(handler func(data []byte, conn net.Conn, senderAddress string)) error {
-	return util.FuncUnavailableError("UDPMultiRemoteClient.SetMessageHandler")
+	return errs.FuncUnavailableError("UDPMultiRemoteClient.SetMessageHandler")
 }
 
 func (c *UDPMultiRemoteClient) Connected() bool { return false }
@@ -299,11 +299,11 @@ func (c *UDPMultiRemoteClient) SendDataToMulti(data []byte, rAddress ...string) 
 }
 
 func (c *UDPMultiRemoteClient) StartReceiving() error {
-	return util.FuncUnavailableError("UDPMultiRemoteClient.StartReceiving")
+	return errs.FuncUnavailableError("UDPMultiRemoteClient.StartReceiving")
 }
 
 func (c *UDPMultiRemoteClient) StopReceiving() error {
-	return util.FuncUnavailableError("UDPMultiRemoteClient.StopReceiving")
+	return errs.FuncUnavailableError("UDPMultiRemoteClient.StopReceiving")
 }
 
 //private ---------------

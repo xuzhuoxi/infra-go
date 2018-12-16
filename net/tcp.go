@@ -42,5 +42,5 @@ func getTCPAddr(network string, address string) (*net.TCPAddr, error) {
 }
 
 func logResolveTCPAddrErr(address string, err error) {
-	log.Fatalln("ResolveTCPAddr Error:[addirss="+address+"],err=", err)
+	log.Fatalln("ResolveTCPAddr Error:[addirss="+address+"],errs=", err)
 }

@@ -1,4 +1,4 @@
-package util
+package errs
 
 type FuncUnavailableError string
 

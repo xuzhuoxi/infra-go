@@ -2,7 +2,7 @@ package net
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/util"
+	"github.com/xuzhuoxi/util/errs"
 	"log"
 	"net"
 	"sync"
@@ -58,7 +58,7 @@ func (t *Transceiver) StartReceiving() error {
 	t.lock.Lock()
 	if t.receiving {
 		t.lock.Unlock()
-		return util.FuncRepeatedCallError(funcName)
+		return errs.FuncRepeatedCallError(funcName)
 	}
 	t.receiving = true
 	t.lock.Unlock()
@@ -80,7 +80,7 @@ func (t *Transceiver) StopReceiving() error {
 		t.receiving = false
 		return nil
 	}
-	return util.FuncRepeatedCallError("Transceiver.StopReceiving")
+	return errs.FuncRepeatedCallError("Transceiver.StopReceiving")
 }
 
 func (t *Transceiver) handleData(newData []byte) {

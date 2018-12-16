@@ -48,13 +48,13 @@ func PostForm(url string, data url.Values, cb ReqCallBack) {
 
 //func Do(url, contentType, body string, cb ReqCallBack) {
 //	client := &http.Client{}
-//	req, err := http.NewRequest("POST", url, strings.NewReader(body))
-//	if err != nil {
-//		log.Fatal(err)
+//	req, errs := http.NewRequest("POST", url, strings.NewReader(body))
+//	if errs != nil {
+//		log.Fatal(errs)
 //		return
 //	}
 //	req.Header.Set("Content-Type", contentType)
-//	resp, err := client.Do(req)
+//	resp, errs := client.Do(req)
 //	defer resp.Body.Close()
 //	handleResponse(resp, cb)
 //}
