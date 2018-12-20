@@ -3,6 +3,7 @@ package logx
 import (
 	"github.com/xuzhuoxi/go-util/mathx"
 	"github.com/xuzhuoxi/go-util/osxu"
+	"github.com/xuzhuoxi/go-util/stringsx"
 	"log"
 	"math"
 	"os"
@@ -46,12 +47,13 @@ func init() {
 }
 
 func NewLogger() ILogger {
-	instance := &logger{level: LevelAll, prefix: "", flag: log.LstdFlags, infoMap: make(map[LogType]*fileInfo)}
-	instance.SetConfig(TypeConsole, "", "", "", 0)
+	instance := &logger{prefix: "", defaultFlag: log.LstdFlags, infoMap: make(map[LogType]*logInfo)}
+	instance.SetConfig(TypeConsole, LevelAll, "", "", "", 0)
 	return instance
 }
 
-type fileInfo struct {
+type logInfo struct {
+	level       LogLevel
 	fileDir     string //以"/"结尾
 	fileName    string
 	fileExtName string
@@ -62,15 +64,16 @@ type fileInfo struct {
 }
 
 type ILogger interface {
-	//设置日志等级，只有大于等级设置等级的日志才会记录
-	SetLevel(level LogLevel)
-	//设置每一行log的时间格式
+	//设置日志前缀
 	SetPrefix(prefix string)
+	//设置日志等级，只有大于等级设置等级的日志才会记录
+	//重置日志等级为level,t为空时重置全部
+	SetLevel(level LogLevel, t ...LogType)
 	// SetFlags sets the output flags for the logger.
-	SetFlags(flag int)
-
+	//重置日志flag,t为空时重置全部
+	SetFlags(flag int, t ...LogType)
 	//配置Log,要求fileDir以"/"结尾
-	SetConfig(t LogType, fileDir, fileName, fileExtName string, maxSize mathx.SizeUint)
+	SetConfig(t LogType, level LogLevel, fileDir, fileName, fileExtName string, maxSize mathx.SizeUint)
 	//移除配置
 	RemoveConfig(t LogType)
 
@@ -99,26 +102,73 @@ type ILogger interface {
 }
 
 type logger struct {
-	level  LogLevel
-	prefix string
-	flag   int
+	prefix      string
+	defaultFlag int
 
 	mu      sync.RWMutex
-	infoMap map[LogType]*fileInfo
+	infoMap map[LogType]*logInfo
 }
 
-func (l *logger) SetConfig(t LogType, fileDir, fileName, fileExtName string, maxSize mathx.SizeUint) {
+func (l *logger) SetPrefix(prefix string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	l.prefix = prefix
+}
+
+func (l *logger) SetLevel(level LogLevel, t ...LogType) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if len(t) == 0 {
+		for _, value := range l.infoMap {
+			value.level = level
+		}
+	} else {
+		for _, tp := range t {
+			value, ok := l.infoMap[tp]
+			if ok {
+				value.level = level
+			}
+		}
+	}
+}
+
+func (l *logger) SetFlags(flag int, t ...LogType) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.defaultFlag = flag
+	if len(t) == 0 {
+		for _, value := range l.infoMap {
+			value.logger.SetFlags(flag)
+		}
+	} else {
+		for _, tp := range t {
+			value, ok := l.infoMap[tp]
+			if ok {
+				value.logger.SetFlags(flag)
+			}
+		}
+	}
+}
+
+func (l *logger) SetConfig(t LogType, level LogLevel, fileDir, fileName, fileExtName string, maxSize mathx.SizeUint) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if "" == fileDir {
+		return
+	}
 	newFileDir := osxu.GetUnitePath(fileDir)
+	if stringsx.GetCharCount(newFileDir)-1 != stringsx.LastIndexOfChar(newFileDir, "/") { //保证最后一个为"/"
+		newFileDir = newFileDir + "/"
+	}
 	val, ok := l.infoMap[t]
 	if ok {
+		val.level = level
 		val.fileDir = newFileDir
 		val.fileName = fileName
 		val.fileExtName = fileExtName
 		val.maxSize = uint64(maxSize)
 	} else {
-		l.infoMap[t] = &fileInfo{fileDir: newFileDir, fileName: fileName, fileExtName: fileExtName, maxSize: uint64(maxSize), logger: genLogger(l.flag)}
+		l.infoMap[t] = &logInfo{level: level, fileDir: newFileDir, fileName: fileName, fileExtName: fileExtName, maxSize: uint64(maxSize), logger: genLogger(l.defaultFlag)}
 	}
 	switch t {
 	case TypeRollingFile:
@@ -138,36 +188,18 @@ func (l *logger) RemoveConfig(t LogType) {
 	delete(l.infoMap, t)
 }
 
-func (l *logger) SetLevel(level LogLevel) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.level = level
-}
-
-func (l *logger) SetPrefix(prefix string) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.prefix = prefix
-}
-
-func (l *logger) SetFlags(flag int) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.flag = flag
-	for _, value := range l.infoMap {
-		value.logger.SetFlags(flag)
-	}
-}
-
 func (l *logger) Log(level LogLevel, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	if level < l.level || len(l.infoMap) == 0 {
+	if len(l.infoMap) == 0 {
 		return
 	}
 	checkFile(l.infoMap)
 	prefix := getLevelPrefix(level, l.prefix)
 	for _, info := range l.infoMap {
+		if level < info.level {
+			continue
+		}
 		info.logger.SetPrefix(prefix)
 		info.logger.Print(v...)
 	}
@@ -176,12 +208,15 @@ func (l *logger) Log(level LogLevel, v ...interface{}) {
 func (l *logger) Logf(level LogLevel, format string, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	if level < l.level || len(l.infoMap) == 0 {
+	if len(l.infoMap) == 0 {
 		return
 	}
 	checkFile(l.infoMap)
 	prefix := getLevelPrefix(level, l.prefix)
 	for _, info := range l.infoMap {
+		if level < info.level {
+			continue
+		}
 		info.logger.SetPrefix(prefix)
 		info.logger.Printf(format, v...)
 	}
@@ -190,12 +225,15 @@ func (l *logger) Logf(level LogLevel, format string, v ...interface{}) {
 func (l *logger) Logln(level LogLevel, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	if level < l.level || len(l.infoMap) == 0 {
+	if len(l.infoMap) == 0 {
 		return
 	}
 	checkFile(l.infoMap)
 	prefix := getLevelPrefix(level, l.prefix)
 	for _, info := range l.infoMap {
+		if level < info.level {
+			continue
+		}
 		info.logger.SetPrefix(prefix)
 		info.logger.Println(v...)
 	}
@@ -276,9 +314,7 @@ func (l *logger) Fatalln(v ...interface{}) {
 //private--------------------------------------
 
 func genLogger(flag int) *log.Logger {
-	newLog := log.New(os.Stderr, "", log.LstdFlags)
-	newLog.SetFlags(flag)
-	return newLog
+	return log.New(os.Stderr, "", flag)
 }
 
 func getLevelPrefix(level LogLevel, prefix string) string {
@@ -289,7 +325,7 @@ func getLevelPrefix(level LogLevel, prefix string) string {
 	return "" + prefix
 }
 
-func checkFile(infoMap map[LogType]*fileInfo) {
+func checkFile(infoMap map[LogType]*logInfo) {
 	for key, value := range infoMap {
 		switch key {
 		case TypeDailyFile:
@@ -302,46 +338,46 @@ func checkFile(infoMap map[LogType]*fileInfo) {
 	}
 }
 
-func checkDailyFile(fi *fileInfo) {
+func checkDailyFile(info *logInfo) {
 	todayStr := getTodayStr()
-	newFileName := fi.fileName + "_" + todayStr
-	fileFullPath := getFullPath(fi.fileDir, newFileName, fi.fileExtName, "")
-	if nil != fi.file {
-		if fi.file.Name() == newFileName+fi.fileExtName { //同一个文件
+	newFileName := info.fileName + "_" + todayStr
+	fileFullPath := getFullPath(info.fileDir, newFileName, info.fileExtName, "")
+	if nil != info.file {
+		if info.file.Name() == newFileName+info.fileExtName { //同一个文件
 			return
 		}
-		closeFile(fi.file)
-		fi.file = nil
+		closeFile(info.file)
+		info.file = nil
 	}
-	updateLoggerOutput(fi, fileFullPath)
+	updateLoggerOutput(info, fileFullPath)
 }
 
-func checkRollingFile(fi *fileInfo, daily bool) {
-	newFileName := fi.fileName
+func checkRollingFile(info *logInfo, daily bool) {
+	newFileName := info.fileName
 	if daily {
-		newFileName = fi.fileName + "_" + getTodayStr()
+		newFileName = info.fileName + "_" + getTodayStr()
 	}
-	fileFullPath := getFullPath(fi.fileDir, newFileName, fi.fileExtName, "")
-	isFull := checkCloseFullFile(fi.file, fileFullPath, fi.maxSize)
+	fileFullPath := getFullPath(info.fileDir, newFileName, info.fileExtName, "")
+	isFull := checkCloseFullFile(info.file, fileFullPath, info.maxSize)
 	if isFull {
-		newName := getFullPath(fi.fileDir, newFileName, fi.fileExtName, "_"+strconv.Itoa(fi.index))
+		newName := getFullPath(info.fileDir, newFileName, info.fileExtName, "_"+strconv.Itoa(info.index))
 		os.Rename(fileFullPath, newName)
-		fi.file = nil
-		fi.index++
+		info.file = nil
+		info.index++
 	}
-	updateLoggerOutput(fi, fileFullPath)
+	updateLoggerOutput(info, fileFullPath)
 }
 
-func updateLoggerOutput(fi *fileInfo, fileFullPath string) {
-	if nil != fi.file {
+func updateLoggerOutput(info *logInfo, fileFullPath string) {
+	if nil != info.file {
 		return
 	}
 	file, err := openFile(fileFullPath)
 	if nil != err {
 		return
 	}
-	fi.file = file
-	fi.logger.SetOutput(file)
+	info.file = file
+	info.logger.SetOutput(file)
 }
 
 func checkCloseFullFile(file *os.File, fileFullPath string, maxSize uint64) bool {
