@@ -1,7 +1,7 @@
-package net
+package netx
 
 import (
-	"github.com/xuzhuoxi/util/errs"
+	"github.com/xuzhuoxi/go-util/errsx"
 	"log"
 	"net"
 	"sync"
@@ -58,7 +58,7 @@ func (s *UDPServer) StartServer(address string) error {
 	s.runningLock.Lock()
 	if s.running {
 		s.runningLock.Unlock()
-		return errs.FuncRepeatedCallError("UDPServer.StartServer")
+		return errsx.FuncRepeatedCallError("UDPServer.StartServer")
 	}
 	s.running = true
 	conn, err := listenUDP(s.Network, address)
@@ -69,7 +69,7 @@ func (s *UDPServer) StartServer(address string) error {
 	}
 	s.conn = conn
 	s.mapBuff = make(map[string]*MessageBuff)
-	data := make([]byte, 2048)
+	data := make([]byte, 1024)
 	s.runningLock.Unlock()
 	defer s.StopServer()
 	for s.running {
@@ -87,7 +87,7 @@ func (s *UDPServer) StopServer() error {
 	s.runningLock.Lock()
 	defer s.runningLock.Unlock()
 	if !s.running {
-		return errs.FuncRepeatedCallError(funcName)
+		return errsx.FuncRepeatedCallError(funcName)
 	}
 	defer func() {
 		s.running = false
@@ -102,7 +102,7 @@ func (s *UDPServer) StopServer() error {
 func (s *UDPServer) SendData(data []byte, rAddress ...string) error {
 	funcName := "UDPServer.SendData"
 	if !s.running {
-		return errs.FuncNotPreparedError(funcName)
+		return errsx.FuncNotPreparedError(funcName)
 	}
 	if len(rAddress) == 0 {
 		return NoAddrError(funcName)

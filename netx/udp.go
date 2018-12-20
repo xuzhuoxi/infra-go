@@ -1,4 +1,4 @@
-package net
+package netx
 
 import (
 	"log"
@@ -26,7 +26,7 @@ func getUDPAddr(network string, address string) (*net.UDPAddr, error) {
 	mapUDPLock.Lock()
 	defer mapUDPLock.Unlock()
 	if "" == address {
-		return nil, EmptyAddrError("net.getUDPAddr")
+		return nil, EmptyAddrError("netx.getUDPAddr")
 	}
 	addr, ok := mapUDPAddr[address]
 	if ok {
@@ -57,5 +57,5 @@ func sendDataFromListen(listenConn *net.UDPConn, data []byte, rAddress ...string
 }
 
 func logResolveUDPAddrErr(address string, err error) {
-	log.Fatalln("\tResolveUDPAddr Error:[addirss="+address+"],errs=", err)
+	log.Fatalln("\tResolveUDPAddr Error:[addirss="+address+"],errsx=", err)
 }

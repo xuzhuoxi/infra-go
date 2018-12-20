@@ -1,7 +1,7 @@
-package net
+package netx
 
 import (
-	"github.com/xuzhuoxi/util/errs"
+	"github.com/xuzhuoxi/go-util/errsx"
 	"log"
 	"net"
 	"sync"
@@ -66,7 +66,7 @@ func (c *UDPDialClient) Setup(lAddress string, rAddress string) bool {
 	}
 	conn, cErr := net.DialUDP(c.Network, lAddr, rAddr)
 	if nil != cErr {
-		log.Fatalln("\tUDPDialClient-net.DialUDP:", c.Network, lAddress, rAddress, cErr)
+		log.Fatalln("\tUDPDialClient-netx.DialUDP:", c.Network, lAddress, rAddress, cErr)
 		return false
 	}
 	c.conn = conn
@@ -94,7 +94,7 @@ func (c *UDPDialClient) SendData(data []byte, rAddress string) error {
 }
 
 func (c *UDPDialClient) SendDataToMulti(data []byte, rAddress ...string) error {
-	return errs.FuncUnavailableError("UDPDialClient.SendDataToMulti")
+	return errsx.FuncUnavailableError("UDPDialClient.SendDataToMulti")
 }
 
 func (c *UDPDialClient) StartReceiving() error {
@@ -181,7 +181,7 @@ func (c *UDPListenClient) SendData(data []byte, rAddress string) error {
 }
 
 func (c *UDPListenClient) SendDataToMulti(data []byte, rAddress ...string) error {
-	return errs.FuncUnavailableError("UDPListenClient.SendDataToMulti")
+	return errsx.FuncUnavailableError("UDPListenClient.SendDataToMulti")
 }
 
 func (c *UDPListenClient) StartReceiving() error {
@@ -193,7 +193,7 @@ func (c *UDPListenClient) StartReceiving() error {
 	}
 	if c.receiving {
 		c.clientLock.Unlock()
-		return errs.FuncRepeatedCallError(funcName)
+		return errsx.FuncRepeatedCallError(funcName)
 	}
 	c.receiving = true
 	c.clientLock.Unlock()
@@ -226,7 +226,7 @@ func (c *UDPListenClient) StopReceiving() error {
 		c.receiving = false
 		return nil
 	}
-	return errs.FuncRepeatedCallError("UDPListenClient.StopReceiving")
+	return errsx.FuncRepeatedCallError("UDPListenClient.StopReceiving")
 }
 
 //UDPMultiRemoteClient
@@ -238,11 +238,11 @@ type UDPMultiRemoteClient struct {
 }
 
 func (c *UDPMultiRemoteClient) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
-	return errs.FuncUnavailableError("UDPMultiRemoteClient.SetSplitHandler")
+	return errsx.FuncUnavailableError("UDPMultiRemoteClient.SetSplitHandler")
 }
 
 func (c *UDPMultiRemoteClient) SetMessageHandler(handler func(data []byte, conn net.Conn, senderAddress string)) error {
-	return errs.FuncUnavailableError("UDPMultiRemoteClient.SetMessageHandler")
+	return errsx.FuncUnavailableError("UDPMultiRemoteClient.SetMessageHandler")
 }
 
 func (c *UDPMultiRemoteClient) Connected() bool { return false }
@@ -299,11 +299,11 @@ func (c *UDPMultiRemoteClient) SendDataToMulti(data []byte, rAddress ...string) 
 }
 
 func (c *UDPMultiRemoteClient) StartReceiving() error {
-	return errs.FuncUnavailableError("UDPMultiRemoteClient.StartReceiving")
+	return errsx.FuncUnavailableError("UDPMultiRemoteClient.StartReceiving")
 }
 
 func (c *UDPMultiRemoteClient) StopReceiving() error {
-	return errs.FuncUnavailableError("UDPMultiRemoteClient.StopReceiving")
+	return errsx.FuncUnavailableError("UDPMultiRemoteClient.StopReceiving")
 }
 
 //private ---------------

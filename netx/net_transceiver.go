@@ -1,8 +1,8 @@
-package net
+package netx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/util/errs"
+	"github.com/xuzhuoxi/go-util/errsx"
 	"log"
 	"net"
 	"sync"
@@ -58,7 +58,7 @@ func (t *Transceiver) StartReceiving() error {
 	t.lock.Lock()
 	if t.receiving {
 		t.lock.Unlock()
-		return errs.FuncRepeatedCallError(funcName)
+		return errsx.FuncRepeatedCallError(funcName)
 	}
 	t.receiving = true
 	t.lock.Unlock()
@@ -80,7 +80,7 @@ func (t *Transceiver) StopReceiving() error {
 		t.receiving = false
 		return nil
 	}
-	return errs.FuncRepeatedCallError("Transceiver.StopReceiving")
+	return errsx.FuncRepeatedCallError("Transceiver.StopReceiving")
 }
 
 func (t *Transceiver) handleData(newData []byte) {

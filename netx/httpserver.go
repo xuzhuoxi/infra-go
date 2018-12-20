@@ -1,4 +1,4 @@
-package net
+package netx
 
 import (
 	"net/http"
@@ -7,7 +7,7 @@ import (
 
 func NewHttpServer() IHttpServer {
 	rs := &HttpServer{Network: "http", ServeMux: http.NewServeMux(), Server: nil}
-	rs.MapFunc("/time", timeHandler)
+	rs.MapFunc("/timex", timeHandler)
 	return rs
 }
 
@@ -50,5 +50,5 @@ func (s *HttpServer) MapFunc(pattern string, f func(w http.ResponseWriter, r *ht
 
 func timeHandler(w http.ResponseWriter, r *http.Request) {
 	tm := time.Now().Format(time.RFC1123)
-	w.Write([]byte("The time is: " + tm))
+	w.Write([]byte("The timex is: " + tm))
 }

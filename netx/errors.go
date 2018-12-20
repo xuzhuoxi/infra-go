@@ -1,4 +1,4 @@
-package net
+package netx
 
 type EmptyAddrError string
 

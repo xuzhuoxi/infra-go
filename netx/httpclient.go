@@ -1,4 +1,4 @@
-package net
+package netx
 
 import (
 	"fmt"
@@ -48,13 +48,13 @@ func PostForm(url string, data url.Values, cb ReqCallBack) {
 
 //func Do(url, contentType, body string, cb ReqCallBack) {
 //	client := &http.Client{}
-//	req, errs := http.NewRequest("POST", url, strings.NewReader(body))
-//	if errs != nil {
-//		log.Fatal(errs)
+//	req, errsx := http.NewRequest("POST", url, stringsx.NewReader(body))
+//	if errsx != nil {
+//		logx.Fatal(errsx)
 //		return
 //	}
 //	req.Header.Set("Content-Type", contentType)
-//	resp, errs := client.Do(req)
+//	resp, errsx := client.Do(req)
 //	defer resp.Body.Close()
 //	handleResponse(resp, cb)
 //}

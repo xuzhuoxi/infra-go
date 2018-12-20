@@ -1,4 +1,4 @@
-package net
+package netx
 
 import (
 	"log"
@@ -26,7 +26,7 @@ func getTCPAddr(network string, address string) (*net.TCPAddr, error) {
 	mapTCPLock.Lock()
 	defer mapTCPLock.Unlock()
 	if "" == address {
-		return nil, EmptyAddrError("net.getTCPAddr")
+		return nil, EmptyAddrError("netx.getTCPAddr")
 	}
 	addr, ok := mapTCPAddr[address]
 	if ok {
@@ -42,5 +42,5 @@ func getTCPAddr(network string, address string) (*net.TCPAddr, error) {
 }
 
 func logResolveTCPAddrErr(address string, err error) {
-	log.Fatalln("ResolveTCPAddr Error:[addirss="+address+"],errs=", err)
+	log.Fatalln("ResolveTCPAddr Error:[addirss="+address+"],errsx=", err)
 }

@@ -1,4 +1,4 @@
-package net
+package netx
 
 import (
 	"log"
@@ -55,7 +55,7 @@ func (s *RPCServer) StopServer() {
 func listenRPC(network string, address string) (net.Listener, string) {
 	l, e := net.Listen(network, address) // any available address
 	if e != nil {
-		log.Fatalln("\tnet.Listen "+network+" "+address+": %v", e)
+		log.Fatalln("\tnetxu.Listen "+network+" "+address+": %v", e)
 	}
 	return l, l.Addr().String()
 }

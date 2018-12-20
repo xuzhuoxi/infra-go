@@ -1,7 +1,7 @@
-package net
+package netx
 
 import (
-	"github.com/xuzhuoxi/util/errs"
+	"github.com/xuzhuoxi/go-util/errsx"
 	"log"
 	"net"
 	"sync"
@@ -59,7 +59,7 @@ func (s *TCPServer) StartServer(address string) error {
 	funcName := "TCPServer.StartServer"
 	s.runningLock.Lock()
 	if s.running {
-		return errs.FuncRepeatedCallError(funcName)
+		return errsx.FuncRepeatedCallError(funcName)
 	}
 	log.Println(funcName + "()")
 	s.running = true
@@ -95,7 +95,7 @@ func (s *TCPServer) StopServer() error {
 	s.runningLock.Lock()
 	defer s.runningLock.Unlock()
 	if !s.running {
-		return errs.FuncRepeatedCallError(funcName)
+		return errsx.FuncRepeatedCallError(funcName)
 	}
 	log.Println(funcName + "()")
 	defer func() {
