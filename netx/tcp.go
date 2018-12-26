@@ -6,6 +6,12 @@ import (
 	"sync"
 )
 
+const (
+	TcpNetwork  = "tcp"
+	TcpNetwork4 = "tcp4"
+	TcpNetwork6 = "tcp6"
+)
+
 var (
 	mapTCPAddr map[string]*net.TCPAddr
 	mapTCPLock sync.RWMutex
@@ -22,11 +28,11 @@ func TCPAddrEqual(addr1 *net.TCPAddr, addr2 *net.TCPAddr) bool {
 	return addr1.IP.Equal(addr2.IP) && addr1.Port == addr2.Port && addr1.Zone == addr2.Zone
 }
 
-func getTCPAddr(network string, address string) (*net.TCPAddr, error) {
+func GetTCPAddr(network string, address string) (*net.TCPAddr, error) {
 	mapTCPLock.Lock()
 	defer mapTCPLock.Unlock()
 	if "" == address {
-		return nil, EmptyAddrError("netx.getTCPAddr")
+		return nil, EmptyAddrError("netx.GetTCPAddr")
 	}
 	addr, ok := mapTCPAddr[address]
 	if ok {
@@ -42,5 +48,5 @@ func getTCPAddr(network string, address string) (*net.TCPAddr, error) {
 }
 
 func logResolveTCPAddrErr(address string, err error) {
-	log.Fatalln("ResolveTCPAddr Error:[addirss="+address+"],errsx=", err)
+	log.Fatalln("ResolveTCPAddr Error:[addirss="+address+"],error=", err)
 }

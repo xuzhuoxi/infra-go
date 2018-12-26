@@ -1,78 +1,54 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/go-util/errsx"
+	"github.com/xuzhuoxi/go-util/errorsx"
 	"log"
 	"net"
-	"sync"
-)
-
-const (
-	TcpNetwork  = "tcp"
-	TcpNetwork4 = "tcp4"
-	TcpNetwork6 = "tcp6"
 )
 
 func NewTCPServer(maxLinkNum int) ITCPServer {
-	rs := &TCPServer{Network: TcpNetwork, maxLinkNum: maxLinkNum}
-	rs.splitHandler = DefaultSplitHandler
+	rs := &TCPServer{maxLinkNum: maxLinkNum}
+	rs.Name = "TCPServer"
+	rs.Network = TcpNetwork
+	rs.splitHandler = DefaultByteSplitHandler
 	rs.messageHandler = DefaultMessageHandler
 	return rs
 }
 
-type ITCPServer interface {
-	SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error
-	SetMessageHandler(handler func(data []byte, conn net.Conn, senderAddress string)) error
-	StartServer(address string) error //会阻塞
-	StopServer() error
-	Running() bool
-	GetTransceiver(key string) ITransceiver
-}
-
 type TCPServer struct {
-	Network    string
+	SockServerBase
 	maxLinkNum int
 	timeout    int
 
-	splitHandler   func(buff []byte) ([]byte, []byte)
-	messageHandler func(data []byte, conn net.Conn, senderAddress string)
-
-	listener       *net.TCPListener
-	serverLinkSem  chan bool
-	mapTransceiver map[string]ITransceiver
-	mapLock        sync.RWMutex
-	running        bool
-	runningLock    sync.Mutex
+	listener      *net.TCPListener
+	serverLinkSem chan bool
+	mapProxy      map[string]IMessageSendReceiver
+	mapConn       map[string]*net.TCPConn
 }
 
-func (s *TCPServer) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
-	s.splitHandler = handler
-	return nil
-}
-
-func (s *TCPServer) SetMessageHandler(handler func(data []byte, conn net.Conn, senderAddress string)) error {
-	s.messageHandler = handler
-	return nil
-}
-
-func (s *TCPServer) StartServer(address string) error {
+func (s *TCPServer) StartServer(params SockParams) error {
 	funcName := "TCPServer.StartServer"
-	s.runningLock.Lock()
+	s.serverMu.Lock()
 	if s.running {
-		return errsx.FuncRepeatedCallError(funcName)
+		defer s.serverMu.Unlock()
+		return errorsx.FuncRepeatedCallError(funcName)
 	}
-	log.Println(funcName + "()")
-	s.running = true
-	listener, err := listenTCP(s.Network, address)
+	if "" != params.Network {
+		s.Network = params.Network
+	}
+	listener, err := listenTCP(s.Network, params.LocalAddress)
 	if nil != err {
-		log.Fatalln(err)
-		s.runningLock.Unlock()
+		defer s.serverMu.Unlock()
 		return err
 	}
 	s.listener = listener
 	s.serverLinkSem = make(chan bool, s.maxLinkNum)
-	s.mapTransceiver = make(map[string]ITransceiver)
-	s.runningLock.Unlock()
+	s.mapConn = make(map[string]*net.TCPConn)
+	s.mapProxy = make(map[string]IMessageSendReceiver)
+	s.running = true
+	s.serverMu.Unlock()
+	log.Println(funcName + "()")
+
 	defer s.StopServer()
 	for s.running {
 		s.serverLinkSem <- true
@@ -84,7 +60,6 @@ func (s *TCPServer) StartServer(address string) error {
 			return err
 		}
 		rAddress := tcpConn.RemoteAddr().String()
-		log.Println("New Connection:", rAddress)
 		go s.processTCPConn(rAddress, tcpConn)
 	}
 	return nil
@@ -92,63 +67,70 @@ func (s *TCPServer) StartServer(address string) error {
 
 func (s *TCPServer) StopServer() error {
 	funcName := "TCPServer.StopServer"
-	s.runningLock.Lock()
-	defer s.runningLock.Unlock()
+	s.serverMu.Lock()
+	defer s.serverMu.Unlock()
 	if !s.running {
-		return errsx.FuncRepeatedCallError(funcName)
+		return errorsx.FuncRepeatedCallError(funcName)
 	}
-	log.Println(funcName + "()")
-	defer func() {
-		for _, value := range s.mapTransceiver {
-			value.GetConnection().Close()
-		}
-		s.running = false
-		close(s.serverLinkSem)
-	}()
 	if nil != s.listener {
 		s.listener.Close()
+		s.listener = nil
 	}
+	for _, value := range s.mapConn {
+		value.Close()
+	}
+	s.mapConn = nil
+	closeLinkChannel(s.serverLinkSem)
+	s.running = false
+	log.Println(funcName + "()")
 	return nil
 }
 
-func (s *TCPServer) Running() bool {
-	return s.running
-}
-
-func (s *TCPServer) GetTransceiver(key string) ITransceiver {
-	ts, ok := s.mapTransceiver[key]
-	if ok {
-		return ts
+func (s *TCPServer) SendDataTo(data []byte, rAddress ...string) error {
+	if 0 == len(rAddress) {
+		return NoAddrError("TCPServer.SendData")
+	}
+	s.serverMu.Lock()
+	defer s.serverMu.Unlock()
+	for _, address := range rAddress {
+		ts, ok := s.mapProxy[address]
+		if ok {
+			ts.SendMessage(data)
+		}
 	}
 	return nil
 }
 
 //private -----------------
 
-func (s *TCPServer) processTCPConn(key string, conn *net.TCPConn) {
+func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	defer func() {
-		conn.Close()
-		s.setMapValue(key, nil)
+		s.serverMu.Lock()
+		defer s.serverMu.Unlock()
+		if nil != conn {
+			conn.Close()
+		}
+		delete(s.mapConn, address)
+		delete(s.mapProxy, address)
 		<-s.serverLinkSem
 	}()
-	transceiver := NewTransceiver(conn)
-	s.setMapValue(key, transceiver)
-	transceiver.SetSplitHandler(s.splitHandler)
-	transceiver.SetMessageHandler(s.messageHandler)
-	transceiver.StartReceiving()
+	s.serverMu.Lock()
+	s.mapConn[address] = conn
+	proxy := NewMessageSendReceiver(conn, conn, TcpRW, s.Network)
+	s.mapProxy[address] = proxy
+	proxy.SetSplitHandler(s.splitHandler)
+	proxy.SetMessageHandler(s.messageHandler)
+	s.serverMu.Unlock()
+	log.Println("New TCP Connection:", address)
+	proxy.StartReceiving()
 }
 
-func (s *TCPServer) setMapValue(key string, value ITransceiver) {
-	s.mapLock.Lock()
-	defer s.mapLock.Unlock()
-	if nil == value {
-		delete(s.mapTransceiver, key)
-	} else {
-		s.mapTransceiver[key] = value
-	}
+func closeLinkChannel(c chan bool) {
+	close(c)
+	//log.Println("closeLinkChannel.finish")
 }
 
 func listenTCP(network string, address string) (*net.TCPListener, error) {
-	tcpAddr, _ := getTCPAddr(network, address)
+	tcpAddr, _ := GetTCPAddr(network, address)
 	return net.ListenTCP(network, tcpAddr)
 }

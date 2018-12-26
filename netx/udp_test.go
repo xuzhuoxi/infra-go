@@ -3,45 +3,45 @@ package netx
 import (
 	"fmt"
 	"log"
-	"net"
 	"strconv"
 	"testing"
 	"time"
 )
 
-func TestUDP(t *testing.T) {
+func TestUDPServer(t *testing.T) {
 	server := NewUDPServer()
-	var msgHandler = func(msgData []byte, conn net.Conn, senderAddress string) {
-		log.Println("msgHandler[Conn:", conn, "]msgData:", msgData, "dataLen:", len(msgData), "]")
+	var msgHandler = func(msgData []byte, sender interface{}) {
+		senderAddress := sender.(string)
+		log.Println("TestUDPServer.msgHandler[Sender:", senderAddress, "]msgData:", msgData, "dataLen:", len(msgData), "]")
 		rs := []byte{byte(len(msgData))}
 		rs = append(rs, msgData...)
-		server.SendData(rs, senderAddress)
+		server.SendDataTo(rs, senderAddress)
 	}
 	server.SetMessageHandler(msgHandler)
-	go server.StartServer("127.0.0.1:9999")
+	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
 	defer server.StopServer()
-	log.Println("Server Start!")
+	time.Sleep(10 * time.Millisecond)
 
-	client1 := NewUDPClient(false)
-	client1.Setup("127.0.0.1:9998", "127.0.0.1:9999")
-	defer client1.Close()
+	client1 := NewUDPDialClient()
+	client1.OpenClient(SockParams{RemoteAddress: "127.0.0.1:9999"})
+	defer client1.CloseClient()
 	go client1.StartReceiving()
 	go func() {
 		for {
-			client1.SendData([]byte{1, 3, 3, 21, 5, 6, 7}, "127.0.0.1:9999")
+			client1.SendDataTo([]byte{1, 3, 3, 21, 5, 6, 7})
 		}
 	}()
 
-	client2 := NewUDPClient(true)
-	client2.Setup("", "127.0.0.1:9999")
-	defer client2.Close()
+	client2 := NewUDPListenClient()
+	client2.OpenClient(SockParams{LocalAddress: "127.0.0.1:9998"})
+	defer client2.CloseClient()
 	go client2.StartReceiving()
 	go func() {
 		for {
-			client2.SendData([]byte{2, 0}, "")
+			client2.SendDataTo([]byte{2, 0}, "127.0.0.1:9999")
 		}
 	}()
-	time.Sleep(3000 * time.Millisecond)
+	time.Sleep(1 * time.Millisecond)
 }
 
 func TestUDP2(t *testing.T) {
@@ -52,16 +52,16 @@ func TestUDP2(t *testing.T) {
 		server := NewUDPServer()
 		address := "127.0.0.1:" + strconv.Itoa(port)
 		addrs = append(addrs, address)
-		go server.StartServer(address)
+		go server.StartServer(SockParams{LocalAddress: address})
 		log.Println("Server Start!")
 	}
 	fmt.Println(addrs)
 
-	client1 := NewUDPClientForMultiRemote()
-	client1.Setup(":9900", "")
+	client1 := NewUDPListenClient()
+	client1.OpenClient(SockParams{LocalAddress: ":9900"})
 	go func() {
 		for {
-			client1.SendDataToMulti([]byte{2, 4}, addrs...)
+			client1.SendDataTo([]byte{2, 4}, addrs...)
 		}
 	}()
 	time.Sleep(10 * time.Millisecond)
@@ -69,8 +69,8 @@ func TestUDP2(t *testing.T) {
 
 func TestUDP3(t *testing.T) {
 	address := ":9999"
-	addt, _ := getTCPAddr("tcp", address)
-	addu, _ := getUDPAddr("udp", address)
+	addt, _ := GetTCPAddr("tcp", address)
+	addu, _ := GetUDPAddr("udp", address)
 	fmt.Println(addt, addt.IP, addt.Port, addt.String())
 	fmt.Println(addu, addu.IP, addu.Port, addu.String())
 }

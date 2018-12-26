@@ -17,3 +17,9 @@ type ConnNilError string
 func (e ConnNilError) Error() string   { return "Conn Is Nil At:" + string(e) }
 func (e ConnNilError) Timeout() bool   { return false }
 func (e ConnNilError) Temporary() bool { return false }
+
+type ReaderUnSupportError string
+
+func (e ReaderUnSupportError) Error() string   { return "Reader Is Not Support At:" + string(e) }
+func (e ReaderUnSupportError) Timeout() bool   { return false }
+func (e ReaderUnSupportError) Temporary() bool { return false }

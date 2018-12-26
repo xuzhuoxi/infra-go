@@ -1,7 +1,7 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/go-util/errsx"
+	"github.com/xuzhuoxi/go-util/errorsx"
 	"log"
 	"net"
 	"sync"
@@ -9,88 +9,59 @@ import (
 
 const (
 	UDPBuffLength = 4096
-
-	UDPNetwork  = "udp"
-	UDPNetwork4 = "udp4"
-	UDPNetwork6 = "udp6"
 )
 
 func NewUDPServer() IUDPServer {
-	rs := &UDPServer{Network: "udp"}
-	rs.splitHandler = DefaultSplitHandler
+	rs := &UDPServer{}
+	rs.Network = UDPNetwork
+	rs.splitHandler = DefaultByteSplitHandler
 	rs.messageHandler = DefaultMessageHandler
 	return rs
 }
 
-//unconnected
-type IUDPServer interface {
-	SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error
-	SetMessageHandler(handler func(data []byte, conn net.Conn, senderAddress string)) error
-	StartServer(address string) error //会阻塞
-	StopServer() error
-	SendData(data []byte, rAddress ...string) error
-}
-
 type UDPServer struct {
-	Network string
-
-	splitHandler   func(buff []byte) ([]byte, []byte)
-	messageHandler func(data []byte, conn net.Conn, senderAddress string)
-
-	conn        *net.UDPConn
-	mapBuff     map[string]*MessageBuff
-	mapLock     sync.RWMutex
-	running     bool
-	runningLock sync.Mutex
+	SockServerBase
+	conn         *net.UDPConn
+	messageProxy IMessageSendReceiver
+	serverMu     sync.Mutex
 }
 
-func (s *UDPServer) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
-	s.splitHandler = handler
-	return nil
-}
-
-func (s *UDPServer) SetMessageHandler(handler func(data []byte, conn net.Conn, senderAddress string)) error {
-	s.messageHandler = handler
-	return nil
-}
-
-func (s *UDPServer) StartServer(address string) error {
-	s.runningLock.Lock()
+func (s *UDPServer) StartServer(params SockParams) error {
+	funcName := "UDPServer.StartServer"
+	s.serverMu.Lock()
 	if s.running {
-		s.runningLock.Unlock()
-		return errsx.FuncRepeatedCallError("UDPServer.StartServer")
+		defer s.serverMu.Unlock()
+		return errorsx.FuncRepeatedCallError(funcName)
 	}
-	s.running = true
-	conn, err := listenUDP(s.Network, address)
+	if "" != params.Network {
+		s.Network = params.Network
+	}
+	conn, err := listenUDP(s.Network, params.LocalAddress)
 	if nil != err {
-		log.Fatalln(err)
-		s.runningLock.Unlock()
+		defer s.serverMu.Unlock()
 		return err
 	}
+	s.running = true
 	s.conn = conn
-	s.mapBuff = make(map[string]*MessageBuff)
-	data := make([]byte, 1024)
-	s.runningLock.Unlock()
-	defer s.StopServer()
-	for s.running {
-		n, rAddr, err := conn.ReadFromUDP(data)
-		if err != nil {
-			break
-		}
-		s.handleData(data[:n], rAddr)
-	}
-	return nil
+	s.messageProxy = NewMessageSendReceiver(s.conn, s.conn, UdpListenRW, s.Network)
+	s.messageProxy.SetSplitHandler(s.splitHandler)
+	s.messageProxy.SetMessageHandler(s.messageHandler)
+	s.serverMu.Unlock()
+	log.Println(funcName + "()")
+	err2 := s.messageProxy.StartReceiving()
+	return err2
 }
 
 func (s *UDPServer) StopServer() error {
 	funcName := "UDPServer.StopServer"
-	s.runningLock.Lock()
-	defer s.runningLock.Unlock()
+	s.serverMu.Lock()
 	if !s.running {
-		return errsx.FuncRepeatedCallError(funcName)
+		defer s.serverMu.Unlock()
+		return errorsx.FuncRepeatedCallError(funcName)
 	}
 	defer func() {
 		s.running = false
+		s.serverMu.Unlock()
 	}()
 	if nil != s.conn {
 		s.conn.Close()
@@ -99,49 +70,21 @@ func (s *UDPServer) StopServer() error {
 	return nil
 }
 
-func (s *UDPServer) SendData(data []byte, rAddress ...string) error {
-	funcName := "UDPServer.SendData"
-	if !s.running {
-		return errsx.FuncNotPreparedError(funcName)
+func (s *UDPServer) SendDataTo(msg []byte, rAddress ...string) error {
+	funcName := "UDPServer.SendMessage"
+	if !s.Running() {
+		return ConnNilError(funcName)
 	}
+	s.serverMu.Lock()
+	defer s.serverMu.Unlock()
 	if len(rAddress) == 0 {
 		return NoAddrError(funcName)
 	}
-	sendDataFromListen(s.conn, data, rAddress...)
-	return nil
-}
-
-//private ----------
-func (s *UDPServer) handleData(data []byte, rAddr *net.UDPAddr) {
-	//fmt.Println("handleData:", data, rAddr)
-	senderAddress := rAddr.String()
-	buff, ok := s.mapBuff[senderAddress]
-	if !ok {
-		buff = NewMessageBuff()
-		s.setMapValue(senderAddress, buff)
-		buff.SetCheckMessageHandler(s.splitHandler)
-	}
-	buff.AppendBytes(data)
-	for buff.CheckMessage() {
-		s.messageHandler(buff.FrontMessage(), s.conn, senderAddress)
-	}
-}
-
-func (s *UDPServer) setMapValue(key string, value *MessageBuff) {
-	s.mapLock.Lock()
-	defer s.mapLock.Unlock()
-	if nil == value {
-		delete(s.mapBuff, key)
-	} else {
-		s.mapBuff[key] = value
-	}
+	_, err := s.messageProxy.SendMessage(msg, rAddress...)
+	return err
 }
 
 func listenUDP(network string, address string) (*net.UDPConn, error) {
-	udpAddr, _ := getUDPAddr(network, address)
+	udpAddr, _ := GetUDPAddr(network, address)
 	return net.ListenUDP(network, udpAddr)
-}
-
-func (s *UDPServer) defaultUDPHandler(data []byte, rAddr *net.UDPAddr) {
-	log.Println("defaultUDPHandler[S:", rAddr.String(), "R:", s.conn.LocalAddr().String(), "data:", data, "]")
 }

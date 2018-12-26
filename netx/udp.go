@@ -6,6 +6,12 @@ import (
 	"sync"
 )
 
+const (
+	UDPNetwork  = "udp"
+	UDPNetwork4 = "udp4"
+	UDPNetwork6 = "udp6"
+)
+
 var (
 	mapUDPAddr map[string]*net.UDPAddr
 	mapUDPLock sync.RWMutex
@@ -22,11 +28,11 @@ func UDPAddrEqual(addr1 *net.UDPAddr, addr2 *net.UDPAddr) bool {
 	return addr1.IP.Equal(addr2.IP) && addr1.Port == addr2.Port && addr1.Zone == addr2.Zone
 }
 
-func getUDPAddr(network string, address string) (*net.UDPAddr, error) {
+func GetUDPAddr(network string, address string) (*net.UDPAddr, error) {
 	mapUDPLock.Lock()
 	defer mapUDPLock.Unlock()
 	if "" == address {
-		return nil, EmptyAddrError("netx.getUDPAddr")
+		return nil, EmptyAddrError("netx.GetUDPAddr")
 	}
 	addr, ok := mapUDPAddr[address]
 	if ok {
@@ -41,21 +47,6 @@ func getUDPAddr(network string, address string) (*net.UDPAddr, error) {
 	return newAddr, nil
 }
 
-func sendDataFromListen(listenConn *net.UDPConn, data []byte, rAddress ...string) {
-	if nil == listenConn {
-		return
-	}
-	if len(rAddress) > 0 {
-		for _, address := range rAddress {
-			addr, err := getUDPAddr(listenConn.LocalAddr().Network(), address)
-			if nil != err {
-				continue
-			}
-			listenConn.WriteToUDP(data, addr)
-		}
-	}
-}
-
 func logResolveUDPAddrErr(address string, err error) {
-	log.Fatalln("\tResolveUDPAddr Error:[addirss="+address+"],errsx=", err)
+	log.Fatalln("\tResolveUDPAddr Error:[addirss="+address+"],error=", err)
 }

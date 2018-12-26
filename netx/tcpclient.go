@@ -1,56 +1,52 @@
 package netx
 
 import (
+	"github.com/xuzhuoxi/go-util/errorsx"
+	"log"
 	"net"
 	"sync"
 )
 
 func NewTCPClient() ITCPClient {
-	client := &TCPClient{Network: "tcp"}
+	client := &TCPClient{SockClientBase: SockClientBase{Name: "TCPClient", Network: TcpNetwork}}
 	return client
 }
 
-type ITCPClient interface {
-	Dial(address string) error
-	Close()
-	Send(data []byte) error
-	GetTransceiver() ITransceiver
-}
-
 type TCPClient struct {
-	Network     string
-	Conn        net.Conn
-	transceiver ITransceiver
-	clientLock  sync.Mutex
+	SockClientBase
+	clientLock sync.Mutex
 }
 
-func (c *TCPClient) Dial(address string) error {
+func (c *TCPClient) OpenClient(params SockParams) error {
+	funcName := "TCPClient.OpenClient"
 	c.clientLock.Lock()
 	defer c.clientLock.Unlock()
-	conn, err := net.Dial(c.Network, address)
+	if "" != params.Network {
+		c.Network = params.Network
+	}
+	conn, err := net.Dial(c.Network, params.RemoteAddress)
 	if nil != err {
 		return err
 	}
-	c.Conn = conn
-	c.transceiver = NewTransceiver(conn)
+	c.conn = conn
+	c.messageProxy = NewMessageSendReceiver(conn, conn, TcpRW, c.Network)
+	c.opening = true
+	log.Println(funcName + "()")
 	return nil
 }
 
-func (c *TCPClient) Close() {
-	defer func() {
-		c.Conn.Close()
-		c.Conn = nil
-		c.transceiver = nil
-		c.clientLock.Unlock()
-	}()
+func (c *TCPClient) CloseClient() error {
+	funcName := "TCPClient.CloseClient"
 	c.clientLock.Lock()
-	c.transceiver.StopReceiving()
-}
-
-func (c *TCPClient) Send(data []byte) error {
-	return c.transceiver.SendData(data)
-}
-
-func (c *TCPClient) GetTransceiver() ITransceiver {
-	return c.transceiver
+	defer c.clientLock.Unlock()
+	if !c.opening {
+		return errorsx.FuncRepeatedCallError(funcName)
+	}
+	c.opening = false
+	if nil != c.conn {
+		c.conn.Close()
+		c.conn = nil
+	}
+	log.Println(funcName + "()")
+	return nil
 }
