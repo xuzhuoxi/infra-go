@@ -1,5 +1,7 @@
 package netx
 
+import "net"
+
 type IReaderProxy interface {
 	ReadBytes(bytes []byte) (int, interface{}, error)
 }
@@ -46,7 +48,13 @@ type IMessageSendReceiver interface {
 }
 
 type ISendData interface {
-	SendDataTo(msg []byte, rAddress ...string) error
+	SendDataTo(data []byte, rAddress ...string) error
+}
+
+type ISockConn interface {
+	Close() error
+	LocalAddr() net.Addr
+	RemoteAddr() net.Addr
 }
 
 type ISockServer interface {
@@ -86,5 +94,9 @@ type IUDPClient interface {
 }
 
 type ITCPClient interface {
+	ISockClient
+}
+
+type IQuicClient interface {
 	ISockClient
 }

@@ -1,7 +1,7 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/go-util/errorsx"
+	"github.com/xuzhuoxi/util-go/errorsx"
 	"log"
 	"net"
 )

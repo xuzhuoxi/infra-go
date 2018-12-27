@@ -1,7 +1,9 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/go-util/errorsx"
+	"github.com/lucas-clemente/quic-go"
+	"github.com/xuzhuoxi/util-go/errorsx"
+	"log"
 	"net"
 )
 
@@ -11,6 +13,7 @@ const (
 	TcpRW ReadWriterType = iota
 	UdpDialRW
 	UdpListenRW
+	QuicRW
 )
 
 func NewReaderProxy(reader interface{}, readerType ReadWriterType, Network string) IReaderProxy {
@@ -30,6 +33,8 @@ type readWriterProxy struct {
 	Network string
 	Reader  interface{}
 	Writer  interface{}
+
+	quicStream quic.Stream
 }
 
 func (p *readWriterProxy) ReadBytes(bytes []byte) (int, interface{}, error) {
@@ -50,6 +55,20 @@ func (p *readWriterProxy) ReadBytes(bytes []byte) (int, interface{}, error) {
 			n, addr, err := r.ReadFromUDP(bytes)
 			return n, addr.String(), err
 		}
+	case quic.Session:
+		rAddr := r.RemoteAddr().String()
+		stream, err := r.AcceptStream()
+		if nil != err {
+			return 0, rAddr, err
+		}
+		n, err := stream.Read(bytes)
+		return n, rAddr, err
+		//err := p.initQuicStream(r)
+		//if nil != err {
+		//	return 0, rAddr, err
+		//}
+		//n, err2 := p.quicStream.Read(bytes)
+		//return n, rAddr, err2
 	}
 	return 0, nil, errorsx.NoCaseCatchError(funcName)
 }
@@ -81,6 +100,32 @@ func (p *readWriterProxy) WriteBytes(bytes []byte, rAddress ...string) (int, err
 			}
 			return n, nil
 		}
+	case quic.Session:
+		stream, err := w.OpenStreamSync()
+		if nil != err {
+			return 0, err
+		}
+		n, err := stream.Write(bytes)
+		return n, err
+		//err := p.initQuicStream(w)
+		//if nil != err {
+		//	return 0, err
+		//}
+		//n, err2 := p.quicStream.Write(bytes)
+		//return n, err2
 	}
+
 	return 0, errorsx.NoCaseCatchError(funcName)
+}
+
+func (p *readWriterProxy) initQuicStream(session quic.Session) error {
+	if nil == p.quicStream {
+		stream, err := session.OpenStreamSync()
+		if nil != err {
+			log.Println("readWriterProxy.initQuicStream:", err)
+			return err
+		}
+		p.quicStream = stream
+	}
+	return nil
 }

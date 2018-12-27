@@ -1,7 +1,7 @@
 package logx
 
 import (
-	"github.com/xuzhuoxi/go-util/mathx"
+	"github.com/xuzhuoxi/util-go/mathx"
 	"log"
 )
 

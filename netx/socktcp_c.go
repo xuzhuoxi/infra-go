@@ -1,10 +1,9 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/go-util/errorsx"
+	"github.com/xuzhuoxi/util-go/errorsx"
 	"log"
 	"net"
-	"sync"
 )
 
 func NewTCPClient() ITCPClient {
@@ -14,13 +13,12 @@ func NewTCPClient() ITCPClient {
 
 type TCPClient struct {
 	SockClientBase
-	clientLock sync.Mutex
 }
 
 func (c *TCPClient) OpenClient(params SockParams) error {
 	funcName := "TCPClient.OpenClient"
-	c.clientLock.Lock()
-	defer c.clientLock.Unlock()
+	c.clientMu.Lock()
+	defer c.clientMu.Unlock()
 	if "" != params.Network {
 		c.Network = params.Network
 	}
@@ -37,8 +35,8 @@ func (c *TCPClient) OpenClient(params SockParams) error {
 
 func (c *TCPClient) CloseClient() error {
 	funcName := "TCPClient.CloseClient"
-	c.clientLock.Lock()
-	defer c.clientLock.Unlock()
+	c.clientMu.Lock()
+	defer c.clientMu.Unlock()
 	if !c.opening {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}

@@ -1,9 +1,9 @@
 package logx
 
 import (
-	"github.com/xuzhuoxi/go-util/mathx"
-	"github.com/xuzhuoxi/go-util/osxu"
-	"github.com/xuzhuoxi/go-util/stringsx"
+	"github.com/xuzhuoxi/util-go/mathx"
+	"github.com/xuzhuoxi/util-go/osxu"
+	"github.com/xuzhuoxi/util-go/stringsx"
 	"log"
 	"math"
 	"os"

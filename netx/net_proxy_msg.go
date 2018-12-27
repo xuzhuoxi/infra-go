@@ -2,7 +2,7 @@ package netx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/go-util/errorsx"
+	"github.com/xuzhuoxi/util-go/errorsx"
 	"log"
 	"sync"
 )
@@ -46,7 +46,7 @@ type msgSendReceiver struct {
 
 func (sr *msgSendReceiver) init() {
 	switch {
-	case sr.rwType == TcpRW || sr.rwType == UdpDialRW:
+	case sr.rwType == TcpRW || sr.rwType == UdpDialRW || sr.rwType == QuicRW:
 		sr.splitter = NewByteSplitter()
 		if nil != sr.splitHandler {
 			sr.splitter.SetSplitHandler(sr.splitHandler)
@@ -57,7 +57,12 @@ func (sr *msgSendReceiver) init() {
 }
 
 func (sr *msgSendReceiver) SendMessage(msg []byte, rAddress ...string) (int, error) {
-	return sr.writer.WriteBytes(msg, rAddress...)
+	n, err := sr.writer.WriteBytes(msg, rAddress...)
+	if nil != err {
+		log.Println("msgSendReceiver.SendMessage", err)
+		return n, err
+	}
+	return n, nil
 }
 
 func (sr *msgSendReceiver) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
@@ -66,7 +71,7 @@ func (sr *msgSendReceiver) SetSplitHandler(handler func(buff []byte) ([]byte, []
 	defer sr.mu.Unlock()
 	sr.splitHandler = handler
 	switch {
-	case sr.rwType == TcpRW || sr.rwType == UdpDialRW:
+	case sr.rwType == TcpRW || sr.rwType == UdpDialRW || sr.rwType == QuicRW:
 		sr.splitter.SetSplitHandler(handler)
 	case sr.rwType == UdpListenRW:
 		for _, value := range sr.mapSplitter {
@@ -118,7 +123,7 @@ func (sr *msgSendReceiver) IsReceiving() bool {
 func (sr *msgSendReceiver) handleData(newData []byte, address interface{}) {
 	strAddress := address.(string)
 	switch {
-	case sr.rwType == TcpRW || sr.rwType == UdpDialRW:
+	case sr.rwType == TcpRW || sr.rwType == UdpDialRW || sr.rwType == QuicRW:
 		sr.handleSplitterData(sr.splitter, newData, strAddress)
 	case sr.rwType == UdpListenRW:
 		sr.mu.Lock()

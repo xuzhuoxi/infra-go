@@ -2,7 +2,6 @@ package netx
 
 import (
 	"log"
-	"net"
 	"sync"
 )
 
@@ -15,7 +14,7 @@ type SockParams struct {
 type SockServerBase struct {
 	Name     string
 	Network  string
-	serverMu sync.Mutex
+	serverMu sync.RWMutex
 	running  bool
 
 	splitHandler   func(buff []byte) ([]byte, []byte)
@@ -37,19 +36,22 @@ func (s *SockServerBase) SetMessageHandler(handler func(msgBytes []byte, info in
 }
 
 func (s *SockServerBase) Running() bool {
-	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
+	s.serverMu.RLock()
+	defer s.serverMu.RUnlock()
 	return s.running
 }
 
 type SockClientBase struct {
-	Name    string
-	Network string
-	baseMu  sync.RWMutex
-	opening bool
+	Name     string
+	Network  string
+	clientMu sync.RWMutex
+	opening  bool
+
+	splitHandler   func(buff []byte) ([]byte, []byte)
+	messageHandler func(msgBytes []byte, info interface{})
 
 	localAddress string
-	conn         net.Conn
+	conn         ISockConn
 	messageProxy IMessageSendReceiver
 }
 
@@ -58,12 +60,18 @@ func (c *SockClientBase) LocalAddress() string {
 }
 
 func (c *SockClientBase) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
-	c.messageProxy.SetSplitHandler(handler)
+	c.splitHandler = handler
+	if nil != c.messageProxy {
+		c.messageProxy.SetSplitHandler(handler)
+	}
 	return nil
 }
 
 func (c *SockClientBase) SetMessageHandler(handler func(msgBytes []byte, info interface{})) error {
-	c.messageProxy.SetMessageHandler(handler)
+	c.messageHandler = handler
+	if nil != c.messageProxy {
+		c.messageProxy.SetMessageHandler(handler)
+	}
 	return nil
 }
 
@@ -72,8 +80,8 @@ func (c *SockClientBase) IsReceiving() bool {
 }
 
 func (c *SockClientBase) Opening() bool {
-	c.baseMu.RLock()
-	defer c.baseMu.RUnlock()
+	c.clientMu.RLock()
+	defer c.clientMu.RUnlock()
 	return c.opening
 }
 
@@ -92,4 +100,14 @@ func (c *SockClientBase) StopReceiving() error {
 	log.Println(c.Name + ".StopReceiving()")
 	err := c.messageProxy.StopReceiving()
 	return err
+}
+
+func (c *SockClientBase) setMessageProxy(messageProxy IMessageSendReceiver) {
+	c.messageProxy = messageProxy
+	if nil != c.splitHandler {
+		messageProxy.SetSplitHandler(c.splitHandler)
+	}
+	if nil != c.messageHandler {
+		messageProxy.SetMessageHandler(c.messageHandler)
+	}
 }

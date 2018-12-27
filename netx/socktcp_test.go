@@ -1,7 +1,7 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/go-util/logx"
+	"github.com/xuzhuoxi/util-go/logx"
 	"log"
 	"testing"
 	"time"

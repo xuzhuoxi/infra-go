@@ -1,10 +1,9 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/go-util/errorsx"
+	"github.com/xuzhuoxi/util-go/errorsx"
 	"log"
 	"net"
-	"sync"
 )
 
 func NewUDPDialClient() IUDPClient {
@@ -18,13 +17,12 @@ func NewUDPListenClient() IUDPClient {
 //UDPDialClient
 type UDPDialClient struct {
 	SockClientBase
-	clientSem sync.Mutex
 }
 
 func (c *UDPDialClient) OpenClient(params SockParams) error {
 	funcName := "UDPDialClient.OpenClient"
-	c.clientSem.Lock()
-	defer c.clientSem.Unlock()
+	c.clientMu.Lock()
+	defer c.clientMu.Unlock()
 	if c.opening {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
@@ -48,8 +46,8 @@ func (c *UDPDialClient) OpenClient(params SockParams) error {
 
 func (c *UDPDialClient) CloseClient() error {
 	funcName := "UDPDialClient.Close"
-	c.clientSem.Lock()
-	defer c.clientSem.Unlock()
+	c.clientMu.Lock()
+	defer c.clientMu.Unlock()
 	if !c.opening {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
@@ -65,13 +63,12 @@ func (c *UDPDialClient) CloseClient() error {
 //UDPListenClient
 type UDPListenClient struct {
 	SockClientBase
-	clientLock sync.RWMutex
 }
 
 func (c *UDPListenClient) OpenClient(params SockParams) error {
 	funcName := "UDPListenClient.OpenClient"
-	c.clientLock.Lock()
-	defer c.clientLock.Unlock()
+	c.clientMu.Lock()
+	defer c.clientMu.Unlock()
 	if c.opening {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
@@ -95,8 +92,8 @@ func (c *UDPListenClient) OpenClient(params SockParams) error {
 
 func (c *UDPListenClient) CloseClient() error {
 	funcName := "UDPListenClient.Close"
-	c.clientLock.Lock()
-	defer c.clientLock.Unlock()
+	c.clientMu.Lock()
+	defer c.clientMu.Unlock()
 	if !c.opening {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
