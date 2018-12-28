@@ -78,7 +78,13 @@ func (l *logger) SetConfig(cfg LogConfig) {
 		cfg.Flag = l.defaultFlag
 	}
 	if cfg.Type == TypeConsole {
-		l.infoMap[cfg.Type] = &logInfo{level: cfg.Level, logger: genLogger(l.defaultFlag)}
+		val, ok := l.infoMap[cfg.Type]
+		if ok {
+			val.level = cfg.Level
+			val.logger.SetFlags(cfg.Flag)
+		} else {
+			l.infoMap[cfg.Type] = &logInfo{level: cfg.Level, logger: genLogger(l.defaultFlag)}
+		}
 		return
 	}
 	if "" == cfg.FileDir {
@@ -98,6 +104,7 @@ func (l *logger) SetConfig(cfg LogConfig) {
 		val.fileName = cfg.FileName
 		val.fileExtName = cfg.FileExtName
 		val.maxSize = uint64(cfg.MaxSize)
+		val.logger.SetFlags(cfg.Flag)
 	} else {
 		l.infoMap[cfg.Type] = &logInfo{level: cfg.Level, fileDir: newFileDir, fileName: cfg.FileName, fileExtName: cfg.FileExtName, maxSize: uint64(cfg.MaxSize), logger: genLogger(l.defaultFlag)}
 	}
