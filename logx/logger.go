@@ -38,7 +38,17 @@ func init() {
 	level2prefix[LevelWarn] = "[Warn]"
 	level2prefix[LevelError] = "[Error]"
 	level2prefix[LevelFatal] = "[Fatal]"
-	defaultLogger.SetConfig(TypeConsole, LevelAll, "", "", "", 0)
+	defaultLogger.SetConfig(LogConfig{Type: TypeConsole, Level: LevelAll})
+}
+
+type LogConfig struct {
+	Type        LogType
+	Level       LogLevel
+	Flag        int
+	FileDir     string
+	FileName    string
+	FileExtName string
+	MaxSize     mathx.SizeUint
 }
 
 func NewLogger() ILogger {
@@ -56,7 +66,7 @@ type ILogger interface {
 	//重置日志flag,t为空时重置全部
 	SetFlags(flag int, t ...LogType)
 	//配置Log,要求fileDir以"/"结尾
-	SetConfig(t LogType, level LogLevel, fileDir, fileName, fileExtName string, maxSize mathx.SizeUint)
+	SetConfig(cfg LogConfig)
 	//移除配置
 	RemoveConfig(t LogType)
 
@@ -96,8 +106,8 @@ func SetFlags(flag int, t ...LogType) {
 	defaultLogger.SetFlags(flag, t...)
 }
 
-func SetConfig(t LogType, level LogLevel, fileDir, fileName, fileExtName string, maxSize mathx.SizeUint) {
-	defaultLogger.SetConfig(t, level, fileDir, fileName, fileExtName, maxSize)
+func SetConfig(cfg LogConfig) {
+	defaultLogger.SetConfig(cfg)
 }
 
 func RemoveConfig(t LogType) {

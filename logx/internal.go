@@ -1,7 +1,6 @@
 package logx
 
 import (
-	"github.com/xuzhuoxi/util-go/mathx"
 	"github.com/xuzhuoxi/util-go/osxu"
 	"github.com/xuzhuoxi/util-go/stringsx"
 	"log"
@@ -72,34 +71,41 @@ func (l *logger) SetFlags(flag int, t ...LogType) {
 	}
 }
 
-func (l *logger) SetConfig(t LogType, level LogLevel, fileDir, fileName, fileExtName string, maxSize mathx.SizeUint) {
+func (l *logger) SetConfig(cfg LogConfig) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	if "" == fileDir {
+	if 0 == cfg.Flag {
+		cfg.Flag = l.defaultFlag
+	}
+	if cfg.Type == TypeConsole {
+		l.infoMap[cfg.Type] = &logInfo{level: cfg.Level, logger: genLogger(l.defaultFlag)}
 		return
 	}
-	newFileDir := osxu.GetUnitePath(fileDir)
+	if "" == cfg.FileDir {
+		return
+	}
+	newFileDir := osxu.GetUnitePath(cfg.FileDir)
 	if stringsx.GetCharCount(newFileDir)-1 != stringsx.LastIndexOfChar(newFileDir, "/") { //保证最后一个为"/"
 		newFileDir = newFileDir + "/"
 	}
 	if !osxu.IsExist(newFileDir) { //目标不存在，创建目录
 		os.MkdirAll(newFileDir, os.ModePerm)
 	}
-	val, ok := l.infoMap[t]
+	val, ok := l.infoMap[cfg.Type]
 	if ok {
-		val.level = level
+		val.level = cfg.Level
 		val.fileDir = newFileDir
-		val.fileName = fileName
-		val.fileExtName = fileExtName
-		val.maxSize = uint64(maxSize)
+		val.fileName = cfg.FileName
+		val.fileExtName = cfg.FileExtName
+		val.maxSize = uint64(cfg.MaxSize)
 	} else {
-		l.infoMap[t] = &logInfo{level: level, fileDir: newFileDir, fileName: fileName, fileExtName: fileExtName, maxSize: uint64(maxSize), logger: genLogger(l.defaultFlag)}
+		l.infoMap[cfg.Type] = &logInfo{level: cfg.Level, fileDir: newFileDir, fileName: cfg.FileName, fileExtName: cfg.FileExtName, maxSize: uint64(cfg.MaxSize), logger: genLogger(l.defaultFlag)}
 	}
-	switch t {
+	switch cfg.Type {
 	case TypeRollingFile:
-		l.infoMap[t].index = getRollingIndex(newFileDir, fileName, fileExtName)
+		l.infoMap[cfg.Type].index = getRollingIndex(newFileDir, cfg.FileName, cfg.FileExtName)
 	case TypeDailyRollingFile:
-		l.infoMap[t].index = getRollingIndex(newFileDir, fileName+"_"+getTodayStr(), fileExtName)
+		l.infoMap[cfg.Type].index = getRollingIndex(newFileDir, cfg.FileName+"_"+getTodayStr(), cfg.FileExtName)
 	}
 }
 

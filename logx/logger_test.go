@@ -10,10 +10,11 @@ func TestLogger(t *testing.T) {
 	dirDaily := "D:\\log\\Daily\\"
 	dirRolling := "D:\\log\\Rolling\\"
 	dirDailyRolling := "D:\\log\\DailyRolling\\"
-	l.SetConfig(TypeDailyFile, LevelAll, dirDaily, "L", ".txt", 0)
-	l.SetConfig(TypeRollingFile, LevelAll, dirRolling, "L", ".txt", 2*mathx.KB)
-	l.SetConfig(TypeDailyRollingFile, LevelAll, dirDailyRolling, "L", ".txt", 2*mathx.KB)
-	//for {
+	l.SetConfig(LogConfig{Type: TypeConsole, Level: LevelAll})
+	l.SetConfig(LogConfig{Type: TypeDailyFile, Level: LevelAll, FileDir: dirDaily, FileName: "L", FileExtName: ".txt"})
+	l.SetConfig(LogConfig{Type: TypeRollingFile, Level: LevelAll, FileDir: dirRolling, FileName: "L", FileExtName: ".txt", MaxSize: 2 * mathx.KB})
+	l.SetConfig(LogConfig{Type: TypeDailyRollingFile, Level: LevelAll, FileDir: dirDailyRolling, FileName: "L", FileExtName: ".txt", MaxSize: 2 * mathx.KB})
+
 	for i := 0; i < 300; i++ {
 		l.Traceln("哈哈", "1111111111111111111111")
 	}
