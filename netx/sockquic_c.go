@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 	"github.com/lucas-clemente/quic-go"
 	"github.com/xuzhuoxi/util-go/errorsx"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 )
 
 func NewQUICClient() IQuicClient {
@@ -34,7 +34,7 @@ func (c *QUICClient) OpenClient(params SockParams) error {
 	c.conn = session
 	c.setMessageProxy(NewMessageSendReceiver(session, session, UdpDialRW, c.Network))
 	c.opening = true
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 
@@ -50,7 +50,7 @@ func (c *QUICClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 

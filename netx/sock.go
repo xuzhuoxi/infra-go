@@ -1,7 +1,7 @@
 package netx
 
 import (
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 	"sync"
 )
 
@@ -91,13 +91,13 @@ func (c *SockClientBase) SendDataTo(msg []byte, rAddress ...string) error {
 }
 
 func (c *SockClientBase) StartReceiving() error {
-	log.Println(c.Name + ".StartReceiving()")
+	logx.Infoln(c.Name + ".StartReceiving()")
 	err := c.messageProxy.StartReceiving()
 	return err
 }
 
 func (c *SockClientBase) StopReceiving() error {
-	log.Println(c.Name + ".StopReceiving()")
+	logx.Infoln(c.Name + ".StopReceiving()")
 	err := c.messageProxy.StopReceiving()
 	return err
 }

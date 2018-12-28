@@ -2,7 +2,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/util-go/errorsx"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 	"net"
 )
 
@@ -47,7 +47,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	s.mapProxy = make(map[string]IMessageSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 
 	defer s.StopServer()
 	for s.running {
@@ -82,7 +82,7 @@ func (s *TCPServer) StopServer() error {
 	s.mapConn = nil
 	closeLinkChannel(s.serverLinkSem)
 	s.running = false
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 
@@ -121,13 +121,13 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	proxy.SetSplitHandler(s.splitHandler)
 	proxy.SetMessageHandler(s.messageHandler)
 	s.serverMu.Unlock()
-	log.Println("New TCP Connection:", address)
+	logx.Traceln("New TCP Connection:", address)
 	proxy.StartReceiving()
 }
 
 func closeLinkChannel(c chan bool) {
 	close(c)
-	//log.Println("closeLinkChannel.finish")
+	//logx.Traceln("closeLinkChannel.finish")
 }
 
 func listenTCP(network string, address string) (*net.TCPListener, error) {

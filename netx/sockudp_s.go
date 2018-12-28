@@ -2,7 +2,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/util-go/errorsx"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 	"net"
 	"sync"
 )
@@ -47,7 +47,7 @@ func (s *UDPServer) StartServer(params SockParams) error {
 	s.messageProxy.SetSplitHandler(s.splitHandler)
 	s.messageProxy.SetMessageHandler(s.messageHandler)
 	s.serverMu.Unlock()
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	err2 := s.messageProxy.StartReceiving()
 	return err2
 }
@@ -66,7 +66,7 @@ func (s *UDPServer) StopServer() error {
 	if nil != s.conn {
 		s.conn.Close()
 	}
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 

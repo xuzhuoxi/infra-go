@@ -3,7 +3,7 @@ package netx
 import (
 	"fmt"
 	"github.com/xuzhuoxi/util-go/errorsx"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 	"sync"
 )
 
@@ -59,7 +59,7 @@ func (sr *msgSendReceiver) init() {
 func (sr *msgSendReceiver) SendMessage(msg []byte, rAddress ...string) (int, error) {
 	n, err := sr.writer.WriteBytes(msg, rAddress...)
 	if nil != err {
-		log.Println("msgSendReceiver.SendMessage", err)
+		logx.Warnln("msgSendReceiver.SendMessage", err)
 		return n, err
 	}
 	return n, nil
@@ -146,5 +146,5 @@ func (sr *msgSendReceiver) handleSplitterData(splitter IByteSplitter, data []byt
 }
 
 func DefaultMessageHandler(msgData []byte, info interface{}) {
-	log.Println("DefaultMessageHandler[Sender:"+fmt.Sprint(info)+"]msgData:", msgData, "dataLen:", len(msgData), "]")
+	logx.Traceln("DefaultMessageHandler[Sender:"+fmt.Sprint(info)+"]msgData:", msgData, "dataLen:", len(msgData), "]")
 }

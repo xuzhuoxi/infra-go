@@ -2,7 +2,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/util-go/errorsx"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 	"net"
 )
 
@@ -29,7 +29,7 @@ func (c *TCPClient) OpenClient(params SockParams) error {
 	c.conn = conn
 	c.messageProxy = NewMessageSendReceiver(conn, conn, TcpRW, c.Network)
 	c.opening = true
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 
@@ -45,6 +45,6 @@ func (c *TCPClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }

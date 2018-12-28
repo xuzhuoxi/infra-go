@@ -2,7 +2,7 @@ package netx
 
 import (
 	"fmt"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 	"strconv"
 	"testing"
 	"time"
@@ -12,7 +12,7 @@ func TestUDPServer(t *testing.T) {
 	server := NewUDPServer()
 	var msgHandler = func(msgData []byte, sender interface{}) {
 		senderAddress := sender.(string)
-		log.Println("TestUDPServer.msgHandler[Sender:", senderAddress, "]msgData:", msgData, "dataLen:", len(msgData), "]")
+		logx.Traceln("TestUDPServer.msgHandler[Sender:", senderAddress, "]msgData:", msgData, "dataLen:", len(msgData), "]")
 		rs := []byte{byte(len(msgData))}
 		rs = append(rs, msgData...)
 		server.SendDataTo(rs, senderAddress)
@@ -28,7 +28,10 @@ func TestUDPServer(t *testing.T) {
 	go client1.StartReceiving()
 	go func() {
 		for {
-			client1.SendDataTo([]byte{1, 3, 3, 21, 5, 6, 7})
+			err := client1.SendDataTo([]byte{1, 3, 3, 21, 5, 6, 7})
+			if nil != err {
+				break
+			}
 		}
 	}()
 
@@ -38,10 +41,13 @@ func TestUDPServer(t *testing.T) {
 	go client2.StartReceiving()
 	go func() {
 		for {
-			client2.SendDataTo([]byte{2, 0}, "127.0.0.1:9999")
+			err := client2.SendDataTo([]byte{2, 0}, "127.0.0.1:9999")
+			if nil != err {
+				break
+			}
 		}
 	}()
-	time.Sleep(1 * time.Millisecond)
+	time.Sleep(50 * time.Millisecond)
 }
 
 func TestUDP2(t *testing.T) {
@@ -53,7 +59,7 @@ func TestUDP2(t *testing.T) {
 		address := "127.0.0.1:" + strconv.Itoa(port)
 		addrs = append(addrs, address)
 		go server.StartServer(SockParams{LocalAddress: address})
-		log.Println("Server Start!")
+		logx.Infoln("Server Start!")
 	}
 	fmt.Println(addrs)
 

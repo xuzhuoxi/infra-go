@@ -3,7 +3,7 @@ package netx
 import (
 	"github.com/lucas-clemente/quic-go"
 	"github.com/xuzhuoxi/util-go/errorsx"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 )
 
 func NewQuicServer() IQUICServer {
@@ -42,7 +42,7 @@ func (s *QUICServer) StartServer(params SockParams) error {
 	s.mapProxy = make(map[string]IMessageSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	for s.running {
 		session, err := listener.Accept()
 		if !s.running || nil != err {
@@ -69,7 +69,7 @@ func (s *QUICServer) StopServer() error {
 	}
 	s.mapSession = nil
 	s.running = false
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 
@@ -106,7 +106,7 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	proxy.SetSplitHandler(s.splitHandler)
 	proxy.SetMessageHandler(s.messageHandler)
 	s.serverMu.Unlock()
-	log.Println("New Quic Connection:", address)
+	logx.Infoln("New Quic Connection:", address)
 	proxy.StartReceiving()
 }
 

@@ -28,7 +28,7 @@ func (b *ByteSplitter) AppendBytes(data []byte) {
 }
 
 func (b *ByteSplitter) CheckSplit() bool {
-	//log.Println("ByteSplitter.CheckSplit：", b, b.splitHandler == nil, b.frontLen, b.frontMsg, b.byteBuff.Bytes())
+	//logx.Traceln("ByteSplitter.CheckSplit：", b, b.splitHandler == nil, b.frontLen, b.frontMsg, b.byteBuff.Bytes())
 	if nil == b.splitHandler {
 		return false
 	}

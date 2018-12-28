@@ -32,12 +32,12 @@ var (
 )
 
 func init() {
-	level2prefix[LevelTrace] = "[Trace]"
-	level2prefix[LevelDebug] = "[Debug]"
-	level2prefix[LevelInfo] = "[Info]"
-	level2prefix[LevelWarn] = "[Warn]"
-	level2prefix[LevelError] = "[Error]"
-	level2prefix[LevelFatal] = "[Fatal]"
+	level2prefix[LevelTrace] = "[Trace]\t"
+	level2prefix[LevelDebug] = "[Debug]\t"
+	level2prefix[LevelInfo] = "[Info]\t"
+	level2prefix[LevelWarn] = "[Warn]\t"
+	level2prefix[LevelError] = "[Error]\t"
+	level2prefix[LevelFatal] = "[Fatal]\t"
 	defaultLogger.SetConfig(LogConfig{Type: TypeConsole, Level: LevelAll})
 }
 

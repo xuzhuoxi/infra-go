@@ -3,7 +3,7 @@ package netx
 import (
 	"github.com/lucas-clemente/quic-go"
 	"github.com/xuzhuoxi/util-go/errorsx"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 	"net"
 )
 
@@ -122,7 +122,7 @@ func (p *readWriterProxy) initQuicStream(session quic.Session) error {
 	if nil == p.quicStream {
 		stream, err := session.OpenStreamSync()
 		if nil != err {
-			log.Println("readWriterProxy.initQuicStream:", err)
+			logx.Warnln("readWriterProxy.initQuicStream:", err)
 			return err
 		}
 		p.quicStream = stream

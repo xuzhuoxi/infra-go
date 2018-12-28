@@ -2,7 +2,6 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/util-go/logx"
-	"log"
 	"testing"
 	"time"
 )
@@ -11,7 +10,7 @@ func TestQUICServer(t *testing.T) {
 	server := NewQuicServer()
 	var msgHandler = func(msgData []byte, sender interface{}) {
 		senderAddress := sender.(string)
-		log.Println("TestQUICServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]")
+		logx.Traceln("TestQUICServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]")
 		rs := []byte{byte(len(msgData))}
 		rs = append(rs, msgData...)
 		server.SendDataTo(rs, senderAddress)
@@ -33,7 +32,6 @@ func TestQUICServer(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	client.CloseClient()
 	server.StopServer()
-	logx.Traceln("不是吧")
 }
 
 //

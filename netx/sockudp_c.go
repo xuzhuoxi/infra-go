@@ -2,7 +2,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/util-go/errorsx"
-	"log"
+	"github.com/xuzhuoxi/util-go/logx"
 	"net"
 )
 
@@ -40,7 +40,7 @@ func (c *UDPDialClient) OpenClient(params SockParams) error {
 	c.conn = conn
 	c.messageProxy = NewMessageSendReceiver(conn, conn, UdpDialRW, c.Network)
 	c.opening = true
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 
@@ -56,7 +56,7 @@ func (c *UDPDialClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 
@@ -86,7 +86,7 @@ func (c *UDPListenClient) OpenClient(params SockParams) error {
 	c.conn = conn
 	c.messageProxy = NewMessageSendReceiver(conn, conn, UdpListenRW, c.Network)
 	c.opening = true
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }
 
@@ -102,6 +102,6 @@ func (c *UDPListenClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	log.Println(funcName + "()")
+	logx.Infoln(funcName + "()")
 	return nil
 }

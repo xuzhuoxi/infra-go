@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"github.com/xuzhuoxi/util-go/logx"
 	"log"
 	"net"
 	"net/rpc"
@@ -43,7 +44,7 @@ func (s *RPCServer) StartServer(addr string) {
 		return
 	}
 	l, newServerAddr := listenRPC(s.Network, addr)
-	log.Println("\tRPC server listening on:", newServerAddr)
+	logx.Info("\tRPC server listening on:", newServerAddr)
 	s.Listener = l
 	s.Server.Accept(l)
 }
