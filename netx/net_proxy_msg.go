@@ -9,23 +9,20 @@ import (
 
 const ReceiverBuffLen = 2048
 
-func NewMessageSender(writer interface{}, t ReadWriterType, Network string) IMessageSender {
-	proxy := NewWriterProxy(writer, t, Network)
-	rs := &msgSendReceiver{writer: proxy, messageHandler: DefaultMessageHandler}
+func NewMessageSender(writer IWriterProxy, t ReadWriterType, Network string) IMessageSender {
+	rs := &msgSendReceiver{writer: writer, messageHandler: DefaultMessageHandler}
 	rs.init()
 	return rs
 }
 
-func NewMessageReceiver(reader interface{}, t ReadWriterType, Network string) IMessageReceiver {
-	proxy := NewReaderProxy(reader, t, Network)
-	rs := &msgSendReceiver{reader: proxy, messageHandler: DefaultMessageHandler}
+func NewMessageReceiver(reader IReaderProxy, t ReadWriterType, Network string) IMessageReceiver {
+	rs := &msgSendReceiver{reader: reader, messageHandler: DefaultMessageHandler}
 	rs.init()
 	return rs
 }
 
-func NewMessageSendReceiver(reader interface{}, writer interface{}, t ReadWriterType, Network string) IMessageSendReceiver {
-	proxy := NewReadWriterProxy(reader, writer, t, Network)
-	rs := &msgSendReceiver{reader: proxy, writer: proxy, messageHandler: DefaultMessageHandler}
+func NewMessageSendReceiver(reader IReaderProxy, writer IWriterProxy, t ReadWriterType, Network string) IMessageSendReceiver {
+	rs := &msgSendReceiver{reader: reader, writer: writer, messageHandler: DefaultMessageHandler}
 	rs.init()
 	return rs
 }
@@ -35,13 +32,14 @@ type msgSendReceiver struct {
 	receiving bool
 	mu        sync.Mutex
 
-	reader         IReaderProxy
 	splitHandler   func(buff []byte) ([]byte, []byte)
 	messageHandler func(msgBytes []byte, info interface{})
-	mapSplitter    map[string]IByteSplitter
-	splitter       IByteSplitter
 
+	reader IReaderProxy
 	writer IWriterProxy
+
+	mapSplitter map[string]IByteSplitter
+	splitter    IByteSplitter
 }
 
 func (sr *msgSendReceiver) init() {
@@ -65,7 +63,7 @@ func (sr *msgSendReceiver) SendMessage(msg []byte, rAddress ...string) (int, err
 	return n, nil
 }
 
-func (sr *msgSendReceiver) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
+func (sr *msgSendReceiver) SetSplitHandler(handler HandlerForSplit) error {
 	funcName := "msgSendReceiver.SetSplitHandler"
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
@@ -83,7 +81,7 @@ func (sr *msgSendReceiver) SetSplitHandler(handler func(buff []byte) ([]byte, []
 	return nil
 }
 
-func (sr *msgSendReceiver) SetMessageHandler(handler func(msgBytes []byte, info interface{})) error {
+func (sr *msgSendReceiver) SetMessageHandler(handler HandlerForMessage) error {
 	sr.messageHandler = handler
 	return nil
 }

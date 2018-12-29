@@ -17,18 +17,18 @@ type SockServerBase struct {
 	serverMu sync.RWMutex
 	running  bool
 
-	splitHandler   func(buff []byte) ([]byte, []byte)
-	messageHandler func(msgBytes []byte, info interface{})
+	splitHandler   HandlerForSplit
+	messageHandler HandlerForMessage
 }
 
-func (s *SockServerBase) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
+func (s *SockServerBase) SetSplitHandler(handler HandlerForSplit) error {
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()
 	s.splitHandler = handler
 	return nil
 }
 
-func (s *SockServerBase) SetMessageHandler(handler func(msgBytes []byte, info interface{})) error {
+func (s *SockServerBase) SetMessageHandler(handler HandlerForMessage) error {
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()
 	s.messageHandler = handler
@@ -47,8 +47,8 @@ type SockClientBase struct {
 	clientMu sync.RWMutex
 	opening  bool
 
-	splitHandler   func(buff []byte) ([]byte, []byte)
-	messageHandler func(msgBytes []byte, info interface{})
+	splitHandler   HandlerForSplit
+	messageHandler HandlerForMessage
 
 	localAddress string
 	conn         ISockConn
@@ -59,7 +59,7 @@ func (c *SockClientBase) LocalAddress() string {
 	return c.conn.LocalAddr().String()
 }
 
-func (c *SockClientBase) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
+func (c *SockClientBase) SetSplitHandler(handler HandlerForSplit) error {
 	c.splitHandler = handler
 	if nil != c.messageProxy {
 		c.messageProxy.SetSplitHandler(handler)
@@ -67,7 +67,7 @@ func (c *SockClientBase) SetSplitHandler(handler func(buff []byte) ([]byte, []by
 	return nil
 }
 
-func (c *SockClientBase) SetMessageHandler(handler func(msgBytes []byte, info interface{})) error {
+func (c *SockClientBase) SetMessageHandler(handler HandlerForMessage) error {
 	c.messageHandler = handler
 	if nil != c.messageProxy {
 		c.messageProxy.SetMessageHandler(handler)

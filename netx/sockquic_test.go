@@ -21,6 +21,9 @@ func TestQUICServer(t *testing.T) {
 	client := NewQUICClient()
 	client.OpenClient(SockParams{RemoteAddress: "127.0.0.1:9999"})
 	go client.StartReceiving()
+	//b := true
+	//go func() {
+	//	for b {
 	client.SendDataTo([]byte{3, 1, 3, 4})
 	client.SendDataTo([]byte{3, 2, 0, 0})
 	client.SendDataTo([]byte{3, 3, 2, 1})
@@ -29,7 +32,10 @@ func TestQUICServer(t *testing.T) {
 	client.SendDataTo([]byte{3, 5, 2, 1})
 	client.SendDataTo([]byte{3, 6, 2, 1})
 	client.SendDataTo([]byte{3, 7, 1, 1})
-	time.Sleep(1 * time.Second)
+	//	}
+	//}()
+	time.Sleep(100 * time.Second)
+	//b = false
 	client.CloseClient()
 	server.StopServer()
 }

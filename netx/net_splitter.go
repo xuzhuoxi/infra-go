@@ -11,14 +11,14 @@ func NewByteSplitter() IByteSplitter {
 }
 
 type ByteSplitter struct {
-	splitHandler func(buff []byte) ([]byte, []byte)
+	splitHandler HandlerForSplit
 
 	byteBuff *bytes.Buffer
 	frontLen []byte
 	frontMsg []byte
 }
 
-func (b *ByteSplitter) SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error {
+func (b *ByteSplitter) SetSplitHandler(handler HandlerForSplit) error {
 	b.splitHandler = handler
 	return nil
 }

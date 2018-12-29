@@ -101,7 +101,8 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	}()
 	s.serverMu.Lock()
 	s.mapSession[address] = session
-	proxy := NewMessageSendReceiver(session, session, QuicRW, s.Network) //要改
+	connProxy := &QUICSessionReadWriter{Session: session}
+	proxy := NewMessageSendReceiver(connProxy, connProxy, QuicRW, s.Network)
 	s.mapProxy[address] = proxy
 	proxy.SetSplitHandler(s.splitHandler)
 	proxy.SetMessageHandler(s.messageHandler)

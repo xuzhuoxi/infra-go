@@ -27,7 +27,8 @@ func (c *TCPClient) OpenClient(params SockParams) error {
 		return err
 	}
 	c.conn = conn
-	c.messageProxy = NewMessageSendReceiver(conn, conn, TcpRW, c.Network)
+	connProxy := &ReadWriterProxy{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	c.messageProxy = NewMessageSendReceiver(connProxy, connProxy, TcpRW, c.Network)
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil

@@ -38,7 +38,8 @@ func (c *UDPDialClient) OpenClient(params SockParams) error {
 		return cErr
 	}
 	c.conn = conn
-	c.messageProxy = NewMessageSendReceiver(conn, conn, UdpDialRW, c.Network)
+	connProxy := &ReadWriterProxy{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	c.messageProxy = NewMessageSendReceiver(connProxy, connProxy, UdpDialRW, c.Network)
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil
@@ -84,7 +85,8 @@ func (c *UDPListenClient) OpenClient(params SockParams) error {
 		return cErr
 	}
 	c.conn = conn
-	c.messageProxy = NewMessageSendReceiver(conn, conn, UdpListenRW, c.Network)
+	connProxy := &UDPListenReadWriterProxy{ReadWriter: conn}
+	c.messageProxy = NewMessageSendReceiver(connProxy, connProxy, UdpListenRW, c.Network)
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil

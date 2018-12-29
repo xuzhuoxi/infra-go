@@ -15,12 +15,16 @@ type IReadWriterProxy interface {
 	IWriterProxy
 }
 
+type HandlerForSplit func(buff []byte) ([]byte, []byte)
+
 type ISplitHandler interface {
-	SetSplitHandler(handler func(buff []byte) ([]byte, []byte)) error
+	SetSplitHandler(handler HandlerForSplit) error
 }
 
+type HandlerForMessage func(msgBytes []byte, info interface{})
+
 type IMessageHandler interface {
-	SetMessageHandler(handler func(msgBytes []byte, info interface{})) error
+	SetMessageHandler(handler HandlerForMessage) error
 }
 
 type IByteSplitter interface {
