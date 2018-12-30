@@ -93,6 +93,10 @@ type IQUICServer interface {
 	ISockServer
 }
 
+type IWebSocketServer interface {
+	ISockServer
+}
+
 type IUDPClient interface {
 	ISockClient
 }
@@ -102,5 +106,9 @@ type ITCPClient interface {
 }
 
 type IQuicClient interface {
+	ISockClient
+}
+
+type IWebSocketClient interface {
 	ISockClient
 }

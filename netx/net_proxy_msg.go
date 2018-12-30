@@ -9,85 +9,56 @@ import (
 
 const ReceiverBuffLen = 2048
 
-func NewMessageSender(writer IWriterProxy, t ReadWriterType, Network string) IMessageSender {
-	rs := &msgSendReceiver{writer: writer, messageHandler: DefaultMessageHandler}
-	rs.init()
-	return rs
+func NewMessageSender(writer IWriterProxy) IMessageSender {
+	return NewMessageSendReceiver(nil, writer, false)
 }
 
-func NewMessageReceiver(reader IReaderProxy, t ReadWriterType, Network string) IMessageReceiver {
-	rs := &msgSendReceiver{reader: reader, messageHandler: DefaultMessageHandler}
-	rs.init()
-	return rs
+func NewMessageReceiver(reader IReaderProxy, multiReceive bool) IMessageReceiver {
+	return NewMessageSendReceiver(reader, nil, multiReceive)
 }
 
-func NewMessageSendReceiver(reader IReaderProxy, writer IWriterProxy, t ReadWriterType, Network string) IMessageSendReceiver {
-	rs := &msgSendReceiver{reader: reader, writer: writer, messageHandler: DefaultMessageHandler}
-	rs.init()
-	return rs
-}
-
-type msgSendReceiver struct {
-	rwType    ReadWriterType
-	receiving bool
-	mu        sync.Mutex
-
-	splitHandler   func(buff []byte) ([]byte, []byte)
-	messageHandler func(msgBytes []byte, info interface{})
-
-	reader IReaderProxy
-	writer IWriterProxy
-
-	mapSplitter map[string]IByteSplitter
-	splitter    IByteSplitter
-}
-
-func (sr *msgSendReceiver) init() {
-	switch {
-	case sr.rwType == TcpRW || sr.rwType == UdpDialRW || sr.rwType == QuicRW:
-		sr.splitter = NewByteSplitter()
-		if nil != sr.splitHandler {
-			sr.splitter.SetSplitHandler(sr.splitHandler)
-		}
-	case sr.rwType == UdpListenRW:
-		sr.mapSplitter = make(map[string]IByteSplitter)
+func NewMessageSendReceiver(reader IReaderProxy, writer IWriterProxy, multiReceive bool) IMessageSendReceiver {
+	base := msgsr{reader: reader, writer: writer, splitHandler: DefaultByteSplitHandler, messageHandler: DefaultMessageHandler}
+	if multiReceive {
+		rs := &msgSendReceiverMulti{msgsr: base, mapSplitter: make(map[string]IByteSplitter)}
+		rs.dispatchHandler = rs.handleDataMulti
+		return rs
+	} else {
+		rs := &msgSendReceiver{msgsr: base, splitter: NewByteSplitter()}
+		rs.dispatchHandler = rs.handleData
+		return rs
 	}
 }
 
-func (sr *msgSendReceiver) SendMessage(msg []byte, rAddress ...string) (int, error) {
+type msgsr struct {
+	receiving bool
+	mu        sync.Mutex
+
+	splitHandler   HandlerForSplit
+	messageHandler HandlerForMessage
+
+	reader          IReaderProxy
+	writer          IWriterProxy
+	dispatchHandler func(newData []byte, address interface{})
+}
+
+func (sr *msgsr) SetSplitHandler(handler HandlerForSplit) error {
+	panic("implement me")
+}
+func (sr *msgsr) SendMessage(msg []byte, rAddress ...string) (int, error) {
 	n, err := sr.writer.WriteBytes(msg, rAddress...)
 	if nil != err {
-		logx.Warnln("msgSendReceiver.SendMessage", err)
+		logx.Warnln("msgsr.SendMessage", err)
 		return n, err
 	}
 	return n, nil
 }
-
-func (sr *msgSendReceiver) SetSplitHandler(handler HandlerForSplit) error {
-	funcName := "msgSendReceiver.SetSplitHandler"
-	sr.mu.Lock()
-	defer sr.mu.Unlock()
-	sr.splitHandler = handler
-	switch {
-	case sr.rwType == TcpRW || sr.rwType == UdpDialRW || sr.rwType == QuicRW:
-		sr.splitter.SetSplitHandler(handler)
-	case sr.rwType == UdpListenRW:
-		for _, value := range sr.mapSplitter {
-			value.SetSplitHandler(handler)
-		}
-	default:
-		return errorsx.NoCaseCatchError(funcName)
-	}
-	return nil
-}
-
-func (sr *msgSendReceiver) SetMessageHandler(handler HandlerForMessage) error {
+func (sr *msgsr) SetMessageHandler(handler HandlerForMessage) error {
 	sr.messageHandler = handler
 	return nil
 }
-
-func (sr *msgSendReceiver) StartReceiving() error {
-	funcName := "msgSendReceiver.StartReceiving"
+func (sr *msgsr) StartReceiving() error {
+	funcName := "msgsr.StartReceiving"
 	if sr.receiving {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
@@ -100,47 +71,77 @@ func (sr *msgSendReceiver) StartReceiving() error {
 		if err != nil {
 			break
 		}
-		sr.handleData(buff[:n], address)
+		sr.dispatchHandler(buff[:n], address)
 	}
 	return nil
 }
-
-func (sr *msgSendReceiver) StopReceiving() error {
-	funcName := "msgSendReceiver.StopReceiving"
+func (sr *msgsr) StopReceiving() error {
+	funcName := "msgsr.StopReceiving"
 	if !sr.receiving {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
 	sr.receiving = false
 	return nil
 }
-
-func (sr *msgSendReceiver) IsReceiving() bool {
+func (sr *msgsr) IsReceiving() bool {
 	return sr.receiving
 }
-
-func (sr *msgSendReceiver) handleData(newData []byte, address interface{}) {
-	strAddress := address.(string)
-	switch {
-	case sr.rwType == TcpRW || sr.rwType == UdpDialRW || sr.rwType == QuicRW:
-		sr.handleSplitterData(sr.splitter, newData, strAddress)
-	case sr.rwType == UdpListenRW:
-		sr.mu.Lock()
-		defer sr.mu.Unlock()
-		splitter, ok := sr.mapSplitter[strAddress]
-		if !ok {
-			splitter = NewByteSplitter()
-			splitter.SetSplitHandler(sr.splitHandler)
-			sr.mapSplitter[strAddress] = splitter
-		}
-		sr.handleSplitterData(splitter, newData, strAddress)
-	}
-}
-
-func (sr *msgSendReceiver) handleSplitterData(splitter IByteSplitter, data []byte, address string) {
+func (sr *msgsr) handleSplitterData(splitter IByteSplitter, data []byte, address string) {
 	splitter.AppendBytes(data)
 	for splitter.CheckSplit() {
 		sr.messageHandler(splitter.FrontBytes(), address)
 	}
+}
+
+type msgSendReceiver struct {
+	msgsr
+	splitter IByteSplitter
+}
+
+func (sr *msgSendReceiver) SetSplitHandler(handler HandlerForSplit) error {
+	sr.mu.Lock()
+	defer sr.mu.Unlock()
+	sr.splitHandler = handler
+	if nil == sr.splitter {
+		sr.splitter = NewByteSplitter()
+	}
+	sr.splitter.SetSplitHandler(handler)
+	return nil
+}
+func (sr *msgSendReceiver) handleData(newData []byte, address interface{}) {
+	strAddress := address.(string)
+	sr.handleSplitterData(sr.splitter, newData, strAddress)
+}
+
+type msgSendReceiverMulti struct {
+	msgsr
+	mapSplitter map[string]IByteSplitter
+}
+
+func (sr *msgSendReceiverMulti) SetSplitHandler(handler HandlerForSplit) error {
+	sr.mu.Lock()
+	defer sr.mu.Unlock()
+	sr.splitHandler = handler
+	if nil == sr.mapSplitter {
+		sr.mapSplitter = make(map[string]IByteSplitter)
+		return nil
+	}
+	for _, value := range sr.mapSplitter {
+		value.SetSplitHandler(handler)
+	}
+	return nil
+}
+func (sr *msgSendReceiverMulti) handleDataMulti(newData []byte, address interface{}) {
+	strAddress := address.(string)
+	sr.mu.Lock()
+	defer sr.mu.Unlock()
+	splitter, ok := sr.mapSplitter[strAddress]
+	if !ok {
+		splitter = NewByteSplitter()
+		splitter.SetSplitHandler(sr.splitHandler)
+		sr.mapSplitter[strAddress] = splitter
+	}
+	sr.handleSplitterData(splitter, newData, strAddress)
 }
 
 func DefaultMessageHandler(msgData []byte, info interface{}) {

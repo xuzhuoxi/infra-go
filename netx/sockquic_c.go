@@ -33,7 +33,7 @@ func (c *QUICClient) OpenClient(params SockParams) error {
 	//stream, err := session.OpenStreamSync()
 	c.conn = session
 	connProxy := &QUICSessionReadWriter{Session: session}
-	c.setMessageProxy(NewMessageSendReceiver(connProxy, connProxy, UdpDialRW, c.Network))
+	c.setMessageProxy(NewMessageSendReceiver(connProxy, connProxy, false))
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil

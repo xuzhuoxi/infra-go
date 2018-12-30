@@ -44,7 +44,7 @@ func (s *UDPServer) StartServer(params SockParams) error {
 	s.running = true
 	s.conn = conn
 	connProxy := &UDPListenReadWriterProxy{ReadWriter: conn}
-	s.messageProxy = NewMessageSendReceiver(connProxy, connProxy, UdpListenRW, s.Network)
+	s.messageProxy = NewMessageSendReceiver(connProxy, connProxy, true)
 	s.messageProxy.SetSplitHandler(s.splitHandler)
 	s.messageProxy.SetMessageHandler(s.messageHandler)
 	s.serverMu.Unlock()

@@ -117,7 +117,7 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
 	connProxy := &ReadWriterProxy{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	proxy := NewMessageSendReceiver(connProxy, connProxy, TcpRW, s.Network)
+	proxy := NewMessageSendReceiver(connProxy, connProxy, false)
 	s.mapProxy[address] = proxy
 	proxy.SetSplitHandler(s.splitHandler)
 	proxy.SetMessageHandler(s.messageHandler)
