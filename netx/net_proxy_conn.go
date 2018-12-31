@@ -6,8 +6,6 @@ import (
 	"net"
 )
 
-type ReadWriterType int
-
 type ReadWriterProxy struct {
 	Reader     io.Reader
 	Writer     io.Writer
@@ -50,26 +48,18 @@ func (rw *UDPListenReadWriterProxy) WriteBytes(bytes []byte, rAddress ...string)
 }
 
 type QUICSessionReadWriter struct {
-	Session quic.Session
+	RemoteAddr net.Addr
+	Reader     quic.ReceiveStream
+	Writer     quic.SendStream
 }
 
 func (rw *QUICSessionReadWriter) ReadBytes(bytes []byte) (int, interface{}, error) {
-	session := rw.Session
-	rAddr := session.RemoteAddr().String()
-	stream, err := session.AcceptStream()
-	if nil != err {
-		return 0, rAddr, err
-	}
-	n, err := stream.Read(bytes)
+	rAddr := rw.RemoteAddr.String()
+	n, err := rw.Reader.Read(bytes)
 	return n, rAddr, err
 }
 
 func (rw *QUICSessionReadWriter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {
-	session := rw.Session
-	stream, err := session.OpenStreamSync()
-	if nil != err {
-		return 0, err
-	}
-	n, err := stream.Write(bytes)
+	n, err := rw.Writer.Write(bytes)
 	return n, err
 }

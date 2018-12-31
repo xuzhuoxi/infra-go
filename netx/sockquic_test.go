@@ -8,38 +8,42 @@ import (
 
 func TestQUICServer(t *testing.T) {
 	server := NewQuicServer()
+	c := 0
 	var msgHandler = func(msgData []byte, sender interface{}) {
 		senderAddress := sender.(string)
-		logx.Traceln("TestQUICServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]")
+		logx.Traceln("TestQUICServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]", c)
+		c++
 		rs := []byte{byte(len(msgData))}
 		rs = append(rs, msgData...)
 		server.SendDataTo(rs, senderAddress)
 	}
 	server.SetMessageHandler(msgHandler)
 	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
-
+	time.Sleep(1 * time.Second)
 	client := NewQUICClient()
 	client.OpenClient(SockParams{RemoteAddress: "127.0.0.1:9999"})
 	go client.StartReceiving()
-	//b := true
-	//go func() {
-	//	for b {
-	client.SendDataTo([]byte{3, 1, 3, 4})
-	client.SendDataTo([]byte{3, 2, 0, 0})
-	client.SendDataTo([]byte{3, 3, 2, 1})
-	client.SendDataTo([]byte{7, 4, 2, 1})
-	client.SendDataTo([]byte{3, 3, 2, 1})
-	client.SendDataTo([]byte{3, 5, 2, 1})
-	client.SendDataTo([]byte{3, 6, 2, 1})
-	client.SendDataTo([]byte{3, 7, 1, 1})
-	//	}
-	//}()
+	b := true
+	go func() {
+		for b {
+			client.SendDataTo([]byte{3, 1, 3, 4})
+			client.SendDataTo([]byte{3, 2, 0, 0})
+			client.SendDataTo([]byte{3, 3, 2, 1})
+			client.SendDataTo([]byte{7, 4, 2, 1})
+			client.SendDataTo([]byte{3, 3, 2, 1})
+			client.SendDataTo([]byte{3, 5, 2, 1})
+			client.SendDataTo([]byte{3, 6, 2, 1})
+			client.SendDataTo([]byte{3, 7, 1, 1})
+			//time.Sleep(1 * time.Second)
+		}
+	}()
 	time.Sleep(100 * time.Second)
-	//b = false
+	b = false
 	client.CloseClient()
 	server.StopServer()
 }
 
+//Server
 //
 //const saddr = "localhost:9999"
 //
@@ -74,4 +78,37 @@ func TestQUICServer(t *testing.T) {
 //func (w loggingWriter) Write(b []byte) (int, error) {
 //	fmt.Printf("Server: Got '%s'\n", string(b))
 //	return w.Writer.Write(b)
+//}
+
+//Client
+//const addr = "localhost:9999"
+//const message = "ccc"
+//
+//func main() {
+//	session, err := quic.DialAddr(addr, &tls.Config{InsecureSkipVerify: true}, nil)
+//	if err != nil {
+//		fmt.Println(err)
+//		return
+//	}
+//	stream, err := session.OpenStreamSync()
+//	if err != nil {
+//		fmt.Println(err)
+//		return
+//	}
+//	for {
+//		fmt.Printf("Client: Sending '%s'\n", message)
+//		_, err = stream.Write([]byte(message))
+//		if err != nil {
+//			fmt.Println(err)
+//			return
+//		}
+//		buf := make([]byte, len(message))
+//		_, err = io.ReadFull(stream, buf)
+//		if err != nil {
+//			fmt.Println(err)
+//			return
+//		}
+//		fmt.Printf("Client: Got '%s'\n", buf)
+//		time.Sleep(2 * time.Second)
+//	}
 //}

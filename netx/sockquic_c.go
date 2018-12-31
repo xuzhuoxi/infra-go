@@ -14,6 +14,7 @@ func NewQUICClient() IQuicClient {
 
 type QUICClient struct {
 	SockClientBase
+	stream quic.Stream
 }
 
 func (c *QUICClient) OpenClient(params SockParams) error {
@@ -28,11 +29,17 @@ func (c *QUICClient) OpenClient(params SockParams) error {
 	}
 	session, err := quic.DialAddr(params.RemoteAddress, &tls.Config{InsecureSkipVerify: true}, nil)
 	if nil != err {
+		logx.Warnln(funcName, err)
 		return err
 	}
-	//stream, err := session.OpenStreamSync()
 	c.conn = session
-	connProxy := &QUICSessionReadWriter{Session: session}
+	stream, err := session.OpenStreamSync()
+	if nil != err {
+		logx.Warnln(funcName, err)
+		return err
+	}
+	c.stream = stream
+	connProxy := &QUICSessionReadWriter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
 	c.setMessageProxy(NewMessageSendReceiver(connProxy, connProxy, false))
 	c.opening = true
 	logx.Infoln(funcName + "()")
@@ -47,6 +54,10 @@ func (c *QUICClient) CloseClient() error {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
 	c.opening = false
+	if nil != c.stream {
+		c.stream.Close()
+		c.stream = nil
+	}
 	if nil != c.conn {
 		c.conn.Close()
 		c.conn = nil
@@ -54,35 +65,3 @@ func (c *QUICClient) CloseClient() error {
 	logx.Infoln(funcName + "()")
 	return nil
 }
-
-//const addr = "localhost:9999"
-//const message = "ccc"
-//
-//func main() {
-//	session, err := quic.DialAddr(addr, &tls.Config{InsecureSkipVerify: true}, nil)
-//	if err != nil {
-//		fmt.Println(err)
-//		return
-//	}
-//	stream, err := session.OpenStreamSync()
-//	if err != nil {
-//		fmt.Println(err)
-//		return
-//	}
-//	for {
-//		fmt.Printf("Client: Sending '%s'\n", message)
-//		_, err = stream.Write([]byte(message))
-//		if err != nil {
-//			fmt.Println(err)
-//			return
-//		}
-//		buf := make([]byte, len(message))
-//		_, err = io.ReadFull(stream, buf)
-//		if err != nil {
-//			fmt.Println(err)
-//			return
-//		}
-//		fmt.Printf("Client: Got '%s'\n", buf)
-//		time.Sleep(2 * time.Second)
-//	}
-//}

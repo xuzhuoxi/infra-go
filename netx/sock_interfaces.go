@@ -1,6 +1,8 @@
 package netx
 
-import "net"
+import (
+	"net"
+)
 
 type IReaderProxy interface {
 	ReadBytes(bytes []byte) (int, interface{}, error)

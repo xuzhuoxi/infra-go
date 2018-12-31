@@ -20,6 +20,7 @@ type QUICServer struct {
 	listener   quic.Listener
 	mapProxy   map[string]IMessageSendReceiver
 	mapSession map[string]quic.Session
+	mapStream  map[string]quic.Stream
 }
 
 func (s *QUICServer) StartServer(params SockParams) error {
@@ -38,8 +39,9 @@ func (s *QUICServer) StartServer(params SockParams) error {
 		return err
 	}
 	s.listener = listener
-	s.mapSession = make(map[string]quic.Session)
 	s.mapProxy = make(map[string]IMessageSendReceiver)
+	s.mapSession = make(map[string]quic.Session)
+	s.mapStream = make(map[string]quic.Stream)
 	s.running = true
 	s.serverMu.Unlock()
 	logx.Infoln(funcName + "()")
@@ -64,10 +66,14 @@ func (s *QUICServer) StopServer() error {
 		s.listener.Close()
 		s.listener = nil
 	}
-	for _, value := range s.mapSession {
-		value.Close()
+	for _, sess := range s.mapSession {
+		sess.Close()
 	}
 	s.mapSession = nil
+	for _, stream := range s.mapStream {
+		stream.Close()
+	}
+	s.mapStream = nil
 	s.running = false
 	logx.Infoln(funcName + "()")
 	return nil
@@ -90,20 +96,29 @@ func (s *QUICServer) SendDataTo(data []byte, rAddress ...string) error {
 }
 
 func (s *QUICServer) handlerSession(address string, session quic.Session) {
+	funcName := "QUICServer.handlerSession"
 	defer func() {
 		s.serverMu.Lock()
 		if nil != session {
 			session.Close()
 		}
-		delete(s.mapSession, address)
 		delete(s.mapProxy, address)
+		delete(s.mapSession, address)
+		delete(s.mapStream, address)
 		s.serverMu.Unlock()
 	}()
 	s.serverMu.Lock()
+	stream, err := session.AcceptStream()
+	if nil != err {
+		logx.Warnln(funcName, err)
+		return
+	}
+	defer stream.Close()
 	s.mapSession[address] = session
-	connProxy := &QUICSessionReadWriter{Session: session}
+	connProxy := &QUICSessionReadWriter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
 	proxy := NewMessageSendReceiver(connProxy, connProxy, false)
 	s.mapProxy[address] = proxy
+	s.mapStream[address] = stream
 	proxy.SetSplitHandler(s.splitHandler)
 	proxy.SetMessageHandler(s.messageHandler)
 	s.serverMu.Unlock()
