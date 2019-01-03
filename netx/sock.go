@@ -9,6 +9,10 @@ type SockParams struct {
 	Network       string
 	LocalAddress  string
 	RemoteAddress string
+
+	WSPattern  string
+	WSOrigin   string
+	WSProtocol string
 }
 
 type SockServerBase struct {

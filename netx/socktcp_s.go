@@ -88,7 +88,7 @@ func (s *TCPServer) StopServer() error {
 
 func (s *TCPServer) SendDataTo(data []byte, rAddress ...string) error {
 	if 0 == len(rAddress) {
-		return NoAddrError("TCPServer.SendData")
+		return NoAddrError("TCPServer.SendDataTo")
 	}
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()

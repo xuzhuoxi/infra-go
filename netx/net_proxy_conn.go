@@ -63,3 +63,18 @@ func (rw *QUICSessionReadWriter) WriteBytes(bytes []byte, rAddress ...string) (i
 	n, err := rw.Writer.Write(bytes)
 	return n, err
 }
+
+type WSConnReadWriter struct {
+	Reader           io.Reader
+	Writer           io.Writer
+	RemoteAddrString string
+}
+
+func (rw *WSConnReadWriter) ReadBytes(bytes []byte) (int, interface{}, error) {
+	n, err := rw.Reader.Read(bytes)
+	return n, rw.RemoteAddrString, err
+}
+
+func (rw *WSConnReadWriter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {
+	return rw.Writer.Write(bytes)
+}
