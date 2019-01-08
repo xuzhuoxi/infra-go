@@ -14,7 +14,10 @@ func TestGetParentDir(t *testing.T) {
 
 func TestGetFolderFileList(t *testing.T) {
 	path := "D://VMOS//Windows 7 x64//"
-	fmt.Println(GetFolderFileList(path))
+	list, _ := GetFolderFileList(path, true, nil)
+	for _, e := range list {
+		fmt.Println(e.Name())
+	}
 }
 
 func TestGetFolderSize(t *testing.T) {

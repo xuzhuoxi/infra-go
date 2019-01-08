@@ -46,8 +46,14 @@ func FormatTime(time time.Time, layout string) string {
 	return time.Format(layout)
 }
 
-func FormatUnixMillisecond(millisecond int64, layout string) string {
-	sec := millisecond / 1000
-	nsec := (millisecond % 1000) * 1000000
-	return time.Unix(sec, nsec).Format(layout)
+func FormatUnixSecond(second int64, layout string) string {
+	return FromSecond(second).Format(layout)
+}
+
+func FormatUnixMilli(millisecond int64, layout string) string {
+	return FromMilli(millisecond).Format(layout)
+}
+
+func FormatUnixNano(nanosecond int64, layout string) string {
+	return FromNano(nanosecond).Format(layout)
 }

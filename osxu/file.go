@@ -58,7 +58,7 @@ func GetFileSize(filePath string) (uint64, error) {
 
 //取文件夹大小，递归全部文件的大小之和
 func GetFolderSize(dirPath string) (uint64, error) {
-	list, err := GetFolderFileList(dirPath)
+	list, err := GetFolderFileList(dirPath, true, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -70,7 +70,9 @@ func GetFolderSize(dirPath string) (uint64, error) {
 }
 
 //取文件夹下全部文件
-func GetFolderFileList(dirPath string) ([]os.FileInfo, error) {
+//recursive 是否递归子文件夹
+//filter 过滤器，=nil时为不增加过滤,返回true时的FileInfo将包含到返回结果中
+func GetFolderFileList(dirPath string, recursive bool, filter func(fileInfo os.FileInfo) bool) ([]os.FileInfo, error) {
 	dirPath = GetUnitePath(dirPath)
 	_, err := os.Stat(dirPath)
 	if nil != err {
@@ -89,9 +91,13 @@ func GetFolderFileList(dirPath string) ([]os.FileInfo, error) {
 		}
 		for _, file := range list {
 			if file.IsDir() {
-				recursiveFunc(folderPath + file.Name() + "/")
+				if recursive {
+					recursiveFunc(folderPath + file.Name() + "/")
+				}
 			} else {
-				rs = append(rs, file)
+				if nil == filter || filter(file) {
+					rs = append(rs, file)
+				}
 			}
 		}
 	}
