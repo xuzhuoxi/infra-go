@@ -1,11 +1,14 @@
 package stringsx
 
+import "unicode/utf8"
+
 //取字符串的字符个数
 func GetCharCount(s string) int {
 	if "" == s {
 		return 0
 	}
-	return len([]rune(s))
+	return utf8.RuneCountInString(s)
+	//return len([]rune(s))
 }
 
 //取单个字符的首位置

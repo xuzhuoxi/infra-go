@@ -48,7 +48,7 @@ type LogConfig struct {
 	FileDir     string
 	FileName    string
 	FileExtName string
-	MaxSize     mathx.SizeUint
+	MaxSize     mathx.SizeUnit
 }
 
 func NewLogger() ILogger {

@@ -6,12 +6,20 @@ import (
 )
 
 type SockParams struct {
-	Network       string
-	LocalAddress  string
+	Network string
+	//E.g
+	// tcp,udp,quic:	127.0.0.1:9999
+	LocalAddress string
+	//E.g
+	// websocket:	ws://127.0.0.1:9999
+	// tcp,udp,quic:	127.0.0.1:9999
 	RemoteAddress string
 
-	WSPattern  string
-	WSOrigin   string
+	//E.g: /,/echo
+	WSPattern string
+	//E.g: http://127.0.0.1/，最后的"/"必须
+	WSOrigin string
+	//E.g: ""
 	WSProtocol string
 }
 

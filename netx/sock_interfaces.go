@@ -63,24 +63,32 @@ type ISockConn interface {
 	RemoteAddr() net.Addr
 }
 
-type ISockServer interface {
-	ISplitHandler
-	IMessageHandler
-	ISendData
-
+type IServer interface {
 	StartServer(params SockParams) error //会阻塞
 	StopServer() error
 	Running() bool
 }
 
-type ISockClient interface {
-	IMessageReceiver
+type ISockServer interface {
+	ISplitHandler
+	IMessageHandler
 	ISendData
 
-	LocalAddress() string
+	IServer
+}
+
+type IClient interface {
 	OpenClient(params SockParams) error
 	CloseClient() error
 	Opening() bool
+}
+
+type ISockClient interface {
+	IMessageReceiver
+	ISendData
+	IClient
+
+	LocalAddress() string
 }
 
 type IUDPServer interface {

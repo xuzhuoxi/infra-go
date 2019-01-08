@@ -1,3 +1,3 @@
 package timex
 
-const ()
+//github.con/facebookgo/clock

@@ -4,8 +4,14 @@ import (
 	"github.com/xuzhuoxi/util-go/stringsx"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
+
+//运行时的当前目录
+func RunningBaseDir() string {
+	return filepath.Dir(os.Args[0])
+}
 
 //检查路径是否存在
 func IsExist(path string) bool {
