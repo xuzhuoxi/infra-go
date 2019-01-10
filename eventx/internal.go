@@ -6,7 +6,7 @@ type _CallInfo struct {
 }
 
 func (ci *_CallInfo) Equal(other *_CallInfo) bool {
-	return ci == other || ci.Once == other.Once && &ci.Call == &other.Call
+	return ci == other || (ci.Once == other.Once && &ci.Call == &other.Call)
 }
 
 type _EventDelegate struct {
@@ -67,7 +67,7 @@ func containsCall(calls []*_CallInfo, call *_CallInfo) bool {
 		return false
 	}
 	for _, v := range calls {
-		if v == call {
+		if v.Equal(call) {
 			return true
 		}
 	}
@@ -82,7 +82,7 @@ func removeCall(calls []*_CallInfo, removeCalls ...*_CallInfo) []*_CallInfo {
 	rs := calls[:]
 	for index := l - 1; index >= 0; index-- {
 		for index2, c := range removeCalls {
-			if rs[index] == c {
+			if rs[index].Equal(c) {
 				rs = append(rs[:index], rs[index+1:]...)
 				removeCalls = append(removeCalls[:index2], removeCalls[index2+1:]...)
 				break

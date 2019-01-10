@@ -1,14 +1,11 @@
 package eventx
 
-import (
-	"reflect"
-)
-
 //监听事件的回调
 type EventCall func(evd *EventData)
 
 func (c EventCall) Equal(c1 EventCall) bool {
-	return reflect.ValueOf(c).Pointer() == reflect.ValueOf(c1).Pointer()
+	return &c == &c1
+	//return reflect.ValueOf(c).Pointer() == reflect.ValueOf(c1).Pointer()
 }
 
 //事件数据
