@@ -12,7 +12,8 @@ import (
 //1.interface{}在分配内存的效率相对于具体类型较差.
 //2.返回切片都是重新分配的内存
 
-func MergeSlice(slices ...[]interface{}) []interface{} {
+//合并
+func MergeT(slices ...[]interface{}) []interface{} {
 	ln := len(slices)
 	index := 0
 	total := 0
@@ -29,7 +30,8 @@ func MergeSlice(slices ...[]interface{}) []interface{} {
 	return rs
 }
 
-func InsertAt(slice []interface{}, target interface{}, pos int) []interface{} {
+//按位置插入
+func InsertT(slice []interface{}, pos int, target ...interface{}) []interface{} {
 	ln := len(slice)
 	if pos < 0 {
 		pos = 0
@@ -39,59 +41,109 @@ func InsertAt(slice []interface{}, target interface{}, pos int) []interface{} {
 		pos = ln
 	}
 Start:
-	rs := make([]interface{}, ln+1)
+	tl := len(target)
+	rs := make([]interface{}, ln+tl)
 	copy(rs, slice[:pos])
-	rs[pos] = target
-	copy(rs[pos+1:], slice[pos:])
+	copy(rs[pos:], target)
+	copy(rs[pos+tl:], slice[pos:])
 	return rs
 }
 
-func InsertHead(slice []interface{}, target interface{}) []interface{} {
-	return InsertAt(slice, target, 0)
+//头插入
+func InsertHeadT(slice []interface{}, target ...interface{}) []interface{} {
+	return InsertT(slice, 0, target...)
 }
 
-func InsertTail(slice []interface{}, target interface{}) []interface{} {
-	return InsertAt(slice, target, len(slice))
+//尾插入
+func InsertTailT(slice []interface{}, target ...interface{}) []interface{} {
+	return InsertT(slice, len(slice), target...)
 }
 
-func RemoveAt(slice []interface{}, index int) ([]interface{}, interface{}, bool) {
-	ln := len(slice)
-	if index < 0 || index >= ln {
-		return slice, nil, false
+//按值删除
+func RemoveValueT(slice []interface{}, target interface{}) ([]interface{}, bool) {
+	if len(slice) == 0 {
+		return nil, false
 	}
-	obj := slice[index]
-	rs := make([]interface{}, ln-1)
-	copy(rs, slice[:index])
-	copy(rs[index:], slice[index+1:])
-	return rs, obj, true
-}
-
-func RemoveHead(slice []interface{}, index int) ([]interface{}, interface{}, bool) {
-	return RemoveAt(slice, 0)
-}
-
-func RemoveTail(slice []interface{}, index int) ([]interface{}, interface{}, bool) {
-	return RemoveAt(slice, len(slice)-1)
-}
-
-func RemoveObject(slice []interface{}, target interface{}) ([]interface{}, bool) {
-	index, ok := IndexOf(slice, target)
+	index, ok := IndexT(slice, target)
 	if ok {
-		rs, _, ok2 := RemoveAt(slice, index)
+		rs, _, ok2 := RemoveAtT(slice, index)
 		if ok2 {
 			return rs, true
 		}
-		return slice, false
+		return nil, false
 	}
-	return slice, false
+	return nil, false
 }
 
-func Contains(slice []interface{}, target interface{}) bool {
-	_, ok := IndexOf(slice, target)
+//按值删除
+func RemoveAllValueT(slice []interface{}, target interface{}) ([]interface{}, bool) {
+	sl := len(slice)
+	if sl == 0 {
+		return nil, false
+	}
+	cp := make([]interface{}, sl)
+	index := 0
+	for _, value := range slice {
+		if !lang.Equal(value, target) {
+			cp[index] = value
+			index++
+		}
+	}
+	return cp[:index], true
+}
+
+//按点删除
+func RemoveAtT(slice []interface{}, pos int) ([]interface{}, interface{}, bool) {
+	ln := len(slice)
+	if pos < 0 || pos >= ln {
+		return nil, nil, false
+	}
+	obj := slice[pos]
+	rs := make([]interface{}, ln-1)
+	copy(rs, slice[:pos])
+	copy(rs[pos:], slice[pos+1:])
+	return rs, obj, true
+}
+
+//删除尾
+func RemoveHeadT(slice []interface{}, pos int) ([]interface{}, interface{}, bool) {
+	return RemoveAtT(slice, 0)
+}
+
+//删除头
+func RemoveTailT(slice []interface{}, pos int) ([]interface{}, interface{}, bool) {
+	return RemoveAtT(slice, len(slice)-1)
+}
+
+//删除区间
+func RemoveFromT(slice []interface{}, startPos int, length int) (result []interface{}, removed []interface{}, ok bool) {
+	endPos := startPos + length
+	return RemoveRangeT(slice, startPos, endPos)
+}
+
+//删除区间
+func RemoveRangeT(slice []interface{}, startPos int, endPos int) (result []interface{}, removed []interface{}, ok bool) {
+	if startPos > endPos {
+		startPos, endPos = endPos, startPos
+	}
+	sl := len(slice)
+	if startPos < 0 || endPos >= sl || startPos == endPos || sl == 0 {
+		return nil, nil, false
+	}
+	rs := make([]interface{}, sl-endPos+startPos)
+	copy(rs, slice[:startPos])
+	copy(rs[startPos:], slice[endPos:])
+	return rs, slice[startPos:endPos], true
+}
+
+//包含
+func ContainsT(slice []interface{}, target interface{}) bool {
+	_, ok := IndexT(slice, target)
 	return ok
 }
 
-func IndexOf(slice []interface{}, target interface{}) (int, bool) {
+//从头部查找
+func IndexT(slice []interface{}, target interface{}) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
 	}
@@ -103,7 +155,8 @@ func IndexOf(slice []interface{}, target interface{}) (int, bool) {
 	return -1, false
 }
 
-func LastIndexOf(slice []interface{}, target interface{}) (int, bool) {
+//从尾部查找
+func LastIndexT(slice []interface{}, target interface{}) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
 	}
@@ -115,7 +168,8 @@ func LastIndexOf(slice []interface{}, target interface{}) (int, bool) {
 	return -1, false
 }
 
-func Reverse(slice []interface{}) []interface{} {
+//倒序
+func ReverseT(slice []interface{}) []interface{} {
 	if nil == slice {
 		return nil
 	}
