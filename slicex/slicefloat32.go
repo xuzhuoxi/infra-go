@@ -157,17 +157,12 @@ func LastIndexFloat32(slice []float32, target float32) (int, bool) {
 }
 
 //倒序
-func ReverseFloat32(slice []float32) []float32 {
-	if nil == slice {
-		return nil
-	}
+func ReverseFloat32(slice []float32) {
 	ln := len(slice)
 	if 0 == ln {
-		return []float32{}
+		return
 	}
-	rs := make([]float32, ln)
 	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
-		rs[i], rs[j] = slice[j], slice[i]
+		slice[i], slice[j] = slice[j], slice[i]
 	}
-	return rs
 }

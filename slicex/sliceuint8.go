@@ -1,5 +1,7 @@
 package slicex
 
+import "bytes"
+
 //合并
 func MergeUint8(slices ...[]uint8) []uint8 {
 	ln := len(slices)
@@ -132,15 +134,17 @@ func ContainsUint8(slice []uint8, target uint8) bool {
 
 //从头部查找
 func IndexUint8(slice []uint8, target uint8) (int, bool) {
-	if nil == slice || len(slice) == 0 {
-		return -1, false
-	}
-	for index, value := range slice {
-		if value == target {
-			return index, true
-		}
-	}
-	return -1, false
+	//if nil == slice || len(slice) == 0 {
+	//	return -1, false
+	//}
+	//for index, value := range slice {
+	//	if value == target {
+	//		return index, true
+	//	}
+	//}
+	//return -1, false
+	index := bytes.IndexByte(slice, target)
+	return index, index != -1
 }
 
 //从尾部查找
@@ -157,17 +161,12 @@ func LastIndexUint8(slice []uint8, target uint8) (int, bool) {
 }
 
 //倒序
-func ReverseUint8(slice []uint8) []uint8 {
-	if nil == slice {
-		return nil
-	}
+func ReverseUint8(slice []uint8) {
 	ln := len(slice)
 	if 0 == ln {
-		return []uint8{}
+		return
 	}
-	rs := make([]uint8, ln)
 	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
-		rs[i], rs[j] = slice[j], slice[i]
+		slice[i], slice[j] = slice[j], slice[i]
 	}
-	return rs
 }

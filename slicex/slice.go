@@ -169,7 +169,17 @@ func LastIndexT(slice []interface{}, target interface{}) (int, bool) {
 }
 
 //倒序
-func ReverseT(slice []interface{}) []interface{} {
+func ReverseT(slice []interface{}) {
+	ln := len(slice)
+	if 0 == ln {
+		return
+	}
+	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
+		slice[i], slice[j] = slice[j], slice[i]
+	}
+}
+
+func Copy(slice []interface{}) []interface{} {
 	if nil == slice {
 		return nil
 	}
@@ -178,8 +188,6 @@ func ReverseT(slice []interface{}) []interface{} {
 		return []interface{}{}
 	}
 	rs := make([]interface{}, ln)
-	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
-		rs[i], rs[j] = slice[j], slice[i]
-	}
+	copy(rs, slice)
 	return rs
 }

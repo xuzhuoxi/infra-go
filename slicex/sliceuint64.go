@@ -157,17 +157,12 @@ func LastIndexUint64(slice []uint64, target uint64) (int, bool) {
 }
 
 //倒序
-func ReverseUint64(slice []uint64) []uint64 {
-	if nil == slice {
-		return nil
-	}
+func ReverseUint64(slice []uint64) {
 	ln := len(slice)
 	if 0 == ln {
-		return []uint64{}
+		return
 	}
-	rs := make([]uint64, ln)
 	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
-		rs[i], rs[j] = slice[j], slice[i]
+		slice[i], slice[j] = slice[j], slice[i]
 	}
-	return rs
 }

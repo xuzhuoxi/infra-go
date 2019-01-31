@@ -157,17 +157,12 @@ func LastIndexInt32(slice []int32, target int32) (int, bool) {
 }
 
 //倒序
-func ReverseInt32(slice []int32) []int32 {
-	if nil == slice {
-		return nil
-	}
+func ReverseInt32(slice []int32) {
 	ln := len(slice)
 	if 0 == ln {
-		return []int32{}
+		return
 	}
-	rs := make([]int32, ln)
 	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
-		rs[i], rs[j] = slice[j], slice[i]
+		slice[i], slice[j] = slice[j], slice[i]
 	}
-	return rs
 }

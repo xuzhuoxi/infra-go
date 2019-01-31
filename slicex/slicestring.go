@@ -157,17 +157,12 @@ func LastIndexString(slice []string, target string) (int, bool) {
 }
 
 //倒序
-func ReverseString(slice []string) []string {
-	if nil == slice {
-		return nil
-	}
+func ReverseString(slice []string) {
 	ln := len(slice)
 	if 0 == ln {
-		return []string{}
+		return
 	}
-	rs := make([]string, ln)
 	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
-		rs[i], rs[j] = slice[j], slice[i]
+		slice[i], slice[j] = slice[j], slice[i]
 	}
-	return rs
 }

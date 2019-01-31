@@ -157,17 +157,12 @@ func LastIndexUint(slice []uint, target uint) (int, bool) {
 }
 
 //倒序
-func ReverseUint(slice []uint) []uint {
-	if nil == slice {
-		return nil
-	}
+func ReverseUint(slice []uint) {
 	ln := len(slice)
 	if 0 == ln {
-		return []uint{}
+		return
 	}
-	rs := make([]uint, ln)
 	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
-		rs[i], rs[j] = slice[j], slice[i]
+		slice[i], slice[j] = slice[j], slice[i]
 	}
-	return rs
 }

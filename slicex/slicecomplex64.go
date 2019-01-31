@@ -157,17 +157,12 @@ func LastIndexComplex64(slice []complex64, target complex64) (int, bool) {
 }
 
 //倒序
-func ReverseComplex64(slice []complex64) []complex64 {
-	if nil == slice {
-		return nil
-	}
+func ReverseComplex64(slice []complex64) {
 	ln := len(slice)
 	if 0 == ln {
-		return []complex64{}
+		return
 	}
-	rs := make([]complex64, ln)
 	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
-		rs[i], rs[j] = slice[j], slice[i]
+		slice[i], slice[j] = slice[j], slice[i]
 	}
-	return rs
 }
