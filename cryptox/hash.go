@@ -109,28 +109,36 @@ func HashFile2Hex(hash crypto.Hash, filePath string) string {
 }
 
 func _md5(data []byte) []byte {
-	return md5.Sum(data)[:]
+	arr := md5.Sum(data)
+	return arr[:]
 }
 func _sha1(data []byte) []byte {
-	return sha1.Sum(data)[:]
+	arr := sha1.Sum(data)
+	return arr[:]
 }
 func _sha224(data []byte) []byte {
-	return sha256.Sum224(data)[:]
+	arr := sha256.Sum224(data)
+	return arr[:]
 }
 func _sha256(data []byte) []byte {
-	return sha256.Sum256(data)[:]
+	arr := sha256.Sum256(data)
+	return arr[:]
 }
 func _sha384(data []byte) []byte {
-	return sha512.Sum384(data)[:]
+	arr := sha512.Sum384(data)
+	return arr[:]
 }
 func _sha512(data []byte) []byte {
-	return sha512.Sum512(data)[:]
+	arr := sha512.Sum512(data)
+	return arr[:]
 }
 func _sha512_224(data []byte) []byte {
-	return sha512.Sum512_224(data)[:]
+	arr := sha512.Sum512_224(data)
+	return arr[:]
 }
 func _sha512_256(data []byte) []byte {
-	return sha512.Sum512_256(data)[:]
+	arr := sha512.Sum512_256(data)
+	return arr[:]
 }
 func _ripemd160(data []byte) []byte {
 	digest := ripemd160.New()
@@ -138,26 +146,34 @@ func _ripemd160(data []byte) []byte {
 	return digest.Sum(nil)
 }
 func _sha3_224(data []byte) []byte {
-	return sha3.Sum224(data)[:]
+	arr := sha3.Sum224(data)
+	return arr[:]
 }
 func _sha3_256(data []byte) []byte {
-	return sha3.Sum256(data)[:]
+	arr := sha3.Sum256(data)
+	return arr[:]
 }
 func _sha3_384(data []byte) []byte {
-	return sha3.Sum384(data)[:]
+	arr := sha3.Sum384(data)
+	return arr[:]
 }
 func _sha3_512(data []byte) []byte {
-	return sha3.Sum512(data)[:]
+	arr := sha3.Sum512(data)
+	return arr[:]
 }
 func _blake2s_256(data []byte) []byte {
-	return blake2s.Sum256(data)[:]
+	arr := blake2s.Sum256(data)
+	return arr[:]
 }
 func _blake2b_256(data []byte) []byte {
-	return blake2b.Sum256(data)[:]
+	arr := blake2b.Sum256(data)
+	return arr[:]
 }
 func _blake2b_384(data []byte) []byte {
-	return blake2b.Sum384(data)[:]
+	arr := blake2b.Sum384(data)
+	return arr[:]
 }
 func _blake2b_512(data []byte) []byte {
-	return blake2b.Sum512(data)[:]
+	arr := blake2b.Sum512(data)
+	return arr[:]
 }
