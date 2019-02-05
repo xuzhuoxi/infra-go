@@ -10,22 +10,51 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
-	"fmt"
 )
 
 type IRSAPublicCipher interface {
+	PublicKey() *rsa.PublicKey
 	Encrypt(origData []byte) ([]byte, error)
+	//hash支持如下:
+	//crypto.MD5
+	//crypto.SHA1
+	//crypto.SHA224
+	//crypto.SHA256
+	//crypto.SHA384
+	//crypto.SHA512
+	//crypto.MD5SHA1
+	//crypto.RIPEMD160
 	VerySign(origData, signData []byte, hash crypto.Hash) error
 }
 
 type IRSAPrivateCipher interface {
+	PrivateKey() *rsa.PrivateKey
 	Decrypt(crypted []byte) ([]byte, error)
+	//hash支持如下:
+	//crypto.MD5
+	//crypto.SHA1
+	//crypto.SHA224
+	//crypto.SHA256
+	//crypto.SHA384
+	//crypto.SHA512
+	//crypto.MD5SHA1
+	//crypto.RIPEMD160
 	Sign(origData []byte, hash crypto.Hash) ([]byte, error)
 }
 
 type IRSACipher interface {
 	IRSAPublicCipher
 	IRSAPrivateCipher
+}
+
+func newRsa(public *rsa.PublicKey, private *rsa.PrivateKey) *rsaBase {
+	if nil == public {
+		public = &private.PublicKey
+	}
+	//RSA使用Pkcs进行padding，所以有11个byte被用于padding信息
+	encryptPartLen := public.N.BitLen()/8 - 11
+	decryptPartLen := public.N.BitLen() / 8
+	return &rsaBase{publicKey: public, privateKey: private, encryptPartLen: encryptPartLen, decryptPartLen: decryptPartLen}
 }
 
 type rsaBase struct {
@@ -35,13 +64,12 @@ type rsaBase struct {
 	decryptPartLen int
 }
 
-func newRsa(public *rsa.PublicKey, private *rsa.PrivateKey) *rsaBase {
-	if nil == public {
-		public = &private.PublicKey
-	}
-	encryptPartLen := public.N.BitLen()/8 - 11
-	decryptPartLen := public.N.BitLen() / 8
-	return &rsaBase{publicKey: public, privateKey: private, encryptPartLen: encryptPartLen, decryptPartLen: decryptPartLen}
+func (b *rsaBase) PublicKey() *rsa.PublicKey {
+	return b.publicKey
+}
+
+func (b *rsaBase) PrivateKey() *rsa.PrivateKey {
+	return b.privateKey
 }
 
 //加密
@@ -81,7 +109,6 @@ func (b *rsaBase) Decrypt(crypted []byte) ([]byte, error) {
 //签名
 func (b *rsaBase) Sign(origData []byte, hash crypto.Hash) ([]byte, error) {
 	hashed := Hash(hash, origData)
-	fmt.Println(1111, hashed, len(hashed), hash.Size())
 	signature, err := rsa.SignPKCS1v15(rand.Reader, b.privateKey, hash, hashed)
 	return signature, err
 }
