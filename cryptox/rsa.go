@@ -46,6 +46,9 @@ func newRsa(public *rsa.PublicKey, private *rsa.PrivateKey) *rsaBase {
 
 //加密
 func (b *rsaBase) Encrypt(origData []byte) ([]byte, error) {
+	if len(origData) < b.encryptPartLen {
+		return rsa.EncryptPKCS1v15(rand.Reader, b.publicKey, origData)
+	}
 	chunks := splitGroup(origData, b.encryptPartLen)
 	buff := bytes.NewBuffer(nil)
 	for _, chunk := range chunks {
@@ -60,6 +63,9 @@ func (b *rsaBase) Encrypt(origData []byte) ([]byte, error) {
 
 //解密
 func (b *rsaBase) Decrypt(crypted []byte) ([]byte, error) {
+	if len(crypted) < b.decryptPartLen {
+		return rsa.EncryptPKCS1v15(rand.Reader, b.publicKey, crypted)
+	}
 	chunks := splitGroup(crypted, b.decryptPartLen)
 	buff := bytes.NewBuffer(nil)
 	for _, chunk := range chunks {
