@@ -4,8 +4,8 @@ import (
 	"net/rpc"
 )
 
-func NewRPCClient() IRPCClient {
-	return &RPCClient{}
+func NewRPCClient(Network string) IRPCClient {
+	return &RPCClient{Network: Network}
 }
 
 type IRPCClient interface {
