@@ -60,6 +60,26 @@ func NewLogger() ILogger {
 	return instance
 }
 
+type ILoggerSupport interface {
+	SetLogger(logger ILogger)
+	GetLogger() ILogger
+}
+
+type LoggerSupport struct {
+	logger ILogger
+}
+
+func (s *LoggerSupport) SetLogger(logger ILogger) {
+	s.logger = logger
+}
+
+func (s *LoggerSupport) GetLogger() ILogger {
+	if nil == s.logger {
+		return DefaultLogger()
+	}
+	return s.logger
+}
+
 type ILogger interface {
 	//设置日志前缀
 	SetPrefix(prefix string)

@@ -2,7 +2,6 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/util-go/logx"
-	"log"
 	"net"
 	"net/rpc"
 )
@@ -26,6 +25,8 @@ type IRPCServer interface {
 }
 
 type RPCServer struct {
+	logx.LoggerSupport
+
 	Network  string
 	Server   *rpc.Server
 	Listener net.Listener
@@ -43,8 +44,8 @@ func (s *RPCServer) StartServer(addr string) {
 	if nil == s.Server {
 		return
 	}
-	l, newServerAddr := listenRPC(s.Network, addr)
-	logx.Info("\tRPC server listening on:", newServerAddr)
+	l, newServerAddr := s.listenRPC(addr)
+	s.GetLogger().Info("\tRPC server listening on:", newServerAddr)
 	s.Listener = l
 	s.Server.Accept(l)
 }
@@ -53,10 +54,10 @@ func (s *RPCServer) StopServer() {
 	s.Listener.Close()
 }
 
-func listenRPC(network string, address string) (net.Listener, string) {
-	l, e := net.Listen(network, address) // any available address
+func (s *RPCServer) listenRPC(address string) (net.Listener, string) {
+	l, e := net.Listen(s.Network, address) // any available address
 	if e != nil {
-		log.Fatalln("\tnetxu.Listen "+network+" "+address+": %v", e)
+		s.GetLogger().Fatalln("\tnetxu.Listen "+s.Network+" "+address+": %v", e)
 	}
 	return l, l.Addr().String()
 }
