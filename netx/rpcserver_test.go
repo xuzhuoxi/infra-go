@@ -28,7 +28,7 @@ func TestRPC(t *testing.T) {
 }
 
 func clientRPCClient() {
-	client := NewRPCClient()
+	client := NewRPCClient(RpcNetworkHttp)
 	client.Dial("127.0.0.1:9999")
 
 	args := &Args{A: 1, B: 1}
