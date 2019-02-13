@@ -179,7 +179,7 @@ func ReverseT(slice []interface{}) {
 	}
 }
 
-func Copy(slice []interface{}) []interface{} {
+func CopyT(slice []interface{}) []interface{} {
 	if nil == slice {
 		return nil
 	}

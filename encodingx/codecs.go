@@ -7,89 +7,87 @@ package encodingx
 
 import (
 	"encoding/binary"
+	"github.com/xuzhuoxi/util-go/bytex"
 	"sync"
 )
 
-type IEncoder interface {
-	//序列化
-	Encode() []byte
-}
-
-type IDecoder interface {
-	//反序列化更新
-	Decode([]byte)
-}
-
-type ICodecs interface {
-	IEncoder
-	IDecoder
-}
-
-//------------------------------------------------
-
 type IBuffEncoder interface {
-	IBuffByteReader
-	IBuffDataWriter
-	IBuffReset
-	EncodeToBuff(encoders ...IEncoder)
+	bytex.IBuffByteReader
+	bytex.IBuffDataWriter
+	bytex.IBuffReset
+	EncodeToBuff(encoders ...IEncodingData)
 }
 
 type IBuffDecoder interface {
-	IBuffByteWriter
-	IBuffDataReader
-	IBuffReset
-	DecodeFromBuff(decoders ...IDecoder)
+	bytex.IBuffByteWriter
+	bytex.IBuffDataReader
+	bytex.IBuffReset
+	DecodeFromBuff(decoders ...IDecodingData)
 }
 
 type IBuffCodecs interface {
-	IBuffByteWriter
-	IBuffDataWriter
-	IBuffByteReader
-	IBuffDataReader
-	IBuffReset
-	EncodeToBuff(encoders ...IEncoder)
-	DecodeFromBuff(decoders ...IDecoder)
+	bytex.IBuffByteWriter
+	bytex.IBuffDataWriter
+	bytex.IBuffByteReader
+	bytex.IBuffDataReader
+	bytex.IBuffReset
+	EncodeToBuff(encoders ...IEncodingData)
+	DecodeFromBuff(decoders ...IDecodingData)
 }
 
-func NewBuffEncoder(order binary.ByteOrder) IBuffEncoder {
-	return newBuffCodecs(order)
+func NewDefaultBuffEncoder() IBuffEncoder {
+	return newBuffCodecs(DefaultOrder, nil, bytex.DefaultDataToBlockHandler)
 }
 
-func NewBuffDecoder(order binary.ByteOrder) IBuffDecoder {
-	return newBuffCodecs(order)
+func NewDefaultBuffDecoder() IBuffDecoder {
+	return newBuffCodecs(DefaultOrder, bytex.DefaultBlockToDataHandler, nil)
 }
 
-func NewBuffCodecs(order binary.ByteOrder) IBuffCodecs {
-	return newBuffCodecs(order)
+func NewDefaultBuffCodecs() IBuffCodecs {
+	return newBuffCodecs(DefaultOrder, bytex.DefaultBlockToDataHandler, bytex.DefaultDataToBlockHandler)
 }
 
-func newBuffCodecs(order binary.ByteOrder) *buffCodecs {
-	return &buffCodecs{buffBase: newBuffBase(order)}
+func NewBuffEncoder(order binary.ByteOrder, data2block bytex.DataToBlockHandler) IBuffEncoder {
+	return newBuffCodecs(order, nil, data2block)
+}
+
+func NewBuffDecoder(order binary.ByteOrder, block2data bytex.BlockToDataHandler) IBuffDecoder {
+	return newBuffCodecs(order, block2data, nil)
+}
+
+func NewBuffCodecs(order binary.ByteOrder, block2data bytex.BlockToDataHandler, data2block bytex.DataToBlockHandler) IBuffCodecs {
+	return newBuffCodecs(order, block2data, data2block)
+}
+
+//------------------------------------------
+
+func newBuffCodecs(order binary.ByteOrder, block2data bytex.BlockToDataHandler, data2block bytex.DataToBlockHandler) *buffCodecs {
+	return &buffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(order, data2block, block2data)}
 }
 
 type buffCodecs struct {
-	buffBase
+	bytex.IBuffDataBlock
 	codecsLock sync.RWMutex
 }
 
-func (bc *buffCodecs) EncodeToBuff(encoders ...IEncoder) {
+func (bc *buffCodecs) EncodeToBuff(encoders ...IEncodingData) {
 	if len(encoders) == 0 {
 		return
 	}
 	bc.codecsLock.Lock()
 	defer bc.codecsLock.Unlock()
 	for _, encoder := range encoders {
-		bc.WriteData(encoder.Encode())
+		bc.WriteData(encoder.EncodeToBytes())
 	}
 }
 
-func (bc *buffCodecs) DecodeFromBuff(decoders ...IDecoder) {
+func (bc *buffCodecs) DecodeFromBuff(decoders ...IDecodingData) {
 	if len(decoders) == 0 {
 		return
 	}
 	bc.codecsLock.Lock()
 	defer bc.codecsLock.Unlock()
 	for _, decoder := range decoders {
-		decoder.Decode(bc.ReadData())
+		decoder.DecodeFromBytes(bc.ReadData())
 	}
 }

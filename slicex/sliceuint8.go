@@ -170,3 +170,20 @@ func ReverseUint8(slice []uint8) {
 		slice[i], slice[j] = slice[j], slice[i]
 	}
 }
+
+func CopyUint8(slice []uint8) []uint8 {
+	if nil == slice {
+		return nil
+	}
+	ln := len(slice)
+	if 0 == ln {
+		return []uint8{}
+	}
+	rs := make([]uint8, ln)
+	copy(rs, slice)
+	return rs
+}
+
+func CopyByte(slice []byte) []uint8 {
+	return CopyUint8(slice)
+}
