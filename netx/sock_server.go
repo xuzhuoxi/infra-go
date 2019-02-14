@@ -17,7 +17,7 @@ type IServer interface {
 
 type ISockServer interface {
 	IServer
-	ISockPackSender
+	ISockSender
 	IPackHandlerSetter
 }
 

@@ -19,7 +19,7 @@ type IClient interface {
 type ISockClient interface {
 	IClient
 	IPackReceiver
-	ISockPackSender
+	ISockSender
 
 	LocalAddress() string
 }

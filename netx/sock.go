@@ -28,10 +28,7 @@ type ISockConn interface {
 	RemoteAddr() net.Addr
 }
 
-type ISockPackSender interface {
+type ISockSender interface {
 	SendPackTo(data []byte, rAddress ...string) error
-}
-
-type ISockByteSender interface {
 	SendBytesTo(bytes []byte, rAddress ...string) error
 }
