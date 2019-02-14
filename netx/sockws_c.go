@@ -6,8 +6,12 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+type IWebSocketClient interface {
+	ISockClient
+}
+
 func NewWebSocketClient() IWebSocketClient {
-	client := &WebSocketClient{SockClientBase: SockClientBase{Name: "WebSocketClient", Network: WSNetwork}}
+	client := &WebSocketClient{SockClientBase: SockClientBase{Name: "WebSocketClient", Network: WSNetwork, PackHandler: DefaultPackHandler}}
 	return client
 }
 
@@ -27,8 +31,8 @@ func (c *WebSocketClient) OpenClient(params SockParams) error {
 		return err
 	}
 	c.conn = conn //LocalAddr=Origin
-	connProxy := &WSConnReadWriter{Reader: conn, Writer: conn, RemoteAddrString: params.RemoteAddress}
-	c.messageProxy = NewMessageSendReceiver(connProxy, connProxy, false)
+	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, RemoteAddrString: params.RemoteAddress}
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, WsDataBlockHandler, false)
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil

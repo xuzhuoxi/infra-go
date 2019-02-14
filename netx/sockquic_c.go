@@ -8,7 +8,7 @@ import (
 )
 
 func NewQUICClient() IQuicClient {
-	client := &QUICClient{SockClientBase: SockClientBase{Name: "QUICClient", Network: QuicNetwork}}
+	client := &QUICClient{SockClientBase: SockClientBase{Name: "QUICClient", Network: QuicNetwork, PackHandler: DefaultPackHandler}}
 	return client
 }
 
@@ -39,8 +39,8 @@ func (c *QUICClient) OpenClient(params SockParams) error {
 		return err
 	}
 	c.stream = stream
-	connProxy := &QUICSessionReadWriter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
-	c.setMessageProxy(NewMessageSendReceiver(connProxy, connProxy, false))
+	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
+	c.setMessageProxy(NewPackSendReceiver(connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, false))
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil

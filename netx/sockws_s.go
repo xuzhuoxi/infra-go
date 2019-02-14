@@ -7,11 +7,14 @@ import (
 	"net/http"
 )
 
+type IWebSocketServer interface {
+	ISockServer
+}
+
 func NewWebSocketServer(maxLinkNum int) IWebSocketServer {
 	rs := &WebSocketServer{maxLinkNum: maxLinkNum}
 	rs.Network = WSNetwork
-	rs.splitHandler = DefaultByteSplitHandler
-	rs.messageHandler = DefaultMessageHandler
+	rs.PackHandler = DefaultPackHandler
 	return rs
 }
 
@@ -20,7 +23,7 @@ type WebSocketServer struct {
 	maxLinkNum int
 
 	httpServer    *http.Server
-	mapProxy      map[string]IMessageSendReceiver
+	mapProxy      map[string]IPackSendReceiver
 	mapConn       map[string]*websocket.Conn
 	serverLinkSem chan bool
 }
@@ -38,7 +41,7 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 	s.httpServer = &http.Server{Addr: params.LocalAddress, Handler: httpMux}
 	s.serverLinkSem = make(chan bool, s.maxLinkNum)
 	s.mapConn = make(map[string]*websocket.Conn)
-	s.mapProxy = make(map[string]IMessageSendReceiver)
+	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
 	logx.Infoln(funcName + "()")
@@ -71,16 +74,21 @@ func (s *WebSocketServer) StopServer() error {
 	return nil
 }
 
-func (s *WebSocketServer) SendDataTo(data []byte, rAddress ...string) error {
+func (s *WebSocketServer) SendPackTo(pack []byte, rAddress ...string) error {
+	bytes := WsDataBlockHandler.DataToBlock(pack)
+	return s.SendBytesTo(bytes, rAddress...)
+}
+
+func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 	if 0 == len(rAddress) {
-		return NoAddrError("WebSocketServer.SendDataTo")
+		return NoAddrError("WebSocketServer.SendPackTo")
 	}
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()
 	for _, address := range rAddress {
 		ts, ok := s.mapProxy[address]
 		if ok {
-			ts.SendMessage(data)
+			ts.SendBytes(bytes)
 		}
 	}
 	return nil
@@ -104,11 +112,9 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	}()
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
-	connProxy := &WSConnReadWriter{Reader: conn, Writer: conn, RemoteAddrString: conn.Request().RemoteAddr}
-	proxy := NewMessageSendReceiver(connProxy, connProxy, false)
+	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, RemoteAddrString: conn.Request().RemoteAddr}
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, WsDataBlockHandler, false)
 	s.mapProxy[address] = proxy
-	proxy.SetSplitHandler(s.splitHandler)
-	proxy.SetMessageHandler(s.messageHandler)
 	s.serverMu.Unlock()
 	logx.Traceln("New WebSocket Connection:", address)
 	proxy.StartReceiving()

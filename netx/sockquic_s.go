@@ -9,8 +9,7 @@ import (
 func NewQuicServer() IQUICServer {
 	rs := &QUICServer{}
 	rs.Network = QuicNetwork
-	rs.splitHandler = DefaultByteSplitHandler
-	rs.messageHandler = DefaultMessageHandler
+	rs.PackHandler = DefaultPackHandler
 	return rs
 }
 
@@ -18,7 +17,7 @@ type QUICServer struct {
 	SockServerBase
 
 	listener   quic.Listener
-	mapProxy   map[string]IMessageSendReceiver
+	mapProxy   map[string]IPackSendReceiver
 	mapSession map[string]quic.Session
 	mapStream  map[string]quic.Stream
 }
@@ -39,7 +38,7 @@ func (s *QUICServer) StartServer(params SockParams) error {
 		return err
 	}
 	s.listener = listener
-	s.mapProxy = make(map[string]IMessageSendReceiver)
+	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.mapSession = make(map[string]quic.Session)
 	s.mapStream = make(map[string]quic.Stream)
 	s.running = true
@@ -79,8 +78,13 @@ func (s *QUICServer) StopServer() error {
 	return nil
 }
 
-func (s *QUICServer) SendDataTo(data []byte, rAddress ...string) error {
-	funcName := "QUICServer.SendDataTo"
+func (s *QUICServer) SendPackTo(pack []byte, rAddress ...string) error {
+	bytes := QuicDataBlockHandler.DataToBlock(pack)
+	return s.SendBytesTo(bytes, rAddress...)
+}
+
+func (s *QUICServer) SendBytesTo(data []byte, rAddress ...string) error {
+	funcName := "QUICServer.SendBytesTo"
 	if 0 == len(rAddress) {
 		return NoAddrError(funcName)
 	}
@@ -89,7 +93,7 @@ func (s *QUICServer) SendDataTo(data []byte, rAddress ...string) error {
 	for _, address := range rAddress {
 		ts, ok := s.mapProxy[address]
 		if ok {
-			ts.SendMessage(data)
+			ts.SendBytes(data)
 		}
 	}
 	return nil
@@ -115,12 +119,10 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	}
 	defer stream.Close()
 	s.mapSession[address] = session
-	connProxy := &QUICSessionReadWriter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
-	proxy := NewMessageSendReceiver(connProxy, connProxy, false)
+	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, QuicDataBlockHandler, false)
 	s.mapProxy[address] = proxy
 	s.mapStream[address] = stream
-	proxy.SetSplitHandler(s.splitHandler)
-	proxy.SetMessageHandler(s.messageHandler)
 	s.serverMu.Unlock()
 	logx.Infoln("New Quic Connection:", address)
 	proxy.StartReceiving()

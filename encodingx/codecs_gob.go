@@ -2,7 +2,6 @@ package encodingx
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/gob"
 	"github.com/xuzhuoxi/util-go/bytex"
 	"sync"
@@ -33,33 +32,33 @@ type IGobBuffCodecs interface {
 }
 
 func NewDefaultGobBuffEncoder() IGobBuffEncoder {
-	return newGobBuffCodecs(DefaultOrder, nil, bytex.DefaultDataToBlockHandler)
+	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
 func NewDefaultGobBuffDecoder() IGobBuffDecoder {
-	return newGobBuffCodecs(DefaultOrder, bytex.DefaultBlockToDataHandler, nil)
+	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
 func NewDefaultGobBuffCodecs() IGobBuffDecoder {
-	return newGobBuffCodecs(DefaultOrder, bytex.DefaultBlockToDataHandler, bytex.DefaultDataToBlockHandler)
+	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewGobBuffEncoder(order binary.ByteOrder, data2block bytex.DataToBlockHandler) IGobBuffEncoder {
-	return newGobBuffCodecs(order, nil, data2block)
+func NewGobBuffEncoder(handler bytex.IDataBlockHandler) IGobBuffEncoder {
+	return newGobBuffCodecs(handler)
 }
 
-func NewGobBuffDecoder(order binary.ByteOrder, block2data bytex.BlockToDataHandler) IGobBuffDecoder {
-	return newGobBuffCodecs(order, block2data, nil)
+func NewGobBuffDecoder(handler bytex.IDataBlockHandler) IGobBuffDecoder {
+	return newGobBuffCodecs(handler)
 }
 
-func NewGobBuffCodecs(order binary.ByteOrder, block2data bytex.BlockToDataHandler, data2block bytex.DataToBlockHandler) IGobBuffDecoder {
-	return newGobBuffCodecs(order, block2data, data2block)
+func NewGobBuffCodecs(handler bytex.IDataBlockHandler) IGobBuffDecoder {
+	return newGobBuffCodecs(handler)
 }
 
 //-------------------------------------
 
-func newGobBuffCodecs(order binary.ByteOrder, block2data bytex.BlockToDataHandler, data2block bytex.DataToBlockHandler) *gobBuffCodecs {
-	return &gobBuffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(order, data2block, block2data), codecs: NewGobCodecs()}
+func newGobBuffCodecs(handler bytex.IDataBlockHandler) *gobBuffCodecs {
+	return &gobBuffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(handler), codecs: NewGobCodecs()}
 }
 
 type gobBuffCodecs struct {

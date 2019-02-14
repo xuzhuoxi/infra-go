@@ -6,12 +6,23 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
+	"github.com/xuzhuoxi/util-go/bytex"
 	"math/big"
 )
 
 const (
 	QuicNetwork = "quic"
 )
+
+type IQUICServer interface {
+	ISockServer
+}
+
+type IQuicClient interface {
+	ISockClient
+}
+
+var QuicDataBlockHandler = bytex.NewDefaultDataBlockHandler()
 
 func generateTLSConfig() *tls.Config {
 	key, err := rsa.GenerateKey(rand.Reader, 1024)

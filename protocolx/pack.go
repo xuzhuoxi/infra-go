@@ -20,6 +20,10 @@ type IPackByte interface {
 	Set(id []byte, data ...[]byte)
 }
 
+func NewDefaultPackByte() IPackByte {
+	return &PackByte{buff: bytes.NewBuffer(nil), dataBlockHandler: bytex.NewDefaultDataBlockHandler()}
+}
+
 func NewPackByte(dataBlockHandler bytex.IDataBlockHandler) IPackByte {
 	return &PackByte{buff: bytes.NewBuffer(nil), dataBlockHandler: dataBlockHandler}
 }
@@ -101,10 +105,18 @@ type IPackData interface {
 	Set(id string, data ...interface{})
 }
 
+func NewDefaultPackData(codeHandler encodingx.IDataCodeHandler) IPackData {
+	return &PackData{packByte: NewDefaultPackByte(), codeHandler: codeHandler}
+}
+
+func NewPackData(packByte IPackByte, codeHandler encodingx.IDataCodeHandler) IPackData {
+	return &PackData{packByte: packByte, codeHandler: codeHandler}
+}
+
 type PackData struct {
 	id          string
 	data        []interface{}
-	dataByte    PackByte
+	packByte    IPackByte
 	codeHandler encodingx.IDataCodeHandler
 }
 
@@ -135,18 +147,18 @@ func (d *PackData) EncodeToBytes() []byte {
 	for index := 0; index < len(d.data); index++ {
 		data = append(data, d.codeHandler.HandleEncode(d.data[index]))
 	}
-	d.dataByte.Set(id, data...)
-	return d.dataByte.EncodeToBytes()
+	d.packByte.Set(id, data...)
+	return d.packByte.EncodeToBytes()
 }
 
 func (d *PackData) DecodeFromBytes(bs []byte) bool {
-	ok := d.dataByte.DecodeFromBytes(bs)
+	ok := d.packByte.DecodeFromBytes(bs)
 	if !ok {
 		return false
 	}
-	d.id = d.codeHandler.HandleDecode(d.dataByte.id).(string)
+	d.id = d.codeHandler.HandleDecode(d.packByte.ProtocolId()).(string)
 	d.data = nil
-	for _, dataT := range d.dataByte.data {
+	for _, dataT := range d.packByte.ProtocolData() {
 		d.data = append(d.data, d.codeHandler.HandleDecode(dataT))
 	}
 	return true

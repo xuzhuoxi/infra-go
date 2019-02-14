@@ -5,9 +5,13 @@
 //
 package encodingx
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"github.com/xuzhuoxi/util-go/bytex"
+)
 
 var DefaultOrder = binary.BigEndian
+var DefaultDataBlockHandler = bytex.NewDefaultDataBlockHandler()
 
 //-------------------------------
 

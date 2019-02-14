@@ -7,7 +7,7 @@ import (
 )
 
 func NewTCPClient() ITCPClient {
-	client := &TCPClient{SockClientBase: SockClientBase{Name: "TCPClient", Network: TcpNetwork}}
+	client := &TCPClient{SockClientBase: SockClientBase{Name: "TCPClient", Network: TcpNetwork, PackHandler: DefaultPackHandler}}
 	return client
 }
 
@@ -27,8 +27,8 @@ func (c *TCPClient) OpenClient(params SockParams) error {
 		return err
 	}
 	c.conn = conn
-	connProxy := &ReadWriterProxy{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	c.messageProxy = NewMessageSendReceiver(connProxy, connProxy, false)
+	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, false)
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil

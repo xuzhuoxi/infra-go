@@ -10,8 +10,7 @@ func NewTCPServer(maxLinkNum int) ITCPServer {
 	rs := &TCPServer{maxLinkNum: maxLinkNum}
 	rs.Name = "TCPServer"
 	rs.Network = TcpNetwork
-	rs.splitHandler = DefaultByteSplitHandler
-	rs.messageHandler = DefaultMessageHandler
+	rs.PackHandler = DefaultPackHandler
 	return rs
 }
 
@@ -22,7 +21,7 @@ type TCPServer struct {
 
 	listener      *net.TCPListener
 	serverLinkSem chan bool
-	mapProxy      map[string]IMessageSendReceiver
+	mapProxy      map[string]IPackSendReceiver
 	mapConn       map[string]*net.TCPConn
 }
 
@@ -44,7 +43,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	s.listener = listener
 	s.serverLinkSem = make(chan bool, s.maxLinkNum)
 	s.mapConn = make(map[string]*net.TCPConn)
-	s.mapProxy = make(map[string]IMessageSendReceiver)
+	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
 	logx.Infoln(funcName + "()")
@@ -86,16 +85,21 @@ func (s *TCPServer) StopServer() error {
 	return nil
 }
 
-func (s *TCPServer) SendDataTo(data []byte, rAddress ...string) error {
+func (s *TCPServer) SendPackTo(pack []byte, rAddress ...string) error {
+	bytes := TcpDataBlockHandler.DataToBlock(pack)
+	return s.SendBytesTo(bytes, rAddress...)
+}
+
+func (s *TCPServer) SendBytesTo(data []byte, rAddress ...string) error {
 	if 0 == len(rAddress) {
-		return NoAddrError("TCPServer.SendDataTo")
+		return NoAddrError("TCPServer.SendBytesTo")
 	}
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()
 	for _, address := range rAddress {
 		ts, ok := s.mapProxy[address]
 		if ok {
-			ts.SendMessage(data)
+			ts.SendBytes(data)
 		}
 	}
 	return nil
@@ -116,11 +120,9 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	}()
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
-	connProxy := &ReadWriterProxy{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	proxy := NewMessageSendReceiver(connProxy, connProxy, false)
+	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, TcpDataBlockHandler, false)
 	s.mapProxy[address] = proxy
-	proxy.SetSplitHandler(s.splitHandler)
-	proxy.SetMessageHandler(s.messageHandler)
 	s.serverMu.Unlock()
 	logx.Traceln("New TCP Connection:", address)
 	proxy.StartReceiving()

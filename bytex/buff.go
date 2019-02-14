@@ -7,7 +7,6 @@ package bytex
 
 import (
 	"bytes"
-	"encoding/binary"
 	"io"
 	"sync"
 )
@@ -62,39 +61,39 @@ type IBuffDataBlock interface {
 }
 
 func NewDefaultBuffDataBlock() IBuffDataBlock {
-	rs := newBuffDataBlock(DefaultOrder, DefaultDataToBlockHandler, DefaultBlockToDataHandler)
+	rs := newBuffDataBlock(DefaultDataBlockHandler)
 	return rs
 }
 
 func NewDefaultBuffToBlock() IBuffToBlock {
-	rs := newBuffDataBlock(DefaultOrder, DefaultDataToBlockHandler, nil)
+	rs := newBuffDataBlock(DefaultDataBlockHandler)
 	return rs
 }
 
 func NewDefaultBuffToData() IBuffToData {
-	rs := newBuffDataBlock(DefaultOrder, nil, DefaultBlockToDataHandler)
+	rs := newBuffDataBlock(DefaultDataBlockHandler)
 	return rs
 }
 
-func NewBuffDataBlock(order binary.ByteOrder, data2blockHandler DataToBlockHandler, block2dataHandler BlockToDataHandler) IBuffDataBlock {
-	rs := newBuffDataBlock(order, data2blockHandler, block2dataHandler)
+func NewBuffDataBlock(handler IDataBlockHandler) IBuffDataBlock {
+	rs := newBuffDataBlock(handler)
 	return rs
 }
 
-func NewBuffToBlock(order binary.ByteOrder, data2blockHandler DataToBlockHandler) IBuffToBlock {
-	rs := newBuffDataBlock(order, data2blockHandler, nil)
+func NewBuffToBlock(handler IDataBlockHandler) IBuffToBlock {
+	rs := newBuffDataBlock(handler)
 	return rs
 }
 
-func NewBuffToData(order binary.ByteOrder, block2dataHandler BlockToDataHandler) IBuffToData {
-	rs := newBuffDataBlock(order, nil, block2dataHandler)
+func NewBuffToData(handler IDataBlockHandler) IBuffToData {
+	rs := newBuffDataBlock(handler)
 	return rs
 }
 
 //----------------------------------------
 
-func newBuffDataBlock(order binary.ByteOrder, data2blockHandler DataToBlockHandler, block2dataHandler BlockToDataHandler) *buffDataBlock {
-	return &buffDataBlock{buff: bytes.NewBuffer(nil), handler: newDataBlockHandler(order, data2blockHandler, block2dataHandler)}
+func newBuffDataBlock(handler IDataBlockHandler) *buffDataBlock {
+	return &buffDataBlock{buff: bytes.NewBuffer(nil), handler: handler}
 }
 
 type buffDataBlock struct {

@@ -7,10 +7,10 @@ package bytex
 
 import "encoding/binary"
 
-type DataToBlockHandler func(data []byte, order binary.ByteOrder) (block []byte)
+type HandlerDataToBlock func(data []byte, order binary.ByteOrder) (block []byte)
 
 //数据数组　+　Block长度 + 成功?
-type BlockToDataHandler func(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool)
+type HandlerBlockToData func(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool)
 
 func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byte) {
 	l := uint16(len(data))
@@ -23,61 +23,92 @@ func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byt
 	return rs
 }
 func DefaultBlockToDataHandler(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool) {
-	var l = int(order.Uint16(block[:2]))
-	if 0 == l && 2 == len(block) {
-		return nil, 2, true
-	}
-	if len(block) < l+2 {
+	blockLen := len(block)
+	if blockLen < 2 {
 		return nil, 0, false
 	}
-	return block[2 : 2+l], l + 2, true
+	var packLen = int(order.Uint16(block[:2]))
+	if 0 == packLen {
+		return nil, 2, true
+	}
+	if blockLen < packLen+2 {
+		return nil, 0, false
+	}
+	return block[2 : 2+packLen], packLen + 2, true
 }
 
 //----------------------------------------------------------
 
-type IDataToBlockHandler interface {
+type iOrderSetter interface {
+	SetOrder(order binary.ByteOrder)
+}
+
+type iToBlockHandler interface {
 	//对数据封装上长度
 	DataToBlock(data []byte) (block []byte)
+	SetDataToBlockHandler(handler HandlerDataToBlock)
+}
+
+type iToDataHandler interface {
+	//拆分一个数据出来
+	BlockToData(block []byte) (data []byte, length int, ok bool)
+	SetBlockToDataHandler(handler HandlerBlockToData)
+}
+
+type IDataToBlockHandler interface {
+	iOrderSetter
+	iToBlockHandler
 }
 
 type IBlockToDataHandler interface {
-	//拆分一个数据出来
-	BlockToData(block []byte) (data []byte, length int, ok bool)
+	iOrderSetter
+	iToDataHandler
 }
 
 type IDataBlockHandler interface {
-	IDataToBlockHandler
-	IBlockToDataHandler
+	iOrderSetter
+	iToBlockHandler
+	iToDataHandler
 }
-
-var DefaultDataBlockHandler = NewDefaultDataBlockHandler()
 
 func NewDefaultDataBlockHandler() IDataBlockHandler {
 	return newDataBlockHandler(DefaultOrder, DefaultDataToBlockHandler, DefaultBlockToDataHandler)
 }
 
-func NewDataBlockHandler(order binary.ByteOrder, data2block DataToBlockHandler, block2data BlockToDataHandler) IDataBlockHandler {
+func NewDataBlockHandler(order binary.ByteOrder, data2block HandlerDataToBlock, block2data HandlerBlockToData) IDataBlockHandler {
 	return newDataBlockHandler(order, data2block, block2data)
 }
 
-func NewDataToBlockHandler(order binary.ByteOrder, data2block DataToBlockHandler) IDataToBlockHandler {
+func NewDataToBlockHandler(order binary.ByteOrder, data2block HandlerDataToBlock) IDataToBlockHandler {
 	return newDataBlockHandler(order, data2block, nil)
 }
 
-func NewBlockToDataHandler(order binary.ByteOrder, block2data BlockToDataHandler) IBlockToDataHandler {
+func NewBlockToDataHandler(order binary.ByteOrder, block2data HandlerBlockToData) IBlockToDataHandler {
 	return newDataBlockHandler(order, nil, block2data)
 }
 
 //----------------------------------------------------------
 
-func newDataBlockHandler(order binary.ByteOrder, data2block DataToBlockHandler, block2data BlockToDataHandler) *dataBlockHandler {
+func newDataBlockHandler(order binary.ByteOrder, data2block HandlerDataToBlock, block2data HandlerBlockToData) *dataBlockHandler {
 	return &dataBlockHandler{order: order, data2Block: data2block, block2Data: block2data}
 }
 
 type dataBlockHandler struct {
 	order      binary.ByteOrder
-	data2Block DataToBlockHandler
-	block2Data BlockToDataHandler
+	data2Block HandlerDataToBlock
+	block2Data HandlerBlockToData
+}
+
+func (h *dataBlockHandler) SetDataToBlockHandler(handler HandlerDataToBlock) {
+	h.data2Block = handler
+}
+
+func (h *dataBlockHandler) SetBlockToDataHandler(handler HandlerBlockToData) {
+	h.block2Data = handler
+}
+
+func (h *dataBlockHandler) SetOrder(order binary.ByteOrder) {
+	h.order = order
 }
 
 func (h *dataBlockHandler) DataToBlock(data []byte) (block []byte) {

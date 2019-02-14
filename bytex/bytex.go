@@ -8,3 +8,4 @@ package bytex
 import "encoding/binary"
 
 var DefaultOrder = binary.BigEndian
+var DefaultDataBlockHandler = NewDefaultDataBlockHandler()

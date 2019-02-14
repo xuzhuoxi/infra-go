@@ -10,14 +10,14 @@ import (
 
 func TestUDPServer(t *testing.T) {
 	server := NewUDPServer()
-	var msgHandler = func(msgData []byte, sender interface{}) {
+	var packHandler = func(msgData []byte, sender interface{}) {
 		senderAddress := sender.(string)
 		logx.Traceln("TestUDPServer.msgHandler[Sender:", senderAddress, "]msgData:", msgData, "dataLen:", len(msgData), "]")
 		rs := []byte{byte(len(msgData))}
 		rs = append(rs, msgData...)
-		server.SendDataTo(rs, senderAddress)
+		server.SendPackTo(rs, senderAddress)
 	}
-	server.SetMessageHandler(msgHandler)
+	server.SetPackHandler(packHandler)
 	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
 	defer server.StopServer()
 	time.Sleep(10 * time.Millisecond)
@@ -28,25 +28,25 @@ func TestUDPServer(t *testing.T) {
 	go client1.StartReceiving()
 	go func() {
 		for {
-			err := client1.SendDataTo([]byte{1, 3, 3, 21, 5, 6, 7})
+			err := client1.SendPackTo([]byte{1, 3, 3, 21, 5, 6, 7})
 			if nil != err {
 				break
 			}
 		}
 	}()
 
-	client2 := NewUDPListenClient()
-	client2.OpenClient(SockParams{LocalAddress: "127.0.0.1:9998"})
-	defer client2.CloseClient()
-	go client2.StartReceiving()
-	go func() {
-		for {
-			err := client2.SendDataTo([]byte{2, 0}, "127.0.0.1:9999")
-			if nil != err {
-				break
-			}
-		}
-	}()
+	//client2 := NewUDPListenClient()
+	//client2.OpenClient(SockParams{LocalAddress: "127.0.0.1:9998"})
+	//defer client2.CloseClient()
+	//go client2.StartReceiving()
+	//go func() {
+	//	for {
+	//		err := client2.SendPackTo([]byte{2, 0}, "127.0.0.1:9999")
+	//		if nil != err {
+	//			break
+	//		}
+	//	}
+	//}()
 	time.Sleep(50 * time.Millisecond)
 }
 
@@ -67,7 +67,7 @@ func TestUDP2(t *testing.T) {
 	client1.OpenClient(SockParams{LocalAddress: ":9900"})
 	go func() {
 		for {
-			client1.SendDataTo([]byte{2, 4}, addrs...)
+			client1.SendPackTo([]byte{2, 4}, addrs...)
 		}
 	}()
 	time.Sleep(10 * time.Millisecond)

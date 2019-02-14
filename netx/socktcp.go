@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"github.com/xuzhuoxi/util-go/bytex"
 	"log"
 	"net"
 	"sync"
@@ -13,12 +14,18 @@ const (
 )
 
 var (
-	mapTCPAddr map[string]*net.TCPAddr
+	mapTCPAddr = make(map[string]*net.TCPAddr)
 	mapTCPLock sync.RWMutex
 )
 
-func init() {
-	mapTCPAddr = make(map[string]*net.TCPAddr)
+var TcpDataBlockHandler = bytex.NewDefaultDataBlockHandler()
+
+type ITCPServer interface {
+	ISockServer
+}
+
+type ITCPClient interface {
+	ISockClient
 }
 
 func TCPAddrEqual(addr1 *net.TCPAddr, addr2 *net.TCPAddr) bool {

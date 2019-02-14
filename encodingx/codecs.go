@@ -6,7 +6,6 @@
 package encodingx
 
 import (
-	"encoding/binary"
 	"github.com/xuzhuoxi/util-go/bytex"
 	"sync"
 )
@@ -36,33 +35,33 @@ type IBuffCodecs interface {
 }
 
 func NewDefaultBuffEncoder() IBuffEncoder {
-	return newBuffCodecs(DefaultOrder, nil, bytex.DefaultDataToBlockHandler)
+	return newBuffCodecs(DefaultDataBlockHandler)
 }
 
 func NewDefaultBuffDecoder() IBuffDecoder {
-	return newBuffCodecs(DefaultOrder, bytex.DefaultBlockToDataHandler, nil)
+	return newBuffCodecs(DefaultDataBlockHandler)
 }
 
 func NewDefaultBuffCodecs() IBuffCodecs {
-	return newBuffCodecs(DefaultOrder, bytex.DefaultBlockToDataHandler, bytex.DefaultDataToBlockHandler)
+	return newBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewBuffEncoder(order binary.ByteOrder, data2block bytex.DataToBlockHandler) IBuffEncoder {
-	return newBuffCodecs(order, nil, data2block)
+func NewBuffEncoder(handler bytex.IDataBlockHandler) IBuffEncoder {
+	return newBuffCodecs(handler)
 }
 
-func NewBuffDecoder(order binary.ByteOrder, block2data bytex.BlockToDataHandler) IBuffDecoder {
-	return newBuffCodecs(order, block2data, nil)
+func NewBuffDecoder(handler bytex.IDataBlockHandler) IBuffDecoder {
+	return newBuffCodecs(handler)
 }
 
-func NewBuffCodecs(order binary.ByteOrder, block2data bytex.BlockToDataHandler, data2block bytex.DataToBlockHandler) IBuffCodecs {
-	return newBuffCodecs(order, block2data, data2block)
+func NewBuffCodecs(handler bytex.IDataBlockHandler) IBuffCodecs {
+	return newBuffCodecs(handler)
 }
 
 //------------------------------------------
 
-func newBuffCodecs(order binary.ByteOrder, block2data bytex.BlockToDataHandler, data2block bytex.DataToBlockHandler) *buffCodecs {
-	return &buffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(order, data2block, block2data)}
+func newBuffCodecs(handler bytex.IDataBlockHandler) *buffCodecs {
+	return &buffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(handler)}
 }
 
 type buffCodecs struct {

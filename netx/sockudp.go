@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"github.com/xuzhuoxi/util-go/bytex"
 	"log"
 	"net"
 	"sync"
@@ -13,12 +14,18 @@ const (
 )
 
 var (
-	mapUDPAddr map[string]*net.UDPAddr
+	mapUDPAddr = make(map[string]*net.UDPAddr)
 	mapUDPLock sync.RWMutex
 )
 
-func init() {
-	mapUDPAddr = make(map[string]*net.UDPAddr)
+var UdpDataBlockHandler = bytex.NewDefaultDataBlockHandler()
+
+type IUDPServer interface {
+	ISockServer
+}
+
+type IUDPClient interface {
+	ISockClient
 }
 
 func UDPAddrEqual(addr1 *net.UDPAddr, addr2 *net.UDPAddr) bool {

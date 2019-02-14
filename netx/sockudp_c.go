@@ -7,11 +7,11 @@ import (
 )
 
 func NewUDPDialClient() IUDPClient {
-	return &UDPDialClient{SockClientBase: SockClientBase{Name: "UDPDialClient", Network: UDPNetwork}}
+	return &UDPDialClient{SockClientBase: SockClientBase{Name: "UDPDialClient", Network: UDPNetwork, PackHandler: DefaultPackHandler}}
 }
 
 func NewUDPListenClient() IUDPClient {
-	return &UDPListenClient{SockClientBase: SockClientBase{Name: "UDPListenClient", Network: UDPNetwork}}
+	return &UDPListenClient{SockClientBase: SockClientBase{Name: "UDPListenClient", Network: UDPNetwork, PackHandler: DefaultPackHandler}}
 }
 
 //UDPDialClient
@@ -38,8 +38,8 @@ func (c *UDPDialClient) OpenClient(params SockParams) error {
 		return cErr
 	}
 	c.conn = conn
-	connProxy := &ReadWriterProxy{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	c.messageProxy = NewMessageSendReceiver(connProxy, connProxy, false)
+	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, false)
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil
@@ -85,8 +85,8 @@ func (c *UDPListenClient) OpenClient(params SockParams) error {
 		return cErr
 	}
 	c.conn = conn
-	connProxy := &UDPListenReadWriterProxy{ReadWriter: conn}
-	c.messageProxy = NewMessageSendReceiver(connProxy, connProxy, true)
+	connProxy := &UDPConnAdapter{ReadWriter: conn}
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, true)
 	c.opening = true
 	logx.Infoln(funcName + "()")
 	return nil

@@ -14,15 +14,14 @@ const (
 func NewUDPServer() IUDPServer {
 	rs := &UDPServer{}
 	rs.Network = UDPNetwork
-	rs.splitHandler = DefaultByteSplitHandler
-	rs.messageHandler = DefaultMessageHandler
+	rs.PackHandler = DefaultPackHandler
 	return rs
 }
 
 type UDPServer struct {
 	SockServerBase
 	conn         *net.UDPConn
-	messageProxy IMessageSendReceiver
+	messageProxy IPackSendReceiver
 	serverMu     sync.Mutex
 }
 
@@ -43,10 +42,8 @@ func (s *UDPServer) StartServer(params SockParams) error {
 	}
 	s.running = true
 	s.conn = conn
-	connProxy := &UDPListenReadWriterProxy{ReadWriter: conn}
-	s.messageProxy = NewMessageSendReceiver(connProxy, connProxy, true)
-	s.messageProxy.SetSplitHandler(s.splitHandler)
-	s.messageProxy.SetMessageHandler(s.messageHandler)
+	connProxy := &UDPConnAdapter{ReadWriter: conn}
+	s.messageProxy = NewPackSendReceiver(connProxy, connProxy, s.PackHandler, UdpDataBlockHandler, true)
 	s.serverMu.Unlock()
 	logx.Infoln(funcName + "()")
 	err2 := s.messageProxy.StartReceiving()
@@ -71,8 +68,13 @@ func (s *UDPServer) StopServer() error {
 	return nil
 }
 
-func (s *UDPServer) SendDataTo(msg []byte, rAddress ...string) error {
-	funcName := "UDPServer.SendMessage"
+func (s *UDPServer) SendPackTo(pack []byte, rAddress ...string) error {
+	bytes := UdpDataBlockHandler.DataToBlock(pack)
+	return s.SendBytesTo(bytes, rAddress...)
+}
+
+func (s *UDPServer) SendBytesTo(bytes []byte, rAddress ...string) error {
+	funcName := "UDPServer.SendPackTo"
 	if !s.Running() {
 		return ConnNilError(funcName)
 	}
@@ -81,7 +83,7 @@ func (s *UDPServer) SendDataTo(msg []byte, rAddress ...string) error {
 	if len(rAddress) == 0 {
 		return NoAddrError(funcName)
 	}
-	_, err := s.messageProxy.SendMessage(msg, rAddress...)
+	_, err := s.messageProxy.SendBytes(bytes, rAddress...)
 	return err
 }
 
