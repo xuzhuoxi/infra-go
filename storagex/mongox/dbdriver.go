@@ -1,7 +1,7 @@
 package mongox
 
 import (
-	"github.com/xuzhuoxi/util-go/logx"
+	"github.com/xuzhuoxi/infra-go/logx"
 	"gopkg.in/mgo.v2"
 	"io"
 	"sync"

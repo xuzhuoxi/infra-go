@@ -2,7 +2,7 @@ package netx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/util-go/logx"
+	"github.com/xuzhuoxi/infra-go/logx"
 	"strconv"
 	"testing"
 	"time"

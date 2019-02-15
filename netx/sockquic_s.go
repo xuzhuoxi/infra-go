@@ -2,8 +2,8 @@ package netx
 
 import (
 	"github.com/lucas-clemente/quic-go"
-	"github.com/xuzhuoxi/util-go/errorsx"
-	"github.com/xuzhuoxi/util-go/logx"
+	"github.com/xuzhuoxi/infra-go/errorsx"
+	"github.com/xuzhuoxi/infra-go/logx"
 )
 
 func NewQuicServer() IQUICServer {

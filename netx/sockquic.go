@@ -6,7 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/xuzhuoxi/util-go/bytex"
+	"github.com/xuzhuoxi/infra-go/bytex"
 	"math/big"
 )
 

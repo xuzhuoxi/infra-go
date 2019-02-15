@@ -1,7 +1,7 @@
 package osxu
 
 import (
-	"github.com/xuzhuoxi/util-go/stringsx"
+	"github.com/xuzhuoxi/infra-go/stringsx"
 	"io/ioutil"
 	"os"
 	"path/filepath"

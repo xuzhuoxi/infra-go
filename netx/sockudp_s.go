@@ -1,8 +1,8 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/util-go/errorsx"
-	"github.com/xuzhuoxi/util-go/logx"
+	"github.com/xuzhuoxi/infra-go/errorsx"
+	"github.com/xuzhuoxi/infra-go/logx"
 	"net"
 	"sync"
 )

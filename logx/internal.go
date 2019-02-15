@@ -1,8 +1,8 @@
 package logx
 
 import (
-	"github.com/xuzhuoxi/util-go/osxu"
-	"github.com/xuzhuoxi/util-go/stringsx"
+	"github.com/xuzhuoxi/infra-go/osxu"
+	"github.com/xuzhuoxi/infra-go/stringsx"
 	"log"
 	"math"
 	"os"

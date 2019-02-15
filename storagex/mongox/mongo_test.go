@@ -3,7 +3,7 @@ package mongox
 import (
 	"context"
 	"github.com/mongodb/mongo-go-driver/mongo"
-	"github.com/xuzhuoxi/util-go/logx"
+	"github.com/xuzhuoxi/infra-go/logx"
 	"testing"
 	"time"
 )

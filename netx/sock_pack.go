@@ -2,9 +2,9 @@ package netx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/util-go/bytex"
-	"github.com/xuzhuoxi/util-go/errorsx"
-	"github.com/xuzhuoxi/util-go/logx"
+	"github.com/xuzhuoxi/infra-go/bytex"
+	"github.com/xuzhuoxi/infra-go/errorsx"
+	"github.com/xuzhuoxi/infra-go/logx"
 	"sync"
 )
 

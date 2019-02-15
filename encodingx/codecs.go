@@ -6,7 +6,7 @@
 package encodingx
 
 import (
-	"github.com/xuzhuoxi/util-go/bytex"
+	"github.com/xuzhuoxi/infra-go/bytex"
 	"sync"
 )
 

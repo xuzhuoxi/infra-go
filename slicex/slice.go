@@ -1,7 +1,7 @@
 package slicex
 
 import (
-	"github.com/xuzhuoxi/util-go/lang"
+	"github.com/xuzhuoxi/infra-go/lang"
 )
 
 //一些说明:

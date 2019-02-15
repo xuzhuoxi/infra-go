@@ -7,8 +7,8 @@ package protocolx
 
 import (
 	"bytes"
-	"github.com/xuzhuoxi/util-go/bytex"
-	"github.com/xuzhuoxi/util-go/encodingx"
+	"github.com/xuzhuoxi/infra-go/bytex"
+	"github.com/xuzhuoxi/infra-go/encodingx"
 )
 
 type IPackByte interface {
