@@ -1,8 +1,6 @@
 package encodingx
 
 import (
-	"bytes"
-	"encoding/gob"
 	"github.com/xuzhuoxi/infra-go/bytex"
 	"sync"
 )
@@ -58,12 +56,12 @@ func NewGobBuffCodecs(handler bytex.IDataBlockHandler) IGobBuffDecoder {
 //-------------------------------------
 
 func newGobBuffCodecs(handler bytex.IDataBlockHandler) *gobBuffCodecs {
-	return &gobBuffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(handler), codecs: NewGobCodecs()}
+	return &gobBuffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(handler), handler: NewGobCodingHandler()}
 }
 
 type gobBuffCodecs struct {
 	bytex.IBuffDataBlock
-	codecs     *gobCodecs
+	handler    ICodingHandler
 	codecsLock sync.RWMutex
 }
 
@@ -74,7 +72,7 @@ func (b *gobBuffCodecs) EncodeToBuff(data ...interface{}) {
 	b.codecsLock.Lock()
 	defer b.codecsLock.Unlock()
 	for index := 0; index < len(data); index++ {
-		bytes := b.codecs.Encode(data[index])
+		bytes := b.handler.HandleEncode(data[index])
 		b.WriteData(bytes)
 	}
 }
@@ -87,42 +85,6 @@ func (b *gobBuffCodecs) DecodeFromBuff(data ...interface{}) {
 	defer b.codecsLock.Unlock()
 	for index := 0; index < len(data); index++ {
 		bytes := b.ReadData()
-		b.codecs.Decode(bytes, data[index])
+		b.handler.HandleDecode(bytes, data[index])
 	}
-}
-
-//----------------------------------------------------
-
-type gobCodecs struct {
-	buff bytes.Buffer
-}
-
-func (c *gobCodecs) Encode(e interface{}) []byte {
-	c.buff.Reset()
-	enc := gob.NewEncoder(&c.buff)
-	enc.Encode(e)
-	return c.buff.Bytes()
-}
-
-func (c *gobCodecs) Decode(data []byte, rs interface{}) {
-	c.buff.Reset()
-	c.buff.Write(data)
-	dec := gob.NewDecoder(&c.buff)
-	dec.Decode(rs)
-}
-
-//----------------------------------------------------
-
-var DefaultGobCodecs gobCodecs
-
-func NewGobCodecs() *gobCodecs {
-	return &gobCodecs{}
-}
-
-func GobEncode(e interface{}) []byte {
-	return DefaultGobCodecs.Encode(e)
-}
-
-func GobDecoder(data []byte, e interface{}) {
-	DefaultGobCodecs.Decode(data, e)
 }

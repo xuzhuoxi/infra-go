@@ -105,11 +105,11 @@ type IPackData interface {
 	Set(id string, data ...interface{})
 }
 
-func NewDefaultPackData(codeHandler encodingx.IDataCodeHandler) IPackData {
+func NewDefaultPackData(codeHandler encodingx.ICodingHandler) IPackData {
 	return &PackData{packByte: NewDefaultPackByte(), codeHandler: codeHandler}
 }
 
-func NewPackData(packByte IPackByte, codeHandler encodingx.IDataCodeHandler) IPackData {
+func NewPackData(packByte IPackByte, codeHandler encodingx.ICodingHandler) IPackData {
 	return &PackData{packByte: packByte, codeHandler: codeHandler}
 }
 
@@ -117,7 +117,7 @@ type PackData struct {
 	id          string
 	data        []interface{}
 	packByte    IPackByte
-	codeHandler encodingx.IDataCodeHandler
+	codeHandler encodingx.ICodingHandler
 }
 
 func (d *PackData) ProtocolId() string {

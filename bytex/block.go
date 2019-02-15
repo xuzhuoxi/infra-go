@@ -111,10 +111,10 @@ func (h *dataBlockHandler) SetOrder(order binary.ByteOrder) {
 	h.order = order
 }
 
-func (h *dataBlockHandler) DataToBlock(data []byte) (block []byte) {
+func (h dataBlockHandler) DataToBlock(data []byte) (block []byte) {
 	return h.data2Block(data, h.order)
 }
 
-func (h *dataBlockHandler) BlockToData(block []byte) (data []byte, length int, ok bool) {
+func (h dataBlockHandler) BlockToData(block []byte) (data []byte, length int, ok bool) {
 	return h.block2Data(block, h.order)
 }

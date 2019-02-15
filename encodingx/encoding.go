@@ -32,15 +32,15 @@ type ICodingData interface {
 
 //------------------------------------
 
-type IDataEncodeHandler interface {
+type IEncodeHandler interface {
 	HandleEncode(data interface{}) []byte
 }
 
-type IDataDecodeHandler interface {
-	HandleDecode(bs []byte) interface{}
+type IDecodeHandler interface {
+	HandleDecode(bs []byte, data interface{})
 }
 
-type IDataCodeHandler interface {
-	IDataEncodeHandler
-	IDataDecodeHandler
+type ICodingHandler interface {
+	IEncodeHandler
+	IDecodeHandler
 }

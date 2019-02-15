@@ -5,19 +5,30 @@
 //
 package encodingx
 
-import "unsafe"
+import (
+	"unsafe"
+)
 
-//-------------------------------------
-
-type StringCodeHandler struct {
+func NewUtf8StringCodingHandle() ICodingHandler {
+	return &utf8StringHandler{}
 }
 
-func (h *StringCodeHandler) HandleEncode(data interface{}) []byte {
-	return StringToByteArray(data.(string))
+//-------------------------------
+
+type utf8StringHandler struct {
 }
 
-func (h *StringCodeHandler) HandleDecode(bytes []byte) interface{} {
-	return ByteArrayToString(bytes)
+func (*utf8StringHandler) HandleEncode(data interface{}) []byte {
+	if str, ok := data.(string); ok {
+		return []byte(str)
+	}
+	return nil
+}
+
+func (*utf8StringHandler) HandleDecode(bytes []byte, data interface{}) {
+	if _, ok := data.(*string); ok {
+		data = string(bytes)
+	}
 }
 
 //-------------------------------
