@@ -49,11 +49,11 @@ func (r *protocolReceiver) Receive(protoData []byte) {
 func (r *protocolReceiver) handleData(handler IProtocolExtension, pId string, data []interface{}) {
 	l := len(data)
 	if 0 == l {
-		handler.OnRequest(pId, nil)
+		handler.HandleRequest(pId, nil)
 	} else if 1 == l {
-		handler.OnRequest(pId, data[0])
+		handler.HandleRequest(pId, data[0])
 	} else {
-		handler.OnRequest(pId, data[0], data[1:]...)
+		handler.HandleRequest(pId, data[0], data[1:]...)
 	}
 }
 
@@ -92,10 +92,10 @@ func (r *byteReceiver) ReceiveBytes(bytes []byte) {
 func (r *byteReceiver) handleData(handler IProtocolExtension, pId string, data []interface{}) {
 	l := len(data)
 	if 0 == l {
-		handler.OnRequest(pId, nil)
+		handler.HandleRequest(pId, nil)
 	} else if 1 == l {
-		handler.OnRequest(pId, data[0])
+		handler.HandleRequest(pId, data[0])
 	} else {
-		handler.OnRequest(pId, data[0], data[1:]...)
+		handler.HandleRequest(pId, data[0], data[1:]...)
 	}
 }

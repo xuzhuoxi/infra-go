@@ -17,7 +17,7 @@ type IProtocolExtension interface {
 	//是否批量处理
 	Batch() bool
 	//请求响应
-	OnRequest(pId string, data interface{}, data2 ...interface{})
+	HandleRequest(pId string, data interface{}, data2 ...interface{})
 }
 
 type IProtocolContainer interface {
@@ -86,7 +86,7 @@ func (e *ProtocolExtension) Batch() bool {
 	return nil != e.batchHandler
 }
 
-func (e *ProtocolExtension) OnRequest(pId string, data interface{}, data2 ...interface{}) {
+func (e *ProtocolExtension) HandleRequest(pId string, data interface{}, data2 ...interface{}) {
 	e.addGoroutine()
 	go func() {
 		defer e.doneGoroutine()
