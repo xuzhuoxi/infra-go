@@ -18,13 +18,13 @@ type IProtocolReceiver interface {
 
 //-------------------------------------------------
 
-func NewProtocolReceiver(handlerTable IExtensionTable) IProtocolReceiver {
-	return &protocolReceiver{handlerTable: handlerTable, packData: newDefaul}
+func NewProtocolReceiver(handlerContainer IProtocolContainer, packData IPackData) IProtocolReceiver {
+	return &protocolReceiver{container: handlerContainer, packData: packData}
 }
 
 type protocolReceiver struct {
-	handlerTable IExtensionTable
-	packData     IPackData
+	container IProtocolContainer
+	packData  IPackData
 }
 
 func (r *protocolReceiver) Write(p []byte) (n int, err error) {
@@ -39,7 +39,7 @@ func (r *protocolReceiver) Receive(protoData []byte) {
 	}
 	pId := r.packData.ProtocolId()
 	pData := r.packData.ProtocolData()
-	handler := r.handlerTable.GetProtocolHandler(pId)
+	handler := r.container.GetExtension(pId).(IProtocolExtension)
 	if nil == handler {
 		return
 	}
@@ -60,9 +60,9 @@ func (r *protocolReceiver) handleData(handler IProtocolExtension, pId string, da
 //-------------------------------------------------
 
 type byteReceiver struct {
-	handlerTable IExtensionTable
-	buffToData   bytex.IBuffToData
-	packData     IPackData
+	container  IProtocolContainer
+	buffToData bytex.IBuffToData
+	packData   IPackData
 }
 
 func (r *byteReceiver) Write(p []byte) (n int, err error) {
@@ -82,7 +82,7 @@ func (r *byteReceiver) ReceiveBytes(bytes []byte) {
 	}
 	pId := r.packData.ProtocolId()
 	pData := r.packData.ProtocolData()
-	handler := r.handlerTable.GetProtocolHandler(pId)
+	handler := r.container.GetExtension(pId).(IProtocolExtension)
 	if nil == handler {
 		return
 	}

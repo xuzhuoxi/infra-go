@@ -115,7 +115,8 @@ func NewPackData(packByte IPackByte, codeHandler encodingx.ICodingHandler) IPack
 
 type PackData struct {
 	id          string
-	data        []interface{}
+	data        []interface{} //结构体数组
+	tempData    interface{}   //结构体
 	packByte    IPackByte
 	codeHandler encodingx.ICodingHandler
 }
@@ -156,10 +157,12 @@ func (d *PackData) DecodeFromBytes(bs []byte) bool {
 	if !ok {
 		return false
 	}
-	d.id = d.codeHandler.HandleDecode(d.packByte.ProtocolId()).(string)
+	d.codeHandler.HandleDecode(d.packByte.ProtocolId(), &d.id)
 	d.data = nil
-	for _, dataT := range d.packByte.ProtocolData() {
-		d.data = append(d.data, d.codeHandler.HandleDecode(dataT))
+	for _, bs := range d.packByte.ProtocolData() {
+		d.codeHandler.HandleDecode(bs, &d.tempData)
+		temp := d.tempData
+		d.data = append(d.data, temp)
 	}
 	return true
 }

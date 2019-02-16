@@ -5,63 +5,109 @@
 //
 package protocolx
 
-type HandleOnce func(pId string, data interface{})                        //单个独立性处理
-type HandleMulti func(pId string, data interface{}, data2 ...interface{}) //批量处理
+import "github.com/xuzhuoxi/infra-go/extendx"
+
+type HandlerProtocol func(pId string, data interface{})                            //单个独立性处理
+type HandlerProtocolBatch func(pId string, data interface{}, data2 ...interface{}) //批量处理
 
 type IProtocolExtension interface {
+	extendx.IExtension
 	//当前处理器所属ProtocolId
 	ProtocolId() string
+	//是否批量处理
+	Batch() bool
 	//请求响应
 	OnRequest(pId string, data interface{}, data2 ...interface{})
 }
 
-func NewProtocolExtensionMulti(pId string, maxGo int, multi HandleMulti) IProtocolExtension {
+type IProtocolContainer interface {
+	extendx.IExtensionContainer
+	//增加ProtocolId到Handler的表映射
+	AppendProtocolExtension(protocolId string, maxGoroutine int, handler HandlerProtocol)
+	//增加ProtocolId到Handler的表映射
+	AppendProtocolExtensionBatch(protocolId string, maxGoroutine int, handler HandlerProtocolBatch)
+}
+
+func NewProtocolExtensionMulti(pId string, maxGo int, multi HandlerProtocolBatch) IProtocolExtension {
 	return newProtocolExtension(pId, maxGo, nil, multi)
 }
-func NewProtocolExtension(pId string, maxGo int, once HandleOnce) IProtocolExtension {
+
+func NewProtocolExtension(pId string, maxGo int, once HandlerProtocol) IProtocolExtension {
 	return newProtocolExtension(pId, maxGo, once, nil)
+}
+
+func NewProtocolExtensionContainer() IProtocolContainer {
+	return &ProtocolContainer{IExtensionContainer: extendx.NewExtensionContainer()}
 }
 
 //-----------------------------------------------------
 
-func newProtocolExtension(pId string, maxGo int, once HandleOnce, multi HandleMulti) *protocolExtension {
-	return &protocolExtension{protocolId: pId, channel: make(chan bool, maxGo), onceHandler: once, multiHandler: multi}
+type ProtocolContainer struct {
+	extendx.IExtensionContainer
 }
 
-type protocolExtension struct {
+func (c *ProtocolContainer) AppendProtocolExtension(protocolId string, maxGoroutine int, handler HandlerProtocol) {
+	if c.CheckExtension(protocolId) {
+		panic("Repeat ProtocolId In Map: " + protocolId)
+	}
+	c.AppendExtension(newProtocolExtension(protocolId, maxGoroutine, handler, nil))
+}
+
+func (c *ProtocolContainer) AppendProtocolExtensionBatch(protocolId string, maxGoroutine int, handler HandlerProtocolBatch) {
+	if c.CheckExtension(protocolId) {
+		panic("Repeat ProtocolId In Map: " + protocolId)
+	}
+	c.AppendExtension(newProtocolExtension(protocolId, maxGoroutine, nil, handler))
+}
+
+//-----------------------------------------------------
+
+func newProtocolExtension(pId string, maxGo int, once HandlerProtocol, multi HandlerProtocolBatch) *ProtocolExtension {
+	return &ProtocolExtension{protocolId: pId, channel: make(chan bool, maxGo), protoHandler: once, batchHandler: multi}
+}
+
+type ProtocolExtension struct {
 	protocolId string
 	channel    chan bool
 
-	onceHandler  HandleOnce
-	multiHandler HandleMulti
+	protoHandler HandlerProtocol
+	batchHandler HandlerProtocolBatch
 }
 
-func (e *protocolExtension) ProtocolId() string {
+func (e *ProtocolExtension) Key() string {
 	return e.protocolId
 }
 
-func (e *protocolExtension) OnRequest(pId string, data interface{}, data2 ...interface{}) {
+func (e *ProtocolExtension) ProtocolId() string {
+	return e.protocolId
+}
+
+func (e *ProtocolExtension) Batch() bool {
+	return nil != e.batchHandler
+}
+
+func (e *ProtocolExtension) OnRequest(pId string, data interface{}, data2 ...interface{}) {
 	e.addGoroutine()
 	go func() {
 		defer e.doneGoroutine()
-		if nil != e.multiHandler {
-			e.multiHandler(pId, data, data2...)
+		if e.Batch() {
+			e.batchHandler(pId, data, data2...)
 		} else {
-			e.onceHandler(pId, data)
+			e.protoHandler(pId, data)
 			len2 := len(data2)
 			if len2 > 0 {
 				for index := 0; index < len2; index++ {
-					e.onceHandler(pId, data2[index])
+					e.protoHandler(pId, data2[index])
 				}
 			}
 		}
 	}()
 }
 
-func (e *protocolExtension) addGoroutine() {
+func (e *ProtocolExtension) addGoroutine() {
 	e.channel <- true
 }
 
-func (e *protocolExtension) doneGoroutine() {
+func (e *ProtocolExtension) doneGoroutine() {
 	<-e.channel
 }
