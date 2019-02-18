@@ -43,7 +43,7 @@ func InsertHeadComplex64(slice []complex64, target ...complex64) []complex64 {
 }
 
 //尾插入
-func InsertComplex64ailComplex64(slice []complex64, target ...complex64) []complex64 {
+func InsertTailComplex64(slice []complex64, target ...complex64) []complex64 {
 	return InsertComplex64(slice, len(slice), target...)
 }
 

@@ -43,7 +43,7 @@ func InsertHeadFloat64(slice []float64, target ...float64) []float64 {
 }
 
 //尾插入
-func InsertFloat64ailFloat64(slice []float64, target ...float64) []float64 {
+func InsertTailFloat64(slice []float64, target ...float64) []float64 {
 	return InsertFloat64(slice, len(slice), target...)
 }
 

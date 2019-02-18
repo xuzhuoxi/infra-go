@@ -43,7 +43,7 @@ func InsertHeadInt16(slice []int16, target ...int16) []int16 {
 }
 
 //尾插入
-func InsertInt16ailInt16(slice []int16, target ...int16) []int16 {
+func InsertTailInt16(slice []int16, target ...int16) []int16 {
 	return InsertInt16(slice, len(slice), target...)
 }
 

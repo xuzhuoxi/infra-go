@@ -1,4 +1,4 @@
-package stringsx
+package stringx
 
 type PasswdFlag int
 

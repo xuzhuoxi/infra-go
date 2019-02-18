@@ -43,7 +43,7 @@ func InsertHeadFloat32(slice []float32, target ...float32) []float32 {
 }
 
 //尾插入
-func InsertFloat32ailFloat32(slice []float32, target ...float32) []float32 {
+func InsertTailFloat32(slice []float32, target ...float32) []float32 {
 	return InsertFloat32(slice, len(slice), target...)
 }
 

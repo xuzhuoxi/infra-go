@@ -43,7 +43,7 @@ func InsertHeadUint(slice []uint, target ...uint) []uint {
 }
 
 //尾插入
-func InsertUintailUint(slice []uint, target ...uint) []uint {
+func InsertTailUint(slice []uint, target ...uint) []uint {
 	return InsertUint(slice, len(slice), target...)
 }
 

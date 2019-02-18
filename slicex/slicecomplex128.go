@@ -43,7 +43,7 @@ func InsertHeadComplex128(slice []complex128, target ...complex128) []complex128
 }
 
 //尾插入
-func InsertComplex128ailComplex128(slice []complex128, target ...complex128) []complex128 {
+func InsertTailComplex128(slice []complex128, target ...complex128) []complex128 {
 	return InsertComplex128(slice, len(slice), target...)
 }
 

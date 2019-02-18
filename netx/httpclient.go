@@ -48,7 +48,7 @@ func PostForm(url string, data url.Values, cb ReqCallBack) {
 
 //func Do(url, contentType, body string, cb ReqCallBack) {
 //	client := &http.Client{}
-//	req, errsx := http.NewRequest("POST", url, stringsx.NewReader(body))
+//	req, errsx := http.NewRequest("POST", url, stringx.NewReader(body))
 //	if errsx != nil {
 //		logx.Fatal(errsx)
 //		return

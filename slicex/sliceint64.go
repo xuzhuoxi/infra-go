@@ -43,7 +43,7 @@ func InsertHeadInt64(slice []int64, target ...int64) []int64 {
 }
 
 //尾插入
-func InsertInt64ailInt64(slice []int64, target ...int64) []int64 {
+func InsertTailInt64(slice []int64, target ...int64) []int64 {
 	return InsertInt64(slice, len(slice), target...)
 }
 

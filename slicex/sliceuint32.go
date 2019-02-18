@@ -43,7 +43,7 @@ func InsertHeadUint32(slice []uint32, target ...uint32) []uint32 {
 }
 
 //尾插入
-func InsertUint32ailUint32(slice []uint32, target ...uint32) []uint32 {
+func InsertTailUint32(slice []uint32, target ...uint32) []uint32 {
 	return InsertUint32(slice, len(slice), target...)
 }
 

@@ -43,7 +43,7 @@ func InsertHeadString(slice []string, target ...string) []string {
 }
 
 //尾插入
-func InsertStringailString(slice []string, target ...string) []string {
+func InsertTailString(slice []string, target ...string) []string {
 	return InsertString(slice, len(slice), target...)
 }
 

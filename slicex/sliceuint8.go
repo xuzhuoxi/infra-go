@@ -45,7 +45,7 @@ func InsertHeadUint8(slice []uint8, target ...uint8) []uint8 {
 }
 
 //尾插入
-func InsertUint8ailUint8(slice []uint8, target ...uint8) []uint8 {
+func InsertTailUint8(slice []uint8, target ...uint8) []uint8 {
 	return InsertUint8(slice, len(slice), target...)
 }
 

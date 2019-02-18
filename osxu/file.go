@@ -1,7 +1,7 @@
 package osxu
 
 import (
-	"github.com/xuzhuoxi/infra-go/stringsx"
+	"github.com/xuzhuoxi/infra-go/stringx"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -78,8 +78,8 @@ func GetFolderFileList(dirPath string, recursive bool, filter func(fileInfo os.F
 	if nil != err {
 		return nil, err
 	}
-	dirLen := stringsx.GetCharCount(dirPath)
-	if stringsx.LastIndexOfChar(dirPath, "/") != dirLen-1 { //最后一个不是"/"
+	dirLen := stringx.GetCharCount(dirPath)
+	if stringx.LastIndexOfChar(dirPath, "/") != dirLen-1 { //最后一个不是"/"
 		dirPath = dirPath + "/"
 	}
 	var rs []os.FileInfo
@@ -120,8 +120,8 @@ func GetFilePrefixName(fileName string) string {
 //取父文件夹(父目录)
 func GetParentDir(dirPath string) (string, bool) {
 	newPath := GetUnitePath(dirPath)
-	pathLen := stringsx.GetCharCount(newPath)
-	dot := stringsx.LastIndexOfChar(newPath, "/")
+	pathLen := stringx.GetCharCount(newPath)
+	dot := stringx.LastIndexOfChar(newPath, "/")
 	if dot == -1 { //无效路径 或 windows顶级路径
 		return "", false
 	}
@@ -133,20 +133,20 @@ func GetParentDir(dirPath string) (string, bool) {
 		}
 	}
 	var f = func(str string) (string, bool) { //保证"/"不在最后一个字符
-		d := stringsx.LastIndexOfChar(str, "/")
+		d := stringx.LastIndexOfChar(str, "/")
 		if -1 == d {
 			return "", false
 		}
 		if 0 == d {
 			return "/", true
 		}
-		return stringsx.SubPrefix(str, d+1), true
+		return stringx.SubPrefix(str, d+1), true
 	}
 	if dot < pathLen-1 { //在中间
 		return f(newPath)
 	}
 	if dot == pathLen-1 { //在尾部
-		return f(stringsx.SubPrefix(newPath, dot))
+		return f(stringx.SubPrefix(newPath, dot))
 	}
 	return "", false
 }
@@ -158,14 +158,14 @@ func GetUnitePath(path string) string {
 
 //把文件名拆分
 func SplitFileName(fileName string) (string, string) {
-	if "" == fileName || 0 == stringsx.GetCharCount(fileName) {
+	if "" == fileName || 0 == stringx.GetCharCount(fileName) {
 		return "", ""
 	}
-	dot := stringsx.LastIndexOfChar(fileName, ".")
+	dot := stringx.LastIndexOfChar(fileName, ".")
 	if -1 == dot {
 		return fileName, ""
 	}
-	return stringsx.CutString(fileName, dot, false)
+	return stringx.CutString(fileName, dot, false)
 }
 
 //private ------------------------------------

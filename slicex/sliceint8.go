@@ -43,7 +43,7 @@ func InsertHeadInt8(slice []int8, target ...int8) []int8 {
 }
 
 //尾插入
-func InsertInt8ailInt8(slice []int8, target ...int8) []int8 {
+func InsertTailInt8(slice []int8, target ...int8) []int8 {
 	return InsertInt8(slice, len(slice), target...)
 }
 
