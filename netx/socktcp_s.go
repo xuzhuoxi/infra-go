@@ -45,6 +45,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 		defer s.serverMu.Unlock()
 		return err
 	}
+	s.Logger.Infoln("[TCPServer] listening on:", params.LocalAddress)
 	s.listener = listener
 	s.serverLinkSem = make(chan bool, s.maxLinkNum)
 	s.mapConn = make(map[string]*net.TCPConn)
@@ -129,7 +130,7 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, TcpDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
-	s.Logger.Traceln("New TCP Connection:", address)
+	s.Logger.Traceln("[TCPServer] New TCP Connection:", address)
 	proxy.StartReceiving()
 }
 

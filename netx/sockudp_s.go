@@ -46,6 +46,7 @@ func (s *UDPServer) StartServer(params SockParams) error {
 		defer s.serverMu.Unlock()
 		return err
 	}
+	s.Logger.Infoln("[UDPServer] listening on:", params.LocalAddress)
 	s.running = true
 	s.conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}

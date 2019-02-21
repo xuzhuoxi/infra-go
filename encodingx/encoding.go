@@ -44,3 +44,29 @@ type ICodingHandler interface {
 	IEncodeHandler
 	IDecodeHandler
 }
+
+//------------------------------------
+
+type IBuffEncoder interface {
+	bytex.IBuffByteReader
+	bytex.IBuffDataWriter
+	bytex.IBuffReset
+	EncodeToBuff(encoders ...interface{})
+}
+
+type IBuffDecoder interface {
+	bytex.IBuffByteWriter
+	bytex.IBuffDataReader
+	bytex.IBuffReset
+	DecodeFromBuff(decoders ...interface{})
+}
+
+type IBuffCodecs interface {
+	bytex.IBuffByteWriter
+	bytex.IBuffDataWriter
+	bytex.IBuffByteReader
+	bytex.IBuffDataReader
+	bytex.IBuffReset
+	EncodeToBuff(encoders ...interface{})
+	DecodeFromBuff(decoders ...interface{})
+}

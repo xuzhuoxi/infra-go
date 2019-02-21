@@ -20,6 +20,7 @@ type ISockServer interface {
 	IServer
 	ISockSender
 	IPackHandlerSetter
+	logx.ILoggerSupport
 }
 
 type SockServerBase struct {
@@ -41,6 +42,10 @@ func (s *SockServerBase) SetPackHandler(handler PackHandler) error {
 
 func (s *SockServerBase) GetLogger() logx.ILogger {
 	return s.Logger
+}
+
+func (s *SockServerBase) SetLogger(logger logx.ILogger) {
+	s.Logger = logger
 }
 
 func (s *SockServerBase) Running() bool {

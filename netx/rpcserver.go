@@ -45,7 +45,7 @@ func (s *RPCServer) StartServer(addr string) {
 		return
 	}
 	l, newServerAddr := s.listenRPC(addr)
-	s.GetLogger().Info("\tRPC server listening on:", newServerAddr)
+	s.GetLogger().Info("[RPCServer] listening on:", newServerAddr)
 	s.Listener = l
 	s.Server.Accept(l)
 }

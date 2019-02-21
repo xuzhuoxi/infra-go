@@ -10,30 +10,6 @@ import (
 	"sync"
 )
 
-type IBuffEncoder interface {
-	bytex.IBuffByteReader
-	bytex.IBuffDataWriter
-	bytex.IBuffReset
-	EncodeToBuff(encoders ...IEncodingData)
-}
-
-type IBuffDecoder interface {
-	bytex.IBuffByteWriter
-	bytex.IBuffDataReader
-	bytex.IBuffReset
-	DecodeFromBuff(decoders ...IDecodingData)
-}
-
-type IBuffCodecs interface {
-	bytex.IBuffByteWriter
-	bytex.IBuffDataWriter
-	bytex.IBuffByteReader
-	bytex.IBuffDataReader
-	bytex.IBuffReset
-	EncodeToBuff(encoders ...IEncodingData)
-	DecodeFromBuff(decoders ...IDecodingData)
-}
-
 func NewDefaultBuffEncoder() IBuffEncoder {
 	return newBuffCodecs(DefaultDataBlockHandler)
 }
@@ -69,24 +45,24 @@ type buffCodecs struct {
 	codecsLock sync.RWMutex
 }
 
-func (bc *buffCodecs) EncodeToBuff(encoders ...IEncodingData) {
+func (bc *buffCodecs) EncodeToBuff(encoders ...interface{}) {
 	if len(encoders) == 0 {
 		return
 	}
 	bc.codecsLock.Lock()
 	defer bc.codecsLock.Unlock()
 	for _, encoder := range encoders {
-		bc.WriteData(encoder.EncodeToBytes())
+		bc.WriteData(encoder.(IEncodingData).EncodeToBytes())
 	}
 }
 
-func (bc *buffCodecs) DecodeFromBuff(decoders ...IDecodingData) {
+func (bc *buffCodecs) DecodeFromBuff(decoders ...interface{}) {
 	if len(decoders) == 0 {
 		return
 	}
 	bc.codecsLock.Lock()
 	defer bc.codecsLock.Unlock()
 	for _, decoder := range decoders {
-		decoder.DecodeFromBytes(bc.ReadData())
+		decoder.(IDecodingData).DecodeFromBytes(bc.ReadData())
 	}
 }

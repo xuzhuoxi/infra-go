@@ -118,7 +118,7 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, WsDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
-	s.Logger.Traceln("New WebSocket Connection:", address)
+	s.Logger.Traceln("[WebSocketServer] New WebSocket Connection:", address)
 	proxy.StartReceiving()
 }
 

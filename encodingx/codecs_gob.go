@@ -5,51 +5,27 @@ import (
 	"sync"
 )
 
-type IGobBuffEncoder interface {
-	bytex.IBuffByteReader
-	bytex.IBuffDataWriter
-	bytex.IBuffReset
-	EncodeToBuff(data ...interface{})
-}
-
-type IGobBuffDecoder interface {
-	bytex.IBuffByteWriter
-	bytex.IBuffDataReader
-	bytex.IBuffReset
-	DecodeFromBuff(data ...interface{})
-}
-
-type IGobBuffCodecs interface {
-	bytex.IBuffByteWriter
-	bytex.IBuffDataWriter
-	bytex.IBuffByteReader
-	bytex.IBuffDataReader
-	bytex.IBuffReset
-	EncodeToBuff(data ...interface{})
-	DecodeFromBuff(data ...interface{})
-}
-
-func NewDefaultGobBuffEncoder() IGobBuffEncoder {
+func NewDefaultGobBuffEncoder() IBuffEncoder {
 	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewDefaultGobBuffDecoder() IGobBuffDecoder {
+func NewDefaultGobBuffDecoder() IBuffDecoder {
 	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewDefaultGobBuffCodecs() IGobBuffDecoder {
+func NewDefaultGobBuffCodecs() IBuffDecoder {
 	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewGobBuffEncoder(handler bytex.IDataBlockHandler) IGobBuffEncoder {
+func NewGobBuffEncoder(handler bytex.IDataBlockHandler) IBuffEncoder {
 	return newGobBuffCodecs(handler)
 }
 
-func NewGobBuffDecoder(handler bytex.IDataBlockHandler) IGobBuffDecoder {
+func NewGobBuffDecoder(handler bytex.IDataBlockHandler) IBuffDecoder {
 	return newGobBuffCodecs(handler)
 }
 
-func NewGobBuffCodecs(handler bytex.IDataBlockHandler) IGobBuffDecoder {
+func NewGobBuffCodecs(handler bytex.IDataBlockHandler) IBuffDecoder {
 	return newGobBuffCodecs(handler)
 }
 
