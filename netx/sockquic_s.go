@@ -7,10 +7,16 @@ import (
 )
 
 func NewQuicServer() IQUICServer {
-	rs := &QUICServer{}
-	rs.Network = QuicNetwork
-	rs.PackHandler = DefaultPackHandler
-	return rs
+	server := &QUICServer{}
+	server.Name = "QuicServer"
+	server.Network = QuicNetwork
+	server.Logger = logx.DefaultLogger()
+	server.PackHandler = DefaultPackHandler
+	return server
+}
+
+type IQUICServer interface {
+	ISockServer
 }
 
 type QUICServer struct {
@@ -43,7 +49,7 @@ func (s *QUICServer) StartServer(params SockParams) error {
 	s.mapStream = make(map[string]quic.Stream)
 	s.running = true
 	s.serverMu.Unlock()
-	logx.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName + "()")
 	for s.running {
 		session, err := listener.Accept()
 		if !s.running || nil != err {
@@ -74,7 +80,7 @@ func (s *QUICServer) StopServer() error {
 	}
 	s.mapStream = nil
 	s.running = false
-	logx.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -114,17 +120,17 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	s.serverMu.Lock()
 	stream, err := session.AcceptStream()
 	if nil != err {
-		logx.Warnln(funcName, err)
+		s.Logger.Warnln(funcName, err)
 		return
 	}
 	defer stream.Close()
 	s.mapSession[address] = session
 	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
-	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, QuicDataBlockHandler, false)
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, QuicDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.mapStream[address] = stream
 	s.serverMu.Unlock()
-	logx.Infoln("New Quic Connection:", address)
+	s.Logger.Infoln("New Quic Connection:", address)
 	proxy.StartReceiving()
 }
 

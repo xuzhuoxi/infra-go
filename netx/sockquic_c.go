@@ -8,8 +8,16 @@ import (
 )
 
 func NewQUICClient() IQuicClient {
-	client := &QUICClient{SockClientBase: SockClientBase{Name: "QUICClient", Network: QuicNetwork, PackHandler: DefaultPackHandler}}
+	client := &QUICClient{}
+	client.Name = "QUICClient"
+	client.Network = QuicNetwork
+	client.Logger = logx.DefaultLogger()
+	client.PackHandler = DefaultPackHandler
 	return client
+}
+
+type IQuicClient interface {
+	ISockClient
 }
 
 type QUICClient struct {
@@ -29,20 +37,20 @@ func (c *QUICClient) OpenClient(params SockParams) error {
 	}
 	session, err := quic.DialAddr(params.RemoteAddress, &tls.Config{InsecureSkipVerify: true}, nil)
 	if nil != err {
-		logx.Warnln(funcName, err)
+		c.Logger.Warnln(funcName, err)
 		return err
 	}
 	c.conn = session
 	stream, err := session.OpenStreamSync()
 	if nil != err {
-		logx.Warnln(funcName, err)
+		c.Logger.Warnln(funcName, err)
 		return err
 	}
 	c.stream = stream
 	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
-	c.setMessageProxy(NewPackSendReceiver(connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, false))
+	c.setMessageProxy(NewPackSendReceiver(connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, c.Logger, false))
 	c.opening = true
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -62,6 +70,6 @@ func (c *QUICClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }

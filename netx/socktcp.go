@@ -20,14 +20,6 @@ var (
 
 var TcpDataBlockHandler = bytex.NewDefaultDataBlockHandler()
 
-type ITCPServer interface {
-	ISockServer
-}
-
-type ITCPClient interface {
-	ISockClient
-}
-
 func TCPAddrEqual(addr1 *net.TCPAddr, addr2 *net.TCPAddr) bool {
 	if addr1 == addr2 {
 		return true

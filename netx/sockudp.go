@@ -20,14 +20,6 @@ var (
 
 var UdpDataBlockHandler = bytex.NewDefaultDataBlockHandler()
 
-type IUDPServer interface {
-	ISockServer
-}
-
-type IUDPClient interface {
-	ISockClient
-}
-
 func UDPAddrEqual(addr1 *net.UDPAddr, addr2 *net.UDPAddr) bool {
 	if addr1 == addr2 {
 		return true

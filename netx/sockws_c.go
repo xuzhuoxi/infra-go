@@ -6,13 +6,17 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-type IWebSocketClient interface {
-	ISockClient
+func NewWebSocketClient() IWebSocketClient {
+	client := &WebSocketClient{}
+	client.Name = "WSClient"
+	client.Network = WSNetwork
+	client.Logger = logx.DefaultLogger()
+	client.PackHandler = DefaultPackHandler
+	return client
 }
 
-func NewWebSocketClient() IWebSocketClient {
-	client := &WebSocketClient{SockClientBase: SockClientBase{Name: "WebSocketClient", Network: WSNetwork, PackHandler: DefaultPackHandler}}
-	return client
+type IWebSocketClient interface {
+	ISockClient
 }
 
 type WebSocketClient struct {
@@ -32,9 +36,9 @@ func (c *WebSocketClient) OpenClient(params SockParams) error {
 	}
 	c.conn = conn //LocalAddr=Origin
 	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, RemoteAddrString: params.RemoteAddress}
-	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, WsDataBlockHandler, false)
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, WsDataBlockHandler, c.Logger, false)
 	c.opening = true
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -50,6 +54,6 @@ func (c *WebSocketClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }

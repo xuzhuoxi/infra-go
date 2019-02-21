@@ -7,8 +7,16 @@ import (
 )
 
 func NewTCPClient() ITCPClient {
-	client := &TCPClient{SockClientBase: SockClientBase{Name: "TCPClient", Network: TcpNetwork, PackHandler: DefaultPackHandler}}
+	client := &TCPClient{}
+	client.Name = "TCPClient"
+	client.Network = TcpNetwork
+	client.Logger = logx.DefaultLogger()
+	client.PackHandler = DefaultPackHandler
 	return client
+}
+
+type ITCPClient interface {
+	ISockClient
 }
 
 type TCPClient struct {
@@ -28,9 +36,9 @@ func (c *TCPClient) OpenClient(params SockParams) error {
 	}
 	c.conn = conn
 	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, false)
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, c.Logger, false)
 	c.opening = true
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -46,6 +54,6 @@ func (c *TCPClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }

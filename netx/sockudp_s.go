@@ -12,10 +12,16 @@ const (
 )
 
 func NewUDPServer() IUDPServer {
-	rs := &UDPServer{}
-	rs.Network = UDPNetwork
-	rs.PackHandler = DefaultPackHandler
-	return rs
+	server := &UDPServer{}
+	server.Name = "UDPServer"
+	server.Network = UDPNetwork
+	server.Logger = logx.DefaultLogger()
+	server.PackHandler = DefaultPackHandler
+	return server
+}
+
+type IUDPServer interface {
+	ISockServer
 }
 
 type UDPServer struct {
@@ -43,9 +49,9 @@ func (s *UDPServer) StartServer(params SockParams) error {
 	s.running = true
 	s.conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
-	s.messageProxy = NewPackSendReceiver(connProxy, connProxy, s.PackHandler, UdpDataBlockHandler, true)
+	s.messageProxy = NewPackSendReceiver(connProxy, connProxy, s.PackHandler, UdpDataBlockHandler, s.Logger, true)
 	s.serverMu.Unlock()
-	logx.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName + "()")
 	err2 := s.messageProxy.StartReceiving()
 	return err2
 }
@@ -64,7 +70,7 @@ func (s *UDPServer) StopServer() error {
 	if nil != s.conn {
 		s.conn.Close()
 	}
-	logx.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName + "()")
 	return nil
 }
 

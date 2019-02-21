@@ -7,11 +7,16 @@ import (
 )
 
 func NewTCPServer(maxLinkNum int) ITCPServer {
-	rs := &TCPServer{maxLinkNum: maxLinkNum}
-	rs.Name = "TCPServer"
-	rs.Network = TcpNetwork
-	rs.PackHandler = DefaultPackHandler
-	return rs
+	server := &TCPServer{maxLinkNum: maxLinkNum}
+	server.Name = "TCPServer"
+	server.Network = TcpNetwork
+	server.Logger = logx.DefaultLogger()
+	server.PackHandler = DefaultPackHandler
+	return server
+}
+
+type ITCPServer interface {
+	ISockServer
 }
 
 type TCPServer struct {
@@ -46,7 +51,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
-	logx.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName + "()")
 
 	defer s.StopServer()
 	for s.running {
@@ -81,7 +86,7 @@ func (s *TCPServer) StopServer() error {
 	s.mapConn = nil
 	closeLinkChannel(s.serverLinkSem)
 	s.running = false
-	logx.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -121,16 +126,16 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
 	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, TcpDataBlockHandler, false)
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, TcpDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
-	logx.Traceln("New TCP Connection:", address)
+	s.Logger.Traceln("New TCP Connection:", address)
 	proxy.StartReceiving()
 }
 
 func closeLinkChannel(c chan bool) {
 	close(c)
-	//logx.Traceln("closeLinkChannel.finish")
+	//s.Logger.Traceln("closeLinkChannel.finish")
 }
 
 func listenTCP(network string, address string) (*net.TCPListener, error) {

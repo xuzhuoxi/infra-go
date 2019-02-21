@@ -6,6 +6,7 @@
 package netx
 
 import (
+	"github.com/xuzhuoxi/infra-go/logx"
 	"sync"
 )
 
@@ -28,6 +29,7 @@ type SockServerBase struct {
 	running  bool
 
 	PackHandler PackHandler
+	Logger      logx.ILogger
 }
 
 func (s *SockServerBase) SetPackHandler(handler PackHandler) error {
@@ -35,6 +37,10 @@ func (s *SockServerBase) SetPackHandler(handler PackHandler) error {
 	defer s.serverMu.Unlock()
 	s.PackHandler = handler
 	return nil
+}
+
+func (s *SockServerBase) GetLogger() logx.ILogger {
+	return s.Logger
 }
 
 func (s *SockServerBase) Running() bool {

@@ -7,15 +7,17 @@ import (
 	"net/http"
 )
 
-type IWebSocketServer interface {
-	ISockServer
+func NewWebSocketServer(maxLinkNum int) IWebSocketServer {
+	server := &WebSocketServer{maxLinkNum: maxLinkNum}
+	server.Name = "WSServer"
+	server.Network = WSNetwork
+	server.Logger = logx.DefaultLogger()
+	server.PackHandler = DefaultPackHandler
+	return server
 }
 
-func NewWebSocketServer(maxLinkNum int) IWebSocketServer {
-	rs := &WebSocketServer{maxLinkNum: maxLinkNum}
-	rs.Network = WSNetwork
-	rs.PackHandler = DefaultPackHandler
-	return rs
+type IWebSocketServer interface {
+	ISockServer
 }
 
 type WebSocketServer struct {
@@ -44,7 +46,7 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
-	logx.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName + "()")
 	err := s.httpServer.ListenAndServe()
 	if nil != err {
 		s.running = false
@@ -70,7 +72,7 @@ func (s *WebSocketServer) StopServer() error {
 	s.mapConn = nil
 	closeLinkChannel(s.serverLinkSem)
 	s.running = false
-	logx.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -113,14 +115,14 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
 	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, RemoteAddrString: conn.Request().RemoteAddr}
-	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, WsDataBlockHandler, false)
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, WsDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
-	logx.Traceln("New WebSocket Connection:", address)
+	s.Logger.Traceln("New WebSocket Connection:", address)
 	proxy.StartReceiving()
 }
 
 func (s *WebSocketServer) closeLinkChannel(c chan bool) {
 	close(c)
-	//logx.Traceln("closeLinkChannel.finish")
+	//s.Logger.Traceln("closeLinkChannel.finish")
 }

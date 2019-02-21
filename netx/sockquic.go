@@ -14,14 +14,6 @@ const (
 	QuicNetwork = "quic"
 )
 
-type IQUICServer interface {
-	ISockServer
-}
-
-type IQuicClient interface {
-	ISockClient
-}
-
 var QuicDataBlockHandler = bytex.NewDefaultDataBlockHandler()
 
 func generateTLSConfig() *tls.Config {

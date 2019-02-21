@@ -7,11 +7,25 @@ import (
 )
 
 func NewUDPDialClient() IUDPClient {
-	return &UDPDialClient{SockClientBase: SockClientBase{Name: "UDPDialClient", Network: UDPNetwork, PackHandler: DefaultPackHandler}}
+	client := &UDPDialClient{}
+	client.Name = "UDPDialClient"
+	client.Network = UDPNetwork
+	client.Logger = logx.DefaultLogger()
+	client.PackHandler = DefaultPackHandler
+	return client
 }
 
 func NewUDPListenClient() IUDPClient {
-	return &UDPListenClient{SockClientBase: SockClientBase{Name: "UDPListenClient", Network: UDPNetwork, PackHandler: DefaultPackHandler}}
+	client := &UDPListenClient{}
+	client.Name = "UDPListenClient"
+	client.Network = UDPNetwork
+	client.Logger = logx.DefaultLogger()
+	client.PackHandler = DefaultPackHandler
+	return client
+}
+
+type IUDPClient interface {
+	ISockClient
 }
 
 //UDPDialClient
@@ -39,9 +53,9 @@ func (c *UDPDialClient) OpenClient(params SockParams) error {
 	}
 	c.conn = conn
 	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, false)
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, false)
 	c.opening = true
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -57,7 +71,7 @@ func (c *UDPDialClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -86,9 +100,9 @@ func (c *UDPListenClient) OpenClient(params SockParams) error {
 	}
 	c.conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
-	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, true)
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, true)
 	c.opening = true
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -104,6 +118,6 @@ func (c *UDPListenClient) CloseClient() error {
 		c.conn.Close()
 		c.conn = nil
 	}
-	logx.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName + "()")
 	return nil
 }

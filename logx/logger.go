@@ -60,9 +60,17 @@ func NewLogger() ILogger {
 	return instance
 }
 
-type ILoggerSupport interface {
+type ILoggerSetter interface {
 	SetLogger(logger ILogger)
+}
+
+type ILoggerGetter interface {
 	GetLogger() ILogger
+}
+
+type ILoggerSupport interface {
+	ILoggerSetter
+	ILoggerGetter
 }
 
 type LoggerSupport struct {

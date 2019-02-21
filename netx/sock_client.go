@@ -35,6 +35,11 @@ type SockClientBase struct {
 
 	PackProxy   IPackSendReceiver
 	PackHandler PackHandler
+	Logger      logx.ILogger
+}
+
+func (c *SockClientBase) GetLogger() logx.ILogger {
+	return c.Logger
 }
 
 func (c *SockClientBase) LocalAddress() string {
@@ -70,13 +75,13 @@ func (c *SockClientBase) SendBytesTo(bytes []byte, rAddress ...string) error {
 }
 
 func (c *SockClientBase) StartReceiving() error {
-	logx.Infoln(c.Name + ".StartReceiving()")
+	c.Logger.Infoln(c.Name + ".StartReceiving()")
 	err := c.PackProxy.StartReceiving()
 	return err
 }
 
 func (c *SockClientBase) StopReceiving() error {
-	logx.Infoln(c.Name + ".StopReceiving()")
+	c.Logger.Infoln(c.Name + ".StopReceiving()")
 	err := c.PackProxy.StopReceiving()
 	return err
 }
