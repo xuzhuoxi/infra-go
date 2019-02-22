@@ -47,26 +47,33 @@ type ICodingHandler interface {
 
 //------------------------------------
 
-type IBuffEncoder interface {
+type iBuffEncoder interface {
 	bytex.IBuffByteReader
 	bytex.IBuffDataWriter
+	EncodeDataToBuff(encoders ...interface{})
+}
+
+type iBuffDecoder interface {
+	bytex.IBuffByteWriter
+	bytex.IBuffDataReader
+	DecodeDataFromBuff(decoders ...interface{})
+}
+
+type IBuffEncoder interface {
+	iBuffEncoder
 	bytex.IBuffReset
-	EncodeToBuff(encoders ...interface{})
+	bytex.IBuffLen
 }
 
 type IBuffDecoder interface {
-	bytex.IBuffByteWriter
-	bytex.IBuffDataReader
+	iBuffDecoder
 	bytex.IBuffReset
-	DecodeFromBuff(decoders ...interface{})
+	bytex.IBuffLen
 }
 
 type IBuffCodecs interface {
-	bytex.IBuffByteWriter
-	bytex.IBuffDataWriter
-	bytex.IBuffByteReader
-	bytex.IBuffDataReader
+	iBuffEncoder
+	iBuffDecoder
 	bytex.IBuffReset
-	EncodeToBuff(encoders ...interface{})
-	DecodeFromBuff(decoders ...interface{})
+	bytex.IBuffLen
 }

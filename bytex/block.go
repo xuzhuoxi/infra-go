@@ -12,6 +12,7 @@ type HandlerDataToBlock func(data []byte, order binary.ByteOrder) (block []byte)
 //数据数组　+　Block长度 + 成功?
 type HandlerBlockToData func(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool)
 
+//block是安全的
 func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byte) {
 	l := uint16(len(data))
 	if 0 == l {
@@ -22,6 +23,8 @@ func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byt
 	copy(rs[2:], data)
 	return rs
 }
+
+//data为共享切片，非安全
 func DefaultBlockToDataHandler(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool) {
 	blockLen := len(block)
 	if blockLen < 2 {

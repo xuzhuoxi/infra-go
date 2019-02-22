@@ -11,14 +11,24 @@ import (
 	"sync"
 )
 
-func NewGobCodingHandler() ICodingHandler {
-	buff := bytes.NewBuffer(nil)
-	return &gobHandler{buff: buff, encoder: gob.NewEncoder(buff), decoder: gob.NewDecoder(buff)}
+func NewDefaultGobCodingHandler() ICodingHandler {
+	return NewGobCodingHandlerAsync()
 }
 
+//有bug,查不明白
+func NewGobCodingHandler() ICodingHandler {
+	encoderBuff := bytes.NewBuffer(nil)
+	decoderBuff := bytes.NewBuffer(nil)
+	return &gobHandler{encoderBuff: encoderBuff, decoderBuff: decoderBuff,
+		encoder: gob.NewEncoder(encoderBuff), decoder: gob.NewDecoder(decoderBuff)}
+}
+
+//有bug,查不明白
 func NewGobCodingHandlerSync() ICodingHandler {
-	buff := bytes.NewBuffer(nil)
-	return &gobHandlerSync{buff: buff, encoder: gob.NewEncoder(buff), decoder: gob.NewDecoder(buff)}
+	encoderBuff := bytes.NewBuffer(nil)
+	decoderBuff := bytes.NewBuffer(nil)
+	return &gobHandlerSync{encoderBuff: encoderBuff, decoderBuff: decoderBuff,
+		encoder: gob.NewEncoder(encoderBuff), decoder: gob.NewDecoder(decoderBuff)}
 }
 
 func NewGobCodingHandlerAsync() ICodingHandler {
@@ -28,45 +38,56 @@ func NewGobCodingHandlerAsync() ICodingHandler {
 //------------------------------------------
 
 type gobHandler struct {
-	buff    *bytes.Buffer
-	encoder *gob.Encoder
-	decoder *gob.Decoder
+	encoderBuff *bytes.Buffer
+	decoderBuff *bytes.Buffer
+	encoder     *gob.Encoder
+	decoder     *gob.Decoder
 }
 
+//把数据编码为[]byte
+//注意：返回的数据应该马上使用
+//因为：[]byte来源于buff的切片，再次执行会覆盖数据，导致上次的返回数据被修改
 func (c *gobHandler) HandleEncode(data interface{}) []byte {
-	c.buff.Reset()
+	c.encoderBuff.Reset()
 	c.encoder.Encode(data)
-	return c.buff.Bytes()
+	//return slicex.CopyUint8(c.encoderBuff.Bytes())
+	return c.encoderBuff.Bytes()
 }
 
 func (c *gobHandler) HandleDecode(bs []byte, data interface{}) {
-	c.buff.Reset()
-	c.buff.Write(bs)
+	c.decoderBuff.Reset()
+	c.decoderBuff.Write(bs)
 	c.decoder.Decode(data)
 }
 
 //------------------------------------------
 
 type gobHandlerSync struct {
-	buff    *bytes.Buffer
-	encoder *gob.Encoder
-	decoder *gob.Decoder
-	mu      sync.RWMutex
+	encoderBuff *bytes.Buffer
+	decoderBuff *bytes.Buffer
+	encoder     *gob.Encoder
+	decoder     *gob.Decoder
+	eMu         sync.RWMutex
+	dMu         sync.RWMutex
 }
 
+//把数据编码为[]byte
+//注意：返回的数据应该马上使用
+//因为：[]byte来源于buff的切片，再次执行会覆盖数据，导致上次的返回数据被修改
 func (c *gobHandlerSync) HandleEncode(data interface{}) []byte {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.buff.Reset()
+	c.eMu.Lock()
+	defer c.eMu.Unlock()
+	c.encoderBuff.Reset()
 	c.encoder.Encode(data)
-	return c.buff.Bytes()
+	//return slicex.CopyUint8(c.encoderBuff.Bytes())
+	return c.encoderBuff.Bytes()
 }
 
 func (c *gobHandlerSync) HandleDecode(bs []byte, data interface{}) {
-	c.mu.Lock()
-	defer c.mu.Unlock()
-	c.buff.Reset()
-	c.buff.Write(bs)
+	c.dMu.Lock()
+	defer c.dMu.Unlock()
+	c.decoderBuff.Reset()
+	c.decoderBuff.Write(bs)
 	c.decoder.Decode(data)
 }
 

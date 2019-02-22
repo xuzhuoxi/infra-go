@@ -45,7 +45,7 @@ type buffCodecs struct {
 	codecsLock sync.RWMutex
 }
 
-func (bc *buffCodecs) EncodeToBuff(encoders ...interface{}) {
+func (bc *buffCodecs) EncodeDataToBuff(encoders ...interface{}) {
 	if len(encoders) == 0 {
 		return
 	}
@@ -56,7 +56,7 @@ func (bc *buffCodecs) EncodeToBuff(encoders ...interface{}) {
 	}
 }
 
-func (bc *buffCodecs) DecodeFromBuff(decoders ...interface{}) {
+func (bc *buffCodecs) DecodeDataFromBuff(decoders ...interface{}) {
 	if len(decoders) == 0 {
 		return
 	}

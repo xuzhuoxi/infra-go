@@ -32,35 +32,37 @@ func NewGobBuffCodecs(handler bytex.IDataBlockHandler) IBuffDecoder {
 //-------------------------------------
 
 func newGobBuffCodecs(handler bytex.IDataBlockHandler) *gobBuffCodecs {
-	return &gobBuffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(handler), handler: NewGobCodingHandler()}
+	return &gobBuffCodecs{IBuffDataBlock: bytex.NewBuffDataBlock(handler), gobHandler: NewDefaultGobCodingHandler()}
 }
 
 type gobBuffCodecs struct {
 	bytex.IBuffDataBlock
-	handler    ICodingHandler
+	gobHandler ICodingHandler
 	codecsLock sync.RWMutex
 }
 
-func (b *gobBuffCodecs) EncodeToBuff(data ...interface{}) {
+func (b *gobBuffCodecs) EncodeDataToBuff(data ...interface{}) {
 	if len(data) == 0 {
 		return
 	}
 	b.codecsLock.Lock()
 	defer b.codecsLock.Unlock()
 	for index := 0; index < len(data); index++ {
-		bytes := b.handler.HandleEncode(data[index])
+		bytes := b.gobHandler.HandleEncode(data[index])
 		b.WriteData(bytes)
+		//fmt.Println("EncodeDataToBuff:", bytes, data[index])
 	}
 }
 
-func (b *gobBuffCodecs) DecodeFromBuff(data ...interface{}) {
+func (b *gobBuffCodecs) DecodeDataFromBuff(data ...interface{}) {
 	if len(data) == 0 {
 		return
 	}
 	b.codecsLock.Lock()
 	defer b.codecsLock.Unlock()
 	for index := 0; index < len(data); index++ {
-		bytes := b.ReadData()
-		b.handler.HandleDecode(bytes, data[index])
+		bytes := b.ReadCopyData()
+		b.gobHandler.HandleDecode(bytes, data[index])
+		//fmt.Println("DecodeDataFromBuff:", bytes, data[index])
 	}
 }
