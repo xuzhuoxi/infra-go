@@ -61,7 +61,7 @@ func (b *gobBuffCodecs) DecodeDataFromBuff(data ...interface{}) {
 	b.codecsLock.Lock()
 	defer b.codecsLock.Unlock()
 	for index := 0; index < len(data); index++ {
-		bytes := b.ReadCopyData()
+		bytes := b.ReadData()
 		b.gobHandler.HandleDecode(bytes, data[index])
 		//fmt.Println("DecodeDataFromBuff:", bytes, data[index])
 	}

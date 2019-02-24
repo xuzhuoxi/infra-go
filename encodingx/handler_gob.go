@@ -13,9 +13,10 @@ import (
 
 func NewDefaultGobCodingHandler() ICodingHandler {
 	return NewGobCodingHandlerAsync()
+	//return NewGobCodingHandler()
 }
 
-//有bug,查不明白
+// 由于复用buff，相同结构体只有第一次才会追加TypeDescriptor
 func NewGobCodingHandler() ICodingHandler {
 	encoderBuff := bytes.NewBuffer(nil)
 	decoderBuff := bytes.NewBuffer(nil)
@@ -23,7 +24,7 @@ func NewGobCodingHandler() ICodingHandler {
 		encoder: gob.NewEncoder(encoderBuff), decoder: gob.NewDecoder(decoderBuff)}
 }
 
-//有bug,查不明白
+// 由于复用buff，相同结构体只有第一次才会追加TypeDescriptor
 func NewGobCodingHandlerSync() ICodingHandler {
 	encoderBuff := bytes.NewBuffer(nil)
 	decoderBuff := bytes.NewBuffer(nil)
@@ -31,6 +32,7 @@ func NewGobCodingHandlerSync() ICodingHandler {
 		encoder: gob.NewEncoder(encoderBuff), decoder: gob.NewDecoder(decoderBuff)}
 }
 
+//每次都会追加TypeDescriptor到编码中去
 func NewGobCodingHandlerAsync() ICodingHandler {
 	return gobHandlerAsync{}
 }
