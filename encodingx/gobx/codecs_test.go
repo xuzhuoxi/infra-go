@@ -3,7 +3,7 @@
 //on 2019-02-22.
 //@author xuzhuoxi
 //
-package encodingx
+package gobx
 
 import (
 	"fmt"

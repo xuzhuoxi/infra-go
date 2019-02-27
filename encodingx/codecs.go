@@ -10,6 +10,8 @@ import (
 	"sync"
 )
 
+var DefaultDataBlockHandler = bytex.NewDefaultDataBlockHandler()
+
 func NewDefaultBuffEncoder() IBuffEncoder {
 	return newBuffCodecs(DefaultDataBlockHandler)
 }

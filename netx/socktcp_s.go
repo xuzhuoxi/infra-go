@@ -130,8 +130,9 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, TcpDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
-	s.Logger.Traceln("[TCPServer] New TCP Connection:", address)
+	s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Opened!")
 	proxy.StartReceiving()
+	s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Closed!")
 }
 
 func closeLinkChannel(c chan bool) {

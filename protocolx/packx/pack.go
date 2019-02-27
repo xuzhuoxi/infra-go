@@ -3,7 +3,7 @@
 //on 2019-02-13.
 //@author xuzhuoxi
 //
-package protocolx
+package packx
 
 import (
 	"bytes"

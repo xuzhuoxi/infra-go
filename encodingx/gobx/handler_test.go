@@ -3,7 +3,7 @@
 //on 2019-02-16.
 //@author xuzhuoxi
 //
-package encodingx
+package gobx
 
 import (
 	"bytes"

@@ -155,7 +155,7 @@ func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, ad
 	buff.WriteBytes(data)
 	var unPackData []byte
 	for {
-		unPackData = buff.ReadData()
+		unPackData = buff.ReadCopyData()
 		if nil == unPackData {
 			break
 		}

@@ -131,8 +131,9 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	s.mapProxy[address] = proxy
 	s.mapStream[address] = stream
 	s.serverMu.Unlock()
-	s.Logger.Infoln("[QUICServer] New Quic Connection:", address)
+	s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Opened!")
 	proxy.StartReceiving()
+	s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Closed!")
 }
 
 func listenQuic(address string) (quic.Listener, error) {

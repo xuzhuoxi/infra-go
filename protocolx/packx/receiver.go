@@ -3,7 +3,7 @@
 //on 2019-02-12.
 //@author xuzhuoxi
 //
-package protocolx
+package packx
 
 import (
 	"github.com/xuzhuoxi/infra-go/bytex"

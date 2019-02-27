@@ -118,8 +118,9 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, WsDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
-	s.Logger.Traceln("[WebSocketServer] New WebSocket Connection:", address)
+	s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Opened!")
 	proxy.StartReceiving()
+	s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
 }
 
 func (s *WebSocketServer) closeLinkChannel(c chan bool) {

@@ -3,21 +3,22 @@
 //on 2019-02-16.
 //@author xuzhuoxi
 //
-package encodingx
+package gobx
 
 import (
 	"bytes"
 	"encoding/gob"
+	"github.com/xuzhuoxi/infra-go/encodingx"
 	"sync"
 )
 
-func NewDefaultGobCodingHandler() ICodingHandler {
+func NewDefaultGobCodingHandler() encodingx.ICodingHandler {
 	return NewGobCodingHandlerAsync()
 	//return NewGobCodingHandler()
 }
 
 // 由于复用buff，相同结构体只有第一次才会追加TypeDescriptor
-func NewGobCodingHandler() ICodingHandler {
+func NewGobCodingHandler() encodingx.ICodingHandler {
 	encoderBuff := bytes.NewBuffer(nil)
 	decoderBuff := bytes.NewBuffer(nil)
 	return &gobHandler{encoderBuff: encoderBuff, decoderBuff: decoderBuff,
@@ -25,7 +26,7 @@ func NewGobCodingHandler() ICodingHandler {
 }
 
 // 由于复用buff，相同结构体只有第一次才会追加TypeDescriptor
-func NewGobCodingHandlerSync() ICodingHandler {
+func NewGobCodingHandlerSync() encodingx.ICodingHandler {
 	encoderBuff := bytes.NewBuffer(nil)
 	decoderBuff := bytes.NewBuffer(nil)
 	return &gobHandlerSync{encoderBuff: encoderBuff, decoderBuff: decoderBuff,
@@ -33,7 +34,7 @@ func NewGobCodingHandlerSync() ICodingHandler {
 }
 
 //每次都会追加TypeDescriptor到编码中去
-func NewGobCodingHandlerAsync() ICodingHandler {
+func NewGobCodingHandlerAsync() encodingx.ICodingHandler {
 	return gobHandlerAsync{}
 }
 
@@ -95,8 +96,7 @@ func (c *gobHandlerSync) HandleDecode(bs []byte, data interface{}) {
 
 //------------------------------------------
 
-type gobHandlerAsync struct {
-}
+type gobHandlerAsync struct{}
 
 func (c gobHandlerAsync) HandleEncode(data interface{}) []byte {
 	buff := bytes.NewBuffer(nil)

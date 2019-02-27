@@ -1,31 +1,34 @@
-package encodingx
+package gobx
 
 import (
 	"github.com/xuzhuoxi/infra-go/bytex"
+	"github.com/xuzhuoxi/infra-go/encodingx"
 	"sync"
 )
 
-func NewDefaultGobBuffEncoder() IBuffEncoder {
+var DefaultDataBlockHandler = bytex.NewDefaultDataBlockHandler()
+
+func NewDefaultGobBuffEncoder() encodingx.IBuffEncoder {
 	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewDefaultGobBuffDecoder() IBuffDecoder {
+func NewDefaultGobBuffDecoder() encodingx.IBuffDecoder {
 	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewDefaultGobBuffCodecs() IBuffDecoder {
+func NewDefaultGobBuffCodecs() encodingx.IBuffDecoder {
 	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewGobBuffEncoder(handler bytex.IDataBlockHandler) IBuffEncoder {
+func NewGobBuffEncoder(handler bytex.IDataBlockHandler) encodingx.IBuffEncoder {
 	return newGobBuffCodecs(handler)
 }
 
-func NewGobBuffDecoder(handler bytex.IDataBlockHandler) IBuffDecoder {
+func NewGobBuffDecoder(handler bytex.IDataBlockHandler) encodingx.IBuffDecoder {
 	return newGobBuffCodecs(handler)
 }
 
-func NewGobBuffCodecs(handler bytex.IDataBlockHandler) IBuffDecoder {
+func NewGobBuffCodecs(handler bytex.IDataBlockHandler) encodingx.IBuffDecoder {
 	return newGobBuffCodecs(handler)
 }
 
@@ -37,7 +40,7 @@ func newGobBuffCodecs(handler bytex.IDataBlockHandler) *gobBuffCodecs {
 
 type gobBuffCodecs struct {
 	bytex.IBuffDataBlock
-	gobHandler ICodingHandler
+	gobHandler encodingx.ICodingHandler
 	codecsLock sync.RWMutex
 }
 
