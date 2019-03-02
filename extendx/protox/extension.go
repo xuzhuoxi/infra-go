@@ -36,8 +36,12 @@ type IRequestExtension interface {
 	RequestDataType() RequestDataType
 	//响应结构体
 	RequestData() interface{}
+}
+
+type IOnRequestExtension interface {
+	IRequestExtension
 	//请求响应
-	OnRequest(pId string, data interface{}, data2 ...interface{})
+	OnRequest(pId string, uid string, data interface{}, data2 ...interface{})
 }
 
 type IBeforeRequestExtension interface {
