@@ -10,27 +10,31 @@ import "github.com/xuzhuoxi/infra-go/extendx"
 type IProtocolContainer interface {
 	extendx.IExtensionContainer
 	//增加ProtocolId到Handler的表映射
-	AppendProtocolExtension(protocolId string, maxGoroutine int, handler ProtocolHandler, reqData interface{})
+	AppendProtocolHandlerExtension(protocolId string, maxGoroutine int, handler ProtocolHandler, reqData interface{})
 	//增加ProtocolId到Handler的表映射
-	AppendProtocolExtensionBatch(protocolId string, maxGoroutine int, handler ProtocolBatchHandler, reqData interface{})
+	AppendProtocolHandlerExtensionBatch(protocolId string, maxGoroutine int, handler ProtocolBatchHandler, reqData interface{})
 }
 
-func NewProtocolExtensionContainer() IProtocolContainer {
-	return &ProtoContainer{IExtensionContainer: extendx.NewExtensionContainer()}
+func NewIProtocolExtensionContainer() IProtocolContainer {
+	return &ProtocolContainer{ExtensionContainer: extendx.NewExtensionContainer()}
 }
 
-type ProtoContainer struct {
-	extendx.IExtensionContainer
+func NewProtocolExtensionContainer() ProtocolContainer {
+	return ProtocolContainer{ExtensionContainer: extendx.NewExtensionContainer()}
 }
 
-func (c *ProtoContainer) AppendProtocolExtension(protocolId string, maxGoroutine int, handler ProtocolHandler, reqData interface{}) {
+type ProtocolContainer struct {
+	extendx.ExtensionContainer
+}
+
+func (c *ProtocolContainer) AppendProtocolHandlerExtension(protocolId string, maxGoroutine int, handler ProtocolHandler, reqData interface{}) {
 	if c.CheckExtension(protocolId) {
 		panic("Repeat ProtocolId In Map: " + protocolId)
 	}
 	c.AppendExtension(newProtocolExtension(protocolId, maxGoroutine, handler, nil, reqData))
 }
 
-func (c *ProtoContainer) AppendProtocolExtensionBatch(protocolId string, maxGoroutine int, handler ProtocolBatchHandler, reqData interface{}) {
+func (c *ProtocolContainer) AppendProtocolHandlerExtensionBatch(protocolId string, maxGoroutine int, handler ProtocolBatchHandler, reqData interface{}) {
 	if c.CheckExtension(protocolId) {
 		panic("Repeat ProtocolId In Map: " + protocolId)
 	}

@@ -30,8 +30,12 @@ type IExtensionContainer interface {
 	HandleAtKey(key string, handler func(key string, extension IExtension)) error
 }
 
-func NewExtensionContainer() IExtensionContainer {
+func NewIExtensionContainer() IExtensionContainer {
 	return &ExtensionContainer{extensionMap: make(map[string]IExtension)}
+}
+
+func NewExtensionContainer() ExtensionContainer {
+	return ExtensionContainer{extensionMap: make(map[string]IExtension)}
 }
 
 type ExtensionContainer struct {
@@ -40,7 +44,7 @@ type ExtensionContainer struct {
 }
 
 func (m *ExtensionContainer) AppendExtension(extension IExtension) {
-	key := extension.Key()
+	key := extension.ExtensionName()
 	if m.hasMap(key) {
 		panic("Repeat Key In Map: " + key)
 	}

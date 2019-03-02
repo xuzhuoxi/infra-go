@@ -7,5 +7,5 @@ package extendx
 
 type IExtension interface {
 	//主键标识
-	Key() string
+	ExtensionName() string
 }

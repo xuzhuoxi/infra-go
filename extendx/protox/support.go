@@ -5,20 +5,22 @@
 //
 package protox
 
-func NewProtocolExtensionSupport(ProtoId string) ProtocolExtensionSupport {
-	return ProtocolExtensionSupport{ProtoId: ProtoId}
+func NewProtocolExtensionSupport(Name string) ProtocolExtensionSupport {
+	return ProtocolExtensionSupport{Name: Name, ProtoIdToValue: make(map[string]interface{})}
 }
 
 type ProtocolExtensionSupport struct {
-	ProtoId string
+	Name           string
+	ProtoIdToValue map[string]interface{}
 }
 
-func (s *ProtocolExtensionSupport) Key() string {
-	return s.ProtoId
+func (s *ProtocolExtensionSupport) ExtensionName() string {
+	return s.Name
 }
 
-func (s *ProtocolExtensionSupport) ProtocolId() string {
-	return s.ProtoId
+func (s *ProtocolExtensionSupport) CheckProtocolId(ProtoId string) bool {
+	_, ok := s.ProtoIdToValue[ProtoId]
+	return ok
 }
 
 //---------------------------------------

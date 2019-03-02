@@ -30,12 +30,15 @@ type ProtocolHandlerExtension struct {
 	reqData      interface{}
 }
 
-func (e *ProtocolHandlerExtension) Key() string {
+func (e *ProtocolHandlerExtension) ExtensionName() string {
 	return e.protocolId
 }
 
-func (e *ProtocolHandlerExtension) ProtocolId() string {
-	return e.protocolId
+func (e *ProtocolHandlerExtension) InitProtocolId() {
+}
+
+func (e *ProtocolHandlerExtension) CheckProtocolId(ProtocolId string) bool {
+	return e.protocolId == ProtocolId
 }
 
 func (e *ProtocolHandlerExtension) Batch() bool {

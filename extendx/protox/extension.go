@@ -17,8 +17,10 @@ const (
 
 type IProtocolExtension interface {
 	extendx.IExtension
-	//当前处理器所属ProtocolId
-	ProtocolId() string
+	//初始化支持的ProtocolId
+	InitProtocolId()
+	//检查ProtoId是否为被当前扩展支持
+	CheckProtocolId(ProtoId string) bool
 }
 
 type IGoroutineExtension interface {
@@ -35,21 +37,21 @@ type IRequestExtension interface {
 	//响应结数据类型
 	RequestDataType() RequestDataType
 	//响应结构体
-	RequestData() interface{}
+	GetRequestData(ProtoId string) (DataCopy interface{})
+}
+
+type IBeforeRequestExtension interface {
+	//执行响应前的一些处理
+	BeforeRequest(ProtoId string)
 }
 
 type IOnRequestExtension interface {
 	IRequestExtension
 	//请求响应
-	OnRequest(pId string, uid string, data interface{}, data2 ...interface{})
-}
-
-type IBeforeRequestExtension interface {
-	//执行响应前的一些处理
-	BeforeRequest()
+	OnRequest(ProtoId string, Uid string, Data interface{}, Data2 ...interface{})
 }
 
 type IAfterRequestExtension interface {
 	//响应结束前的一些处理
-	AfterRequest()
+	AfterRequest(ProtoId string)
 }
