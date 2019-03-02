@@ -2,6 +2,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/infra-go/errorsx"
+	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"golang.org/x/net/websocket"
 	"net/http"
@@ -18,9 +19,11 @@ func NewWebSocketServer(maxLinkNum int) IWebSocketServer {
 
 type IWebSocketServer interface {
 	ISockServer
+	eventx.IEventDispatcher
 }
 
 type WebSocketServer struct {
+	eventx.EventDispatcher
 	SockServerBase
 	maxLinkNum int
 
@@ -46,6 +49,7 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
+	s.dispatchServerStartedEvent(s)
 	s.Logger.Infoln(funcName + "()")
 	err := s.httpServer.ListenAndServe()
 	if nil != err {
@@ -58,7 +62,11 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 func (s *WebSocketServer) StopServer() error {
 	funcName := "WebSocketServer.StopServer"
 	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
+	defer func() {
+		s.serverMu.Unlock()
+		s.dispatchServerStoppedEvent(s)
+		s.Logger.Infoln(funcName + "()")
+	}()
 	if !s.running {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
@@ -72,7 +80,6 @@ func (s *WebSocketServer) StopServer() error {
 	s.mapConn = nil
 	closeLinkChannel(s.serverLinkSem)
 	s.running = false
-	s.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -111,6 +118,8 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 		delete(s.mapConn, address)
 		delete(s.mapProxy, address)
 		<-s.serverLinkSem
+		s.dispatchServerConnCloseEvent(s, address)
+		s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
 	}()
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
@@ -118,9 +127,9 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, WsDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
+	s.dispatchServerConnOpenEvent(s, address)
 	s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Opened!")
-	proxy.StartReceiving()
-	s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
+	proxy.StartReceiving() //这里会阻塞
 }
 
 func (s *WebSocketServer) closeLinkChannel(c chan bool) {

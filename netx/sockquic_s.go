@@ -3,6 +3,7 @@ package netx
 import (
 	"github.com/lucas-clemente/quic-go"
 	"github.com/xuzhuoxi/infra-go/errorsx"
+	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
 )
 
@@ -17,9 +18,11 @@ func NewQuicServer() IQUICServer {
 
 type IQUICServer interface {
 	ISockServer
+	eventx.IEventDispatcher
 }
 
 type QUICServer struct {
+	eventx.EventDispatcher
 	SockServerBase
 
 	listener   quic.Listener
@@ -50,6 +53,7 @@ func (s *QUICServer) StartServer(params SockParams) error {
 	s.mapStream = make(map[string]quic.Stream)
 	s.running = true
 	s.serverMu.Unlock()
+	s.dispatchServerStartedEvent(s)
 	s.Logger.Infoln(funcName + "()")
 	for s.running {
 		session, err := listener.Accept()
@@ -64,7 +68,11 @@ func (s *QUICServer) StartServer(params SockParams) error {
 func (s *QUICServer) StopServer() error {
 	funcName := "QUICServer.StopServer"
 	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
+	defer func() {
+		s.serverMu.Unlock()
+		s.dispatchServerStoppedEvent(s)
+		s.Logger.Infoln(funcName + "()")
+	}()
 	if !s.running {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
@@ -81,7 +89,6 @@ func (s *QUICServer) StopServer() error {
 	}
 	s.mapStream = nil
 	s.running = false
-	s.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -117,6 +124,8 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 		delete(s.mapSession, address)
 		delete(s.mapStream, address)
 		s.serverMu.Unlock()
+		s.dispatchServerConnCloseEvent(s, address)
+		s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Closed!")
 	}()
 	s.serverMu.Lock()
 	stream, err := session.AcceptStream()
@@ -131,9 +140,9 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	s.mapProxy[address] = proxy
 	s.mapStream[address] = stream
 	s.serverMu.Unlock()
+	s.dispatchServerConnOpenEvent(s, address)
 	s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Opened!")
-	proxy.StartReceiving()
-	s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Closed!")
+	proxy.StartReceiving() //这里会阻塞
 }
 
 func listenQuic(address string) (quic.Listener, error) {

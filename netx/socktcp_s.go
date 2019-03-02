@@ -2,6 +2,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/infra-go/errorsx"
+	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"net"
 )
@@ -17,9 +18,11 @@ func NewTCPServer(maxLinkNum int) ITCPServer {
 
 type ITCPServer interface {
 	ISockServer
+	eventx.IEventDispatcher
 }
 
 type TCPServer struct {
+	eventx.EventDispatcher
 	SockServerBase
 	maxLinkNum int
 	timeout    int
@@ -52,6 +55,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
+	s.dispatchServerStartedEvent(s)
 	s.Logger.Infoln(funcName + "()")
 
 	defer s.StopServer()
@@ -73,7 +77,11 @@ func (s *TCPServer) StartServer(params SockParams) error {
 func (s *TCPServer) StopServer() error {
 	funcName := "TCPServer.StopServer"
 	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
+	defer func() {
+		s.serverMu.Unlock()
+		s.dispatchServerStoppedEvent(s)
+		s.Logger.Infoln(funcName + "()")
+	}()
 	if !s.running {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
@@ -87,7 +95,6 @@ func (s *TCPServer) StopServer() error {
 	s.mapConn = nil
 	closeLinkChannel(s.serverLinkSem)
 	s.running = false
-	s.Logger.Infoln(funcName + "()")
 	return nil
 }
 
@@ -123,6 +130,8 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 		delete(s.mapConn, address)
 		delete(s.mapProxy, address)
 		<-s.serverLinkSem
+		s.dispatchServerConnCloseEvent(s, address)
+		s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Closed!")
 	}()
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
@@ -130,9 +139,9 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, TcpDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
+	s.dispatchServerConnOpenEvent(s, address)
 	s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Opened!")
-	proxy.StartReceiving()
-	s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Closed!")
+	proxy.StartReceiving() //这里会阻塞
 }
 
 func closeLinkChannel(c chan bool) {

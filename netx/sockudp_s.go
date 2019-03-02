@@ -2,6 +2,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/infra-go/errorsx"
+	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"net"
 	"sync"
@@ -22,9 +23,11 @@ func NewUDPServer() IUDPServer {
 
 type IUDPServer interface {
 	ISockServer
+	eventx.IEventDispatcher
 }
 
 type UDPServer struct {
+	eventx.EventDispatcher
 	SockServerBase
 	conn         *net.UDPConn
 	messageProxy IPackSendReceiver
@@ -52,6 +55,7 @@ func (s *UDPServer) StartServer(params SockParams) error {
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
 	s.messageProxy = NewPackSendReceiver(connProxy, connProxy, s.PackHandler, UdpDataBlockHandler, s.Logger, true)
 	s.serverMu.Unlock()
+	s.dispatchServerStartedEvent(s)
 	s.Logger.Infoln(funcName + "()")
 	err2 := s.messageProxy.StartReceiving()
 	return err2
@@ -67,11 +71,12 @@ func (s *UDPServer) StopServer() error {
 	defer func() {
 		s.running = false
 		s.serverMu.Unlock()
+		s.dispatchServerStoppedEvent(s)
+		s.Logger.Infoln(funcName + "()")
 	}()
 	if nil != s.conn {
 		s.conn.Close()
 	}
-	s.Logger.Infoln(funcName + "()")
 	return nil
 }
 
