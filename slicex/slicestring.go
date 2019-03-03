@@ -166,3 +166,17 @@ func ReverseString(slice []string) {
 		slice[i], slice[j] = slice[j], slice[i]
 	}
 }
+
+//克隆
+func CopyString(slice []string) []string {
+	if nil == slice {
+		return nil
+	}
+	ln := len(slice)
+	if 0 == ln {
+		return []string{}
+	}
+	rs := make([]string, ln)
+	copy(rs, slice)
+	return rs
+}
