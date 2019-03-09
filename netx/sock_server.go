@@ -19,16 +19,21 @@ const (
 	ServerEventConnClosed = "netx.ServerEventConnClosed"
 )
 
+type IServerRunning interface {
+	Running() bool
+}
+
 type IServer interface {
 	StartServer(params SockParams) error //会阻塞
 	StopServer() error
-	Running() bool
 }
 
 type ISockServer interface {
 	IServer
+	IServerRunning
 	ISockSender
 	IPackHandlerSetter
+	IPackHandlerGetter
 	logx.ILoggerSupport
 }
 
@@ -38,15 +43,9 @@ type SockServerBase struct {
 	serverMu sync.RWMutex
 	running  bool
 
-	PackHandler PackHandler
-	Logger      logx.ILogger
-}
+	Logger logx.ILogger
 
-func (s *SockServerBase) SetPackHandler(handler PackHandler) error {
-	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
-	s.PackHandler = handler
-	return nil
+	PackHandler IPackHandler
 }
 
 func (s *SockServerBase) GetLogger() logx.ILogger {
@@ -61,6 +60,18 @@ func (s *SockServerBase) Running() bool {
 	s.serverMu.RLock()
 	defer s.serverMu.RUnlock()
 	return s.running
+}
+
+func (s *SockServerBase) GetPackHandler() IPackHandler {
+	s.serverMu.RLock()
+	defer s.serverMu.RUnlock()
+	return s.PackHandler
+}
+
+func (s *SockServerBase) SetPackHandler(packHandler IPackHandler) {
+	s.serverMu.Lock()
+	defer s.serverMu.Unlock()
+	s.PackHandler = packHandler
 }
 
 func (s *SockServerBase) dispatchServerStartedEvent(dispatcher eventx.IEventDispatcher) {

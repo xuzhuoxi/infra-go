@@ -12,7 +12,7 @@ func NewQuicServer() IQUICServer {
 	server.Name = "QuicServer"
 	server.Network = QuicNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandler = DefaultPackHandler
+	server.PackHandler = NewIPackHandler(nil)
 	return server
 }
 

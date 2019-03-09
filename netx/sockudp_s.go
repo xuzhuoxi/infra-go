@@ -17,7 +17,7 @@ func NewUDPServer() IUDPServer {
 	server.Name = "UDPServer"
 	server.Network = UDPNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandler = DefaultPackHandler
+	server.PackHandler = NewIPackHandler(nil)
 	return server
 }
 

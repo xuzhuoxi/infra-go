@@ -13,7 +13,7 @@ func NewWebSocketServer(maxLinkNum int) IWebSocketServer {
 	server.Name = "WSServer"
 	server.Network = WSNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandler = DefaultPackHandler
+	server.PackHandler = NewIPackHandler(nil)
 	return server
 }
 

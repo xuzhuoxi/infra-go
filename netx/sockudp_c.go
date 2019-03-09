@@ -11,7 +11,7 @@ func NewUDPDialClient() IUDPClient {
 	client.Name = "UDPDialClient"
 	client.Network = UDPNetwork
 	client.Logger = logx.DefaultLogger()
-	client.PackHandler = DefaultPackHandler
+	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
 
@@ -20,7 +20,7 @@ func NewUDPListenClient() IUDPClient {
 	client.Name = "UDPListenClient"
 	client.Network = UDPNetwork
 	client.Logger = logx.DefaultLogger()
-	client.PackHandler = DefaultPackHandler
+	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
 

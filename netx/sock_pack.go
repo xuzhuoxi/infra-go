@@ -1,7 +1,6 @@
 package netx
 
 import (
-	"fmt"
 	"github.com/xuzhuoxi/infra-go/bytex"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/logx"
@@ -9,16 +8,6 @@ import (
 )
 
 const ReceiverBuffLen = 2048
-
-type PackHandler func(msgBytes []byte, info interface{})
-
-func DefaultPackHandler(msgData []byte, info interface{}) {
-	logx.Traceln("DefaultMessageHandler[Sender:"+fmt.Sprint(info)+"]msgData:", msgData, "dataLen:", len(msgData), "]")
-}
-
-type IPackHandlerSetter interface {
-	SetPackHandler(handler PackHandler) error
-}
 
 type iPackReceiver interface {
 	IPackHandlerSetter
@@ -40,7 +29,7 @@ type IPackReceiver interface {
 }
 
 type IPackSender interface {
-	iPackReceiver
+	iPackSender
 	logx.ILoggerGetter
 }
 
@@ -50,19 +39,21 @@ type IPackSendReceiver interface {
 	logx.ILoggerGetter
 }
 
+//--------------------------------------------------------------------------
+
 func NewPackSender(writer IConnWriterAdapter, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackSender {
 	return NewPackSendReceiver(nil, writer, nil, dataBlockHandler, logger, false)
 }
 
-func NewPackReceiver(reader IConnReaderAdapter, packHandler PackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
+func NewPackReceiver(reader IConnReaderAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
 	return NewPackSendReceiver(reader, nil, packHandler, dataBlockHandler, logger, false)
 }
 
-func NewPackMultiReceiver(reader IConnReaderAdapter, packHandler PackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
+func NewPackMultiReceiver(reader IConnReaderAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
 	return NewPackSendReceiver(reader, nil, packHandler, dataBlockHandler, logger, true)
 }
 
-func NewPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler PackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger, multiReceive bool) IPackSendReceiver {
+func NewPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger, multiReceive bool) IPackSendReceiver {
 	if multiReceive {
 		rs := newPackSendReceiverMulti(reader, writer, packHandler, dataBlockHandler, logger)
 		rs.onReceiveBytes = rs.handleDataMulti
@@ -76,39 +67,42 @@ func NewPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, p
 
 //--------------------------------------------------
 
-func newPackSRBase(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler PackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) packSRBase {
-	return packSRBase{reader: reader, writer: writer, packHandler: packHandler, dataBlockHandler: dataBlockHandler, toBlockBuff: bytex.NewBuffDataBlock(dataBlockHandler), Logger: logger}
+func newPackSRBase(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) packSRBase {
+	return packSRBase{reader: reader, writer: writer, PackHandler: packHandler, dataBlockHandler: dataBlockHandler, toBlockBuff: bytex.NewBuffDataBlock(dataBlockHandler), Logger: logger}
 }
 
 type packSRBase struct {
 	reader IConnReaderAdapter
 	writer IConnWriterAdapter
-	mu     sync.Mutex
+	mu     sync.RWMutex
 
 	//receive
 	receiving      bool
-	packHandler    PackHandler
+	PackHandler    IPackHandler
 	onReceiveBytes func(newData []byte, address interface{})
+
 	//send
 	dataBlockHandler bytex.IDataBlockHandler
 	toBlockBuff      bytex.IBuffToBlock
 	Logger           logx.ILogger
 }
 
+func (sr *packSRBase) SetPackHandler(packHandler IPackHandler) {
+	sr.PackHandler = packHandler
+}
+
 func (sr *packSRBase) SetLogger(logger logx.ILogger) {
+	sr.mu.Lock()
+	defer sr.mu.Unlock()
 	sr.Logger = logger
 }
 
 func (sr *packSRBase) GetLogger() logx.ILogger {
+	sr.mu.RLock()
+	defer sr.mu.RUnlock()
 	return sr.Logger
 }
 
-func (sr *packSRBase) SetPackHandler(handler PackHandler) error {
-	sr.mu.Lock()
-	defer sr.mu.Unlock()
-	sr.packHandler = handler
-	return nil
-}
 func (sr *packSRBase) SendBytes(bytes []byte, rAddress ...string) (int, error) {
 	return sr.writer.WriteBytes(bytes, rAddress...)
 }
@@ -149,6 +143,8 @@ func (sr *packSRBase) StopReceiving() error {
 	return nil
 }
 func (sr *packSRBase) IsReceiving() bool {
+	sr.mu.RLock()
+	defer sr.mu.RUnlock()
 	return sr.receiving
 }
 func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, address string) {
@@ -159,13 +155,15 @@ func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, ad
 		if nil == unPackData {
 			break
 		}
-		sr.packHandler(unPackData, address)
+		sr.PackHandler.ForEachHandler(func(handler FuncPackHandler) bool {
+			return handler(unPackData, address)
+		})
 	}
 }
 
 //--------------------------------------------------
 
-func newPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler PackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiver {
+func newPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiver {
 	return &packSendReceiver{packSRBase: newPackSRBase(reader, writer, packHandler, dataBlockHandler, logger), toDataBuff: bytex.NewBuffToData(dataBlockHandler)}
 }
 
@@ -184,7 +182,7 @@ func (sr *packSendReceiver) handleData(newData []byte, address interface{}) {
 
 //--------------------------------------------------
 
-func newPackSendReceiverMulti(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler PackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiverMulti {
+func newPackSendReceiverMulti(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiverMulti {
 	return &packSendReceiverMulti{packSRBase: newPackSRBase(reader, writer, packHandler, dataBlockHandler, logger), toDataBuffMap: make(map[string]bytex.IBuffToData)}
 }
 

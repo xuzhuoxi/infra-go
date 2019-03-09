@@ -8,14 +8,15 @@ import (
 
 func TestTCPServer(t *testing.T) {
 	server := NewTCPServer(5)
-	var packHandler = func(msgData []byte, sender interface{}) {
+	var packHandler = func(msgData []byte, sender interface{}) bool {
 		senderAddress := sender.(string)
 		logx.Traceln("TestTCPServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]")
 		rs := []byte{byte(len(msgData))}
 		rs = append(rs, msgData...)
 		server.SendPackTo(rs, senderAddress)
+		return true
 	}
-	server.SetPackHandler(packHandler)
+	server.GetPackHandler().SetPackHandlers([]FuncPackHandler{packHandler})
 	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
 
 	client := NewTCPClient()

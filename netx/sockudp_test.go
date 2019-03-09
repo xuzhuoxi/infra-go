@@ -10,14 +10,15 @@ import (
 
 func TestUDPServer(t *testing.T) {
 	server := NewUDPServer()
-	var packHandler = func(msgData []byte, sender interface{}) {
+	var packHandler = func(msgData []byte, sender interface{}) bool {
 		senderAddress := sender.(string)
 		logx.Traceln("TestUDPServer.msgHandler[Sender:", senderAddress, "]msgData:", msgData, "dataLen:", len(msgData), "]")
 		rs := []byte{byte(len(msgData))}
 		rs = append(rs, msgData...)
 		server.SendPackTo(rs, senderAddress)
+		return true
 	}
-	server.SetPackHandler(packHandler)
+	server.GetPackHandler().SetPackHandlers([]FuncPackHandler{packHandler})
 	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
 	defer server.StopServer()
 	time.Sleep(10 * time.Millisecond)

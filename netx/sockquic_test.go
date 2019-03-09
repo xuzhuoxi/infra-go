@@ -9,15 +9,16 @@ import (
 func TestQUICServer(t *testing.T) {
 	server := NewQuicServer()
 	c := 0
-	var packHandler = func(msgData []byte, sender interface{}) {
+	var packHandler = func(msgData []byte, sender interface{}) bool {
 		senderAddress := sender.(string)
 		logx.Traceln("TestQUICServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]", c)
 		c++
 		rs := []byte{byte(len(msgData))}
 		rs = append(rs, msgData...)
 		server.SendPackTo(rs, senderAddress)
+		return true
 	}
-	server.SetPackHandler(packHandler)
+	server.GetPackHandler().SetPackHandlers([]FuncPackHandler{packHandler})
 	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
 	time.Sleep(1 * time.Second)
 	client := NewQUICClient()

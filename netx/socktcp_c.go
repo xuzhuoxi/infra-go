@@ -11,7 +11,7 @@ func NewTCPClient() ITCPClient {
 	client.Name = "TCPClient"
 	client.Network = TcpNetwork
 	client.Logger = logx.DefaultLogger()
-	client.PackHandler = DefaultPackHandler
+	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
 

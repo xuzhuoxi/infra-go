@@ -11,7 +11,7 @@ func NewWebSocketClient() IWebSocketClient {
 	client.Name = "WSClient"
 	client.Network = WSNetwork
 	client.Logger = logx.DefaultLogger()
-	client.PackHandler = DefaultPackHandler
+	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
 

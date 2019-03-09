@@ -10,14 +10,18 @@ import (
 	"sync"
 )
 
+type IClientOpening interface {
+	Opening() bool
+}
+
 type IClient interface {
 	OpenClient(params SockParams) error
 	CloseClient() error
-	Opening() bool
 }
 
 type ISockClient interface {
 	IClient
+	IClientOpening
 	IPackReceiver
 	ISockSender
 
@@ -33,25 +37,29 @@ type SockClientBase struct {
 	localAddress string
 	conn         ISockConn
 
-	PackProxy   IPackSendReceiver
-	PackHandler PackHandler
-	Logger      logx.ILogger
+	PackProxy IPackSendReceiver
+	Logger    logx.ILogger
+
+	PackHandler IPackHandler
 }
 
-func (c *SockClientBase) GetLogger() logx.ILogger {
-	return c.Logger
+func (c *SockClientBase) GetPackHandler() IPackHandler {
+	c.clientMu.RLock()
+	defer c.clientMu.RUnlock()
+	return c.PackHandler
+}
+
+func (c *SockClientBase) SetPackHandler(packHandler IPackHandler) {
+	c.clientMu.Lock()
+	defer c.clientMu.Unlock()
+	c.PackHandler = packHandler
+	if c.PackProxy != nil {
+		c.PackProxy.SetPackHandler(c.PackHandler)
+	}
 }
 
 func (c *SockClientBase) LocalAddress() string {
 	return c.conn.LocalAddr().String()
-}
-
-func (c *SockClientBase) SetPackHandler(handler PackHandler) error {
-	c.PackHandler = handler
-	if nil != c.PackProxy {
-		c.PackProxy.SetPackHandler(handler)
-	}
-	return nil
 }
 
 func (c *SockClientBase) IsReceiving() bool {
@@ -62,6 +70,10 @@ func (c *SockClientBase) Opening() bool {
 	c.clientMu.RLock()
 	defer c.clientMu.RUnlock()
 	return c.opening
+}
+
+func (c *SockClientBase) GetLogger() logx.ILogger {
+	return c.Logger
 }
 
 func (c *SockClientBase) SendPackTo(msg []byte, rAddress ...string) error {
@@ -84,11 +96,4 @@ func (c *SockClientBase) StopReceiving() error {
 	c.Logger.Infoln(c.Name + ".StopReceiving()")
 	err := c.PackProxy.StopReceiving()
 	return err
-}
-
-func (c *SockClientBase) setMessageProxy(packProxy IPackSendReceiver) {
-	c.PackProxy = packProxy
-	if nil != c.PackHandler {
-		packProxy.SetPackHandler(c.PackHandler)
-	}
 }

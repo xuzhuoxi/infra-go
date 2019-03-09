@@ -12,7 +12,7 @@ func NewQUICClient() IQuicClient {
 	client.Name = "QUICClient"
 	client.Network = QuicNetwork
 	client.Logger = logx.DefaultLogger()
-	client.PackHandler = DefaultPackHandler
+	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
 
@@ -48,7 +48,7 @@ func (c *QUICClient) OpenClient(params SockParams) error {
 	}
 	c.stream = stream
 	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
-	c.setMessageProxy(NewPackSendReceiver(connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, c.Logger, false))
+	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, c.Logger, false)
 	c.opening = true
 	c.Logger.Infoln(funcName + "()")
 	return nil

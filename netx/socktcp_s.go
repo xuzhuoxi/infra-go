@@ -12,7 +12,7 @@ func NewTCPServer(maxLinkNum int) ITCPServer {
 	server.Name = "TCPServer"
 	server.Network = TcpNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandler = DefaultPackHandler
+	server.PackHandler = NewIPackHandler(nil)
 	return server
 }
 
