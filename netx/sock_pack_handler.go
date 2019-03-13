@@ -44,6 +44,7 @@ type IPackHandlerGetter interface {
 }
 
 type IPackHandler interface {
+	FirstHandler(first func(handler FuncPackHandler) bool)
 	ForEachHandler(each func(handler FuncPackHandler) bool)
 	AppendPackHandler(handler FuncPackHandler) error
 	SetPackHandlers(handlers []FuncPackHandler) error
@@ -53,6 +54,15 @@ type IPackHandler interface {
 type PackHandler struct {
 	handlers []FuncPackHandler
 	RWMutex  sync.RWMutex
+}
+
+func (ph *PackHandler) FirstHandler(first func(handler FuncPackHandler) bool) {
+	ph.RWMutex.RLock()
+	defer ph.RWMutex.RUnlock()
+	if len(ph.handlers) == 0 || nil == ph.handlers[0] || nil == first {
+		return
+	}
+	first(ph.handlers[0])
 }
 
 func (ph *PackHandler) ForEachHandler(each func(handler FuncPackHandler) bool) {
