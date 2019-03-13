@@ -10,6 +10,14 @@ import (
 	"sync"
 )
 
+type ISockClientSetter interface {
+	SetClient(client ISockClient)
+}
+
+type ISockClientGetter interface {
+	GetClient() ISockClient
+}
+
 type IClientOpening interface {
 	Opening() bool
 }

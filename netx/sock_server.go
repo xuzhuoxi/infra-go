@@ -19,6 +19,14 @@ const (
 	ServerEventConnClosed = "netx.ServerEventConnClosed"
 )
 
+type ISockServerSetter interface {
+	SetServer(server ISockServer)
+}
+
+type ISockServerGetter interface {
+	GetServer() ISockServer
+}
+
 type IServerRunning interface {
 	Running() bool
 }
