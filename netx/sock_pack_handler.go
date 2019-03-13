@@ -59,7 +59,7 @@ type PackHandler struct {
 func (ph *PackHandler) FirstHandler(first func(handler FuncPackHandler) bool) {
 	ph.RWMutex.RLock()
 	defer ph.RWMutex.RUnlock()
-	if len(ph.handlers) == 0 || nil == ph.handlers[0] || nil == first {
+	if len(ph.handlers) == 0 {
 		return
 	}
 	first(ph.handlers[0])
@@ -68,12 +68,17 @@ func (ph *PackHandler) FirstHandler(first func(handler FuncPackHandler) bool) {
 func (ph *PackHandler) ForEachHandler(each func(handler FuncPackHandler) bool) {
 	ph.RWMutex.RLock()
 	defer ph.RWMutex.RUnlock()
-	if len(ph.handlers) == 0 {
+	l := len(ph.handlers)
+	switch {
+	case 0 == l:
 		return
-	}
-	for _, handler := range ph.handlers {
-		if each(handler) {
-			break
+	case 1 == l:
+		each(ph.handlers[0])
+	default:
+		for _, handler := range ph.handlers {
+			if each(handler) {
+				break
+			}
 		}
 	}
 }
