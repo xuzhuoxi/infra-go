@@ -22,7 +22,7 @@ func (d *_EventDelegate) Handle(data *EventData) {
 	copyArr := d.calls[:]
 	var onceTempAry []*_CallInfo
 	for _, call := range copyArr {
-		if data.stoped {
+		if data.stopped {
 			break
 		}
 		if !containsCall(d.calls, call) {

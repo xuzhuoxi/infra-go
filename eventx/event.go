@@ -18,15 +18,25 @@ type EventData struct {
 	//事件传递的数据
 	Data interface{}
 
-	currentTarget IEventDispatcher
-	stoped        bool
+	currentTarget     interface{}
+	currentDispatcher IEventDispatcher
+	target            interface{}
+	stopped           bool
 }
 
 /**
  * 事件的发生器
  * @returns {IEventDispatcher}
  */
-func (ed *EventData) CurrentTarget() IEventDispatcher {
+func (ed *EventData) CurrentDispatcher() IEventDispatcher {
+	return ed.currentDispatcher
+}
+
+/**
+ * 事件当前目标
+ * @returns interface{}
+ */
+func (ed *EventData) CurrentTarget() interface{} {
 	return ed.currentTarget
 }
 
@@ -34,18 +44,15 @@ func (ed *EventData) CurrentTarget() IEventDispatcher {
  * 是否设置为停止
  * @returns {boolean}
  */
-func (ed *EventData) Stoped() bool {
-	return ed.stoped
+func (ed *EventData) Stopped() bool {
+	return ed.stopped
 }
 
 /**
  * 防止对事件流中当前节点中和所有后续节点中的事件侦听器进行处理
  */
 func (ed *EventData) StopImmediatePropagation() {
-	ed.stoped = true
-}
-func (ed *EventData) SetCurrentTarget(currentTarget IEventDispatcher) {
-	ed.currentTarget = currentTarget
+	ed.stopped = true
 }
 
 type IEventDispatcher interface {
@@ -81,7 +88,7 @@ type IEventDispatcher interface {
 	 * @param eventType 事件类型
 	 * @param data 事件的数据(可为null)
 	 */
-	DispatchEvent(eventType string, data interface{})
+	DispatchEvent(eventType string, currentTarget interface{}, data interface{})
 }
 
 type EventDispatcher struct {
@@ -114,11 +121,11 @@ func (e *EventDispatcher) RemoveEventListeners() {
 	e.dMap = nil
 }
 
-func (e *EventDispatcher) DispatchEvent(eventType string, data interface{}) {
+func (e *EventDispatcher) DispatchEvent(eventType string, currentTarget interface{}, data interface{}) {
 	if !e.hasType(eventType) {
 		return
 	}
-	d := &EventData{EventType: eventType, Data: data, currentTarget: e}
+	d := &EventData{EventType: eventType, Data: data, currentTarget: currentTarget, currentDispatcher: e}
 	e.getDelegate(eventType).Handle(d)
 }
 

@@ -83,17 +83,17 @@ func (s *SockServerBase) SetPackHandler(packHandler IPackHandler) {
 }
 
 func (s *SockServerBase) dispatchServerStartedEvent(dispatcher eventx.IEventDispatcher) {
-	dispatcher.DispatchEvent(ServerEventStart, nil)
+	dispatcher.DispatchEvent(ServerEventStart, dispatcher, nil)
 }
 
 func (s *SockServerBase) dispatchServerStoppedEvent(dispatcher eventx.IEventDispatcher) {
-	dispatcher.DispatchEvent(ServerEventStop, nil)
+	dispatcher.DispatchEvent(ServerEventStop, dispatcher, nil)
 }
 
 func (s *SockServerBase) dispatchServerConnOpenEvent(dispatcher eventx.IEventDispatcher, address string) {
-	dispatcher.DispatchEvent(ServerEventConnOpened, address)
+	dispatcher.DispatchEvent(ServerEventConnOpened, dispatcher, address)
 }
 
 func (s *SockServerBase) dispatchServerConnCloseEvent(dispatcher eventx.IEventDispatcher, address string) {
-	dispatcher.DispatchEvent(ServerEventConnClosed, address)
+	dispatcher.DispatchEvent(ServerEventConnClosed, dispatcher, address)
 }
