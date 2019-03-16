@@ -180,3 +180,16 @@ func CopyString(slice []string) []string {
 	copy(rs, slice)
 	return rs
 }
+
+//比较
+func EqualString(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for index, val := range a {
+		if val != b[index] {
+			return false
+		}
+	}
+	return true
+}

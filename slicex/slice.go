@@ -191,3 +191,16 @@ func CopyT(slice []interface{}) []interface{} {
 	copy(rs, slice)
 	return rs
 }
+
+//比较
+func EqualT(a, b []interface{}) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for index, val := range a {
+		if !lang.Equal(val, b[index]) {
+			return false
+		}
+	}
+	return true
+}

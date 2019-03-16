@@ -166,3 +166,16 @@ func ReverseInt64(slice []int64) {
 		slice[i], slice[j] = slice[j], slice[i]
 	}
 }
+
+//比较
+func EqualInt64(a, b []int64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for index, val := range a {
+		if val != b[index] {
+			return false
+		}
+	}
+	return true
+}

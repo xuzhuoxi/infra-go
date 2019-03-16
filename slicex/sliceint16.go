@@ -166,3 +166,16 @@ func ReverseInt16(slice []int16) {
 		slice[i], slice[j] = slice[j], slice[i]
 	}
 }
+
+//比较
+func EqualInt16(a, b []int16) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for index, val := range a {
+		if val != b[index] {
+			return false
+		}
+	}
+	return true
+}

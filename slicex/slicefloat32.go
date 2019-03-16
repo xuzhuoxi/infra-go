@@ -1,5 +1,7 @@
 package slicex
 
+import "github.com/xuzhuoxi/infra-go/lang"
+
 //合并
 func MergeFloat32(slices ...[]float32) []float32 {
 	ln := len(slices)
@@ -165,4 +167,17 @@ func ReverseFloat32(slice []float32) {
 	for i, j := 0, ln-1; i < j; i, j = i+1, j-1 {
 		slice[i], slice[j] = slice[j], slice[i]
 	}
+}
+
+//比较
+func EqualFloat32(a, b []float32) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for index, val := range a {
+		if val != b[index] {
+			return false
+		}
+	}
+	return true
 }

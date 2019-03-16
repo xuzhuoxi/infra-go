@@ -1,6 +1,8 @@
 package slicex
 
-import "bytes"
+import (
+	"bytes"
+)
 
 //合并
 func MergeUint8(slices ...[]uint8) []uint8 {
@@ -186,4 +188,9 @@ func CopyUint8(slice []uint8) []uint8 {
 
 func CopyByte(slice []byte) []uint8 {
 	return CopyUint8(slice)
+}
+
+//比较
+func EqualUint8(a, b []uint8) bool {
+	return bytes.Equal(a, b)
 }

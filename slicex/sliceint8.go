@@ -166,3 +166,16 @@ func ReverseInt8(slice []int8) {
 		slice[i], slice[j] = slice[j], slice[i]
 	}
 }
+
+//比较
+func EqualInt8(a, b []int8) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for index, val := range a {
+		if val != b[index] {
+			return false
+		}
+	}
+	return true
+}
