@@ -1,7 +1,5 @@
 package slicex
 
-import "github.com/xuzhuoxi/infra-go/lang"
-
 //合并
 func MergeUint32(slices ...[]uint32) []uint32 {
 	ln := len(slices)
