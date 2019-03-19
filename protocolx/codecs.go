@@ -18,20 +18,20 @@ package protocolx
 //	return newProtocolCoder(DefaultOrder, DefaultData2BlockHandler, DefaultBlock2DataHandler, encodeHandler, decodeHandler)
 //}
 //
-//func NewProtocolEncoder(order binary.ByteOrder, data2blockHandler bytex.DataToBlockHandler, encodeHandler encodingx.IDataEncodeHandler) IEncodingProtocol {
+//func NewProtocolEncoder(order binaryx.ByteOrder, data2blockHandler bytex.DataToBlockHandler, encodeHandler encodingx.IDataEncodeHandler) IEncodingProtocol {
 //	return newProtocolCoder(order, data2blockHandler, nil, encodeHandler, nil)
 //}
 //
-//func NewProtocolDecoder(order binary.ByteOrder, block2dataHandler bytex.BlockToDataHandler, decodeHandler encodingx.IDataDecodeHandler) IDecodingProtocol {
+//func NewProtocolDecoder(order binaryx.ByteOrder, block2dataHandler bytex.BlockToDataHandler, decodeHandler encodingx.IDataDecodeHandler) IDecodingProtocol {
 //	return newProtocolCoder(order, nil, block2dataHandler, nil, decodeHandler)
 //}
 //
-//func NewProtocolCoder(order binary.ByteOrder, data2blockHandler bytex.DataToBlockHandler, block2dataHandler bytex.BlockToDataHandler,
+//func NewProtocolCoder(order binaryx.ByteOrder, data2blockHandler bytex.DataToBlockHandler, block2dataHandler bytex.BlockToDataHandler,
 //	encodeHandler encodingx.IDataEncodeHandler, decodeHandler encodingx.IDataDecodeHandler) ICodingProtocol {
 //	return newProtocolCoder(order, data2blockHandler, block2dataHandler, encodeHandler, decodeHandler)
 //}
 //
-//func newProtocolCoder(order binary.ByteOrder, data2blockHandler bytex.DataToBlockHandler, block2dataHandler bytex.BlockToDataHandler,
+//func newProtocolCoder(order binaryx.ByteOrder, data2blockHandler bytex.DataToBlockHandler, block2dataHandler bytex.BlockToDataHandler,
 //	encodeHandler encodingx.IDataEncodeHandler, decodeHandler encodingx.IDataDecodeHandler) *protocolData {
 //	return &protocolData{buff: bytes.NewBuffer(nil), order: order,
 //		data2blockHandler: data2blockHandler, block2dataHandler: block2dataHandler,
@@ -48,7 +48,7 @@ package protocolx
 //	protocolData []interface{}
 //	buff         *bytes.Buffer
 //
-//	order             binary.ByteOrder
+//	order             binaryx.ByteOrder
 //	data2blockHandler bytex.DataToBlockHandler
 //	block2dataHandler bytex.BlockToDataHandler
 //	encodeHandler     encodingx.IDataEncodeHandler
@@ -65,7 +65,7 @@ package protocolx
 //
 //func (d *protocolData) EncodeToBytes() []byte {
 //	d.buff.Reset()
-//	binary.Write(d.buff, d.order, &d.protocolId)
+//	binaryx.Write(d.buff, d.order, &d.protocolId)
 //	if len(d.protocolData) > 0 {
 //		for index := 0; index < len(d.protocolData); index++ {
 //			var data []byte
@@ -88,7 +88,7 @@ package protocolx
 //func (d *protocolData) DecodeFromBytes(data []byte) bool {
 //	d.buff.Reset()
 //	d.buff.Write(data)
-//	err := binary.Read(d.buff, d.order, &d.protocolId)
+//	err := binaryx.Read(d.buff, d.order, &d.protocolId)
 //	if nil != err {
 //		return false
 //	}

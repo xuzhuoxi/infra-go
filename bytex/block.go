@@ -46,6 +46,10 @@ type iOrderSetter interface {
 	SetOrder(order binary.ByteOrder)
 }
 
+type iOrderGetter interface {
+	GetOrder() binary.ByteOrder
+}
+
 type iToBlockHandler interface {
 	//对数据封装上长度
 	DataToBlock(data []byte) (block []byte)
@@ -60,16 +64,19 @@ type iToDataHandler interface {
 
 type IDataToBlockHandler interface {
 	iOrderSetter
+	iOrderGetter
 	iToBlockHandler
 }
 
 type IBlockToDataHandler interface {
 	iOrderSetter
+	iOrderGetter
 	iToDataHandler
 }
 
 type IDataBlockHandler interface {
 	iOrderSetter
+	iOrderGetter
 	iToBlockHandler
 	iToDataHandler
 }
@@ -112,6 +119,10 @@ func (h *dataBlockHandler) SetBlockToDataHandler(handler HandlerBlockToData) {
 
 func (h *dataBlockHandler) SetOrder(order binary.ByteOrder) {
 	h.order = order
+}
+
+func (h *dataBlockHandler) GetOrder() binary.ByteOrder {
+	return h.order
 }
 
 func (h dataBlockHandler) DataToBlock(data []byte) (block []byte) {

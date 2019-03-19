@@ -22,7 +22,7 @@ type MongoDriver struct {
 	MongoSession IMongoSession
 
 	maxSessions  int
-	chanSessions chan bool
+	chanSessions chan struct{}
 	sessions     []IMongoSession
 	mu           sync.Mutex
 }
@@ -46,8 +46,8 @@ func (d *MongoDriver) Open(info *mgo.DialInfo, mode mgo.Mode, maxSessions int) e
 		maxSessions = 1
 	}
 	d.maxSessions = maxSessions
-	d.chanSessions = make(chan bool, maxSessions)
-	d.chanSessions <- true
+	d.chanSessions = make(chan struct{}, maxSessions)
+	d.chanSessions <- struct{}{}
 	d.sessions = nil
 	logx.Infoln(funcName + "()")
 	return nil

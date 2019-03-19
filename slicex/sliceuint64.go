@@ -179,3 +179,31 @@ func EqualUint64(a, b []uint64) bool {
 	}
 	return true
 }
+
+func UintToUint64(source []uint) []uint64 {
+	if nil == source {
+		return nil
+	}
+	if len(source) == 0 {
+		return []uint64{}
+	}
+	var rs []uint64
+	for _, val := range source {
+		rs = append(rs, uint64(val))
+	}
+	return rs
+}
+
+func Uint64ToUint(source []uint64) []uint {
+	if nil == source {
+		return nil
+	}
+	if len(source) == 0 {
+		return []uint{}
+	}
+	var rs []uint
+	for _, val := range source {
+		rs = append(rs, uint(val))
+	}
+	return rs
+}

@@ -17,13 +17,13 @@ func NewHandlerExtension(protoId string, maxGo int, handler ProtocolHandler, req
 }
 
 func newProtocolExtension(protoId string, maxGo int, once ProtocolHandler, multi ProtocolBatchHandler, reqData interface{}) *ProtocolHandlerExtension {
-	return &ProtocolHandlerExtension{protocolId: protoId, maxGo: maxGo, channel: make(chan bool, maxGo), protoHandler: once, batchHandler: multi, reqData: reqData}
+	return &ProtocolHandlerExtension{protocolId: protoId, maxGo: maxGo, channel: make(chan struct{}, maxGo), protoHandler: once, batchHandler: multi, reqData: reqData}
 }
 
 type ProtocolHandlerExtension struct {
 	protocolId string
 	maxGo      int
-	channel    chan bool
+	channel    chan struct{}
 
 	protoHandler ProtocolHandler
 	batchHandler ProtocolBatchHandler
@@ -83,7 +83,7 @@ func (e *ProtocolHandlerExtension) OnRequest(pId string, data interface{}, data2
 }
 
 func (e *ProtocolHandlerExtension) addGoroutine() {
-	e.channel <- true
+	e.channel <- struct{}{}
 }
 
 func (e *ProtocolHandlerExtension) doneGoroutine() {

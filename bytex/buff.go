@@ -7,6 +7,8 @@ package bytex
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/xuzhuoxi/infra-go/binaryx"
 	"github.com/xuzhuoxi/infra-go/slicex"
 	"io"
 	"sync"
@@ -14,18 +16,25 @@ import (
 
 type IBuffByteReader interface {
 	io.Reader
+	//缓冲中全部字节
+	Bytes() []byte
 	//读取缓冲中全部字节
 	//非数据安全
 	ReadBytes() []byte
 	//读取缓冲中全部字节
 	//数据安全
 	ReadCopyBytes() []byte
+	//读取一个二进制数据到out
+	//out只支持binary.Write中支持的类型
+	ReadBinary(out interface{})
 }
 
 type IBuffByteWriter interface {
 	io.Writer
 	//把字节写入缓冲
 	WriteBytes(bytes []byte)
+	//把in写入数据
+	WriteBinary(in interface{})
 }
 
 type IBuffDataReader interface {
@@ -130,6 +139,12 @@ func (b *buffDataBlock) Read(p []byte) (n int, err error) {
 	return b.buff.Read(p)
 }
 
+func (b *buffDataBlock) Bytes() []byte {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+	return b.buff.Bytes()
+}
+
 //返回：buff缓存中的切片
 //安全：共享数据，非安全，如果要保存使用，请先进行复制
 func (b *buffDataBlock) ReadBytes() []byte {
@@ -147,6 +162,12 @@ func (b *buffDataBlock) ReadCopyBytes() []byte {
 	return cp
 }
 
+func (b *buffDataBlock) ReadBinary(out interface{}) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	binaryx.Read(b.buff, b.handler.GetOrder(), out)
+}
+
 func (b *buffDataBlock) Write(p []byte) (n int, err error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -159,6 +180,15 @@ func (b *buffDataBlock) WriteBytes(bytes []byte) {
 	b.buff.Write(bytes)
 }
 
+func (b *buffDataBlock) WriteBinary(in interface{}) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	err := binaryx.Write(b.buff, b.handler.GetOrder(), in)
+	if nil != err {
+		fmt.Println("buffDataBlock.WriteBinary:", err)
+	}
+}
+
 func (b *buffDataBlock) Reset() {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -166,6 +196,8 @@ func (b *buffDataBlock) Reset() {
 }
 
 func (b *buffDataBlock) Len() int {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
 	return b.buff.Len()
 }
 

@@ -28,7 +28,7 @@ type TCPServer struct {
 	timeout    int
 
 	listener      *net.TCPListener
-	serverLinkSem chan bool
+	serverLinkSem chan struct{}
 	mapProxy      map[string]IPackSendReceiver
 	mapConn       map[string]*net.TCPConn
 }
@@ -50,7 +50,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	}
 	s.Logger.Infoln("[TCPServer] listening on:", params.LocalAddress)
 	s.listener = listener
-	s.serverLinkSem = make(chan bool, s.maxLinkNum)
+	s.serverLinkSem = make(chan struct{}, s.maxLinkNum)
 	s.mapConn = make(map[string]*net.TCPConn)
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
@@ -60,7 +60,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 
 	defer s.StopServer()
 	for s.running {
-		s.serverLinkSem <- true
+		s.serverLinkSem <- struct{}{}
 		if !s.running {
 			break
 		}
@@ -144,7 +144,7 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	proxy.StartReceiving() //这里会阻塞
 }
 
-func closeLinkChannel(c chan bool) {
+func closeLinkChannel(c chan struct{}) {
 	close(c)
 	//s.Logger.Traceln("closeLinkChannel.finish")
 }

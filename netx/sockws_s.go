@@ -30,7 +30,7 @@ type WebSocketServer struct {
 	httpServer    *http.Server
 	mapProxy      map[string]IPackSendReceiver
 	mapConn       map[string]*websocket.Conn
-	serverLinkSem chan bool
+	serverLinkSem chan struct{}
 }
 
 func (s *WebSocketServer) StartServer(params SockParams) error {
@@ -44,7 +44,7 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 	httpMux := http.NewServeMux()
 	httpMux.Handle(params.WSPattern, websocket.Handler(s.onWSConn))
 	s.httpServer = &http.Server{Addr: params.LocalAddress, Handler: httpMux}
-	s.serverLinkSem = make(chan bool, s.maxLinkNum)
+	s.serverLinkSem = make(chan struct{}, s.maxLinkNum)
 	s.mapConn = make(map[string]*websocket.Conn)
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
@@ -108,7 +108,7 @@ func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 //RemoteAddr=Origin
 func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	address := conn.Request().RemoteAddr //最根的地址信息
-	s.serverLinkSem <- true
+	s.serverLinkSem <- struct{}{}
 	defer func() {
 		s.serverMu.Lock()
 		defer s.serverMu.Unlock()
@@ -132,7 +132,7 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	proxy.StartReceiving() //这里会阻塞
 }
 
-func (s *WebSocketServer) closeLinkChannel(c chan bool) {
+func (s *WebSocketServer) closeLinkChannel(c chan struct{}) {
 	close(c)
 	//s.Logger.Traceln("closeLinkChannel.finish")
 }

@@ -47,7 +47,7 @@ func (s *GoroutineExtensionSupport) MaxGo() int {
 }
 
 //type ProtocolExtensionSupport struct {
-//	Channel chan bool
+//	Channel chan struct{}
 //}
 //
 //func (e *ProtocolExtensionSupport) MaxGo() int {
@@ -91,7 +91,7 @@ func (s *GoroutineExtensionSupport) MaxGo() int {
 //
 //func (e *ProtocolExtensionSupport) addGoroutine() {
 //	if nil == e.Channel {
-//		e.Channel = make(chan bool, e.MaxGo())
+//		e.Channel = make(chan struct{}, e.MaxGo())
 //	}
 //	e.Channel <- true
 //}
