@@ -11,6 +11,29 @@ import (
 	"github.com/xuzhuoxi/infra-go/lang"
 )
 
+type IKeyValue interface {
+	//序列化接口
+	ICodingData
+
+	//键值对数量
+	Len() int
+	//设置键值
+	Set(key string, value interface{}) (IKeyValue, bool)
+	//取值
+	Get(key string) (interface{}, bool)
+	//删除键值
+	Delete(key string) (interface{}, bool)
+	//检查键值是否存在
+	Check(key string) bool
+
+	//合并
+	Merge(vs IKeyValue) IKeyValue
+	//遍历
+	ForEach(handler func(key string, value interface{}))
+}
+
+//-------------------------
+
 func NewCodingMap() CodingMap {
 	return make(map[string]interface{})
 }
@@ -89,31 +112,74 @@ func (v CodingMap) DecodeFromBytes(bs []byte) bool {
 	return true
 }
 
-func (v CodingMap) Merge(vs CodingMap) CodingMap {
-	var rm []string
-	for key, val := range vs {
-		if v2, ok := v[key]; ok && lang.Equal(v2, val) {
-			rm = append(rm, key)
-			continue
-		}
-		v[key] = val
-	}
-	if len(rm) > 0 { //有重复
-		for _, key := range rm {
-			delete(vs, key)
-		}
-	}
-	if len(vs) == 0 {
-		return nil
-	}
-	return vs
+func (v CodingMap) Len() int {
+	return len(v)
 }
-func (v CodingMap) Set(key string, value interface{}) CodingMap {
+
+func (v CodingMap) Set(key string, value interface{}) (IKeyValue, bool) {
 	if v2, ok := v[key]; ok && lang.Equal(v2, value) {
-		return nil
+		return nil, false
 	}
 	v[key] = value
 	rs := NewCodingMap()
 	rs[key] = value
-	return rs
+	return rs, true
+}
+
+func (v CodingMap) Get(key string) (interface{}, bool) {
+	value, ok := v[key]
+	return value, ok
+}
+
+//func (v CodingMap) Get(key string, value interface{}) CodingMap {
+//	if v2, ok := v[key]; ok && lang.Equal(v2, value) {
+//		return nil
+//	}
+//	v[key] = value
+//	rs := NewCodingMap()
+//	rs[key] = value
+//	return rs
+//}
+
+func (v CodingMap) Delete(key string) (interface{}, bool) {
+	if v.Check(key) {
+		rs, ok := v.Get(key)
+		delete(v, key)
+		return rs, ok
+	}
+	return nil, false
+}
+
+func (v CodingMap) Check(key string) bool {
+	_, ok := v[key]
+	return ok
+}
+
+func (v CodingMap) Merge(vs IKeyValue) IKeyValue {
+	if nil == vs {
+		return nil
+	}
+	var rm []string
+	vs.ForEach(func(key string, value interface{}) {
+		if v2, ok := v[key]; ok && lang.Equal(v2, value) {
+			rm = append(rm, key)
+			return
+		}
+		v[key] = value
+	})
+	if len(rm) > 0 { //有重复
+		for _, key := range rm {
+			vs.Delete(key)
+		}
+	}
+	if vs.Len() == 0 {
+		return nil
+	}
+	return vs
+}
+
+func (v CodingMap) ForEach(handler func(key string, value interface{})) {
+	for key, value := range v {
+		handler(key, value)
+	}
 }
