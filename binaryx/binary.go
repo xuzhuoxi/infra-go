@@ -6,6 +6,7 @@
 package binaryx
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 )
@@ -196,6 +197,29 @@ func ReadSliceComplex128(r io.Reader, order binary.ByteOrder, ln int) ([]complex
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
+func ReadString(r io.Reader, order binary.ByteOrder) (string, error) {
+	var ln int
+	var err error
+	if ln, err = ReadLen(r, order); nil != err {
+		return "", err
+	}
+	var bs = make([]byte, ln)
+	if err := binary.Read(r, order, &bs); nil != err {
+		return "", err
+	}
+	return string(bs), nil
+}
+func ReadSliceString(r io.Reader, order binary.ByteOrder, ln int) ([]string, error) {
+	var rs []string
+	for index := ln - 1; index >= 0; index-- {
+		str, err := ReadString(r, order)
+		if nil != err {
+			return nil, err
+		}
+		rs = append(rs, str)
+	}
+	return rs, nil
+}
 
 func Read(r io.Reader, order binary.ByteOrder, data interface{}) (err error) {
 	if dataPtr, ok := data.(*interface{}); ok {
@@ -231,6 +255,8 @@ func Read(r io.Reader, order binary.ByteOrder, data interface{}) (err error) {
 			*dataPtr, err = ReadComplex64(r, order)
 		case complex128:
 			*dataPtr, err = ReadComplex128(r, order)
+		case string:
+			*dataPtr, err = ReadString(r, order)
 		default:
 			isCatch = false
 		}
@@ -275,6 +301,8 @@ func ReadSlice(r io.Reader, order binary.ByteOrder, data interface{}, ln int) (e
 			*dataPtr, err = ReadSliceComplex64(r, order, ln)
 		case []complex128:
 			*dataPtr, err = ReadSliceComplex128(r, order, ln)
+		case []string:
+			*dataPtr, err = ReadSliceString(r, order, ln)
 		default:
 			isCatch = false
 		}
@@ -285,12 +313,41 @@ func ReadSlice(r io.Reader, order binary.ByteOrder, data interface{}, ln int) (e
 	return binary.Read(r, order, data)
 }
 
+func WriteString(w io.Writer, order binary.ByteOrder, str string) error {
+	buff := bytes.NewBuffer(nil)
+	if err := WriteLen(buff, order, len(str)); nil != err {
+		return err
+	}
+	if _, err := buff.Write([]byte(str)); nil != err {
+		return err
+	}
+	if _, err := w.Write(buff.Bytes()); nil != err {
+		return err
+	}
+	return nil
+}
+
+func WriteSliceString(w io.Writer, order binary.ByteOrder, str []string) error {
+	buff := bytes.NewBuffer(nil)
+	for index := 0; index < len(str); index++ {
+		if err := WriteString(buff, order, str[index]); nil != err {
+			return err
+		}
+	}
+	if _, err := w.Write(buff.Bytes()); nil != err {
+		return err
+	}
+	return nil
+}
+
 func Write(w io.Writer, order binary.ByteOrder, data interface{}) error {
 	tempData := data
 	if dataPtr, ok := data.(*interface{}); ok {
 		tempData = *dataPtr
 	}
 	switch d := tempData.(type) {
+	case string:
+		return WriteString(w, order, d)
 	case int:
 		if bit32 {
 			return binary.Write(w, order, int32(d))
@@ -303,6 +360,19 @@ func Write(w io.Writer, order binary.ByteOrder, data interface{}) error {
 		} else {
 			return binary.Write(w, order, uint64(d))
 		}
+	default:
+		return binary.Write(w, order, tempData)
+	}
+}
+
+func WriteSlice(w io.Writer, order binary.ByteOrder, data interface{}) error {
+	tempData := data
+	if dataPtr, ok := data.(*interface{}); ok {
+		tempData = *dataPtr
+	}
+	switch d := tempData.(type) {
+	case []string:
+		return WriteSliceString(w, order, d)
 	case []int:
 		if bit32 {
 			var val []int32
@@ -334,4 +404,18 @@ func Write(w io.Writer, order binary.ByteOrder, data interface{}) error {
 	default:
 		return binary.Write(w, order, tempData)
 	}
+}
+
+//-------------------------------------
+
+func ReadLen(r io.Reader, order binary.ByteOrder) (int, error) {
+	var ln uint16
+	if err := binary.Read(r, order, &ln); nil != err {
+		return 0, err
+	}
+	return int(ln), nil
+}
+
+func WriteLen(w io.Writer, order binary.ByteOrder, ln int) error {
+	return binary.Write(w, order, uint16(ln))
 }
