@@ -33,11 +33,7 @@ type UDPServer struct {
 
 	conn         *net.UDPConn
 	messageProxy IPackSendReceiver
-	serverMu     sync.Mutex
-}
-
-func (s *UDPServer) SetMaxLink(max int) {
-	return
+	serverMu     sync.RWMutex
 }
 
 func (s *UDPServer) StartServer(params SockParams) error {
@@ -75,7 +71,6 @@ func (s *UDPServer) StopServer() error {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
 	defer func() {
-		s.running = false
 		s.serverMu.Unlock()
 		s.dispatchServerStoppedEvent(s)
 		s.Logger.Infoln(funcName + "()")
@@ -83,6 +78,11 @@ func (s *UDPServer) StopServer() error {
 	if nil != s.conn {
 		s.conn.Close()
 	}
+	s.running = false
+	return nil
+}
+
+func (s *UDPServer) CloseConnection(address string) error {
 	return nil
 }
 
@@ -93,11 +93,11 @@ func (s *UDPServer) SendPackTo(pack []byte, rAddress ...string) error {
 
 func (s *UDPServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 	funcName := "UDPServer.SendPackTo"
-	if !s.Running() {
+	s.serverMu.RLock()
+	defer s.serverMu.RUnlock()
+	if !s.running || s.messageProxy == nil || s.conn == nil {
 		return ConnNilError(funcName)
 	}
-	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
 	if len(rAddress) == 0 {
 		return NoAddrError(funcName)
 	}

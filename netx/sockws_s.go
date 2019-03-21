@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"github.com/pkg/errors"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
@@ -61,18 +62,23 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 func (s *WebSocketServer) StopServer() error {
 	funcName := "WebSocketServer.StopServer"
 	s.serverMu.Lock()
-	defer func() {
+	if !s.running {
+		defer s.serverMu.Unlock()
+		return errorsx.FuncRepeatedCallError(funcName)
+	}
+	defer func() { //应该解锁后抛出事件
 		s.serverMu.Unlock()
 		s.dispatchServerStoppedEvent(s)
 		s.Logger.Infoln(funcName + "()")
 	}()
-	if !s.running {
-		return errorsx.FuncRepeatedCallError(funcName)
-	}
 	if nil != s.httpServer {
 		s.httpServer.Close()
 		s.httpServer = nil
 	}
+	for _, value := range s.mapProxy {
+		value.StopReceiving()
+	}
+	s.mapProxy = nil
 	for _, value := range s.mapConn {
 		value.Close()
 	}
@@ -82,17 +88,33 @@ func (s *WebSocketServer) StopServer() error {
 	return nil
 }
 
+func (s *WebSocketServer) CloseConnection(address string) error {
+	s.serverMu.Lock()
+	defer s.serverMu.Unlock()
+	if conn, ok := s.mapConn[address]; ok {
+		delete(s.mapProxy, address)
+		delete(s.mapConn, address)
+		return conn.Close()
+	} else {
+		return errors.New("WebSocketServer: No Connection At " + address)
+	}
+}
+
 func (s *WebSocketServer) SendPackTo(pack []byte, rAddress ...string) error {
 	bytes := WsDataBlockHandler.DataToBlock(pack)
 	return s.SendBytesTo(bytes, rAddress...)
 }
 
 func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
-	if 0 == len(rAddress) {
-		return NoAddrError("WebSocketServer.SendPackTo")
+	funcName := "WebSocketServer.SendPackTo"
+	s.serverMu.RLock()
+	defer s.serverMu.RUnlock()
+	if !s.running || nil == s.mapProxy {
+		return ConnNilError(funcName)
 	}
-	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
+	if 0 == len(rAddress) {
+		return NoAddrError(funcName)
+	}
 	for _, address := range rAddress {
 		ts, ok := s.mapProxy[address]
 		if ok {
@@ -108,18 +130,6 @@ func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	address := conn.Request().RemoteAddr //最根的地址信息
 	s.LinkLimit.Add()
-	defer func() {
-		s.serverMu.Lock()
-		defer s.serverMu.Unlock()
-		if nil != conn {
-			conn.Close()
-		}
-		delete(s.mapConn, address)
-		delete(s.mapProxy, address)
-		s.LinkLimit.Done()
-		s.dispatchServerConnCloseEvent(s, address)
-		s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
-	}()
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
 	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, RemoteAddrString: conn.Request().RemoteAddr}
@@ -128,6 +138,22 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	s.serverMu.Unlock()
 	s.dispatchServerConnOpenEvent(s, address)
 	s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Opened!")
+
+	defer func() {
+		s.dispatchServerConnCloseEvent(s, address)
+		s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
+	}()
+	defer func() {
+		s.serverMu.Lock()
+		if nil != conn {
+			conn.Close()
+			conn = nil
+		}
+		delete(s.mapConn, address)
+		delete(s.mapProxy, address)
+		s.LinkLimit.Done()
+		s.serverMu.Unlock()
+	}()
 	proxy.StartReceiving() //这里会阻塞
 }
 

@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"errors"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
@@ -76,18 +77,23 @@ func (s *TCPServer) StartServer(params SockParams) error {
 func (s *TCPServer) StopServer() error {
 	funcName := "TCPServer.StopServer"
 	s.serverMu.Lock()
+	if !s.running {
+		defer s.serverMu.Unlock()
+		return errorsx.FuncRepeatedCallError(funcName)
+	}
 	defer func() {
 		s.serverMu.Unlock()
 		s.dispatchServerStoppedEvent(s)
 		s.Logger.Infoln(funcName + "()")
 	}()
-	if !s.running {
-		return errorsx.FuncRepeatedCallError(funcName)
-	}
 	if nil != s.listener {
 		s.listener.Close()
 		s.listener = nil
 	}
+	for _, value := range s.mapProxy {
+		value.StopReceiving()
+	}
+	s.mapProxy = nil
 	for _, value := range s.mapConn {
 		value.Close()
 	}
@@ -97,17 +103,32 @@ func (s *TCPServer) StopServer() error {
 	return nil
 }
 
+func (s *TCPServer) CloseConnection(address string) error {
+	s.serverMu.Lock()
+	defer s.serverMu.Unlock()
+	if conn, ok := s.mapConn[address]; ok {
+		delete(s.mapProxy, address)
+		delete(s.mapConn, address)
+		return conn.Close()
+	}
+	return errors.New("TCPServer: No Connection At " + address)
+}
+
 func (s *TCPServer) SendPackTo(pack []byte, rAddress ...string) error {
 	bytes := TcpDataBlockHandler.DataToBlock(pack)
 	return s.SendBytesTo(bytes, rAddress...)
 }
 
 func (s *TCPServer) SendBytesTo(data []byte, rAddress ...string) error {
-	if 0 == len(rAddress) {
-		return NoAddrError("TCPServer.SendBytesTo")
+	funcName := "TCPServer.SendBytesTo"
+	s.serverMu.RLock()
+	defer s.serverMu.RUnlock()
+	if !s.running || nil == s.mapProxy || nil == s.mapConn {
+		return ConnNilError(funcName)
 	}
-	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
+	if 0 == len(rAddress) {
+		return NoAddrError(funcName)
+	}
 	for _, address := range rAddress {
 		ts, ok := s.mapProxy[address]
 		if ok {
@@ -120,18 +141,6 @@ func (s *TCPServer) SendBytesTo(data []byte, rAddress ...string) error {
 //private -----------------
 
 func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
-	defer func() {
-		s.serverMu.Lock()
-		defer s.serverMu.Unlock()
-		if nil != conn {
-			conn.Close()
-		}
-		delete(s.mapConn, address)
-		delete(s.mapProxy, address)
-		s.LinkLimit.Done()
-		s.dispatchServerConnCloseEvent(s, address)
-		s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Closed!")
-	}()
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
 	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
@@ -140,6 +149,21 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	s.serverMu.Unlock()
 	s.dispatchServerConnOpenEvent(s, address)
 	s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Opened!")
+
+	defer func() {
+		s.dispatchServerConnCloseEvent(s, address)
+		s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Closed!")
+	}()
+	defer func() {
+		s.serverMu.Lock()
+		if nil != conn {
+			conn.Close()
+		}
+		delete(s.mapConn, address)
+		delete(s.mapProxy, address)
+		s.LinkLimit.Done()
+		s.serverMu.Unlock()
+	}()
 	proxy.StartReceiving() //这里会阻塞
 }
 

@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"errors"
 	"github.com/lucas-clemente/quic-go"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
@@ -30,10 +31,6 @@ type QUICServer struct {
 	mapProxy   map[string]IPackSendReceiver
 	mapSession map[string]quic.Session
 	mapStream  map[string]quic.Stream
-}
-
-func (s *QUICServer) SetMaxLink(max int) {
-	return
 }
 
 func (s *QUICServer) StartServer(params SockParams) error {
@@ -73,27 +70,60 @@ func (s *QUICServer) StartServer(params SockParams) error {
 func (s *QUICServer) StopServer() error {
 	funcName := "QUICServer.StopServer"
 	s.serverMu.Lock()
+	if !s.running {
+		defer s.serverMu.Unlock()
+		return errorsx.FuncRepeatedCallError(funcName)
+	}
 	defer func() {
 		s.serverMu.Unlock()
 		s.dispatchServerStoppedEvent(s)
 		s.Logger.Infoln(funcName + "()")
 	}()
-	if !s.running {
-		return errorsx.FuncRepeatedCallError(funcName)
-	}
 	if nil != s.listener {
 		s.listener.Close()
 		s.listener = nil
 	}
-	for _, sess := range s.mapSession {
-		sess.Close()
+	for _, proxy := range s.mapProxy {
+		proxy.StopReceiving()
 	}
-	s.mapSession = nil
+	s.mapProxy = nil
 	for _, stream := range s.mapStream {
 		stream.Close()
 	}
 	s.mapStream = nil
+	for _, sess := range s.mapSession {
+		sess.Close()
+	}
+	s.mapSession = nil
 	s.running = false
+	return nil
+}
+
+func (s *QUICServer) CloseConnection(address string) error {
+	s.serverMu.Lock()
+	defer s.serverMu.Unlock()
+	stream, ok1 := s.mapStream[address]
+	session, ok2 := s.mapSession[address]
+	if !ok1 && !ok2 {
+		return errors.New("QUICServer: No Connection At " + address)
+	}
+	delete(s.mapProxy, address)
+	delete(s.mapStream, address)
+	delete(s.mapSession, address)
+	var err1 error
+	var err2 error
+	if ok1 {
+		err1 = stream.Close()
+	}
+	if ok2 {
+		err2 = session.Close()
+	}
+	if nil != err1 {
+		return err1
+	}
+	if nil != err2 {
+		return err2
+	}
 	return nil
 }
 
@@ -104,11 +134,14 @@ func (s *QUICServer) SendPackTo(pack []byte, rAddress ...string) error {
 
 func (s *QUICServer) SendBytesTo(data []byte, rAddress ...string) error {
 	funcName := "QUICServer.SendBytesTo"
+	s.serverMu.RLock()
+	defer s.serverMu.RUnlock()
+	if !s.running || nil == s.mapProxy || nil == s.mapStream || nil == s.mapSession {
+		return ConnNilError(funcName)
+	}
 	if 0 == len(rAddress) {
 		return NoAddrError(funcName)
 	}
-	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
 	for _, address := range rAddress {
 		ts, ok := s.mapProxy[address]
 		if ok {
@@ -120,33 +153,43 @@ func (s *QUICServer) SendBytesTo(data []byte, rAddress ...string) error {
 
 func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	funcName := "QUICServer.handlerSession"
-	defer func() {
-		s.serverMu.Lock()
-		if nil != session {
-			session.Close()
-		}
-		delete(s.mapProxy, address)
-		delete(s.mapSession, address)
-		delete(s.mapStream, address)
-		s.serverMu.Unlock()
-		s.dispatchServerConnCloseEvent(s, address)
-		s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Closed!")
-	}()
 	s.serverMu.Lock()
-	stream, err := session.AcceptStream()
+	var stream quic.Stream
+	var err error
+	stream, err = session.AcceptStream()
 	if nil != err {
+		s.serverMu.Unlock()
 		s.Logger.Warnln(funcName, err)
 		return
 	}
-	defer stream.Close()
 	s.mapSession[address] = session
+	s.mapStream[address] = stream
 	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, QuicDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
-	s.mapStream[address] = stream
 	s.serverMu.Unlock()
 	s.dispatchServerConnOpenEvent(s, address)
 	s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Opened!")
+
+	defer func() {
+		s.dispatchServerConnCloseEvent(s, address)
+		s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Closed!")
+	}()
+	defer func() {
+		s.serverMu.Lock()
+		delete(s.mapProxy, address)
+		delete(s.mapStream, address)
+		delete(s.mapSession, address)
+		if nil != stream {
+			stream.Close()
+			stream = nil
+		}
+		if nil != session {
+			session.Close()
+			session = nil
+		}
+		s.serverMu.Unlock()
+	}()
 	proxy.StartReceiving() //这里会阻塞
 }
 

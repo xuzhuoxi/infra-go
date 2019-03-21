@@ -48,7 +48,7 @@ func TestUDPServer(t *testing.T) {
 	//		}
 	//	}
 	//}()
-	time.Sleep(50 * time.Millisecond)
+	time.Sleep(1000 * time.Millisecond)
 }
 
 func TestUDP2(t *testing.T) {

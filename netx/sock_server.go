@@ -40,9 +40,12 @@ type ISockServer interface {
 	IServer
 	IServerRunning
 	ILinkLimit
+	CloseConnection(address string) error
+
 	ISockSender
 	IPackHandlerSetter
 	IPackHandlerGetter
+
 	logx.ILoggerSupport
 }
 

@@ -9,7 +9,8 @@ import (
 )
 
 func TestWSServer(t *testing.T) {
-	server := NewWebSocketServer(5)
+	server := NewWebSocketServer()
+	server.SetLinkMax(5)
 	var packHandler = func(msgData []byte, sender interface{}) bool {
 		senderAddress := sender.(string)
 		logx.Traceln("TestWSServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]")

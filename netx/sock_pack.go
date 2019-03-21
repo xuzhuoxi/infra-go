@@ -111,7 +111,7 @@ func (sr *packSRBase) SendPack(msg []byte, rAddress ...string) (int, error) {
 	sr.toBlockBuff.WriteData(msg)
 	n, err := sr.writer.WriteBytes(sr.toBlockBuff.ReadBytes(), rAddress...)
 	if nil != err {
-		sr.Logger.Warnln("packSRBase.SendMessage", err)
+		sr.Logger.Warnln("packSRBase.SendPack", err)
 		return n, err
 	}
 	return n, nil

@@ -38,7 +38,7 @@ func TestQUICServer(t *testing.T) {
 			//time.Sleep(1 * time.Second)
 		}
 	}()
-	time.Sleep(10 * time.Second)
+	time.Sleep(3 * time.Second)
 	b = false
 	client.CloseClient()
 	server.StopServer()
