@@ -16,7 +16,7 @@ func NewDefaultGobBuffDecoder() encodingx.IBuffDecoder {
 	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
-func NewDefaultGobBuffCodecs() encodingx.IBuffDecoder {
+func NewDefaultGobBuffCodecs() encodingx.IBuffCodecs {
 	return newGobBuffCodecs(DefaultDataBlockHandler)
 }
 
@@ -28,7 +28,7 @@ func NewGobBuffDecoder(handler bytex.IDataBlockHandler) encodingx.IBuffDecoder {
 	return newGobBuffCodecs(handler)
 }
 
-func NewGobBuffCodecs(handler bytex.IDataBlockHandler) encodingx.IBuffDecoder {
+func NewGobBuffCodecs(handler bytex.IDataBlockHandler) encodingx.IBuffCodecs {
 	return newGobBuffCodecs(handler)
 }
 
