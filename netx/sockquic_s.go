@@ -24,11 +24,16 @@ type IQUICServer interface {
 type QUICServer struct {
 	eventx.EventDispatcher
 	SockServerBase
+	NoLinkLimit
 
 	listener   quic.Listener
 	mapProxy   map[string]IPackSendReceiver
 	mapSession map[string]quic.Session
 	mapStream  map[string]quic.Stream
+}
+
+func (s *QUICServer) SetMaxLink(max int) {
+	return
 }
 
 func (s *QUICServer) StartServer(params SockParams) error {

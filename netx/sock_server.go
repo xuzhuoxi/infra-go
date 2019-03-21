@@ -39,6 +39,7 @@ type IServer interface {
 type ISockServer interface {
 	IServer
 	IServerRunning
+	ILinkLimit
 	ISockSender
 	IPackHandlerSetter
 	IPackHandlerGetter

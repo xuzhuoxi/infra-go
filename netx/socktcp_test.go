@@ -7,7 +7,8 @@ import (
 )
 
 func TestTCPServer(t *testing.T) {
-	server := NewTCPServer(5)
+	server := NewTCPServer()
+	server.SetMaxLink(5)
 	var packHandler = func(msgData []byte, sender interface{}) bool {
 		senderAddress := sender.(string)
 		logx.Traceln("TestTCPServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]")

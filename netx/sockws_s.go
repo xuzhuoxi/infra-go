@@ -8,8 +8,8 @@ import (
 	"net/http"
 )
 
-func NewWebSocketServer(maxLinkNum int) IWebSocketServer {
-	server := &WebSocketServer{maxLinkNum: maxLinkNum}
+func NewWebSocketServer() IWebSocketServer {
+	server := &WebSocketServer{}
 	server.Name = "WSServer"
 	server.Network = WSNetwork
 	server.Logger = logx.DefaultLogger()
@@ -25,12 +25,11 @@ type IWebSocketServer interface {
 type WebSocketServer struct {
 	eventx.EventDispatcher
 	SockServerBase
-	maxLinkNum int
+	LinkLimit
 
-	httpServer    *http.Server
-	mapProxy      map[string]IPackSendReceiver
-	mapConn       map[string]*websocket.Conn
-	serverLinkSem chan struct{}
+	httpServer *http.Server
+	mapProxy   map[string]IPackSendReceiver
+	mapConn    map[string]*websocket.Conn
 }
 
 func (s *WebSocketServer) StartServer(params SockParams) error {
@@ -44,7 +43,7 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 	httpMux := http.NewServeMux()
 	httpMux.Handle(params.WSPattern, websocket.Handler(s.onWSConn))
 	s.httpServer = &http.Server{Addr: params.LocalAddress, Handler: httpMux}
-	s.serverLinkSem = make(chan struct{}, s.maxLinkNum)
+	s.LinkLimit.StartLimit()
 	s.mapConn = make(map[string]*websocket.Conn)
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
@@ -78,7 +77,7 @@ func (s *WebSocketServer) StopServer() error {
 		value.Close()
 	}
 	s.mapConn = nil
-	closeLinkChannel(s.serverLinkSem)
+	s.LinkLimit.StopLimit()
 	s.running = false
 	return nil
 }
@@ -108,7 +107,7 @@ func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 //RemoteAddr=Origin
 func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	address := conn.Request().RemoteAddr //最根的地址信息
-	s.serverLinkSem <- struct{}{}
+	s.LinkLimit.Add()
 	defer func() {
 		s.serverMu.Lock()
 		defer s.serverMu.Unlock()
@@ -117,7 +116,7 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 		}
 		delete(s.mapConn, address)
 		delete(s.mapProxy, address)
-		<-s.serverLinkSem
+		s.LinkLimit.Done()
 		s.dispatchServerConnCloseEvent(s, address)
 		s.Logger.Traceln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
 	}()

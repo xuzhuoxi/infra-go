@@ -29,9 +29,15 @@ type IUDPServer interface {
 type UDPServer struct {
 	eventx.EventDispatcher
 	SockServerBase
+	NoLinkLimit
+
 	conn         *net.UDPConn
 	messageProxy IPackSendReceiver
 	serverMu     sync.Mutex
+}
+
+func (s *UDPServer) SetMaxLink(max int) {
+	return
 }
 
 func (s *UDPServer) StartServer(params SockParams) error {

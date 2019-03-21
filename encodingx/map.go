@@ -131,16 +131,6 @@ func (v CodingMap) Get(key string) (interface{}, bool) {
 	return value, ok
 }
 
-//func (v CodingMap) Get(key string, value interface{}) CodingMap {
-//	if v2, ok := v[key]; ok && lang.Equal(v2, value) {
-//		return nil
-//	}
-//	v[key] = value
-//	rs := NewCodingMap()
-//	rs[key] = value
-//	return rs
-//}
-
 func (v CodingMap) Delete(key string) (interface{}, bool) {
 	if v.Check(key) {
 		rs, ok := v.Get(key)

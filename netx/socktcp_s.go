@@ -7,8 +7,8 @@ import (
 	"net"
 )
 
-func NewTCPServer(maxLinkNum int) ITCPServer {
-	server := &TCPServer{maxLinkNum: maxLinkNum}
+func NewTCPServer() ITCPServer {
+	server := &TCPServer{}
 	server.Name = "TCPServer"
 	server.Network = TcpNetwork
 	server.Logger = logx.DefaultLogger()
@@ -24,13 +24,12 @@ type ITCPServer interface {
 type TCPServer struct {
 	eventx.EventDispatcher
 	SockServerBase
-	maxLinkNum int
-	timeout    int
+	LinkLimit
 
-	listener      *net.TCPListener
-	serverLinkSem chan struct{}
-	mapProxy      map[string]IPackSendReceiver
-	mapConn       map[string]*net.TCPConn
+	timeout  int
+	listener *net.TCPListener
+	mapProxy map[string]IPackSendReceiver
+	mapConn  map[string]*net.TCPConn
 }
 
 func (s *TCPServer) StartServer(params SockParams) error {
@@ -50,7 +49,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	}
 	s.Logger.Infoln("[TCPServer] listening on:", params.LocalAddress)
 	s.listener = listener
-	s.serverLinkSem = make(chan struct{}, s.maxLinkNum)
+	s.LinkLimit.StartLimit()
 	s.mapConn = make(map[string]*net.TCPConn)
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
@@ -60,7 +59,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 
 	defer s.StopServer()
 	for s.running {
-		s.serverLinkSem <- struct{}{}
+		s.LinkLimit.Add()
 		if !s.running {
 			break
 		}
@@ -93,7 +92,7 @@ func (s *TCPServer) StopServer() error {
 		value.Close()
 	}
 	s.mapConn = nil
-	closeLinkChannel(s.serverLinkSem)
+	s.LinkLimit.StopLimit()
 	s.running = false
 	return nil
 }
@@ -129,7 +128,7 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 		}
 		delete(s.mapConn, address)
 		delete(s.mapProxy, address)
-		<-s.serverLinkSem
+		s.LinkLimit.Done()
 		s.dispatchServerConnCloseEvent(s, address)
 		s.Logger.Traceln("[TCPServer] TCP Connection:", address, "Closed!")
 	}()
