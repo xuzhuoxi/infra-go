@@ -143,7 +143,7 @@ func (s *TCPServer) SendBytesTo(data []byte, rAddress ...string) error {
 func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
-	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, remoteAddr: conn.RemoteAddr()}
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, TcpDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
@@ -165,11 +165,6 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 		s.serverMu.Unlock()
 	}()
 	proxy.StartReceiving() //这里会阻塞
-}
-
-func closeLinkChannel(c chan struct{}) {
-	close(c)
-	//s.Logger.Traceln("closeLinkChannel.finish")
 }
 
 func listenTCP(network string, address string) (*net.TCPListener, error) {

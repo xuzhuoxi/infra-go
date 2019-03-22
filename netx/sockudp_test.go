@@ -10,11 +10,10 @@ import (
 
 func TestUDPServer(t *testing.T) {
 	server := NewUDPServer()
-	var packHandler = func(msgData []byte, sender interface{}) bool {
-		senderAddress := sender.(string)
-		logx.Traceln("TestUDPServer.msgHandler[Sender:", senderAddress, "]msgData:", msgData, "dataLen:", len(msgData), "]")
-		rs := []byte{byte(len(msgData))}
-		rs = append(rs, msgData...)
+	var packHandler = func(data []byte, senderAddress string, other interface{}) bool {
+		logx.Traceln(fmt.Sprintf("TestUDPServer.packHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, fmt.Sprint(data), fmt.Sprint(other)))
+		rs := []byte{byte(len(data))}
+		rs = append(rs, data...)
 		server.SendPackTo(rs, senderAddress)
 		return true
 	}

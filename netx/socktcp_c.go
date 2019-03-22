@@ -35,7 +35,7 @@ func (c *TCPClient) OpenClient(params SockParams) error {
 		return err
 	}
 	c.conn = conn
-	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, remoteAddr: conn.RemoteAddr()}
 	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, c.Logger, false)
 	c.opening = true
 	c.Logger.Infoln(funcName + "()")

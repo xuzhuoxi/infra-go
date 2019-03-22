@@ -132,7 +132,7 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	s.LinkLimit.Add()
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
-	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, RemoteAddrString: conn.Request().RemoteAddr}
+	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: conn.Request().RemoteAddr}
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, WsDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
@@ -155,9 +155,4 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 		s.serverMu.Unlock()
 	}()
 	proxy.StartReceiving() //这里会阻塞
-}
-
-func (s *WebSocketServer) closeLinkChannel(c chan struct{}) {
-	close(c)
-	//s.Logger.Traceln("closeLinkChannel.finish")
 }

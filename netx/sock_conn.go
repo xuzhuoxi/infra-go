@@ -6,17 +6,32 @@ import (
 	"net"
 )
 
-type IConnReaderAdapter interface {
+type IRemoteAddress interface {
+	RemoteAddress() string
+}
+
+type iConnReaderAdapter interface {
 	ReadBytes(bytes []byte) (int, interface{}, error)
 }
 
-type IConnWriterAdapter interface {
+type iConnWriterAdapter interface {
 	WriteBytes(bytes []byte, rAddress ...string) (int, error)
 }
 
+type IConnReaderAdapter interface {
+	iConnReaderAdapter
+	IRemoteAddress
+}
+
+type IConnWriterAdapter interface {
+	iConnWriterAdapter
+	IRemoteAddress
+}
+
 type IConnReadWriterAdapter interface {
-	IConnReaderAdapter
-	IConnWriterAdapter
+	iConnReaderAdapter
+	iConnWriterAdapter
+	IRemoteAddress
 }
 
 //-------------------------------------------------
@@ -24,12 +39,16 @@ type IConnReadWriterAdapter interface {
 type ReadWriterAdapter struct {
 	Reader     io.Reader
 	Writer     io.Writer
-	RemoteAddr net.Addr
+	remoteAddr net.Addr
+}
+
+func (rw *ReadWriterAdapter) RemoteAddress() string {
+	return rw.remoteAddr.String()
 }
 
 func (rw *ReadWriterAdapter) ReadBytes(bytes []byte) (int, interface{}, error) {
 	n, err := rw.Reader.Read(bytes)
-	return n, rw.RemoteAddr.String(), err
+	return n, rw.RemoteAddress(), err
 }
 
 func (rw *ReadWriterAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {
@@ -40,6 +59,10 @@ func (rw *ReadWriterAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, 
 
 type UDPConnAdapter struct {
 	ReadWriter *net.UDPConn
+}
+
+func (rw *UDPConnAdapter) RemoteAddress() string {
+	return ""
 }
 
 func (rw *UDPConnAdapter) ReadBytes(bytes []byte) (int, interface{}, error) {
@@ -67,15 +90,18 @@ func (rw *UDPConnAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, err
 //-------------------------------------------------
 
 type QUICStreamAdapter struct {
-	RemoteAddr net.Addr
+	remoteAddr net.Addr
 	Reader     quic.ReceiveStream
 	Writer     quic.SendStream
 }
 
+func (rw *QUICStreamAdapter) RemoteAddress() string {
+	return rw.remoteAddr.String()
+}
+
 func (rw *QUICStreamAdapter) ReadBytes(bytes []byte) (int, interface{}, error) {
-	rAddr := rw.RemoteAddr.String()
 	n, err := rw.Reader.Read(bytes)
-	return n, rAddr, err
+	return n, rw.RemoteAddress(), err
 }
 
 func (rw *QUICStreamAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {
@@ -88,12 +114,16 @@ func (rw *QUICStreamAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, 
 type WSConnAdapter struct {
 	Reader           io.Reader
 	Writer           io.Writer
-	RemoteAddrString string
+	remoteAddrString string
+}
+
+func (rw *WSConnAdapter) RemoteAddress() string {
+	return rw.remoteAddrString
 }
 
 func (rw *WSConnAdapter) ReadBytes(bytes []byte) (int, interface{}, error) {
 	n, err := rw.Reader.Read(bytes)
-	return n, rw.RemoteAddrString, err
+	return n, rw.remoteAddrString, err
 }
 
 func (rw *WSConnAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {

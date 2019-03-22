@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"testing"
 	"time"
@@ -9,12 +10,11 @@ import (
 func TestQUICServer(t *testing.T) {
 	server := NewQuicServer()
 	c := 0
-	var packHandler = func(msgData []byte, sender interface{}) bool {
-		senderAddress := sender.(string)
-		logx.Traceln("TestQUICServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]", c)
+	var packHandler = func(data []byte, senderAddress string, other interface{}) bool {
+		logx.Traceln(fmt.Sprintf("TestQUICServer.packHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, fmt.Sprint(data), fmt.Sprint(other)))
 		c++
-		rs := []byte{byte(len(msgData))}
-		rs = append(rs, msgData...)
+		rs := []byte{byte(len(data))}
+		rs = append(rs, data...)
 		server.SendPackTo(rs, senderAddress)
 		return true
 	}

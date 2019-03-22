@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"testing"
 	"time"
@@ -9,11 +10,10 @@ import (
 func TestTCPServer(t *testing.T) {
 	server := NewTCPServer()
 	server.SetLinkMax(200)
-	var packHandler = func(msgData []byte, sender interface{}) bool {
-		senderAddress := sender.(string)
-		logx.Traceln("TestTCPServer.msgHandler[Sender:"+senderAddress+"]msgData:", msgData, "dataLen:", len(msgData), "]")
-		rs := []byte{byte(len(msgData))}
-		rs = append(rs, msgData...)
+	var packHandler = func(data []byte, senderAddress string, other interface{}) bool {
+		logx.Traceln(fmt.Sprintf("TestTCPServer.packHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, fmt.Sprint(data), fmt.Sprint(other)))
+		rs := []byte{byte(len(data))}
+		rs = append(rs, data...)
 		server.SendPackTo(rs, senderAddress)
 		return true
 	}

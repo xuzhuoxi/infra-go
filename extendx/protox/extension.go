@@ -5,14 +5,8 @@
 //
 package protox
 
-import "github.com/xuzhuoxi/infra-go/extendx"
-
-type RequestDataType uint16
-
-const (
-	None RequestDataType = iota
-	ByteArray
-	StructValue
+import (
+	"github.com/xuzhuoxi/infra-go/extendx"
 )
 
 type IProtocolExtension interface {
@@ -20,7 +14,7 @@ type IProtocolExtension interface {
 	//初始化支持的ProtocolId
 	InitProtocolId()
 	//检查ProtoId是否为被当前扩展支持
-	CheckProtocolId(ProtoId string) bool
+	CheckProtocolId(protoId string) bool
 }
 
 type IGoroutineExtension interface {
@@ -33,25 +27,29 @@ type IBatchExtension interface {
 	Batch() bool
 }
 
-type IRequestExtension interface {
-	//响应结数据类型
-	RequestDataType() RequestDataType
-	//响应结构体
-	GetRequestData(ProtoId string) (DataCopy interface{})
-}
-
 type IBeforeRequestExtension interface {
 	//执行响应前的一些处理
-	BeforeRequest(ProtoId string)
+	BeforeRequest(protoId string)
 }
 
-type IOnRequestExtension interface {
-	IRequestExtension
+type IOnNoneRequestExtension interface {
 	//请求响应
-	OnRequest(ProtoId string, Uid string, Data interface{}, Data2 ...interface{})
+	OnRequest(resp extendx.IExtensionResponse, protoId string, uid string)
+}
+
+type IOnBinaryRequestExtension interface {
+	//请求响应
+	OnRequest(resp extendx.IExtensionResponse, protoId string, uid string, data []byte, data2 ...[]byte)
+}
+
+type IOnObjectRequestExtension interface {
+	//响应结构体
+	GetRequestData(pProtoId string) (dataCopy interface{})
+	//请求响应
+	OnRequest(resp extendx.IExtensionResponse, protoId string, uid string, data interface{}, data2 ...interface{})
 }
 
 type IAfterRequestExtension interface {
 	//响应结束前的一些处理
-	AfterRequest(ProtoId string)
+	AfterRequest(protoId string)
 }

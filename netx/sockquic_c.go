@@ -47,7 +47,7 @@ func (c *QUICClient) OpenClient(params SockParams) error {
 		return err
 	}
 	c.stream = stream
-	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
+	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, remoteAddr: session.RemoteAddr()}
 	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, c.Logger, false)
 	c.opening = true
 	c.Logger.Infoln(funcName + "()")

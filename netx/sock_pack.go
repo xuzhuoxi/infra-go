@@ -87,6 +87,10 @@ type packSRBase struct {
 	Logger           logx.ILogger
 }
 
+func (sr *packSRBase) a(packHandler IPackHandler) {
+	sr.PackHandler = packHandler
+}
+
 func (sr *packSRBase) SetPackHandler(packHandler IPackHandler) {
 	sr.PackHandler = packHandler
 }
@@ -156,7 +160,7 @@ func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, ad
 			break
 		}
 		sr.PackHandler.ForEachHandler(func(handler FuncPackHandler) bool {
-			return handler(unPackData, address)
+			return handler(unPackData, address, nil)
 		})
 	}
 }

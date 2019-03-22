@@ -164,7 +164,7 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	}
 	s.mapSession[address] = session
 	s.mapStream[address] = stream
-	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
+	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, remoteAddr: session.RemoteAddr()}
 	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, QuicDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()

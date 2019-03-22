@@ -35,7 +35,7 @@ func (c *WebSocketClient) OpenClient(params SockParams) error {
 		return err
 	}
 	c.conn = conn //LocalAddr=Origin
-	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, RemoteAddrString: params.RemoteAddress}
+	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: params.RemoteAddress}
 	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, WsDataBlockHandler, c.Logger, false)
 	c.opening = true
 	c.Logger.Infoln(funcName + "()")

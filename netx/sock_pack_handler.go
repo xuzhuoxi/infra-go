@@ -12,10 +12,12 @@ import (
 	"sync"
 )
 
-type FuncPackHandler func(msgBytes []byte, info interface{}) bool
+type FuncPackHandler func(data []byte, senderAddress string, other interface{}) bool
 
-func DefaultPackHandler(msgData []byte, info interface{}) bool {
-	logx.Traceln("DefaultMessageHandler[Sender:"+fmt.Sprint(info)+"]msgData:", msgData, "dataLen:", len(msgData), "]")
+//--------------------------
+
+func DefaultPackHandler(data []byte, senderAddress string, other interface{}) bool {
+	logx.Traceln(fmt.Sprintf("DefaultMessageHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, data, other))
 	return true
 }
 

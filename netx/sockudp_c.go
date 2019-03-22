@@ -52,7 +52,7 @@ func (c *UDPDialClient) OpenClient(params SockParams) error {
 		return cErr
 	}
 	c.conn = conn
-	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, remoteAddr: conn.RemoteAddr()}
 	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, false)
 	c.opening = true
 	c.Logger.Infoln(funcName + "()")

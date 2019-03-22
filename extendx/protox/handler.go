@@ -35,6 +35,7 @@ func (e *ProtocolHandlerExtension) ExtensionName() string {
 }
 
 func (e *ProtocolHandlerExtension) InitProtocolId() {
+	return
 }
 
 func (e *ProtocolHandlerExtension) CheckProtocolId(ProtocolId string) bool {
@@ -49,33 +50,22 @@ func (e *ProtocolHandlerExtension) MaxGo() int {
 	return e.maxGo
 }
 
-func (e *ProtocolHandlerExtension) RequestDataType() RequestDataType {
-	if nil == e.reqData {
-		return None
-	}
-	if _, ok := e.reqData.([]byte); ok {
-		return ByteArray
-	}
-	return StructValue
+func (e *ProtocolHandlerExtension) GetRequestData(ProtoId string) (DataCopy interface{}) {
+	return e.reqData
 }
 
-func (e *ProtocolHandlerExtension) RequestData() interface{} {
-	rs := e.reqData
-	return rs
-}
-
-func (e *ProtocolHandlerExtension) OnRequest(pId string, data interface{}, data2 ...interface{}) {
+func (e *ProtocolHandlerExtension) OnRequest(ProtoId string, Uid string, Data interface{}, Data2 ...interface{}) {
 	e.addGoroutine()
 	go func() {
 		defer e.doneGoroutine()
 		if e.Batch() {
-			e.batchHandler(pId, data, data2...)
+			e.batchHandler(ProtoId, Data, Data2...)
 		} else {
-			e.protoHandler(pId, data)
-			len2 := len(data2)
+			e.protoHandler(ProtoId, Data)
+			len2 := len(Data2)
 			if len2 > 0 {
 				for index := 0; index < len2; index++ {
-					e.protoHandler(pId, data2[index])
+					e.protoHandler(ProtoId, Data2[index])
 				}
 			}
 		}
