@@ -79,7 +79,7 @@ type packSRBase struct {
 	//receive
 	receiving      bool
 	PackHandler    IPackHandler
-	onReceiveBytes func(newData []byte, address interface{})
+	onReceiveBytes func(newData []byte, address string)
 
 	//send
 	dataBlockHandler bytex.IDataBlockHandler
@@ -156,7 +156,7 @@ func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, ad
 	var unPackData []byte
 	for {
 		unPackData = buff.ReadCopyData()
-		if nil == unPackData {
+		if nil == unPackData || len(unPackData) == 0 {
 			break
 		}
 		sr.PackHandler.ForEachHandler(func(handler FuncPackHandler) bool {
@@ -176,12 +176,11 @@ type packSendReceiver struct {
 	toDataBuff bytex.IBuffToData
 }
 
-func (sr *packSendReceiver) handleData(newData []byte, address interface{}) {
+func (sr *packSendReceiver) handleData(newData []byte, address string) {
 	//fmt.Println("packSendReceiver.handleData:", newData)
-	strAddress := address.(string)
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
-	sr.handleReceiveBytes(sr.toDataBuff, newData, strAddress)
+	sr.handleReceiveBytes(sr.toDataBuff, newData, address)
 }
 
 //--------------------------------------------------
@@ -195,15 +194,14 @@ type packSendReceiverMulti struct {
 	toDataBuffMap map[string]bytex.IBuffToData
 }
 
-func (sr *packSendReceiverMulti) handleDataMulti(newData []byte, address interface{}) {
+func (sr *packSendReceiverMulti) handleDataMulti(newData []byte, address string) {
 	//fmt.Println("packSendReceiverMulti.handleData:", newData)
-	strAddress := address.(string)
 	sr.mu.Lock()
 	defer sr.mu.Unlock()
-	buffToData, ok := sr.toDataBuffMap[strAddress]
+	buffToData, ok := sr.toDataBuffMap[address]
 	if !ok {
 		buffToData = bytex.NewBuffToData(sr.dataBlockHandler)
-		sr.toDataBuffMap[strAddress] = buffToData
+		sr.toDataBuffMap[address] = buffToData
 	}
-	sr.handleReceiveBytes(buffToData, newData, strAddress)
+	sr.handleReceiveBytes(buffToData, newData, address)
 }

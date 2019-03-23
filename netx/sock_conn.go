@@ -11,11 +11,11 @@ type IRemoteAddress interface {
 }
 
 type iConnReaderAdapter interface {
-	ReadBytes(bytes []byte) (int, interface{}, error)
+	ReadBytes(bytes []byte) (n int, address string, err error)
 }
 
 type iConnWriterAdapter interface {
-	WriteBytes(bytes []byte, rAddress ...string) (int, error)
+	WriteBytes(bytes []byte, rAddress ...string) (n int, err error)
 }
 
 type IConnReaderAdapter interface {
@@ -46,12 +46,13 @@ func (rw *ReadWriterAdapter) RemoteAddress() string {
 	return rw.remoteAddr.String()
 }
 
-func (rw *ReadWriterAdapter) ReadBytes(bytes []byte) (int, interface{}, error) {
-	n, err := rw.Reader.Read(bytes)
-	return n, rw.RemoteAddress(), err
+func (rw *ReadWriterAdapter) ReadBytes(bytes []byte) (n int, address string, err error) {
+	n, err = rw.Reader.Read(bytes)
+	address = rw.RemoteAddress()
+	return
 }
 
-func (rw *ReadWriterAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {
+func (rw *ReadWriterAdapter) WriteBytes(bytes []byte, rAddress ...string) (n int, err error) {
 	return rw.Writer.Write(bytes)
 }
 
@@ -65,16 +66,16 @@ func (rw *UDPConnAdapter) RemoteAddress() string {
 	return ""
 }
 
-func (rw *UDPConnAdapter) ReadBytes(bytes []byte) (int, interface{}, error) {
+func (rw *UDPConnAdapter) ReadBytes(bytes []byte) (n int, address string, err error) {
 	n, addr, err := rw.ReadWriter.ReadFromUDP(bytes)
 	return n, addr.String(), err
 }
 
-func (rw *UDPConnAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {
+func (rw *UDPConnAdapter) WriteBytes(bytes []byte, rAddress ...string) (n int, err error) {
 	if len(rAddress) == 0 {
 		return 0, NoAddrError("UDPConnAdapter.ReadBytes")
 	}
-	n := 0
+	n = 0
 	network := rw.ReadWriter.LocalAddr().Network()
 	for _, address := range rAddress {
 		uAddr, err := GetUDPAddr(network, address)
@@ -99,14 +100,14 @@ func (rw *QUICStreamAdapter) RemoteAddress() string {
 	return rw.remoteAddr.String()
 }
 
-func (rw *QUICStreamAdapter) ReadBytes(bytes []byte) (int, interface{}, error) {
-	n, err := rw.Reader.Read(bytes)
-	return n, rw.RemoteAddress(), err
+func (rw *QUICStreamAdapter) ReadBytes(bytes []byte) (n int, address string, err error) {
+	n, err = rw.Reader.Read(bytes)
+	address = rw.RemoteAddress()
+	return
 }
 
-func (rw *QUICStreamAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {
-	n, err := rw.Writer.Write(bytes)
-	return n, err
+func (rw *QUICStreamAdapter) WriteBytes(bytes []byte, rAddress ...string) (n int, err error) {
+	return rw.Writer.Write(bytes)
 }
 
 //-------------------------------------------------
@@ -121,11 +122,12 @@ func (rw *WSConnAdapter) RemoteAddress() string {
 	return rw.remoteAddrString
 }
 
-func (rw *WSConnAdapter) ReadBytes(bytes []byte) (int, interface{}, error) {
-	n, err := rw.Reader.Read(bytes)
-	return n, rw.remoteAddrString, err
+func (rw *WSConnAdapter) ReadBytes(bytes []byte) (n int, address string, err error) {
+	n, err = rw.Reader.Read(bytes)
+	address = rw.remoteAddrString
+	return
 }
 
-func (rw *WSConnAdapter) WriteBytes(bytes []byte, rAddress ...string) (int, error) {
+func (rw *WSConnAdapter) WriteBytes(bytes []byte, rAddress ...string) (n int, err error) {
 	return rw.Writer.Write(bytes)
 }

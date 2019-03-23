@@ -99,13 +99,13 @@ func (s *QUICServer) StopServer() error {
 	return nil
 }
 
-func (s *QUICServer) CloseConnection(address string) error {
+func (s *QUICServer) CloseConnection(address string) (err error, ok bool) {
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()
 	stream, ok1 := s.mapStream[address]
 	session, ok2 := s.mapSession[address]
 	if !ok1 && !ok2 {
-		return errors.New("QUICServer: No Connection At " + address)
+		return errors.New("QUICServer: No Connection At " + address), false
 	}
 	delete(s.mapProxy, address)
 	delete(s.mapStream, address)
@@ -119,12 +119,12 @@ func (s *QUICServer) CloseConnection(address string) error {
 		err2 = session.Close()
 	}
 	if nil != err1 {
-		return err1
+		return err1, true
 	}
 	if nil != err2 {
-		return err2
+		return err2, true
 	}
-	return nil
+	return nil, true
 }
 
 func (s *QUICServer) SendPackTo(pack []byte, rAddress ...string) error {

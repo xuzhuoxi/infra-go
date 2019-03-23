@@ -82,8 +82,8 @@ func (s *UDPServer) StopServer() error {
 	return nil
 }
 
-func (s *UDPServer) CloseConnection(address string) error {
-	return nil
+func (s *UDPServer) CloseConnection(address string) (err error, ok bool) {
+	return nil, false
 }
 
 func (s *UDPServer) SendPackTo(pack []byte, rAddress ...string) error {

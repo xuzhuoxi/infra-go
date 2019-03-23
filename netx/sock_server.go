@@ -40,7 +40,7 @@ type ISockServer interface {
 	IServer
 	IServerRunning
 	ILinkLimit
-	CloseConnection(address string) error
+	CloseConnection(address string) (err error, ok bool)
 
 	ISockSender
 	IPackHandlerSetter

@@ -103,15 +103,15 @@ func (s *TCPServer) StopServer() error {
 	return nil
 }
 
-func (s *TCPServer) CloseConnection(address string) error {
+func (s *TCPServer) CloseConnection(address string) (err error, ok bool) {
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()
 	if conn, ok := s.mapConn[address]; ok {
 		delete(s.mapProxy, address)
 		delete(s.mapConn, address)
-		return conn.Close()
+		return conn.Close(), ok
 	}
-	return errors.New("TCPServer: No Connection At " + address)
+	return errors.New("TCPServer: No Connection At " + address), false
 }
 
 func (s *TCPServer) SendPackTo(pack []byte, rAddress ...string) error {

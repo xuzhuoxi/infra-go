@@ -18,6 +18,10 @@ func NewJsonCodingHandlerAsync() encodingx.ICodingHandler {
 	return jsonHandlerAsync{}
 }
 
+func NewJsonCodingHandlerSync() encodingx.ICodingHandler {
+	return jsonHandlerAsync{}
+}
+
 type jsonHandlerAsync struct{}
 
 func (c jsonHandlerAsync) HandleEncode(data interface{}) []byte {

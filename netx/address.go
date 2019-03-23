@@ -5,7 +5,14 @@
 //
 package netx
 
-import "sync"
+import (
+	"github.com/xuzhuoxi/infra-go/eventx"
+	"sync"
+)
+
+const (
+	EventAddressRemoved = "EventAddressRemoved"
+)
 
 type IAddressProxySetter interface {
 	SetAddressProxy(proxy IAddressProxy)
@@ -17,6 +24,7 @@ type IAddressProxyGetter interface {
 
 //难住地址与id的双向映射
 type IAddressProxy interface {
+	eventx.IEventDispatcher
 	//能过地址找id
 	GetId(address string) (id string, ok bool)
 	//能过id找地址
@@ -40,6 +48,7 @@ func NewAddressProxy() *AddressProxy {
 }
 
 type AddressProxy struct {
+	eventx.EventDispatcher
 	idAddr map[string]string
 	addrId map[string]string
 	mu     sync.RWMutex
@@ -68,35 +77,73 @@ func (p *AddressProxy) GetAddress(id string) (address string, ok bool) {
 
 func (p *AddressProxy) MapIdAddress(id string, address string) {
 	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.removeId(id)
+	if p.checkGroup(id, address) {
+		p.mu.Unlock()
+		return
+	}
+	var removeAddress string
+	var ok bool
+	defer func() {
+		p.mu.Unlock()
+		if ok {
+			p.DispatchEvent(EventAddressRemoved, p, removeAddress)
+		}
+	}()
+	removeAddress, ok = p.removeId(id)
 	p.removeAddress(address)
+
 	p.idAddr[id] = address
 	p.addrId[address] = id
 }
 
 func (p *AddressProxy) RemoveById(id string) {
 	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.removeId(id)
+	var address string
+	var ok bool
+	defer func() {
+		p.mu.Unlock()
+		if ok {
+			p.DispatchEvent(EventAddressRemoved, p, address)
+		}
+	}()
+	address, ok = p.removeId(id)
 }
 
 func (p *AddressProxy) RemoveByAddress(address string) {
 	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.removeAddress(address)
+	var ok bool
+	defer func() {
+		p.mu.Unlock()
+		if ok {
+			p.DispatchEvent(EventAddressRemoved, p, address)
+		}
+	}()
+	_, ok = p.removeAddress(address)
 }
 
-func (p *AddressProxy) removeId(id string) {
+func (p *AddressProxy) removeId(id string) (address string, ok bool) {
 	if address, ok := p.idAddr[id]; ok {
 		delete(p.addrId, address)
 		delete(p.idAddr, id)
+		return address, true
 	}
+	return "", false
 }
 
-func (p *AddressProxy) removeAddress(address string) {
+func (p *AddressProxy) removeAddress(address string) (id string, ok bool) {
 	if id, ok := p.addrId[address]; ok {
 		delete(p.idAddr, id)
 		delete(p.addrId, address)
+		return id, true
 	}
+	return "", false
+}
+
+func (p *AddressProxy) checkGroup(id string, address string) bool {
+	address1, ok1 := p.idAddr[id]
+	id2, ok2 := p.addrId[address]
+	if ok1 && ok2 && address == address1 && id == id2 {
+		return true
+	}
+	return false
 }

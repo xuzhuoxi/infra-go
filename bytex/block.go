@@ -5,7 +5,9 @@
 //
 package bytex
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+)
 
 type HandlerDataToBlock func(data []byte, order binary.ByteOrder) (block []byte)
 
@@ -26,18 +28,19 @@ func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byt
 
 //data为共享切片，非安全
 func DefaultBlockToDataHandler(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool) {
+	lenLn := 2
 	blockLen := len(block)
-	if blockLen < 2 {
+	if blockLen < lenLn {
 		return nil, 0, false
 	}
-	var packLen = int(order.Uint16(block[:2]))
+	var packLen = int(order.Uint16(block[:lenLn]))
 	if 0 == packLen {
-		return nil, 2, true
+		return nil, lenLn, true
 	}
-	if blockLen < packLen+2 {
+	if blockLen < packLen+lenLn {
 		return nil, 0, false
 	}
-	return block[2 : 2+packLen], packLen + 2, true
+	return block[lenLn : lenLn+packLen], packLen + lenLn, true
 }
 
 //----------------------------------------------------------

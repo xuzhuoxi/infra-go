@@ -88,15 +88,15 @@ func (s *WebSocketServer) StopServer() error {
 	return nil
 }
 
-func (s *WebSocketServer) CloseConnection(address string) error {
+func (s *WebSocketServer) CloseConnection(address string) (err error, ok bool) {
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()
 	if conn, ok := s.mapConn[address]; ok {
 		delete(s.mapProxy, address)
 		delete(s.mapConn, address)
-		return conn.Close()
+		return conn.Close(), true
 	} else {
-		return errors.New("WebSocketServer: No Connection At " + address)
+		return errors.New("WebSocketServer: No Connection At " + address), false
 	}
 }
 

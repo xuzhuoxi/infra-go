@@ -10,6 +10,5 @@ import (
 	"github.com/xuzhuoxi/infra-go/bytex"
 )
 
-var DataBlockHandler = bytex.NewDefaultDataBlockHandler()
-
 var DefaultOrder = binary.BigEndian
+var DefaultDataBlockHandler = bytex.NewDefaultDataBlockHandler()
