@@ -10,9 +10,9 @@ import "github.com/xuzhuoxi/infra-go/extendx"
 type IProtocolContainer interface {
 	extendx.IExtensionContainer
 	//增加ProtocolId到Handler的表映射
-	AppendProtocolHandlerExtension(protocolId string, maxGoroutine int, handler ProtocolHandler, reqData interface{})
+	AppendProtocolHandlerExtension(protocolId string, handler ProtocolHandler)
 	//增加ProtocolId到Handler的表映射
-	AppendProtocolHandlerExtensionBatch(protocolId string, maxGoroutine int, handler ProtocolBatchHandler, reqData interface{})
+	AppendProtocolHandlerExtensionBatch(protocolId string, handler ProtocolBatchHandler)
 }
 
 func NewIProtocolExtensionContainer() IProtocolContainer {
@@ -27,16 +27,16 @@ type ProtocolContainer struct {
 	extendx.ExtensionContainer
 }
 
-func (c *ProtocolContainer) AppendProtocolHandlerExtension(protocolId string, maxGoroutine int, handler ProtocolHandler, reqData interface{}) {
+func (c *ProtocolContainer) AppendProtocolHandlerExtension(protocolId string, handler ProtocolHandler) {
 	if c.CheckExtension(protocolId) {
 		panic("Repeat ProtocolId In Map: " + protocolId)
 	}
-	c.AppendExtension(newProtocolExtension(protocolId, maxGoroutine, handler, nil, reqData))
+	c.AppendExtension(newProtocolExtension(protocolId, handler, nil))
 }
 
-func (c *ProtocolContainer) AppendProtocolHandlerExtensionBatch(protocolId string, maxGoroutine int, handler ProtocolBatchHandler, reqData interface{}) {
+func (c *ProtocolContainer) AppendProtocolHandlerExtensionBatch(protocolId string, handler ProtocolBatchHandler) {
 	if c.CheckExtension(protocolId) {
 		panic("Repeat ProtocolId In Map: " + protocolId)
 	}
-	c.AppendExtension(newProtocolExtension(protocolId, maxGoroutine, nil, handler, reqData))
+	c.AppendExtension(newProtocolExtension(protocolId, nil, handler))
 }
