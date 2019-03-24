@@ -94,6 +94,8 @@ func (p *AddressProxy) MapIdAddress(id string, address string) {
 
 	p.idAddr[id] = address
 	p.addrId[address] = id
+
+	//p.traceLen()
 }
 
 func (p *AddressProxy) RemoveById(id string) {
@@ -107,6 +109,9 @@ func (p *AddressProxy) RemoveById(id string) {
 		}
 	}()
 	address, ok = p.removeId(id)
+	//if ok {
+	//	p.traceLen()
+	//}
 }
 
 func (p *AddressProxy) RemoveByAddress(address string) {
@@ -119,6 +124,9 @@ func (p *AddressProxy) RemoveByAddress(address string) {
 		}
 	}()
 	_, ok = p.removeAddress(address)
+	//if ok {
+	//	p.traceLen()
+	//}
 }
 
 func (p *AddressProxy) removeId(id string) (address string, ok bool) {
@@ -147,3 +155,7 @@ func (p *AddressProxy) checkGroup(id string, address string) bool {
 	}
 	return false
 }
+
+//func (p *AddressProxy) traceLen() {
+//	fmt.Println("AddressProxy Len:", len(p.idAddr), len(p.addrId))
+//}

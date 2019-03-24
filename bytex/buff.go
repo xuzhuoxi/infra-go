@@ -16,6 +16,8 @@ import (
 
 type IBuffByteReader interface {
 	io.Reader
+	//缓冲中起始下标
+	Off() int
 	//缓冲中全部字节
 	Bytes() []byte
 	//读取缓冲中全部字节
@@ -41,6 +43,9 @@ type IBuffDataReader interface {
 	//读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
 	//非数据安全
 	ReadData() []byte
+	//读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
+	//如果不是nil,把数据写入到dst中，返回dst写入的数据长度
+	ReadDataTo(dst []byte) (n int, rs []byte)
 	//读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
 	//数据安全
 	ReadCopyData() []byte
@@ -133,6 +138,12 @@ type buffDataBlock struct {
 	lock    sync.RWMutex
 }
 
+func (b *buffDataBlock) Off() int {
+	b.lock.RLock()
+	defer b.lock.RUnlock()
+	return 0
+}
+
 func (b *buffDataBlock) Read(p []byte) (n int, err error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -149,11 +160,14 @@ func (b *buffDataBlock) Bytes() []byte {
 //安全：共享数据，非安全，如果要保存使用，请先进行复制
 func (b *buffDataBlock) ReadBytes() []byte {
 	b.lock.Lock()
+	var l int
 	defer b.lock.Unlock()
-	l := b.buff.Len()
+	l = b.buff.Len()
 	return b.buff.Next(l)
 }
 
+//返回：buff缓存中的切片的克隆
+//触发Reset
 func (b *buffDataBlock) ReadCopyBytes() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -206,23 +220,38 @@ func (b *buffDataBlock) Len() int {
 func (b *buffDataBlock) ReadData() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	return b.readData()
+}
+
+func (b *buffDataBlock) ReadDataTo(dst []byte) (n int, rs []byte) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	data := b.readData()
+	if nil == data {
+		return 0, nil
+	}
+	n = copy(dst, data)
+	rs = dst[:n]
+	return
+}
+
+func (b *buffDataBlock) ReadCopyData() []byte {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	data := b.readData()
+	if nil == data {
+		return nil
+	}
+	return slicex.CopyUint8(data)
+}
+
+func (b *buffDataBlock) readData() []byte {
 	rs, l, ok := b.handler.BlockToData(b.buff.Bytes())
 	if !ok {
 		return nil
 	}
 	b.buff.Next(l)
 	return rs
-}
-
-func (b *buffDataBlock) ReadCopyData() []byte {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-	rs, l, ok := b.handler.BlockToData(b.buff.Bytes())
-	if !ok {
-		return nil
-	}
-	b.buff.Next(l)
-	return slicex.CopyUint8(rs)
 }
 
 func (b *buffDataBlock) WriteData(bytes []byte) {
