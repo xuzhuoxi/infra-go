@@ -16,16 +16,16 @@ import (
 
 type IBuffByteReader interface {
 	io.Reader
-	//缓冲中起始下标
-	Off() int
 	//缓冲中全部字节
 	Bytes() []byte
 	//读取缓冲中全部字节
 	//非数据安全
 	ReadBytes() []byte
+	//读取缓冲中全部字节，并写入到dst中
+	ReadBytesTo(dst []byte) (n int, rs []byte)
 	//读取缓冲中全部字节
 	//数据安全
-	ReadCopyBytes() []byte
+	ReadBytesCopy() []byte
 	//读取一个二进制数据到out
 	//out只支持binary.Write中支持的类型
 	ReadBinary(out interface{})
@@ -48,7 +48,7 @@ type IBuffDataReader interface {
 	ReadDataTo(dst []byte) (n int, rs []byte)
 	//读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
 	//数据安全
-	ReadCopyData() []byte
+	ReadDataCopy() []byte
 }
 
 type IBuffDataWriter interface {
@@ -138,12 +138,6 @@ type buffDataBlock struct {
 	lock    sync.RWMutex
 }
 
-func (b *buffDataBlock) Off() int {
-	b.lock.RLock()
-	defer b.lock.RUnlock()
-	return 0
-}
-
 func (b *buffDataBlock) Read(p []byte) (n int, err error) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -160,20 +154,34 @@ func (b *buffDataBlock) Bytes() []byte {
 //安全：共享数据，非安全，如果要保存使用，请先进行复制
 func (b *buffDataBlock) ReadBytes() []byte {
 	b.lock.Lock()
-	var l int
 	defer b.lock.Unlock()
-	l = b.buff.Len()
-	return b.buff.Next(l)
+	return b.readBytes()
+}
+
+func (b *buffDataBlock) ReadBytesTo(dst []byte) (n int, rs []byte) {
+	b.lock.Lock()
+	defer b.lock.Unlock()
+	if nil == dst || len(dst) == 0 {
+		return
+	}
+	bs := b.readBytes()
+	n = copy(dst, bs)
+	rs = bs[:n]
+	return
 }
 
 //返回：buff缓存中的切片的克隆
 //触发Reset
-func (b *buffDataBlock) ReadCopyBytes() []byte {
+func (b *buffDataBlock) ReadBytesCopy() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
-	cp := slicex.CopyUint8(b.buff.Bytes())
+	cp := slicex.CopyUint8(b.readBytes())
 	b.buff.Reset()
 	return cp
+}
+
+func (b *buffDataBlock) readBytes() []byte {
+	return b.buff.Next(b.buff.Len())
 }
 
 func (b *buffDataBlock) ReadBinary(out interface{}) {
@@ -226,16 +234,19 @@ func (b *buffDataBlock) ReadData() []byte {
 func (b *buffDataBlock) ReadDataTo(dst []byte) (n int, rs []byte) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
+	if nil == dst || len(dst) == 0 {
+		return
+	}
 	data := b.readData()
 	if nil == data {
-		return 0, nil
+		return
 	}
 	n = copy(dst, data)
 	rs = dst[:n]
 	return
 }
 
-func (b *buffDataBlock) ReadCopyData() []byte {
+func (b *buffDataBlock) ReadDataCopy() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	data := b.readData()
