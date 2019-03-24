@@ -10,10 +10,6 @@ import (
 	"github.com/xuzhuoxi/infra-go/encodingx"
 )
 
-func NewDefaultJsonCodingHandler() encodingx.ICodingHandler {
-	return NewJsonCodingHandlerAsync()
-}
-
 func NewJsonCodingHandlerAsync() encodingx.ICodingHandler {
 	return jsonHandlerAsync{}
 }

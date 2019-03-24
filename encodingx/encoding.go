@@ -46,13 +46,13 @@ type ICodingHandler interface {
 type iBuffEncoder interface {
 	bytex.IBuffByteReader
 	bytex.IBuffDataWriter
-	EncodeDataToBuff(encoders ...interface{})
+	EncodeDataToBuff(data ...interface{})
 }
 
 type iBuffDecoder interface {
 	bytex.IBuffByteWriter
 	bytex.IBuffDataReader
-	DecodeDataFromBuff(decoders ...interface{})
+	DecodeDataFromBuff(data ...interface{})
 }
 
 type IBuffEncoder interface {

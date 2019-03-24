@@ -10,15 +10,12 @@ import (
 )
 
 var (
-	DefaultPoolBuffDataBlock IPoolBuffDataBlock
-	DefaultPoolBuffToData    IPoolBuffToData
-	DefaultPoolBuffToBlock   IPoolBuffToBlock
+	DefaultPoolBuffDataBlock = NewPoolBuffDataBlock()
+	DefaultPoolBuffToData    = NewPoolBuffToData()
+	DefaultPoolBuffToBlock   = NewPoolBuffToBlock()
 )
 
 func init() {
-	DefaultPoolBuffDataBlock = NewPoolBuffDataBlock()
-	DefaultPoolBuffToData = NewPoolBuffToData()
-	DefaultPoolBuffToBlock = NewPoolBuffToBlock()
 	DefaultPoolBuffDataBlock.Register(NewDefaultBuffDataBlock)
 	DefaultPoolBuffToData.Register(NewDefaultBuffToData)
 	DefaultPoolBuffToBlock.Register(NewDefaultBuffToBlock)

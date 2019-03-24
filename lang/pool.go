@@ -7,8 +7,14 @@ package lang
 
 import "sync"
 
+type PoolCheckFunc func(instance interface{}) bool
+
+type IPoolInstanceChecker interface {
+	SetCheckFunc(check PoolCheckFunc)
+}
+
 type IObjectPool interface {
-	Register(newFunc func() interface{}, check func(instance interface{}) bool)
+	Register(newFunc func() interface{}, check PoolCheckFunc)
 	GetInstance() interface{}
 	Recycle(instance interface{}) bool
 }
@@ -64,7 +70,7 @@ func (p *sizeObjectPool) SetMaxSize(size int) {
 	p.size = make(chan struct{}, size)
 }
 
-func (p *sizeObjectPool) Register(newFunc func() interface{}, check func(instance interface{}) bool) {
+func (p *sizeObjectPool) Register(newFunc func() interface{}, check PoolCheckFunc) {
 	p.objPool.Register(newFunc, check)
 }
 
@@ -89,7 +95,7 @@ type objectPoolSync struct {
 	lock sync.Mutex
 }
 
-func (p *objectPoolSync) Register(newFunc func() interface{}, check func(instance interface{}) bool) {
+func (p *objectPoolSync) Register(newFunc func() interface{}, check PoolCheckFunc) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 	p.pool.Register(newFunc, check)
@@ -111,11 +117,11 @@ func (p *objectPoolSync) Recycle(instance interface{}) bool {
 
 type objectPool struct {
 	newFunc func() interface{}
-	check   func(instance interface{}) bool
+	check   PoolCheckFunc
 	objs    []interface{}
 }
 
-func (p *objectPool) Register(newFunc func() interface{}, check func(instance interface{}) bool) {
+func (p *objectPool) Register(newFunc func() interface{}, check PoolCheckFunc) {
 	p.newFunc = newFunc
 	p.check = check
 	list := make([]interface{}, 32)

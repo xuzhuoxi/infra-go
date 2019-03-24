@@ -6,20 +6,6 @@ import (
 	"sync"
 )
 
-var DefaultDataBlockHandler = bytex.NewDefaultDataBlockHandler()
-
-func NewDefaultGobBuffEncoder() encodingx.IBuffEncoder {
-	return newGobBuffCodecs(DefaultDataBlockHandler)
-}
-
-func NewDefaultGobBuffDecoder() encodingx.IBuffDecoder {
-	return newGobBuffCodecs(DefaultDataBlockHandler)
-}
-
-func NewDefaultGobBuffCodecs() encodingx.IBuffCodecs {
-	return newGobBuffCodecs(DefaultDataBlockHandler)
-}
-
 func NewGobBuffEncoder(handler bytex.IDataBlockHandler) encodingx.IBuffEncoder {
 	return newGobBuffCodecs(handler)
 }

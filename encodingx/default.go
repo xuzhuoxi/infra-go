@@ -10,5 +10,19 @@ import (
 	"github.com/xuzhuoxi/infra-go/bytex"
 )
 
-var DefaultOrder = binary.BigEndian
-var DefaultDataBlockHandler = bytex.NewDefaultDataBlockHandler()
+var (
+	DefaultOrder            = binary.BigEndian
+	DefaultDataBlockHandler = bytex.NewDefaultDataBlockHandler()
+)
+
+func NewDefaultBuffEncoder(encodeHandler IEncodeHandler) IBuffEncoder {
+	return newBuffCodecs(DefaultDataBlockHandler, encodeHandler, nil)
+}
+
+func NewDefaultBuffDecoder(decodeHandler IDecodeHandler) IBuffDecoder {
+	return newBuffCodecs(DefaultDataBlockHandler, nil, decodeHandler)
+}
+
+func NewDefaultBuffCodecs(codingHandler ICodingHandler) IBuffCodecs {
+	return newBuffCodecs(DefaultDataBlockHandler, codingHandler, codingHandler)
+}

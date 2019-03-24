@@ -12,11 +12,6 @@ import (
 	"sync"
 )
 
-func NewDefaultGobCodingHandler() encodingx.ICodingHandler {
-	return NewGobCodingHandlerAsync()
-	//return NewGobCodingHandler()
-}
-
 // 由于复用buff，相同结构体只有第一次才会追加TypeDescriptor
 func NewGobCodingHandler() encodingx.ICodingHandler {
 	encoderBuff := bytes.NewBuffer(nil)
