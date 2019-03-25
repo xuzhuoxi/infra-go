@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
+	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"net"
 )
@@ -25,7 +26,7 @@ type ITCPServer interface {
 type TCPServer struct {
 	eventx.EventDispatcher
 	SockServerBase
-	LinkLimit
+	lang.ChannelLimit
 
 	timeout  int
 	listener *net.TCPListener
@@ -50,7 +51,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	}
 	s.Logger.Infoln("[TCPServer] listening on:", params.LocalAddress)
 	s.listener = listener
-	s.LinkLimit.StartLimit()
+	s.ChannelLimit.StartLimit()
 	s.mapConn = make(map[string]*net.TCPConn)
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
@@ -60,7 +61,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 
 	defer s.StopServer()
 	for s.running {
-		s.LinkLimit.Add()
+		s.ChannelLimit.Add()
 		if !s.running {
 			break
 		}
@@ -98,9 +99,13 @@ func (s *TCPServer) StopServer() error {
 		value.Close()
 	}
 	s.mapConn = nil
-	s.LinkLimit.StopLimit()
+	s.ChannelLimit.StopLimit()
 	s.running = false
 	return nil
+}
+
+func (s *TCPServer) Connections() int {
+	return len(s.mapConn)
 }
 
 func (s *TCPServer) CloseConnection(address string) (err error, ok bool) {
@@ -161,7 +166,7 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 		}
 		delete(s.mapConn, address)
 		delete(s.mapProxy, address)
-		s.LinkLimit.Done()
+		s.ChannelLimit.Done()
 		s.serverMu.Unlock()
 	}()
 	proxy.StartReceiving() //这里会阻塞

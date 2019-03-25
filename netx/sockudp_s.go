@@ -3,6 +3,7 @@ package netx
 import (
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
+	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"net"
 	"sync"
@@ -29,7 +30,7 @@ type IUDPServer interface {
 type UDPServer struct {
 	eventx.EventDispatcher
 	SockServerBase
-	NoLinkLimit
+	lang.ChannelLimitNone
 
 	conn         *net.UDPConn
 	messageProxy IPackSendReceiver
@@ -80,6 +81,10 @@ func (s *UDPServer) StopServer() error {
 	}
 	s.running = false
 	return nil
+}
+
+func (s *UDPServer) Connections() int {
+	return 0
 }
 
 func (s *UDPServer) CloseConnection(address string) (err error, ok bool) {

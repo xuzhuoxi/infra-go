@@ -5,6 +5,7 @@ import (
 	"github.com/lucas-clemente/quic-go"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
+	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 )
 
@@ -25,7 +26,7 @@ type IQUICServer interface {
 type QUICServer struct {
 	eventx.EventDispatcher
 	SockServerBase
-	NoLinkLimit
+	lang.ChannelLimitNone
 
 	listener   quic.Listener
 	mapProxy   map[string]IPackSendReceiver
@@ -97,6 +98,10 @@ func (s *QUICServer) StopServer() error {
 	s.mapSession = nil
 	s.running = false
 	return nil
+}
+
+func (s *QUICServer) Connections() int {
+	return len(s.mapSession)
 }
 
 func (s *QUICServer) CloseConnection(address string) (err error, ok bool) {

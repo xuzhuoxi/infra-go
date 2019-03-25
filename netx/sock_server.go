@@ -7,6 +7,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/infra-go/eventx"
+	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"sync"
 )
@@ -36,11 +37,16 @@ type IServer interface {
 	StopServer() error
 }
 
+type ISockConnection interface {
+	Connections() int
+	CloseConnection(address string) (err error, ok bool)
+}
+
 type ISockServer interface {
 	IServer
 	IServerRunning
-	ILinkLimit
-	CloseConnection(address string) (err error, ok bool)
+	lang.IChannelLimit
+	ISockConnection
 
 	ISockSender
 	IPackHandlerSetter

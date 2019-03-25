@@ -9,7 +9,7 @@ import (
 
 func TestTCPServer(t *testing.T) {
 	server := NewTCPServer()
-	server.SetLinkMax(200)
+	server.SetMax(200)
 	var packHandler = func(data []byte, senderAddress string, other interface{}) bool {
 		logx.Traceln(fmt.Sprintf("TestTCPServer.packHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, fmt.Sprint(data), fmt.Sprint(other)))
 		rs := []byte{byte(len(data))}

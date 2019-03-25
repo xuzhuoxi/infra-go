@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
+	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"golang.org/x/net/websocket"
 	"net/http"
@@ -26,7 +27,7 @@ type IWebSocketServer interface {
 type WebSocketServer struct {
 	eventx.EventDispatcher
 	SockServerBase
-	LinkLimit
+	lang.ChannelLimit
 
 	httpServer *http.Server
 	mapProxy   map[string]IPackSendReceiver
@@ -44,7 +45,7 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 	httpMux := http.NewServeMux()
 	httpMux.Handle(params.WSPattern, websocket.Handler(s.onWSConn))
 	s.httpServer = &http.Server{Addr: params.LocalAddress, Handler: httpMux}
-	s.LinkLimit.StartLimit()
+	s.ChannelLimit.StartLimit()
 	s.mapConn = make(map[string]*websocket.Conn)
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
@@ -83,9 +84,13 @@ func (s *WebSocketServer) StopServer() error {
 		value.Close()
 	}
 	s.mapConn = nil
-	s.LinkLimit.StopLimit()
+	s.ChannelLimit.StopLimit()
 	s.running = false
 	return nil
+}
+
+func (s *WebSocketServer) Connections() int {
+	return len(s.mapConn)
 }
 
 func (s *WebSocketServer) CloseConnection(address string) (err error, ok bool) {
@@ -129,7 +134,7 @@ func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 //RemoteAddr=Origin
 func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	address := conn.Request().RemoteAddr //最根的地址信息
-	s.LinkLimit.Add()
+	s.ChannelLimit.Add()
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
 	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: conn.Request().RemoteAddr}
@@ -151,7 +156,7 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 		}
 		delete(s.mapConn, address)
 		delete(s.mapProxy, address)
-		s.LinkLimit.Done()
+		s.ChannelLimit.Done()
 		s.serverMu.Unlock()
 	}()
 	proxy.StartReceiving() //这里会阻塞

@@ -11,7 +11,7 @@ import (
 
 func TestWSServer(t *testing.T) {
 	server := NewWebSocketServer()
-	server.SetLinkMax(5)
+	server.SetMax(5)
 	var packHandler = func(data []byte, senderAddress string, other interface{}) bool {
 		logx.Traceln(fmt.Sprintf("TestWSServer.packHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, fmt.Sprint(data), fmt.Sprint(other)))
 		rs := []byte{byte(len(data))}
