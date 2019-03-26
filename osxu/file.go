@@ -157,7 +157,8 @@ func GetUnitePath(path string) string {
 }
 
 //把文件名拆分
-func SplitFileName(fileName string) (string, string) {
+//fileName不能包含目录
+func SplitFileName(fileName string) (fileBaseName string, fileExtName string) {
 	if "" == fileName || 0 == stringx.GetCharCount(fileName) {
 		return "", ""
 	}
@@ -166,6 +167,20 @@ func SplitFileName(fileName string) (string, string) {
 		return fileName, ""
 	}
 	return stringx.CutString(fileName, dot, false)
+}
+
+//取绝对路径下对应的文件全名
+func SplitFilePath(fileFullPath string) (fileDir string, fileName string) {
+	fileFullPath = GetUnitePath(fileFullPath)
+	if IsFolder(fileFullPath) {
+		return fileFullPath, ""
+	}
+	dot := stringx.LastIndexOfChar(fileFullPath, "/")
+	if -1 == dot {
+		return "", fileFullPath
+	}
+	fileDir, fileName = stringx.CutString(fileFullPath, dot, false)
+	return
 }
 
 //private ------------------------------------
