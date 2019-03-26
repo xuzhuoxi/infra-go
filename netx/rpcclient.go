@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"errors"
 	"net/rpc"
 )
 
@@ -11,7 +12,7 @@ func NewRPCClient(Network string) IRPCClient {
 type IRPCClient interface {
 	Dial(address string) error
 	IsConnected() bool
-	Call(serviceMethod string, args interface{}, reply interface{})
+	Call(serviceMethod string, args interface{}, reply interface{}) error
 	Close()
 }
 
@@ -35,10 +36,11 @@ func (c *RPCClient) IsConnected() bool {
 	return nil != c.client && c.connected
 }
 
-func (c *RPCClient) Call(serviceMethod string, args interface{}, reply interface{}) {
+func (c *RPCClient) Call(serviceMethod string, args interface{}, reply interface{}) error {
 	if c.IsConnected() {
-		c.client.Call(serviceMethod, args, reply)
+		return c.client.Call(serviceMethod, args, reply)
 	}
+	return errors.New("Client does not connect. ")
 }
 
 func (c *RPCClient) Close() {
