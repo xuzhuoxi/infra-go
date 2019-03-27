@@ -43,6 +43,7 @@ type ISockConnection interface {
 }
 
 type ISockServer interface {
+	ISockName
 	IServer
 	IServerRunning
 	lang.IChannelLimit
@@ -64,6 +65,14 @@ type SockServerBase struct {
 	Logger logx.ILogger
 
 	PackHandler IPackHandler
+}
+
+func (s *SockServerBase) SetName(name string) {
+	s.Name = name
+}
+
+func (s *SockServerBase) GetName() string {
+	return s.Name
 }
 
 func (s *SockServerBase) GetLogger() logx.ILogger {

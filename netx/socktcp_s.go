@@ -56,8 +56,8 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
-	s.dispatchServerStartedEvent(s)
 	s.Logger.Infoln(funcName + "()")
+	s.dispatchServerStartedEvent(s)
 
 	defer s.StopServer()
 	for s.running {
@@ -84,8 +84,8 @@ func (s *TCPServer) StopServer() error {
 	}
 	defer func() {
 		s.serverMu.Unlock()
-		s.dispatchServerStoppedEvent(s)
 		s.Logger.Infoln(funcName + "()")
+		s.dispatchServerStoppedEvent(s)
 	}()
 	if nil != s.listener {
 		s.listener.Close()

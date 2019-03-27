@@ -50,8 +50,8 @@ func (s *WebSocketServer) StartServer(params SockParams) error {
 	s.mapProxy = make(map[string]IPackSendReceiver)
 	s.running = true
 	s.serverMu.Unlock()
-	s.dispatchServerStartedEvent(s)
 	s.Logger.Infoln(funcName + "()")
+	s.dispatchServerStartedEvent(s)
 	err := s.httpServer.ListenAndServe()
 	if nil != err {
 		s.running = false
@@ -69,8 +69,8 @@ func (s *WebSocketServer) StopServer() error {
 	}
 	defer func() { //应该解锁后抛出事件
 		s.serverMu.Unlock()
-		s.dispatchServerStoppedEvent(s)
 		s.Logger.Infoln(funcName + "()")
+		s.dispatchServerStoppedEvent(s)
 	}()
 	if nil != s.httpServer {
 		s.httpServer.Close()

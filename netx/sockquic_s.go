@@ -56,8 +56,8 @@ func (s *QUICServer) StartServer(params SockParams) error {
 	s.mapStream = make(map[string]quic.Stream)
 	s.running = true
 	s.serverMu.Unlock()
-	s.dispatchServerStartedEvent(s)
 	s.Logger.Infoln(funcName + "()")
+	s.dispatchServerStartedEvent(s)
 	for s.running {
 		session, err := listener.Accept()
 		if !s.running || nil != err {
@@ -77,8 +77,8 @@ func (s *QUICServer) StopServer() error {
 	}
 	defer func() {
 		s.serverMu.Unlock()
-		s.dispatchServerStoppedEvent(s)
 		s.Logger.Infoln(funcName + "()")
+		s.dispatchServerStoppedEvent(s)
 	}()
 	if nil != s.listener {
 		s.listener.Close()

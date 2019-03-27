@@ -32,3 +32,8 @@ type ISockSender interface {
 	SendPackTo(data []byte, rAddress ...string) error
 	SendBytesTo(bytes []byte, rAddress ...string) error
 }
+
+type ISockName interface {
+	SetName(name string)
+	GetName() string
+}

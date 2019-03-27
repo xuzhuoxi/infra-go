@@ -28,6 +28,7 @@ type IClient interface {
 }
 
 type ISockClient interface {
+	ISockName
 	IClient
 	IClientOpening
 	IPackReceiver
@@ -49,6 +50,14 @@ type SockClientBase struct {
 	Logger    logx.ILogger
 
 	PackHandler IPackHandler
+}
+
+func (c *SockClientBase) SetName(name string) {
+	c.Name = name
+}
+
+func (c *SockClientBase) GetName() string {
+	return c.Name
 }
 
 func (c *SockClientBase) GetPackHandler() IPackHandler {

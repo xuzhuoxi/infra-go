@@ -58,8 +58,8 @@ func (s *UDPServer) StartServer(params SockParams) error {
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
 	s.messageProxy = NewPackSendReceiver(connProxy, connProxy, s.PackHandler, UdpDataBlockHandler, s.Logger, true)
 	s.serverMu.Unlock()
-	s.dispatchServerStartedEvent(s)
 	s.Logger.Infoln(funcName + "()")
+	s.dispatchServerStartedEvent(s)
 	err2 := s.messageProxy.StartReceiving()
 	return err2
 }
@@ -73,8 +73,8 @@ func (s *UDPServer) StopServer() error {
 	}
 	defer func() {
 		s.serverMu.Unlock()
-		s.dispatchServerStoppedEvent(s)
 		s.Logger.Infoln(funcName + "()")
+		s.dispatchServerStoppedEvent(s)
 	}()
 	if nil != s.conn {
 		s.conn.Close()

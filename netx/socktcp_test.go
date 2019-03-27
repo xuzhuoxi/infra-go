@@ -2,6 +2,7 @@ package netx
 
 import (
 	"fmt"
+	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"testing"
 	"time"
@@ -18,6 +19,15 @@ func TestTCPServer(t *testing.T) {
 		return true
 	}
 	server.GetPackHandler().SetPackHandlers([]FuncPackHandler{packHandler})
+	server.OnceEventListener(ServerEventStart, func(evd *eventx.EventData) {
+		fmt.Println(1111111111111111)
+	})
+	server.OnceEventListener(ServerEventStart, func(evd *eventx.EventData) {
+		fmt.Println(3333333333333333)
+	})
+	server.OnceEventListener(ServerEventStop, func(evd *eventx.EventData) {
+		fmt.Println(2222222222222)
+	})
 	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
 
 	client := NewTCPClient()
