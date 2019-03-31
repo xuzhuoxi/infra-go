@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-type FuncPackHandler func(data []byte, senderAddress string, other interface{}) bool
+type FuncPackHandler func(data []byte, senderAddress string, other interface{}) (catch bool)
 
 //--------------------------
 

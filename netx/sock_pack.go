@@ -11,6 +11,7 @@ const ReceiverBuffLen = 2048
 
 type iPackReceiver interface {
 	IPackHandlerSetter
+	IPackHandlerGetter
 	StartReceiving() error
 	StopReceiving() error
 	IsReceiving() bool
@@ -87,8 +88,8 @@ type packSRBase struct {
 	Logger           logx.ILogger
 }
 
-func (sr *packSRBase) a(packHandler IPackHandler) {
-	sr.PackHandler = packHandler
+func (sr *packSRBase) GetPackHandler() IPackHandler {
+	return sr.PackHandler
 }
 
 func (sr *packSRBase) SetPackHandler(packHandler IPackHandler) {

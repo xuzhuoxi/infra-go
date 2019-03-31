@@ -39,14 +39,14 @@ type IOnNoneRequestExtension interface {
 
 type IOnBinaryRequestExtension interface {
 	//请求响应
-	OnRequest(resp extendx.IExtensionResponse, protoId string, uid string, data []byte, data2 ...[]byte)
+	OnRequest(resp extendx.IExtensionBinaryResponse, protoId string, uid string, data []byte, data2 ...[]byte)
 }
 
 type IOnObjectRequestExtension interface {
 	//响应结构体
 	GetRequestData(pProtoId string) (dataCopy interface{})
 	//请求响应
-	OnRequest(resp extendx.IExtensionResponse, protoId string, uid string, data interface{}, data2 ...interface{})
+	OnRequest(resp extendx.IExtensionObjectResponse, protoId string, uid string, data interface{}, data2 ...interface{})
 }
 
 type IAfterRequestExtension interface {
