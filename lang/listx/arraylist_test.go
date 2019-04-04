@@ -15,11 +15,11 @@ func TestArrayList_Add(t *testing.T) {
 	list.Add(1)
 	list.Add(2, 3)
 	list.AddAt(0, 1)
-	list.AddAt(list.Size(), 9)
+	list.AddAt(list.Len(), 9)
 	fmt.Println(list.GetAll())
 	list2 := NewLinkedList()
 	list2.AddAll(0, list)
-	list2.AddAll(list2.Size(), list)
+	list2.AddAll(list2.Len(), list)
 	fmt.Println(list2.GetAll())
 }
 

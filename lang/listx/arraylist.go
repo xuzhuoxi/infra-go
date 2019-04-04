@@ -21,8 +21,12 @@ type ArrayList struct {
 	elements []interface{}
 }
 
-func (l *ArrayList) Size() int {
+func (l *ArrayList) Len() int {
 	return len(l.elements)
+}
+
+func (l *ArrayList) Swap(i, j int) {
+	l.elements[i], l.elements[j] = l.elements[j], l.elements[i]
 }
 
 func (l *ArrayList) Clear() {
@@ -60,7 +64,7 @@ func (l *ArrayList) AddAll(index int, list IList) (suc bool) {
 }
 
 func (l *ArrayList) RemoveAt(index int) (ele interface{}, suc bool) {
-	if index >= 0 && index < l.Size() {
+	if index >= 0 && index < l.Len() {
 		rs := l.elements[index]
 		l.elements = append(l.elements[:index], l.elements[index+1:]...)
 		return rs, true
@@ -69,7 +73,7 @@ func (l *ArrayList) RemoveAt(index int) (ele interface{}, suc bool) {
 }
 
 func (l *ArrayList) RemoveMultiAt(index int, amount int) (ele []interface{}, suc bool) {
-	ln := l.Size()
+	ln := l.Len()
 	endIndex := index + amount
 	if amount > 0 && index >= 0 && endIndex <= ln {
 		removes := l.elements[index : index+amount]
@@ -83,11 +87,11 @@ func (l *ArrayList) RemoveMultiAt(index int, amount int) (ele []interface{}, suc
 }
 
 func (l *ArrayList) RemoveLast() (ele interface{}, suc bool) {
-	return l.RemoveAt(l.Size() - 1)
+	return l.RemoveAt(l.Len() - 1)
 }
 
 func (l *ArrayList) RemoveLastMulti(amount int) (ele []interface{}, suc bool) {
-	startIndex := l.Size() - amount
+	startIndex := l.Len() - amount
 	return l.RemoveMultiAt(startIndex, amount)
 }
 
@@ -100,7 +104,7 @@ func (l *ArrayList) RemoveFirstMulti(amount int) (ele []interface{}, suc bool) {
 }
 
 func (l *ArrayList) Get(index int) (ele interface{}, ok bool) {
-	ln := l.Size()
+	ln := l.Len()
 	if ln > 0 && index >= 0 && index < ln {
 		return l.elements[index], true
 	}
@@ -108,7 +112,7 @@ func (l *ArrayList) Get(index int) (ele interface{}, ok bool) {
 }
 
 func (l *ArrayList) GetMulti(index int, amount int) (ele []interface{}, ok bool) {
-	if amount > 0 && index >= 0 && index+amount <= l.Size() {
+	if amount > 0 && index >= 0 && index+amount <= l.Len() {
 		return l.elements[index : index+amount], true
 	}
 	return nil, false
@@ -132,11 +136,11 @@ func (l *ArrayList) FirstMulti(amount int) (ele []interface{}, ok bool) {
 }
 
 func (l *ArrayList) Last() (ele interface{}, ok bool) {
-	return l.Get(l.Size() - 1)
+	return l.Get(l.Len() - 1)
 }
 
 func (l *ArrayList) LastMulti(amount int) (ele []interface{}, ok bool) {
-	return l.GetMultiLast(l.Size()-1, amount)
+	return l.GetMultiLast(l.Len()-1, amount)
 }
 
 func (l *ArrayList) IndexOf(ele interface{}) (index int, ok bool) {

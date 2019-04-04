@@ -6,8 +6,10 @@
 package listx
 
 type IList interface {
-	// Removes the size of the list.
-	Size() int
+	// Len is the number of elements in the collection.
+	Len() int
+	// Swap swaps the elements with indexes i and j.
+	Swap(i, j int)
 	// Removes all of the elements from this list (optional operation).
 	Clear()
 

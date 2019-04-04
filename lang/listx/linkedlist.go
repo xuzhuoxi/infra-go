@@ -8,6 +8,7 @@ package listx
 import (
 	"container/list"
 	"github.com/xuzhuoxi/infra-go/lang"
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
 func NewLinkedList() *LinkedList {
@@ -19,8 +20,39 @@ type LinkedList struct {
 	list *list.List
 }
 
-func (l *LinkedList) Size() int {
+func (l *LinkedList) Len() int {
 	return l.list.Len()
+}
+
+func (l *LinkedList) Swap(i, j int) {
+	if i == j {
+		return
+	}
+	before := mathx.MinInt(i, j)
+	after := mathx.MaxInt(i, j)
+	if eleBefore, okBefore := l.getElement(before); okBefore {
+		if eleAfter, okAfter := l.getElement(after); okAfter {
+			switch {
+			case 0 == before && 1 == after: //只有两个元素
+				l.list.MoveToFront(eleAfter)
+			case 0 == before && after == l.Len()-1: //头和尾
+				l.list.MoveToBack(eleBefore)
+				l.list.MoveToFront(eleAfter)
+			default:
+				if 0 == before { //头，不是尾
+					beforeNext := eleBefore.Next() //必须
+					afterNext := eleAfter.Next()
+					l.list.MoveBefore(eleAfter, beforeNext)
+					l.list.MoveBefore(eleBefore, afterNext)
+				} else { //不是头，可能是尾
+					afterPrev := eleAfter.Prev() //必须
+					beforePrev := eleBefore.Prev()
+					l.list.MoveAfter(eleBefore, afterPrev)
+					l.list.MoveAfter(eleAfter, beforePrev)
+				}
+			}
+		}
+	}
 }
 
 func (l *LinkedList) Clear() {
@@ -39,7 +71,7 @@ func (l *LinkedList) Add(ele ...interface{}) (suc bool) {
 }
 
 func (l *LinkedList) AddAt(index int, ele ...interface{}) (suc bool) {
-	if index == l.Size() {
+	if index == l.Len() {
 		return l.Add(ele...)
 	}
 	if tempEle, ok := l.getElement(index); ok {
@@ -59,7 +91,7 @@ func (l *LinkedList) AddAt(index int, ele ...interface{}) (suc bool) {
 }
 
 func (l *LinkedList) AddAll(index int, list IList) (suc bool) {
-	if nil == list || list.Size() == 0 {
+	if nil == list || list.Len() == 0 {
 		return false
 	}
 	return l.AddAt(index, list.GetAll()...)
@@ -95,7 +127,7 @@ func (l *LinkedList) RemoveLast() (ele interface{}, suc bool) {
 }
 
 func (l *LinkedList) RemoveLastMulti(amount int) (ele []interface{}, suc bool) {
-	startIndex := l.Size() - amount
+	startIndex := l.Len() - amount
 	return l.RemoveMultiAt(startIndex, amount)
 }
 
@@ -120,7 +152,7 @@ func (l *LinkedList) Get(index int) (ele interface{}, ok bool) {
 }
 
 func (l *LinkedList) GetMulti(index int, amount int) (ele []interface{}, ok bool) {
-	if amount <= 0 || index < 0 || index+amount > l.Size() {
+	if amount <= 0 || index < 0 || index+amount > l.Len() {
 		return nil, false
 	}
 	arr := make([]interface{}, amount)
@@ -140,7 +172,7 @@ func (l *LinkedList) GetMultiLast(lastIndex int, amount int) (ele []interface{},
 }
 
 func (l *LinkedList) GetAll() []interface{} {
-	arr := make([]interface{}, l.Size())
+	arr := make([]interface{}, l.Len())
 	rs := arr[0:0]
 	for e := l.list.Front(); e != nil; e = e.Next() {
 		rs = append(rs, e.Value)
@@ -157,11 +189,11 @@ func (l *LinkedList) FirstMulti(amount int) (ele []interface{}, ok bool) {
 }
 
 func (l *LinkedList) Last() (ele interface{}, ok bool) {
-	return l.Get(l.Size() - 1)
+	return l.Get(l.Len() - 1)
 }
 
 func (l *LinkedList) LastMulti(amount int) (ele []interface{}, ok bool) {
-	return l.GetMultiLast(l.Size()-1, amount)
+	return l.GetMultiLast(l.Len()-1, amount)
 }
 
 func (l *LinkedList) IndexOf(ele interface{}) (index int, ok bool) {
@@ -218,7 +250,7 @@ func (l *LinkedList) ForEachLast(each func(index int, ele interface{}) (stop boo
 }
 
 func (l *LinkedList) getElement(index int) (ele *list.Element, ok bool) {
-	ln := l.Size()
+	ln := l.Len()
 	if 0 == ln || index < 0 || index >= ln {
 		return nil, false
 	}
@@ -254,7 +286,7 @@ func (l *LinkedList) getElement(index int) (ele *list.Element, ok bool) {
 }
 
 func (l *LinkedList) getElements(index int, amount int) (ele []*list.Element, ok bool) {
-	ln := l.Size()
+	ln := l.Len()
 	if 0 == ln || amount <= 0 || index < 0 || index+amount > ln {
 		return nil, false
 	}
