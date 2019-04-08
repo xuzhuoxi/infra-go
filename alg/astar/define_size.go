@@ -8,21 +8,13 @@ package astar
 type Size struct {
 	Width  int
 	Height int
+	Depth  int
 }
 
 func (s Size) Area() int {
-	return s.Width * s.Height
+	return s.Width * s.Height * s.Depth
 }
 
 func (s Size) Empty() bool {
-	return 0 == s.Width || 0 == s.Height
+	return 0 == s.Width || 0 == s.Height || 0 == s.Depth
 }
-
-const (
-	//地图外
-	GridOut = -1
-	//通路
-	GridPath = 0
-	//障碍
-	GridObstacle = 1
-)

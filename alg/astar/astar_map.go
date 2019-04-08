@@ -6,7 +6,6 @@
 package astar
 
 import (
-	"errors"
 	"sync"
 )
 
@@ -50,7 +49,7 @@ type GridMap struct {
 	gridSize Size
 	dataSize Size
 
-	mapData  [][]int
+	mapData  [][][]int
 	oblique  bool
 	aStarAlg IAStarAlg
 
@@ -96,30 +95,31 @@ func (m *GridMap) InitGridMap(dataSize, gridSize Size) {
 	m.dataSize = dataSize
 	m.gridSize = gridSize
 	m.aStarAlg = NewAStartAlg()
-	m.aStarAlg.InitMapSize(dataSize.Width, dataSize.Height)
+	m.aStarAlg.InitMapSize(dataSize.Width, dataSize.Height, dataSize.Depth)
 }
 
 func (m *GridMap) SetMapData(data interface{}) error {
 	m.rwMu.Lock()
 	defer m.rwMu.Unlock()
-	dataSize := m.dataSize
+	var source [][][]int
+	var err error
 	switch d := data.(type) {
 	case []int:
-		if len(d) != dataSize.Area() {
-			return errors.New("Data Error! ")
+		if source, err = m.aStarAlg.SetData(d); nil != err {
+			return err
 		}
-		m.mapData = m.copyData(d)
+		m.mapData = source
 	case [][]int:
-		ln := 0
-		for _, ds := range d {
-			ln += len(ds)
+		if source, err = m.aStarAlg.SetData2D(d); nil != err {
+			return err
 		}
-		if ln != dataSize.Area() {
-			return errors.New("Data Error! ")
+		m.mapData = source
+	case [][][]int:
+		if source, err = m.aStarAlg.SetData3D(d); nil != err {
+			return err
 		}
-		m.mapData = m.copyData2(d)
+		m.mapData = source
 	}
-	m.aStarAlg.InitData2(m.mapData)
 	return nil
 }
 
@@ -168,7 +168,7 @@ func (m *GridMap) SearchPath(startPos, endPos Position) (path []Position, ok boo
 	if m.canLineTo(startPos, endPos) {
 		return []Position{startPos, endPos}, true
 	} else {
-		if path, ok := m.aStarAlg.Search(startPos.X, startPos.Y, endPos.X, endPos.Y); ok {
+		if path, ok := m.aStarAlg.SearchPosition(startPos, endPos); ok {
 			path = ClearInflection(path)
 			return path, ok
 		}
@@ -215,34 +215,9 @@ func (m *GridMap) isPathGrid(pos Position) bool {
 
 // 取格式数据值
 func (m *GridMap) getDataValue(pos Position) int {
-	x := pos.X
-	y := pos.Y
-	if x < 0 || x >= m.dataSize.Width || y < 0 || y >= m.dataSize.Height {
+	x, y, z := pos.X, pos.Y, pos.Z
+	if x < 0 || x >= m.dataSize.Width || y < 0 || y >= m.dataSize.Height || z < 0 || z >= m.dataSize.Height {
 		return GridOut
 	}
-	return m.mapData[y][x]
-}
-
-func (m *GridMap) copyData(data []int) [][]int {
-	cp := make([]int, m.dataSize.Area())
-	copy(cp, data)
-	var rs [][]int
-	for y := 0; y < m.dataSize.Height; y++ {
-		startIndex := y * m.dataSize.Width
-		slice := cp[startIndex : startIndex+m.dataSize.Width]
-		rs = append(rs, slice)
-	}
-	return rs
-}
-
-func (m *GridMap) copyData2(data [][]int) [][]int {
-	cp := make([]int, m.dataSize.Area())
-	var rs [][]int
-	for y := 0; y < m.dataSize.Height; y++ {
-		startIndex := y * m.dataSize.Width
-		slice := cp[startIndex : startIndex+m.dataSize.Width]
-		copy(slice, data[y])
-		rs = append(rs, slice)
-	}
-	return rs
+	return m.mapData[z][y][x]
 }

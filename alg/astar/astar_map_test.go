@@ -90,15 +90,15 @@ var mapData = [][]int{
 
 func TestAStarAlg(t *testing.T) {
 	gm := NewIGridMap()
-	dataSize := Size{Height: len(mapData), Width: len(mapData[0])}
+	dataSize := Size{Height: len(mapData), Width: len(mapData[0]), Depth: 1}
 	fmt.Println("DataSize:", dataSize)
-	gm.InitGridMap(dataSize, Size{1, 1})
+	gm.InitGridMap(dataSize, Size{1, 1, 1})
 	gm.SetAllowedDirections(DefaultDirections2D...)
 	if err := gm.SetMapData(mapData); nil != err {
 		t.Fatal(err)
 	}
-	startPos := Position{13, 47}
-	endPos := Position{16, 55}
+	startPos := Position{13, 47, 0}
+	endPos := Position{16, 55, 0}
 	if path, ok := gm.SearchPath(startPos, endPos); ok {
 		fmt.Println(startPos, endPos)
 		fmt.Println(path)

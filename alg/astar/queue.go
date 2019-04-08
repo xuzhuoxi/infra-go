@@ -43,8 +43,14 @@ func (q *sortedQueue) getAll() []interface{} {
 }
 
 //选择插入
-func (q *sortedQueue) Push(x, y, priority int) {
-	pp := NewPriorityPosition(x, y, priority)
+func (q *sortedQueue) Push2D(x, y, priority int) {
+	pp := NewPriorityPosition2D(x, y, priority)
+	q.PushPriorityPosition(pp)
+}
+
+//选择插入
+func (q *sortedQueue) Push3D(x, y, z, priority int) {
+	pp := NewPriorityPosition3D(x, y, z, priority)
 	q.PushPriorityPosition(pp)
 }
 
