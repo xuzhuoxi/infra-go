@@ -6,10 +6,10 @@
 package astar
 
 const (
-	//地图外
+	// 地图外
 	GridOut = -1
-	//通路
+	// 通路
 	GridPath = 0
-	//障碍
+	// 障碍
 	GridObstacle = 1
 )

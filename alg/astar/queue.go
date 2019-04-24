@@ -42,19 +42,19 @@ func (q *sortedQueue) getAll() []interface{} {
 	return q.list.GetAll()
 }
 
-//选择插入
+// 选择插入
 func (q *sortedQueue) Push2D(x, y, priority int) {
 	pp := NewPriorityPosition2D(x, y, priority)
 	q.PushPriorityPosition(pp)
 }
 
-//选择插入
+// 选择插入
 func (q *sortedQueue) Push3D(x, y, z, priority int) {
 	pp := NewPriorityPosition3D(x, y, z, priority)
 	q.PushPriorityPosition(pp)
 }
 
-//选择插入
+// 选择插入
 func (q *sortedQueue) PushPriorityPosition(pp *PriorityPosition) {
 	if q.list.Len() == 0 {
 		q.list.Add(pp)
@@ -74,7 +74,7 @@ func (q *sortedQueue) PushPriorityPosition(pp *PriorityPosition) {
 	}
 }
 
-//取尾
+// 取尾
 func (q *sortedQueue) Pop() (pp *PriorityPosition, ok bool) {
 	if last, ok := q.list.RemoveLast(); ok {
 		return last.(*PriorityPosition), true
@@ -82,7 +82,7 @@ func (q *sortedQueue) Pop() (pp *PriorityPosition, ok bool) {
 	return nil, false
 }
 
-//取头
+// 取头
 func (q *sortedQueue) Shift() (pp *PriorityPosition, ok bool) {
 	if first, ok := q.list.RemoveFirst(); ok {
 		return first.(*PriorityPosition), true
@@ -90,10 +90,12 @@ func (q *sortedQueue) Shift() (pp *PriorityPosition, ok bool) {
 	return nil, false
 }
 
+// 清空
 func (q *sortedQueue) Clear() {
 	q.list.Clear()
 }
 
+// 长度
 func (q *sortedQueue) Len() int {
 	return q.list.Len()
 }

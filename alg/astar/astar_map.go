@@ -10,30 +10,30 @@ import (
 )
 
 type IGridMap interface {
-	//初始化地图大小
+	// 初始化地图大小
 	InitGridMap(dataSize, gridSize Size)
-	//格式大小
+	// 格式大小
 	GetGridSize() Size
-	//地图数据大小
+	// 地图数据大小
 	GetDataSize() Size
-	//地图像素大小
+	// 地图像素大小
 	GetPixelSize() Size
-	//AStart算法
+	// AStart算法
 	GetAStartAlg() IAStarAlg
 
-	//设置允许寻路的方向
+	// 设置允许寻路的方向
 	SetAllowedDirections(direction ...Direction)
-	//设置地图数据
+	// 设置地图数据
 	SetMapData(data interface{}) error
-	//格式数据值
+	// 格式数据值
 	GetDataValue(pos Position) int
-	//判断路径是否通路
+	// 判断路径是否通路
 	CheckPath(path []Position) bool
-	//判断是否两点直通
+	// 判断是否两点直通
 	CanLineTo(startPos, endPos Position) bool
-	//设置自定义估值函数
+	// 设置自定义估值函数
 	SetSearchHn(hn FuncHn)
-	//检索路径
+	// 检索路径
 	SearchPath(startPos, endPos Position) (path []Position, ok bool)
 }
 
@@ -149,7 +149,7 @@ func (m *GridMap) CheckPath(path []Position) bool {
 	return true
 }
 
-//判断是否两点直通
+// 判断是否两点直通
 func (m *GridMap) CanLineTo(startPos, endPos Position) bool {
 	m.rwMu.RLock()
 	defer m.rwMu.RUnlock()

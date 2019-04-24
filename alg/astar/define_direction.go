@@ -5,9 +5,10 @@
 //
 package astar
 
+// 方向定义
 type Direction uint8
 
-//3D方向
+// 3D方向
 const (
 	X0_Y0_Z0 Direction = iota // 水平方向：中心 ----------------
 	X0_Y1_Z0                  // 水平方向：↑
@@ -38,7 +39,7 @@ const (
 	X__Y1_Z_                  // Z减小方向：↖
 )
 
-//2D方向
+// 2D方向
 const (
 	Center    = X0_Y0_Z0
 	North     = X0_Y1_Z0
@@ -51,6 +52,7 @@ const (
 	WestNorth = X__Y1_Z0
 )
 
+// 默认寻路方向
 var (
 	DefaultDirections2D = []Direction{North, EastNorth, East, EastSouth, South, WestSouth, West, WestNorth}
 	DefaultDirections3D = []Direction{
@@ -66,24 +68,30 @@ var (
 
 //-------------------------------------------------------
 
+// 方向矢量
 type DirectionVector [4]int
 
+// 坐标X方向增量
 func (v DirectionVector) X() int {
 	return v[0]
 }
 
+// 坐标Y方向增量
 func (v DirectionVector) Y() int {
 	return v[1]
 }
 
+// 坐标Z方向增量
 func (v DirectionVector) Z() int {
 	return v[2]
 }
 
+// 代价值
 func (v DirectionVector) V() int {
 	return v[3]
 }
 
+// 默认3D方向矢量定义
 var (
 	Vector_X0_Y0_Z0 = DirectionVector{0, 0, 0, 5}    // 水平方向：中心 ----------------
 	Vector_X0_Y1_Z0 = DirectionVector{0, 1, 0, 5}    // 水平方向：↑
@@ -114,6 +122,7 @@ var (
 	Vector_X__Y1_Z_ = DirectionVector{-1, 1, -1, 5}  // Z减小方向：↖
 )
 
+// 默认2D方向矢量定义
 var (
 	VectorCenter    = Vector_X0_Y0_Z0
 	VectorNorth     = Vector_X0_Y1_Z0
@@ -131,6 +140,7 @@ var vectors = []DirectionVector{
 	Vector_X0_Y0_Z1, Vector_X0_Y1_Z1, Vector_X1_Y1_Z1, Vector_X1_Y0_Z1, Vector_X1_Y__Z1, Vector_X0_Y__Z1, Vector_X__Y__Z1, Vector_X__Y0_Z1, Vector_X__Y1_Z1,
 	Vector_X0_Y0_Z_, Vector_X0_Y1_Z_, Vector_X1_Y1_Z_, Vector_X1_Y0_Z_, Vector_X1_Y__Z_, Vector_X0_Y__Z_, Vector_X__Y__Z_, Vector_X__Y0_Z_, Vector_X__Y1_Z_}
 
+// 取方向对应的矢量定义
 func GetNextDir(dir Direction) DirectionVector {
 	return vectors[dir]
 }

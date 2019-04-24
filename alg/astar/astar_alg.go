@@ -20,26 +20,26 @@ const (
 // 下一点到终点的估算代价
 type FuncHn func(cx, cy, cz, ex, ey, ez int) int
 
-//默认估值函数
+// 默认估值函数
 func DefaultFuncHn(cx, cy, cz, ex, ey, ez int) int {
 	return mathx.AbsInt(cx-ex) + mathx.AbsInt(cy-ey) + mathx.AbsInt(cz-ez)
 }
 
 type IAStarAlg interface {
-	//设置禁止检索的方向(可用于特殊地图)
+	// 设置禁止检索的方向(可用于特殊地图)
 	SetAllowedDirections(direction []Direction)
-	//设置自定义的估值函数
+	// 设置自定义的估值函数
 	SetCustomFuncHn(hn FuncHn)
 
-	//初始化地图Size
+	// 初始化地图Size
 	InitMapSize(width, height, depth int)
-	//初始化地图Size
+	// 初始化地图Size
 	InitMapSize2D(width, height int)
-	//设置地图数据
+	// 设置地图数据
 	SetData(data []int) (sourceData [][][]int, err error)
-	//设置地图数据
+	// 设置地图数据
 	SetData2D(data [][]int) (sourceData [][][]int, err error)
-	//设置地图数据
+	// 设置地图数据
 	SetData3D(data [][][]int) (sourceData [][][]int, err error)
 	// 寻路
 	// sx:StartX; sy:StartY
@@ -81,7 +81,7 @@ func (h history) getPath() []Position {
 }
 
 type AStarAlg struct {
-	//地图的大小
+	// 地图的大小
 	size *Size
 	//可行方向
 	nextDirs []Direction
