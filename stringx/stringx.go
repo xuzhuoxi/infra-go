@@ -73,7 +73,8 @@ func SubSuffix(s string, index int) string {
 	return suffix
 }
 
-//把字符串一分为二
+// 把字符串一分为二
+// 当keepIndex=true是，index所在字符会留在第二个返回字符的第一个
 func CutString(s string, index int, keepIndex bool) (string, string) {
 	runes := []rune(s)
 	if index < 0 {

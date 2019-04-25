@@ -69,18 +69,26 @@ func GetFolderSize(dirPath string) (uint64, error) {
 	return size, nil
 }
 
+//取扩展名
+func GetExtensionName(fileName string) string {
+	_, eName := SplitFileName(fileName)
+	return eName
+}
+
+//取文件名
+func GetFilePrefixName(fileName string) string {
+	bName, _ := SplitFileName(fileName)
+	return bName
+}
+
 //取文件夹下全部文件
 //recursive 是否递归子文件夹
 //filter 过滤器，=nil时为不增加过滤,返回true时的FileInfo将包含到返回结果中
 func GetFolderFileList(dirPath string, recursive bool, filter func(fileInfo os.FileInfo) bool) ([]os.FileInfo, error) {
-	dirPath = GetUnitePath(dirPath)
+	dirPath = FormatDirPath(dirPath)
 	_, err := os.Stat(dirPath)
 	if nil != err {
 		return nil, err
-	}
-	dirLen := stringx.GetCharCount(dirPath)
-	if stringx.LastIndexOfChar(dirPath, "/") != dirLen-1 { //最后一个不是"/"
-		dirPath = dirPath + "/"
 	}
 	var rs []os.FileInfo
 	var recursiveFunc func(folderPath string) = nil
@@ -105,59 +113,38 @@ func GetFolderFileList(dirPath string, recursive bool, filter func(fileInfo os.F
 	return rs, nil
 }
 
-//取扩展名
-func GetExtensionName(fileName string) string {
-	_, eName := SplitFileName(fileName)
-	return eName
-}
-
-//取文件名
-func GetFilePrefixName(fileName string) string {
-	bName, _ := SplitFileName(fileName)
-	return bName
-}
-
-//取父文件夹(父目录)
-func GetParentDir(dirPath string) (string, bool) {
-	newPath := GetUnitePath(dirPath)
-	pathLen := stringx.GetCharCount(newPath)
-	dot := stringx.LastIndexOfChar(newPath, "/")
-	if dot == -1 { //无效路径 或 windows顶级路径
+// 取路径的父目录
+// 如果当前路径为文件夹，返回上一级文件夹路径
+// 如果当前路径为文件，返回所在目录
+func GetParentDir(dirPath string) (dir string, ok bool) {
+	fileDir, _ := SplitFilePath(dirPath)
+	if "" == fileDir || "/" == fileDir {
 		return "", false
 	}
-	if dot == 0 { //在头部
-		if pathLen == 1 {
-			return "", false
-		} else {
-			return "/", true
-		}
+	fileDir = stringx.SubString(fileDir, 0, len(fileDir)-1) //取掉最后一个"/"
+	dot := stringx.LastIndexOfChar(fileDir, "/")
+	// 已经是顶级目录
+	if -1 == dot {
+		return "", false
 	}
-	var f = func(str string) (string, bool) { //保证"/"不在最后一个字符
-		d := stringx.LastIndexOfChar(str, "/")
-		if -1 == d {
-			return "", false
-		}
-		if 0 == d {
-			return "/", true
-		}
-		return stringx.SubPrefix(str, d+1), true
-	}
-	if dot < pathLen-1 { //在中间
-		return f(newPath)
-	}
-	if dot == pathLen-1 { //在尾部
-		return f(stringx.SubPrefix(newPath, dot))
-	}
-	return "", false
+	dir, _ = stringx.CutString(fileDir, dot+1, true)
+	return dir, true
 }
 
-//转换为"/"形式路径
-func GetUnitePath(path string) string {
-	return strings.Replace(path, "\\", "/", -1)
+// 取路径的当前目录
+// 如果当前路径是文件夹，返回当前路径
+// 如果当前路径是文件，返回所在目录
+func GetCurrentDir(fullPath string) (string, bool) {
+	fileDir, _ := SplitFilePath(fullPath)
+	if "" == fileDir {
+		return "", false
+	}
+	return fileDir, true
 }
 
-//把文件名拆分
-//fileName不能包含目录
+// 把文件名拆分
+// fileName不能包含目录
+// 路径已经转化为"/"格式
 func SplitFileName(fileName string) (fileBaseName string, fileExtName string) {
 	if "" == fileName || 0 == stringx.GetCharCount(fileName) {
 		return "", ""
@@ -169,18 +156,41 @@ func SplitFileName(fileName string) (fileBaseName string, fileExtName string) {
 	return stringx.CutString(fileName, dot, false)
 }
 
-//取绝对路径下对应的文件全名
+// 拆分目录路径与文件,目录路径以"/"结尾
+// 取绝对路径下对应的文件全名
+// 路径已经转化为"/"格式
 func SplitFilePath(fileFullPath string) (fileDir string, fileName string) {
-	fileFullPath = GetUnitePath(fileFullPath)
+	fileFullPath = FormatPath(fileFullPath)
 	if IsFolder(fileFullPath) {
-		return fileFullPath, ""
+		return FormatDirPath(fileFullPath), ""
 	}
 	dot := stringx.LastIndexOfChar(fileFullPath, "/")
 	if -1 == dot {
 		return "", fileFullPath
 	}
-	fileDir, fileName = stringx.CutString(fileFullPath, dot, false)
+	fileDir, fileName = stringx.CutString(fileFullPath, dot+1, true)
 	return
 }
 
-//private ------------------------------------
+//Format ------------------------------------
+
+// 标准化目录路径，以"/"结尾
+// 非"/"结尾补全
+// 已经转换为"/"形式路径
+// 不检测有效性
+func FormatDirPath(dirPath string) string {
+	fDirPath := FormatPath(dirPath)
+	dot := stringx.LastIndexOfChar(fDirPath, "/")
+	// 非"/"结尾
+	if dot != stringx.GetCharCount(fDirPath)-1 {
+		return fDirPath + "/"
+	}
+	return fDirPath
+}
+
+// 标准化路径
+// 转换为"/"形式路径
+// 不检测有效性
+func FormatPath(path string) string {
+	return strings.Replace(path, "\\", "/", -1)
+}

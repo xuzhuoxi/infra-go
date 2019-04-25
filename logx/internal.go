@@ -2,7 +2,6 @@ package logx
 
 import (
 	"github.com/xuzhuoxi/infra-go/osxu"
-	"github.com/xuzhuoxi/infra-go/stringx"
 	"log"
 	"math"
 	"os"
@@ -90,10 +89,7 @@ func (l *logger) SetConfig(cfg LogConfig) {
 	if "" == cfg.FileDir {
 		return
 	}
-	newFileDir := osxu.GetUnitePath(cfg.FileDir)
-	if stringx.GetCharCount(newFileDir)-1 != stringx.LastIndexOfChar(newFileDir, "/") { //保证最后一个为"/"
-		newFileDir = newFileDir + "/"
-	}
+	newFileDir := osxu.FormatDirPath(cfg.FileDir)
 	if !osxu.IsExist(newFileDir) { //目标不存在，创建目录
 		os.MkdirAll(newFileDir, os.ModePerm)
 	}
