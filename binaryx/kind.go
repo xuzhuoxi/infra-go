@@ -11,8 +11,8 @@ import (
 
 type ValueKind uint8
 
+//简单类型定义
 const (
-	//简单类型
 	KindNone ValueKind = iota
 	KindBool
 	KindInt8
@@ -31,8 +31,9 @@ const (
 	KindUint
 	KindString
 )
+
+//简单数组类型定义
 const (
-	//数组类型
 	KindSliceNone ValueKind = iota + 128
 	KindSliceBool
 	KindSliceInt8
@@ -52,14 +53,17 @@ const (
 	KindSliceString
 )
 
+// 判断是否为不可用的类型
 func IsForbidKind(kind ValueKind) bool {
 	return kind == KindNone || kind == KindSliceNone
 }
 
+// 判断是否为简单类型
 func IsSimpleKind(kind ValueKind) bool {
 	return kind > KindNone && kind < KindSliceNone
 }
 
+// 判断是否为简单数组类型
 func IsSliceKind(kind ValueKind) bool {
 	return kind > KindSliceNone
 }
