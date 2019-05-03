@@ -8,9 +8,23 @@ import (
 	"strings"
 )
 
+type FileDetailInfo interface {
+	os.FileInfo
+	FullPath() string
+}
+
+type fileDetailInfo struct {
+	os.FileInfo
+	fullPath string
+}
+
+func (f *fileDetailInfo) FullPath() string {
+	return f.fullPath
+}
+
 //运行时的当前目录
 func RunningBaseDir() string {
-	return filepath.Dir(os.Args[0])
+	return FormatDirPath(filepath.Dir(os.Args[0]))
 }
 
 //检查路径是否存在
@@ -84,13 +98,13 @@ func GetFilePrefixName(fileName string) string {
 //取文件夹下全部文件
 //recursive 是否递归子文件夹
 //filter 过滤器，=nil时为不增加过滤,返回true时的FileInfo将包含到返回结果中
-func GetFolderFileList(dirPath string, recursive bool, filter func(fileInfo os.FileInfo) bool) ([]os.FileInfo, error) {
+func GetFolderFileList(dirPath string, recursive bool, filter func(fileInfo os.FileInfo) bool) ([]FileDetailInfo, error) {
 	dirPath = FormatDirPath(dirPath)
 	_, err := os.Stat(dirPath)
 	if nil != err {
 		return nil, err
 	}
-	var rs []os.FileInfo
+	var rs []FileDetailInfo
 	var recursiveFunc func(folderPath string) = nil
 	recursiveFunc = func(folderPath string) { //folderPath必须为"/"结尾
 		list, e := ioutil.ReadDir(folderPath)
@@ -104,7 +118,7 @@ func GetFolderFileList(dirPath string, recursive bool, filter func(fileInfo os.F
 				}
 			} else {
 				if nil == filter || filter(file) {
-					rs = append(rs, file)
+					rs = append(rs, &fileDetailInfo{fullPath: folderPath + file.Name(), FileInfo: file})
 				}
 			}
 		}
