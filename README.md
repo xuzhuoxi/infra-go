@@ -13,7 +13,7 @@ xuzhuoxi
 <xuzhuoxi@gmail.com> or <mailxuzhuoxi@163.com>
 
 ## License
-IconGen source code is available under the MIT [License](/LICENSE).
+"infra-go" source code is available under the MIT [License](/LICENSE).
 
 # Package Description
 
