@@ -21,11 +21,11 @@ const (
 )
 
 type ISockServerSetter interface {
-	SetServer(server ISockServer)
+	SetSockServer(server ISockServer)
 }
 
 type ISockServerGetter interface {
-	GetServer() ISockServer
+	GetSockServer() ISockServer
 }
 
 type IServerRunning interface {

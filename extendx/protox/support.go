@@ -5,41 +5,80 @@
 //
 package protox
 
+// 协议定义
+type ExtensionProtoInfo struct {
+	ProtoId          string
+	ParamType        ExtensionParamType
+	ExtensionHandler interface{}
+
+	ParamHandler IProtocolParamsHandler
+	ParamOrigin  interface{}
+}
+
+//---------------------------------------
+
 func NewProtocolExtensionSupport(Name string) ProtocolExtensionSupport {
-	return ProtocolExtensionSupport{Name: Name, ProtoIdToValue: make(map[string]interface{})}
+	return ProtocolExtensionSupport{
+		Name: Name, ProtoIdToInfo: make(map[string]*ExtensionProtoInfo),
+	}
 }
 
 type ProtocolExtensionSupport struct {
-	Name           string
-	ProtoIdToValue map[string]interface{}
+	Name          string
+	ProtoIdToInfo map[string]*ExtensionProtoInfo
 }
 
 func (s *ProtocolExtensionSupport) ExtensionName() string {
 	return s.Name
 }
-
-func (s *ProtocolExtensionSupport) CheckProtocolId(ProtoId string) bool {
-	_, ok := s.ProtoIdToValue[ProtoId]
+func (s *ProtocolExtensionSupport) CheckProtocolId(protoId string) bool {
+	_, ok := s.ProtoIdToInfo[protoId]
 	return ok
+}
+func (s *ProtocolExtensionSupport) GetParamInfo(protoId string) (paramType ExtensionParamType, handler IProtocolParamsHandler) {
+	info, _ := s.ProtoIdToInfo[protoId]
+	return info.ParamType, info.ParamHandler
+}
+
+func (s *ProtocolExtensionSupport) SetRequestHandlerBinary(protoId string, handler ExtensionHandlerBinaryParam) {
+	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Binary, ExtensionHandler: handler}
+}
+func (s *ProtocolExtensionSupport) SetRequestHandlerJson(protoId string, handler ExtensionHandlerJsonParam) {
+	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Json, ExtensionHandler: handler, ParamHandler: NewProtocolJsonParamsHandler()}
+}
+func (s *ProtocolExtensionSupport) SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam, ObjectOrigin interface{}, paramHandler IProtocolParamsHandler) {
+	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Object, ExtensionHandler: handler, ParamOrigin: ObjectOrigin, ParamHandler: paramHandler}
+}
+func (s *ProtocolExtensionSupport) ClearRequestHandler(protoId string) {
+	delete(s.ProtoIdToInfo, protoId)
+}
+
+func (s *ProtocolExtensionSupport) OnRequest(resp IExtensionResponse, req IExtensionRequest) {
+	info, _ := s.ProtoIdToInfo[req.ProtoId()]
+	switch info.ParamType {
+	case None:
+		handler := info.ExtensionHandler.(ExtensionHandlerNoneParam)
+		handler(resp.(IExtensionResponse), req.(IExtensionRequest))
+	case Binary:
+		handler := info.ExtensionHandler.(ExtensionHandlerBinaryParam)
+		handler(resp.(IExtensionBinaryResponse), req.(IExtensionBinaryRequest))
+	case Json:
+		handler := info.ExtensionHandler.(ExtensionHandlerJsonParam)
+		handler(resp.(IExtensionJsonResponse), req.(IExtensionJsonRequest))
+	case Object:
+		handler := info.ExtensionHandler.(ExtensionHandlerObjectParam)
+		handler(resp.(IExtensionObjectResponse), req.(IExtensionObjectRequest))
+	}
 }
 
 //---------------------------------------
 
-func NewGoroutineExtensionSupport(ProtoId string, MaxGo int) GoroutineExtensionSupport {
-	return GoroutineExtensionSupport{ProtoId: ProtoId, MaxGoroutine: MaxGo}
+func NewGoroutineExtensionSupport(MaxGo int) GoroutineExtensionSupport {
+	return GoroutineExtensionSupport{MaxGoroutine: MaxGo}
 }
 
 type GoroutineExtensionSupport struct {
-	ProtoId      string
 	MaxGoroutine int
-}
-
-func (s *GoroutineExtensionSupport) Key() string {
-	return s.ProtoId
-}
-
-func (s *GoroutineExtensionSupport) ProtocolId() string {
-	return s.ProtoId
 }
 
 func (s *GoroutineExtensionSupport) MaxGo() int {

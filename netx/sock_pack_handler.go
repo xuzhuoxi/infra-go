@@ -8,6 +8,7 @@ package netx
 import (
 	"errors"
 	"fmt"
+	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"sync"
 )
@@ -47,10 +48,13 @@ type IPackHandlerGetter interface {
 
 type IPackHandler interface {
 	FirstHandler(first func(handler FuncPackHandler) bool)
+	LastHandler(first func(handler FuncPackHandler) bool)
 	ForEachHandler(each func(handler FuncPackHandler) bool)
+
 	AppendPackHandler(handler FuncPackHandler) error
-	SetPackHandlers(handlers []FuncPackHandler) error
+	ClearHandler(handler FuncPackHandler) error
 	ClearHandlers() error
+	SetPackHandlers(handlers []FuncPackHandler) error
 }
 
 type PackHandler struct {
@@ -65,6 +69,15 @@ func (ph *PackHandler) FirstHandler(first func(handler FuncPackHandler) bool) {
 		return
 	}
 	first(ph.handlers[0])
+}
+
+func (ph *PackHandler) LastHandler(first func(handler FuncPackHandler) bool) {
+	ph.RWMutex.RLock()
+	defer ph.RWMutex.RUnlock()
+	if len(ph.handlers) == 0 {
+		return
+	}
+	first(ph.handlers[len(ph.handlers)-1])
 }
 
 func (ph *PackHandler) ForEachHandler(each func(handler FuncPackHandler) bool) {
@@ -89,16 +102,24 @@ func (ph *PackHandler) AppendPackHandler(handler FuncPackHandler) error {
 	ph.RWMutex.Lock()
 	defer ph.RWMutex.Unlock()
 	if nil == handler {
-		return errors.New("PackHandler:handler is nil")
+		return errors.New("PackHandler.AppendPackHandler:handler is nil")
 	}
 	ph.handlers = append(ph.handlers, handler)
 	return nil
 }
 
-func (ph *PackHandler) SetPackHandlers(handlers []FuncPackHandler) error {
+func (ph *PackHandler) ClearHandler(handler FuncPackHandler) error {
 	ph.RWMutex.Lock()
 	defer ph.RWMutex.Unlock()
-	ph.handlers = handlers
+	if nil == handler {
+		return errors.New("PackHandler.ClearHandler:handler is nil")
+	}
+	for index, _ := range ph.handlers {
+		if lang.Equal(ph.handlers[index], handler) {
+			ph.handlers = append(ph.handlers[:index], ph.handlers[index+1:]...)
+			return nil
+		}
+	}
 	return nil
 }
 
@@ -106,5 +127,12 @@ func (ph *PackHandler) ClearHandlers() error {
 	ph.RWMutex.Lock()
 	defer ph.RWMutex.Unlock()
 	ph.handlers = nil
+	return nil
+}
+
+func (ph *PackHandler) SetPackHandlers(handlers []FuncPackHandler) error {
+	ph.RWMutex.Lock()
+	defer ph.RWMutex.Unlock()
+	ph.handlers = handlers
 	return nil
 }

@@ -11,9 +11,9 @@ type IExtensionContainer interface {
 	//增加Extension
 	AppendExtension(extension IExtension)
 	//检查
-	CheckExtension(key string) bool
+	CheckExtension(name string) bool
 	//取Extension
-	GetExtension(key string) IExtension
+	GetExtension(name string) IExtension
 	//Extension数量
 	Len() int
 	//列表
@@ -27,7 +27,7 @@ type IExtensionContainer interface {
 	//对指定Extension执行处理
 	HandleAt(index int, handler func(index int, extension IExtension)) error
 	//对指定Extension执行处理
-	HandleAtKey(key string, handler func(key string, extension IExtension)) error
+	HandleAtName(name string, handler func(name string, extension IExtension)) error
 }
 
 func NewIExtensionContainer() IExtensionContainer {
@@ -44,24 +44,24 @@ type ExtensionContainer struct {
 }
 
 func (m *ExtensionContainer) AppendExtension(extension IExtension) {
-	key := extension.ExtensionName()
-	if m.hasMap(key) {
-		panic("Repeat Key In Map: " + key)
+	name := extension.ExtensionName()
+	if m.checkMap(name) {
+		panic("Repeat Name In Map: " + name)
 	}
-	m.extensionMap[key] = extension
+	m.extensionMap[name] = extension
 	m.extensions = append(m.extensions, extension)
 }
 
-func (m *ExtensionContainer) CheckExtension(key string) bool {
-	_, ok := m.extensionMap[key]
+func (m *ExtensionContainer) CheckExtension(name string) bool {
+	_, ok := m.extensionMap[name]
 	return ok
 }
 
-func (m *ExtensionContainer) GetExtension(key string) IExtension {
-	if !m.hasMap(key) {
+func (m *ExtensionContainer) GetExtension(name string) IExtension {
+	if !m.checkMap(name) {
 		return nil
 	}
-	rs, _ := m.extensionMap[key]
+	rs, _ := m.extensionMap[name]
 	return rs
 }
 
@@ -112,15 +112,15 @@ func (m *ExtensionContainer) HandleAt(index int, handler func(index int, extensi
 	return nil
 }
 
-func (m *ExtensionContainer) HandleAtKey(key string, handler func(key string, extension IExtension)) error {
-	if !m.CheckExtension(key) {
-		return errors.New("HandleAtKey Error : No such key [" + key + "]")
+func (m *ExtensionContainer) HandleAtName(name string, handler func(name string, extension IExtension)) error {
+	if !m.CheckExtension(name) {
+		return errors.New("HandleAtName Error : No such name [" + name + "]")
 	}
-	handler(key, m.extensionMap[key])
+	handler(name, m.extensionMap[name])
 	return nil
 }
 
-func (m *ExtensionContainer) hasMap(key string) bool {
-	_, ok := m.extensionMap[key]
+func (m *ExtensionContainer) checkMap(name string) bool {
+	_, ok := m.extensionMap[name]
 	return ok
 }
