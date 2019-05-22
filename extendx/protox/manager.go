@@ -19,7 +19,7 @@ type IExtensionManager interface {
 	netx.IAddressProxySetter
 
 	// 初始化
-	InitManager(sock netx.ISockServer, container IProtocolContainer)
+	InitManager(sock netx.ISockServer, container IProtocolExtensionContainer)
 
 	// 开始运行
 	StartManager()
@@ -46,129 +46,120 @@ type IExtensionManager interface {
 
 //---------------------------------------------
 
-func NewExtensionManager() IExtensionManager {
+func NewIExtensionManager() IExtensionManager {
+	return NewExtensionManager()
+}
+
+func NewExtensionManager() *ExtensionManager {
 	return &ExtensionManager{}
 }
 
 type ExtensionManager struct {
-	sock         netx.ISockServer
-	container    IProtocolContainer
-	logger       logx.ILogger
-	addressProxy netx.IAddressProxy
-	mutex        sync.RWMutex
+	SockServer   netx.ISockServer
+	Container    IProtocolExtensionContainer
+	Logger       logx.ILogger
+	AddressProxy netx.IAddressProxy
+	Mutex        sync.RWMutex
+
+	ExtensionManagerCustomizeSupport
 }
 
 func (m *ExtensionManager) SetAddressProxy(proxy netx.IAddressProxy) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.addressProxy = proxy
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.AddressProxy = proxy
 }
 
-func (m *ExtensionManager) InitManager(sock netx.ISockServer, container IProtocolContainer) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.sock, m.container = sock, container
+func (m *ExtensionManager) InitManager(sock netx.ISockServer, container IProtocolExtensionContainer) {
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.SockServer, m.Container = sock, container
 }
 
 func (m *ExtensionManager) SetLogger(logger logx.ILogger) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.logger = logger
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.Logger = logger
 }
 
 func (m *ExtensionManager) StartManager() {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.container.InitExtensions()
-	m.sock.GetPackHandler().AppendPackHandler(m.onPack)
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.Container.InitExtensions()
+	m.SockServer.GetPackHandlerContainer().AppendPackHandler(m.onPack)
 }
 
 func (m *ExtensionManager) StopManager() {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.sock.GetPackHandler().ClearHandler(m.onPack)
-	m.container.DestroyExtensions()
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.SockServer.GetPackHandlerContainer().ClearHandler(m.onPack)
+	m.Container.DestroyExtensions()
 }
 
 func (m *ExtensionManager) SaveExtensions() {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.container.SaveExtensions()
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.Container.SaveExtensions()
 }
 
 func (m *ExtensionManager) SaveExtension(name string) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.container.SaveExtension(name)
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.Container.SaveExtension(name)
 }
 
 func (m *ExtensionManager) EnableExtension(name string) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.container.EnableExtension(name, true)
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.Container.EnableExtension(name, true)
 }
 
 func (m *ExtensionManager) DisableExtension(name string) {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.container.EnableExtension(name, false)
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.Container.EnableExtension(name, false)
 }
 
 func (m *ExtensionManager) EnableExtensions() {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.container.EnableExtensions(true)
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.Container.EnableExtensions(true)
 }
 
 func (m *ExtensionManager) DisableExtensions() {
-	m.mutex.Lock()
-	defer m.mutex.Unlock()
-	m.container.EnableExtensions(false)
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.Container.EnableExtensions(false)
 }
 
 //---------------------------------
 
-//消息处理入口，这里是并发方法
-//msgData非共享的，但在parsePackMessage后这部分数据会发生变化
+// 消息处理入口，这里是并发方法
+// 并发注意:本方法是否并发，取决于SockServer的并发性
+// 在netx中，TCP,Quic,WebSocket为并发响应，UDP为非并发响应
+// msgData非共享的，但在parsePackMessage后这部分数据会发生变化
 func (m *ExtensionManager) onPack(msgData []byte, senderAddress string, other interface{}) bool {
 	//m.logger.Infoln("ExtensionManager.onPack", senderAddress, msgData)
-	name, pid, uid, data := m.parsePackMessage(msgData)
-	extension := m.getProtocolExtension(name)
-
-	//有效性验证
-	if nil == extension {
-		if nil != m.logger {
-			m.logger.Warnln(fmt.Sprintf("Undefined Extension(%s)! Sender(%s)", name, uid))
-		}
+	m.CustomStartOnPack(senderAddress)
+	name, pid, uid, data := m.ParseMessage(msgData)
+	extension, ok := m.Verify(name, pid, uid)
+	if !ok {
 		return false
 	}
-	if !extension.CheckProtocolId(pid) { //有效性检查
-		if nil != m.logger {
-			m.logger.Warnln(fmt.Sprintf("Undefined ProtoId(%s) Send to Extension(%s)! Sender(%s)", pid, name, uid))
-		}
-		return false
-	}
-	//m.logger.Infoln("ExtensionManager.onPack:Params:", name, pid, uid, data)
-
-	//构造响应参数
-	t, h := extension.GetParamInfo(pid)
-	response := DefaultResponsePool.GetInstance()
-	response.SetHeader(name, pid, uid, senderAddress)
-	response.SetSockServer(m.sock)
-	response.SetAddressProxy(m.addressProxy)
-	response.SetParamInfo(t, h)
-	defer DefaultResponsePool.Recycle(response)
-	request := DefaultRequestPool.GetInstance()
-	request.SetHeader(name, pid, uid, senderAddress)
-	request.SetRequestData(t, h, data)
-	defer DefaultRequestPool.Recycle(request)
-
+	//参数处理
+	response, request := m.GenParams(extension, senderAddress, name, pid, uid, data)
+	defer func() {
+		DefaultRequestPool.Recycle(request)
+		DefaultResponsePool.Recycle(response)
+	}()
 	//响应处理
 	if be, ok := extension.(IBeforeRequestExtension); ok { //前置处理
 		be.BeforeRequest(request)
 	}
 	if re, ok := extension.(IRequestExtension); ok {
+		m.CustomStartOnRequest(response, request)
 		re.OnRequest(response, request)
+		m.CustomFinishOnRequest(response, request)
 	}
 	if ae, ok := extension.(IAfterRequestExtension); ok { //后置处理
 		ae.AfterRequest(response, request)
@@ -180,7 +171,10 @@ func (m *ExtensionManager) onPack(msgData []byte, senderAddress string, other in
 //block1 : pid	utf8
 //block2 : uid	utf8
 //[n]其它信息
-func (m *ExtensionManager) parsePackMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte) {
+func (m *ExtensionManager) ParseMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte) {
+	if nil != m.FuncParseMessage {
+		return m.FuncParseMessage(msgBytes)
+	}
 	index := 0
 	buffToData := bytex.DefaultPoolBuffToData.GetInstance()
 	defer bytex.DefaultPoolBuffToData.Recycle(buffToData)
@@ -204,10 +198,44 @@ func (m *ExtensionManager) parsePackMessage(msgBytes []byte) (name string, pid s
 	return name, pid, uid, data
 }
 
-func (m *ExtensionManager) getProtocolExtension(pid string) IProtocolExtension {
-	e := m.container.GetExtension(pid)
-	if pe, ok := e.(IProtocolExtension); ok {
-		return pe
+func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProtocolExtension, ok bool) {
+	if nil != m.FuncVerify {
+		return m.FuncVerify(name, pid, uid)
 	}
-	return nil
+	extension, ok := m.GetProtocolExtension(name)
+	//有效性验证
+	if !ok {
+		if nil != m.Logger {
+			m.Logger.Warnln(fmt.Sprintf("Undefined Extension(%s)! Sender(%s)", name, uid))
+		}
+		return nil, false
+	}
+	if !extension.CheckProtocolId(pid) { //有效性检查
+		if nil != m.Logger {
+			m.Logger.Warnln(fmt.Sprintf("Undefined ProtoId(%s) Send to Extension(%s)! Sender(%s)", pid, name, uid))
+		}
+		return nil, false
+	}
+	return extension, true
+}
+
+// 构造响应参数
+func (m *ExtensionManager) GenParams(extension IProtocolExtension, senderAddress string, name string, pid string, uid string, data [][]byte) (resp IExtensionResponse, req IExtensionRequest) {
+	t, h := extension.GetParamInfo(pid)
+	response := DefaultResponsePool.GetInstance()
+	response.SetHeader(name, pid, uid, senderAddress)
+	response.SetSockServer(m.SockServer)
+	response.SetAddressProxy(m.AddressProxy)
+	response.SetParamInfo(t, h)
+	request := DefaultRequestPool.GetInstance()
+	request.SetHeader(name, pid, uid, senderAddress)
+	request.SetRequestData(t, h, data)
+	return response, request
+}
+
+func (m *ExtensionManager) GetProtocolExtension(pid string) (pe IProtocolExtension, ok bool) {
+	if pe, ok := m.Container.GetExtension(pid).(IProtocolExtension); ok {
+		return pe, true
+	}
+	return nil, false
 }

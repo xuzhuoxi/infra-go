@@ -15,7 +15,7 @@ func NewWebSocketServer() IWebSocketServer {
 	server.Name = "WSServer"
 	server.Network = WSNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandler = NewIPackHandler(nil)
+	server.PackHandlerContainer = NewIPackHandler(nil)
 	return server
 }
 
@@ -138,7 +138,7 @@ func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
 	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: conn.Request().RemoteAddr}
-	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, WsDataBlockHandler, s.Logger, false)
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, WsDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
 	s.dispatchServerConnOpenEvent(s, address)

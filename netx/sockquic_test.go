@@ -18,7 +18,7 @@ func TestQUICServer(t *testing.T) {
 		server.SendPackTo(rs, senderAddress)
 		return true
 	}
-	server.GetPackHandler().SetPackHandlers([]FuncPackHandler{packHandler})
+	server.GetPackHandlerContainer().SetPackHandlers([]FuncPackHandler{packHandler})
 	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
 	time.Sleep(1 * time.Second)
 	client := NewQUICClient()

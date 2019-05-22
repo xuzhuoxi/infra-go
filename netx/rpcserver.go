@@ -17,10 +17,13 @@ func NewRPCServer() IRPCServer {
 }
 
 type IRPCServer interface {
+	// Register publishes in the server the set of methods of the receiver value that satisfy the following conditions:
 	Register(rcvr interface{}) error
+	// RegisterName is like Register but uses the provided name for the type instead of the receiver's concrete type.
 	RegisterName(name string, rcvr interface{}) error
-	//会阻塞
+	// 启动RPC服务,会阻塞
 	StartServer(addr string)
+	// 停止RPC服务
 	StopServer()
 }
 

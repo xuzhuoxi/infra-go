@@ -14,7 +14,7 @@ func NewQuicServer() IQUICServer {
 	server.Name = "QuicServer"
 	server.Network = QuicNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandler = NewIPackHandler(nil)
+	server.PackHandlerContainer = NewIPackHandler(nil)
 	return server
 }
 
@@ -170,7 +170,7 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	s.mapSession[address] = session
 	s.mapStream[address] = stream
 	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, remoteAddr: session.RemoteAddr()}
-	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, QuicDataBlockHandler, s.Logger, false)
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, QuicDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
 	s.dispatchServerConnOpenEvent(s, address)

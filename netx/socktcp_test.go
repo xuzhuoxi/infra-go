@@ -18,7 +18,7 @@ func TestTCPServer(t *testing.T) {
 		server.SendPackTo(rs, senderAddress)
 		return true
 	}
-	server.GetPackHandler().SetPackHandlers([]FuncPackHandler{packHandler})
+	server.GetPackHandlerContainer().SetPackHandlers([]FuncPackHandler{packHandler})
 	server.OnceEventListener(ServerEventStart, func(evd *eventx.EventData) {
 		fmt.Println(1111111111111111)
 	})

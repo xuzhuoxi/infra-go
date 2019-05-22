@@ -9,7 +9,7 @@ import (
 	"github.com/xuzhuoxi/infra-go/extendx"
 )
 
-type IProtocolContainer interface {
+type IProtocolExtensionContainer interface {
 	extendx.IExtensionContainer
 	// 初始化全部Extension
 	InitExtensions() []error
@@ -27,7 +27,7 @@ type IProtocolContainer interface {
 	EnableExtension(name string, enable bool) error
 }
 
-func NewIProtocolExtensionContainer() IProtocolContainer {
+func NewIProtocolExtensionContainer() IProtocolExtensionContainer {
 	return &ProtocolContainer{ExtensionContainer: extendx.NewExtensionContainer()}
 }
 

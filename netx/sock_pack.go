@@ -10,10 +10,13 @@ import (
 const ReceiverBuffLen = 2048
 
 type iPackReceiver interface {
-	IPackHandlerSetter
-	IPackHandlerGetter
+	IPackHandlerContainerSetter
+	IPackHandlerContainerGetter
+	// 开始接收数据
 	StartReceiving() error
+	// 停止接收数据
 	StopReceiving() error
+	// 是否为数据接收中
 	IsReceiving() bool
 }
 
@@ -46,21 +49,21 @@ func NewPackSender(writer IConnWriterAdapter, dataBlockHandler bytex.IDataBlockH
 	return NewPackSendReceiver(nil, writer, nil, dataBlockHandler, logger, false)
 }
 
-func NewPackReceiver(reader IConnReaderAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
-	return NewPackSendReceiver(reader, nil, packHandler, dataBlockHandler, logger, false)
+func NewPackReceiver(reader IConnReaderAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
+	return NewPackSendReceiver(reader, nil, packHandlerContainer, dataBlockHandler, logger, false)
 }
 
-func NewPackMultiReceiver(reader IConnReaderAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
-	return NewPackSendReceiver(reader, nil, packHandler, dataBlockHandler, logger, true)
+func NewPackMultiReceiver(reader IConnReaderAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
+	return NewPackSendReceiver(reader, nil, packHandlerContainer, dataBlockHandler, logger, true)
 }
 
-func NewPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger, multiReceive bool) IPackSendReceiver {
+func NewPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger, multiReceive bool) IPackSendReceiver {
 	if multiReceive {
-		rs := newPackSendReceiverMulti(reader, writer, packHandler, dataBlockHandler, logger)
+		rs := newPackSendReceiverMulti(reader, writer, packHandlerContainer, dataBlockHandler, logger)
 		rs.onReceiveBytes = rs.handleDataMulti
 		return rs
 	} else {
-		rs := newPackSendReceiver(reader, writer, packHandler, dataBlockHandler, logger)
+		rs := newPackSendReceiver(reader, writer, packHandlerContainer, dataBlockHandler, logger)
 		rs.onReceiveBytes = rs.handleData
 		return rs
 	}
@@ -68,8 +71,8 @@ func NewPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, p
 
 //--------------------------------------------------
 
-func newPackSRBase(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) packSRBase {
-	return packSRBase{reader: reader, writer: writer, PackHandler: packHandler, dataBlockHandler: dataBlockHandler, toBlockBuff: bytex.NewBuffDataBlock(dataBlockHandler), Logger: logger}
+func newPackSRBase(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) packSRBase {
+	return packSRBase{reader: reader, writer: writer, PackHandlerContainer: packHandlerContainer, dataBlockHandler: dataBlockHandler, toBlockBuff: bytex.NewBuffDataBlock(dataBlockHandler), Logger: logger}
 }
 
 type packSRBase struct {
@@ -78,9 +81,9 @@ type packSRBase struct {
 	mu     sync.RWMutex
 
 	//receive
-	receiving      bool
-	PackHandler    IPackHandler
-	onReceiveBytes func(newData []byte, address string)
+	receiving            bool
+	PackHandlerContainer IPackHandlerContainer
+	onReceiveBytes       func(newData []byte, address string)
 
 	//send
 	dataBlockHandler bytex.IDataBlockHandler
@@ -88,12 +91,12 @@ type packSRBase struct {
 	Logger           logx.ILogger
 }
 
-func (sr *packSRBase) GetPackHandler() IPackHandler {
-	return sr.PackHandler
+func (sr *packSRBase) GetPackHandlerContainer() IPackHandlerContainer {
+	return sr.PackHandlerContainer
 }
 
-func (sr *packSRBase) SetPackHandler(packHandler IPackHandler) {
-	sr.PackHandler = packHandler
+func (sr *packSRBase) SetPackHandlerContainer(packHandlerContainer IPackHandlerContainer) {
+	sr.PackHandlerContainer = packHandlerContainer
 }
 
 func (sr *packSRBase) SetLogger(logger logx.ILogger) {
@@ -160,7 +163,7 @@ func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, ad
 		if nil == unPackData || len(unPackData) == 0 {
 			break
 		}
-		sr.PackHandler.ForEachHandler(func(handler FuncPackHandler) bool {
+		sr.PackHandlerContainer.ForEachHandler(func(handler FuncPackHandler) bool {
 			return handler(unPackData, address, nil)
 		})
 	}
@@ -168,7 +171,7 @@ func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, ad
 
 //--------------------------------------------------
 
-func newPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiver {
+func newPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiver {
 	return &packSendReceiver{packSRBase: newPackSRBase(reader, writer, packHandler, dataBlockHandler, logger), toDataBuff: bytex.NewBuffToData(dataBlockHandler)}
 }
 
@@ -186,7 +189,7 @@ func (sr *packSendReceiver) handleData(newData []byte, address string) {
 
 //--------------------------------------------------
 
-func newPackSendReceiverMulti(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandler, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiverMulti {
+func newPackSendReceiverMulti(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiverMulti {
 	return &packSendReceiverMulti{packSRBase: newPackSRBase(reader, writer, packHandler, dataBlockHandler, logger), toDataBuffMap: make(map[string]bytex.IBuffToData)}
 }
 

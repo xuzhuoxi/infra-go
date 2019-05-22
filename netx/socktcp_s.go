@@ -14,7 +14,7 @@ func NewTCPServer() ITCPServer {
 	server.Name = "TCPServer"
 	server.Network = TcpNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandler = NewIPackHandler(nil)
+	server.PackHandlerContainer = NewIPackHandler(nil)
 	return server
 }
 
@@ -149,7 +149,7 @@ func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
 	s.serverMu.Lock()
 	s.mapConn[address] = conn
 	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, remoteAddr: conn.RemoteAddr()}
-	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandler, TcpDataBlockHandler, s.Logger, false)
+	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, TcpDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
 	s.serverMu.Unlock()
 	s.dispatchServerConnOpenEvent(s, address)

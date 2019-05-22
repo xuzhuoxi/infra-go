@@ -18,7 +18,7 @@ func NewUDPServer() IUDPServer {
 	server.Name = "UDPServer"
 	server.Network = UDPNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandler = NewIPackHandler(nil)
+	server.PackHandlerContainer = NewIPackHandler(nil)
 	return server
 }
 
@@ -56,7 +56,7 @@ func (s *UDPServer) StartServer(params SockParams) error {
 	s.running = true
 	s.conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
-	s.messageProxy = NewPackSendReceiver(connProxy, connProxy, s.PackHandler, UdpDataBlockHandler, s.Logger, true)
+	s.messageProxy = NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, UdpDataBlockHandler, s.Logger, true)
 	s.serverMu.Unlock()
 	s.Logger.Infoln(funcName + "()")
 	s.dispatchServerStartedEvent(s)

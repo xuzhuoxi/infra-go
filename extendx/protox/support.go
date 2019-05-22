@@ -40,6 +40,9 @@ func (s *ProtocolExtensionSupport) GetParamInfo(protoId string) (paramType Exten
 	return info.ParamType, info.ParamHandler
 }
 
+func (s *ProtocolExtensionSupport) SetRequestHandler(protoId string, handler ExtensionHandlerNoneParam) {
+	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: None, ExtensionHandler: handler}
+}
 func (s *ProtocolExtensionSupport) SetRequestHandlerBinary(protoId string, handler ExtensionHandlerBinaryParam) {
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Binary, ExtensionHandler: handler}
 }

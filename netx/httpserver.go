@@ -12,9 +12,13 @@ func NewHttpServer() IHttpServer {
 }
 
 type IHttpServer interface {
+	// 启动Http服务
 	StartServer(addr string)
+	// 停止Http服务
 	StopServer()
+	// 映射请求响应处理器
 	MapHandle(pattern string, handler http.Handler)
+	// 映射请求响应函数
 	MapFunc(pattern string, f func(w http.ResponseWriter, r *http.Request))
 }
 

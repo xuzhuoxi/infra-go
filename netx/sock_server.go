@@ -33,12 +33,16 @@ type IServerRunning interface {
 }
 
 type IServer interface {
-	StartServer(params SockParams) error //会阻塞
+	// 启动服务，会阻塞
+	StartServer(params SockParams) error
+	// 停止服务，会阻塞
 	StopServer() error
 }
 
 type ISockConnection interface {
+	// 连接数
 	Connections() int
+	// 关闭指定连接
 	CloseConnection(address string) (err error, ok bool)
 }
 
@@ -50,8 +54,8 @@ type ISockServer interface {
 	ISockConnection
 
 	ISockSender
-	IPackHandlerSetter
-	IPackHandlerGetter
+	IPackHandlerContainerSetter
+	IPackHandlerContainerGetter
 
 	logx.ILoggerSupport
 }
@@ -64,7 +68,7 @@ type SockServerBase struct {
 
 	Logger logx.ILogger
 
-	PackHandler IPackHandler
+	PackHandlerContainer IPackHandlerContainer
 }
 
 func (s *SockServerBase) SetName(name string) {
@@ -89,16 +93,16 @@ func (s *SockServerBase) Running() bool {
 	return s.running
 }
 
-func (s *SockServerBase) GetPackHandler() IPackHandler {
+func (s *SockServerBase) GetPackHandlerContainer() IPackHandlerContainer {
 	s.serverMu.RLock()
 	defer s.serverMu.RUnlock()
-	return s.PackHandler
+	return s.PackHandlerContainer
 }
 
-func (s *SockServerBase) SetPackHandler(packHandler IPackHandler) {
+func (s *SockServerBase) SetPackHandlerContainer(packHandlerContainer IPackHandlerContainer) {
 	s.serverMu.Lock()
 	defer s.serverMu.Unlock()
-	s.PackHandler = packHandler
+	s.PackHandlerContainer = packHandlerContainer
 }
 
 func (s *SockServerBase) dispatchServerStartedEvent(dispatcher eventx.IEventDispatcher) {

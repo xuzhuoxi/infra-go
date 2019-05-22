@@ -23,7 +23,9 @@ type IClientOpening interface {
 }
 
 type IClient interface {
+	// 打开
 	OpenClient(params SockParams) error
+	// 关闭
 	CloseClient() error
 }
 
@@ -49,7 +51,7 @@ type SockClientBase struct {
 	PackProxy IPackSendReceiver
 	Logger    logx.ILogger
 
-	PackHandler IPackHandler
+	PackHandler IPackHandlerContainer
 }
 
 func (c *SockClientBase) SetName(name string) {
@@ -60,18 +62,18 @@ func (c *SockClientBase) GetName() string {
 	return c.Name
 }
 
-func (c *SockClientBase) GetPackHandler() IPackHandler {
+func (c *SockClientBase) GetPackHandlerContainer() IPackHandlerContainer {
 	c.clientMu.RLock()
 	defer c.clientMu.RUnlock()
 	return c.PackHandler
 }
 
-func (c *SockClientBase) SetPackHandler(packHandler IPackHandler) {
+func (c *SockClientBase) SetPackHandlerContainer(packHandler IPackHandlerContainer) {
 	c.clientMu.Lock()
 	defer c.clientMu.Unlock()
 	c.PackHandler = packHandler
 	if c.PackProxy != nil {
-		c.PackProxy.SetPackHandler(c.PackHandler)
+		c.PackProxy.SetPackHandlerContainer(c.PackHandler)
 	}
 }
 

@@ -49,13 +49,6 @@ type IGoroutineExtension interface {
 
 //-------------------------------------------------------------
 
-type IBatchExtension interface {
-	// 是否批量处理
-	Batch() bool
-}
-
-//-------------------------------------------------------------
-
 type IBeforeRequestExtension interface {
 	// 执行响应前的一些处理
 	BeforeRequest(req IExtensionRequest)
