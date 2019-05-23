@@ -45,3 +45,32 @@ xuzhuoxi
 ├── timex: A set of functions for timer
 </code></pre>
 </details>
+
+<details>
+<summary>展开代码说明(中文)</summary>
+<pre><code>.
+├── alg: 通用算法
+│   ├── astar: 一个支持二维与三维的A星寻路算法
+├── binaryx: 二进制数据的序列化与反序列化
+├── bytex: 字节切片及缓存的序列化与反序列化
+├── cmdx: 控制台命令行监听，解释与处理
+├── cryptox: 加解密
+├── encodingx: 编码与解码
+│   ├── gobx: Gob编码与解码
+│   ├── jsonx: Json编码与解码
+├── errorsx: 错误异常
+├── eventx: 一个简单的事件处理模块
+├── extendx: 通用扩展模块
+│   ├── protox: 通用协议扩展模块
+├── lang: 一些通用常用的功能函数
+│   ├── listx: 列表，包含数据实现和链表实现
+├── logx:  日志模块
+├── mathx: 数学函数集
+├── netx:  网络库，包含http,rpc,quic,tcp,udp,websocket等实现，同步支持服务端与客户端
+├── osxu:  操作系统级的常用函数
+├── regexpx: 常用正则表达式
+├── slicex: 关于基本类型切片的常用函数
+├── stringx: 关于字符串处理的常用函数
+├── timex: 关于计时器的常用函数
+</code></pre>
+</details>
