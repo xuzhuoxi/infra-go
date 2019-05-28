@@ -114,17 +114,23 @@ const (
 
 	//-----------------------------------
 
-	// 目标前置
+	// (已实现)
 	DestinationAtop
+	// (已实现)
 	DestinationIn
+	// (已实现)
 	DestinationOut
+	// (已实现)
 	DestinationOver
 	// 高级深色(已实现)
 	PlusDarker
 	// 高级浅色(已实现)
 	PlusLighter
+	// (已实现)
 	SourceAtop
+	// (已实现)
 	SourceIn
+	// (已实现)
 	SourceOut
 	// 异或模式(已实现)
 	Xor

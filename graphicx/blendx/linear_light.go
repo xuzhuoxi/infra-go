@@ -14,7 +14,7 @@ func init() {
 }
 
 // 线性光模式
-// (R = S + 2 * D - 255
+// R = S + 2 * D - 255
 func LinearLightBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	if !keepAlpha {
 		source.A = LinearLightUnit(source.A, target.A, factor)
@@ -25,7 +25,7 @@ func LinearLightBlend(source color.RGBA, target color.RGBA, factor float64, keep
 	return source
 }
 
-// (R = S + 2 * D - 255
+// R = S + 2 * D - 255
 func LinearLightUnit(S uint8, D uint8, _ float64) uint8 {
 	return uint8(uint16(S) + 2*uint16(D) - 255)
 }
