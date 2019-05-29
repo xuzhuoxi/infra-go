@@ -14,6 +14,7 @@ func init() {
 }
 
 // 线性光模式
+// 根据绘图色通过增加或降低“亮度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过增加亮度被照亮，如果绘图色比50%的灰暗，图像通过降低亮度变暗。
 // R = S + 2 * D - 255
 func LinearLightBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	if !keepAlpha {

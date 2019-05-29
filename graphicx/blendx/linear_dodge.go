@@ -14,6 +14,7 @@ func init() {
 }
 
 // 线性减淡模式
+// 查看每个通道的颜色信息，通过增加“亮度”使底色的颜色变亮来反映绘图色，和黑色混合没变化。
 // R = S + D
 func LinearDodgeBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	if !keepAlpha {

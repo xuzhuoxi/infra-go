@@ -14,6 +14,8 @@ func init() {
 }
 
 // 清除模式
+// 同背后模式一样，当在图层上操作时，清除模式才会出现。利用清除模式可将图层中有像素的部分清除掉。当有图层时，利用清除模式，使用喷漆桶工具可以将图层中的颜色相近的区域清除掉。
+// 可在喷漆桶工具的选项栏中设定“预值”以确定喷漆桶工具所清除的范围。工具选项栏中的“用于所有图层”选项在清除模式下无效。
 // R = 0
 func ClearBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	if !keepAlpha {

@@ -14,6 +14,8 @@ func init() {
 }
 
 // 颜色加深模式
+// 查看每个通道的颜色信息，通过增加“对比度”使底色的颜色变暗来反映绘图色，和白色混合没变化。
+// 除了背景上的较淡区域消失，且图像区域呈现尖锐的边缘特性之外，这种Color Burn模式创建的效果类似于由MuItiply模式创建的效果。
 // R = S - ((1 - S) * (1 - D)) / D
 // R = S - (255-S)*(255-D) / D
 func ColorBurnBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {

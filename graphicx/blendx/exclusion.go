@@ -14,6 +14,7 @@ func init() {
 }
 
 // 排除模式
+// 可生成和差值模式相似的效果，但比差值模式生成的颜色对比度较小，因而颜色较柔和。与白色混合将使底色反相；与黑色混合则不产生变化。
 // R = S + D - 2*S*D [0,1]
 // R = S + D - S*D/128 [0,255]
 func ExclusionBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {

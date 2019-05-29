@@ -14,6 +14,7 @@ func init() {
 }
 
 // 线性加深模式
+// 查看每个通道的颜色信息，通过降低“亮度”使底色的颜色变暗来反映绘图色，和白色混合没变化。
 // R = S + D - 255
 func LinearBurnBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	if !keepAlpha {

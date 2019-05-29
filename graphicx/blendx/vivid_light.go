@@ -14,6 +14,7 @@ func init() {
 }
 
 // 亮光模式
+// 根据绘图色通过增加或降低“对比度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过降低对比度被照亮，如果绘图色比50%的灰暗，图像通过增加对比度变暗。
 // (D<=128): R = S - (255-S)*(255-2*D) / (2*D)
 // (D>128): R = S + S * (2*D - 255) / (2*(255-D))
 func VividLightBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {

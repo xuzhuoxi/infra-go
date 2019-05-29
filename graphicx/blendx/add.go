@@ -14,6 +14,7 @@ func init() {
 }
 
 // 增加模式
+// 是将原始图像及混合图像的对应像素取出来并加在一起；
 // R = Min(255, S+D)
 func AddBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	if !keepAlpha {

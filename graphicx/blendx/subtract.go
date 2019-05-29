@@ -14,6 +14,7 @@ func init() {
 }
 
 // 减去模式
+// 是将原始图像与混合图像相对应的像素提取出来并将它们相减。
 // C = Max(0,A-B)
 func SubtractBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	if !keepAlpha {

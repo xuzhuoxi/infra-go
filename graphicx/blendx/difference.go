@@ -14,6 +14,7 @@ func init() {
 }
 
 // 差值模式
+// 查看每个通道中的颜色信息，比较底色和绘图色，用较亮的像素点的像素值减去较暗的像素点的像素值。与白色混合将使底色反相；与黑色混合则不产生变化。
 // R = R = |S - D|
 func DifferenceBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	if !keepAlpha {
