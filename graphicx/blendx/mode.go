@@ -132,6 +132,8 @@ const (
 	SourceIn
 	// (已实现)
 	SourceOut
+	// (已实现)
+	SourceOver
 	// 异或模式(已实现)
 	Xor
 )

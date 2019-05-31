@@ -16,6 +16,7 @@ func init() {
 // 异或模式
 // R = S*(1 - Da) + D*(1 - Sa)
 // R = S*(255 - Da)/255 + D*(255 - Sa)/255
+// Note that the Porter-Duff "XOR" mode is only titularly related to the classical bitmap XOR operation (which is unsupported by CoreGraphics)
 func XorBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
 	Sa := source.A
 	Da := target.A
