@@ -27,8 +27,8 @@ const (
 )
 
 var (
-	level2prefix          = make(map[LogLevel]string)
-	defaultLogger ILogger = NewLogger()
+	level2prefix  = make(map[LogLevel]string)
+	defaultLogger = NewLogger()
 )
 
 func DefaultLogger() ILogger {
