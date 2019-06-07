@@ -2,6 +2,7 @@ package cmdx
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"strings"
@@ -18,11 +19,11 @@ type ICommandLineListener interface {
 	StopListen()
 	SetFrontTips(tips string)
 	SetRepeatCount(repeatCount int)
-	MapCommand(cmd string, f func([]string))
+	MapCommand(cmd string, f func(flagSet *FlagSetExtend, args []string))
 }
 
 func CreateCommandLineListener(frontTips string, repeatCount int) ICommandLineListener {
-	rs := CommandLineListener{frontTips, repeatCount, 0, make(map[string]func([]string)), nil, false}
+	rs := CommandLineListener{frontTips, repeatCount, 0, make(map[string]func(flagSet *FlagSetExtend, args []string)), nil, false}
 	rs.MapCommand(CmdExit, rs.confirmExit)
 	rs.MapCommand(CmdVersion, version)
 	return &rs
@@ -32,7 +33,7 @@ type CommandLineListener struct {
 	FrontTips    string
 	RepeatCount  int
 	CurrentCount int
-	handler      map[string]func([]string)
+	handler      map[string]func(flagSet *FlagSetExtend, args []string)
 	reader       *bufio.Reader
 	exitFlag     bool
 }
@@ -55,7 +56,7 @@ func (c *CommandLineListener) SetRepeatCount(repeatCount int) {
 	c.RepeatCount = repeatCount
 }
 
-func (c *CommandLineListener) MapCommand(cmd string, f func([]string)) {
+func (c *CommandLineListener) MapCommand(cmd string, f func(flagSet *FlagSetExtend, args []string)) {
 	c.handler[cmd] = f
 }
 
@@ -85,11 +86,13 @@ func (c *CommandLineListener) listenCommand() {
 	inputTrim := strings.ToLower(strings.TrimSpace(input))
 	cmdArgs := strings.Split(inputTrim, " ")
 	cmd := cmdArgs[0]
+
+	flagSet := NewFlagSetExtend(cmd, flag.ContinueOnError)
 	f := c.handler[cmd]
 	if nil == f {
 		return
 	}
-	f(cmdArgs)
+	f(flagSet, cmdArgs[1:])
 }
 
 func (c *CommandLineListener) finishCommand() bool {
@@ -101,7 +104,7 @@ func (c *CommandLineListener) finishCommand() bool {
 	return true
 }
 
-func (c *CommandLineListener) confirmExit(_ []string) {
+func (c *CommandLineListener) confirmExit(_ *FlagSetExtend, _ []string) {
 	fmt.Print("Ary you sure to exit:")
 	var input string
 	fmt.Scanln(&input)
@@ -111,6 +114,6 @@ func (c *CommandLineListener) confirmExit(_ []string) {
 	}
 }
 
-func version(_ []string) {
+func version(_ *FlagSetExtend, _ []string) {
 	fmt.Println("version=" + Version)
 }
