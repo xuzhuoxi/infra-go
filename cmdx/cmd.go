@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -70,6 +71,7 @@ func (c *CommandLineListener) nextCommand() {
 	c.listenCommand()
 	exit := c.finishCommand()
 	if !exit {
+		time.Sleep(time.Millisecond * 200)
 		c.nextCommand()
 	}
 }
