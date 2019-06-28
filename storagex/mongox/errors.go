@@ -6,8 +6,8 @@ func (e SessionNilError) Error() string   { return "Session Nil At: " + string(e
 func (e SessionNilError) Timeout() bool   { return false }
 func (e SessionNilError) Temporary() bool { return false }
 
-type SessionLimitError string
+type ClientNilError string
 
-func (e SessionLimitError) Error() string   { return "Session Is Reaching LinkLimit At: " + string(e) }
-func (e SessionLimitError) Timeout() bool   { return false }
-func (e SessionLimitError) Temporary() bool { return false }
+func (e ClientNilError) Error() string   { return "Client Nil At: " + string(e) }
+func (e ClientNilError) Timeout() bool   { return false }
+func (e ClientNilError) Temporary() bool { return false }
