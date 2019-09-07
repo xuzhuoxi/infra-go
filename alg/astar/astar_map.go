@@ -5,10 +5,6 @@
 //
 package astar
 
-import (
-	"sync"
-)
-
 type IGridMap interface {
 	// 初始化地图大小
 	InitGridMap(dataSize, gridSize Size)
@@ -21,20 +17,25 @@ type IGridMap interface {
 	// AStart算法
 	GetAStartAlg() IAStarAlg
 
-	// 设置允许寻路的方向
-	SetAllowedDirections(direction ...Direction)
-	// 设置地图数据
-	SetMapData(data interface{}) error
 	// 格式数据值
 	GetDataValue(pos Position) int
 	// 判断路径是否通路
 	CheckPath(path []Position) bool
 	// 判断是否两点直通
 	CanLineTo(startPos, endPos Position) bool
+
+	// 设置允许寻路的方向
+	SetAllowedDirections(direction ...Direction)
+	// 设置地图数据
+	SetMapData(data interface{}) error
 	// 设置自定义估值函数
 	SetSearchHn(hn FuncHn)
 	// 检索路径
+	// 默认清除拐点
 	SearchPath(startPos, endPos Position) (path []Position, ok bool)
+	// 检索路径
+	// 保留拐点
+	SearchPathWithInflection(startPos, endPos Position) (path []Position, ok bool)
 }
 
 func NewIGridMap() IGridMap {
@@ -52,55 +53,66 @@ type GridMap struct {
 	mapData  [][][]int
 	oblique  bool
 	aStarAlg IAStarAlg
-
-	rwMu sync.RWMutex
 }
 
-func (m *GridMap) GetGridSize() Size {
-	m.rwMu.RLock()
-	defer m.rwMu.RUnlock()
-	return m.gridSize
-}
-
-func (m *GridMap) GetDataSize() Size {
-	m.rwMu.RLock()
-	defer m.rwMu.RUnlock()
-	return m.dataSize
-}
-
-func (m *GridMap) GetAStartAlg() IAStarAlg {
-	m.rwMu.RLock()
-	defer m.rwMu.RUnlock()
-	return m.aStarAlg
-}
-
-func (m *GridMap) GetPixelSize() Size {
-	m.rwMu.RLock()
-	defer m.rwMu.RUnlock()
-	return Size{Width: m.gridSize.Width * m.dataSize.Width, Height: m.gridSize.Height * m.dataSize.Height}
-}
-
-func (m *GridMap) SetAllowedDirections(direction ...Direction) {
-	m.rwMu.Lock()
-	defer m.rwMu.Unlock()
-	m.aStarAlg.SetAllowedDirections(direction)
-}
+//---------------
 
 func (m *GridMap) InitGridMap(dataSize, gridSize Size) {
 	if dataSize.Empty() || gridSize.Empty() {
 		panic("GridMap Empty! ")
 	}
-	m.rwMu.Lock()
-	defer m.rwMu.Unlock()
 	m.dataSize = dataSize
 	m.gridSize = gridSize
 	m.aStarAlg = NewAStartAlg()
 	m.aStarAlg.InitMapSize(dataSize.Width, dataSize.Height, dataSize.Depth)
 }
 
+func (m *GridMap) GetGridSize() Size {
+	return m.gridSize
+}
+
+func (m *GridMap) GetDataSize() Size {
+	return m.dataSize
+}
+
+func (m *GridMap) GetPixelSize() Size {
+	return Size{Width: m.gridSize.Width * m.dataSize.Width, Height: m.gridSize.Height * m.dataSize.Height}
+}
+
+func (m *GridMap) GetAStartAlg() IAStarAlg {
+	return m.aStarAlg
+}
+
+//---------------
+
+func (m *GridMap) GetDataValue(pos Position) int {
+	return m.getDataValue(pos)
+}
+
+func (m *GridMap) CheckPath(path []Position) bool {
+	if len(path) == 0 {
+		return false
+	}
+	for _, pos := range path {
+		if !m.isPathGrid(pos) {
+			return false
+		}
+	}
+	return true
+}
+
+// 判断是否两点直通
+func (m *GridMap) CanLineTo(startPos, endPos Position) bool {
+	return m.canLineTo(startPos, endPos)
+}
+
+//---------------
+
+func (m *GridMap) SetAllowedDirections(direction ...Direction) {
+	m.aStarAlg.SetAllowedDirections(direction)
+}
+
 func (m *GridMap) SetMapData(data interface{}) error {
-	m.rwMu.Lock()
-	defer m.rwMu.Unlock()
 	var source [][][]int
 	var err error
 	switch d := data.(type) {
@@ -124,41 +136,20 @@ func (m *GridMap) SetMapData(data interface{}) error {
 }
 
 func (m *GridMap) SetSearchHn(hn FuncHn) {
-	m.rwMu.Lock()
-	defer m.rwMu.Unlock()
 	m.aStarAlg.SetCustomFuncHn(hn)
 }
 
-func (m *GridMap) GetDataValue(pos Position) int {
-	m.rwMu.RLock()
-	defer m.rwMu.RUnlock()
-	return m.getDataValue(pos)
-}
-
-func (m *GridMap) CheckPath(path []Position) bool {
-	m.rwMu.RLock()
-	defer m.rwMu.RUnlock()
-	if len(path) == 0 {
-		return false
-	}
-	for _, pos := range path {
-		if !m.isPathGrid(pos) {
-			return false
-		}
-	}
-	return true
-}
-
-// 判断是否两点直通
-func (m *GridMap) CanLineTo(startPos, endPos Position) bool {
-	m.rwMu.RLock()
-	defer m.rwMu.RUnlock()
-	return m.canLineTo(startPos, endPos)
-}
-
 func (m *GridMap) SearchPath(startPos, endPos Position) (path []Position, ok bool) {
-	m.rwMu.Lock()
-	defer m.rwMu.Unlock()
+	return m.searchPath(startPos, endPos, false)
+}
+
+func (m *GridMap) SearchPathWithInflection(startPos, endPos Position) (path []Position, ok bool) {
+	return m.searchPath(startPos, endPos, true)
+}
+
+//--------------------------------------
+
+func (m *GridMap) searchPath(startPos, endPos Position, keepInflection bool) (path []Position, ok bool) {
 	if !m.isPathGrid(startPos) || !m.isPathGrid(endPos) { //位置不可行走
 		return nil, false
 	}
@@ -169,14 +160,15 @@ func (m *GridMap) SearchPath(startPos, endPos Position) (path []Position, ok boo
 		return []Position{startPos, endPos}, true
 	} else {
 		if path, ok := m.aStarAlg.SearchPosition(startPos, endPos); ok {
-			path = ClearInflection(path)
-			return path, ok
+			if keepInflection {
+				return path, ok
+			} else {
+				return ClearInflection(path), ok
+			}
 		}
 		return nil, false
 	}
 }
-
-//--------------------------------------
 
 //是否可以直线行走
 func (m *GridMap) canLineTo(startPos, endPos Position) bool {
