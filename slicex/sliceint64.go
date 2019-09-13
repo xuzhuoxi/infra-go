@@ -179,3 +179,12 @@ func EqualInt64(a, b []int64) bool {
 	}
 	return true
 }
+
+// 求和
+func SumInt64(slice []int64) int64 {
+	rs := int64(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

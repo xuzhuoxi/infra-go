@@ -179,3 +179,12 @@ func EqualFloat32(a, b []float32) bool {
 	}
 	return true
 }
+
+// 求和
+func SumFloat32(slice []float32) float32 {
+	rs := float32(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

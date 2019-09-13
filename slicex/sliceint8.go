@@ -179,3 +179,12 @@ func EqualInt8(a, b []int8) bool {
 	}
 	return true
 }
+
+// 求和
+func SumInt8(slice []int8) int8 {
+	rs := int8(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

@@ -99,7 +99,7 @@ func RemoveHeadInt16(slice []int16, pos int) ([]int16, int16, bool) {
 }
 
 //删除头
-func RemoveInt16ailInt16(slice []int16, pos int) ([]int16, int16, bool) {
+func RemoveInt16ailInt1(slice []int16, pos int) ([]int16, int16, bool) {
 	return RemoveAtInt16(slice, len(slice)-1)
 }
 
@@ -178,4 +178,13 @@ func EqualInt16(a, b []int16) bool {
 		}
 	}
 	return true
+}
+
+// 求和
+func SumInt16(slice []int16) int16 {
+	rs := int16(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
 }

@@ -207,3 +207,12 @@ func Uint64ToUint(source []uint64) []uint {
 	}
 	return rs
 }
+
+// 求和
+func SumUint64(slice []uint64) uint64 {
+	rs := uint64(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

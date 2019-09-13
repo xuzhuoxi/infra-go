@@ -194,3 +194,12 @@ func CopyByte(slice []byte) []uint8 {
 func EqualUint8(a, b []uint8) bool {
 	return bytes.Equal(a, b)
 }
+
+// 求和
+func SumUint8(slice []uint8) uint8 {
+	rs := uint8(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

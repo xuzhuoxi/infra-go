@@ -179,3 +179,12 @@ func EqualFloat64(a, b []float64) bool {
 	}
 	return true
 }
+
+// 求和
+func SumFloat64(slice []float64) float64 {
+	rs := float64(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

@@ -179,3 +179,12 @@ func EqualUint16(a, b []uint16) bool {
 	}
 	return true
 }
+
+// 求和
+func SumUint16(slice []uint16) uint16 {
+	rs := uint16(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

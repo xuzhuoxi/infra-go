@@ -179,3 +179,12 @@ func EqualUint(a, b []uint) bool {
 	}
 	return true
 }
+
+// 求和
+func SumUint(slice []uint) uint {
+	rs := uint(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

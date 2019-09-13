@@ -22,7 +22,8 @@ func (f *fileDetailInfo) FullPath() string {
 	return f.fullPath
 }
 
-//运行时的当前目录
+// 运行时的当前目录
+// 以"/"结尾
 func RunningBaseDir() string {
 	return FormatDirPath(filepath.Dir(os.Args[0]))
 }

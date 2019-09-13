@@ -179,3 +179,12 @@ func EqualInt(a, b []int) bool {
 	}
 	return true
 }
+
+// 求和
+func SumInt(slice []int) int {
+	rs := 0
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}

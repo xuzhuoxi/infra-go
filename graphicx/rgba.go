@@ -27,17 +27,6 @@ func Chroma(c color.RGBA) float64 {
 	return 0.1687*float64(c.R) + 0.3313*float64(c.G) + 0.5*float64(c.B) + 128
 }
 
-// 灰度
-// 1.浮点算法：Gray=R*0.3+G*0.59+B*0.11
-// 2.整数方法：Gray=(R*30+G*59+B*11)/100
-// 3.移位方法：Gray =(R*76+G*151+B*28)>>8
-// 4.平均值法：Gray=（R+G+B）/3
-// 5.仅取绿色：Gray=G
-func Gray(c color.RGBA) color.Gray {
-	gray := uint8((uint16(c.R)*76 + uint16(c.G)*151 + uint16(c.B)*28) >> 8)
-	return color.Gray{Y:gray}
-}
-
 // 反相
 func Inverse(c color.RGBA) color.RGBA {
 	c.R = 255 - c.R

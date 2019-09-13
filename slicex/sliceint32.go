@@ -179,3 +179,12 @@ func EqualInt32(a, b []int32) bool {
 	}
 	return true
 }
+
+// 求和
+func SumInt32(slice []int32) int32 {
+	rs := int32(0)
+	for _, val := range slice {
+		rs += val
+	}
+	return rs
+}
