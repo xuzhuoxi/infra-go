@@ -8,8 +8,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/slicex"
 )
 
-// 二值化
-func CVT(srcImg *image.Gray, dstImg *image.Gray, threshold uint8) error {
+// 二值化灰度图
+func CVTGray(srcImg *image.Gray, dstImg *image.Gray, threshold uint8) error {
 	if nil == srcImg || nil == dstImg {
 		return errors.New("SrcImg or dstImg is nil. ")
 	}
@@ -27,15 +27,15 @@ func CVT(srcImg *image.Gray, dstImg *image.Gray, threshold uint8) error {
 }
 
 // OTSU二值化算法
-func CVT_OTSU(srcImg *image.Gray, dstImg *image.Gray) error {
+func CVTGrayWithOTSU(srcImg *image.Gray, dstImg *image.Gray) error {
 	threshold := GetThresholdOTSU(srcImg)
-	return CVT(srcImg, dstImg, threshold)
+	return CVTGray(srcImg, dstImg, threshold)
 }
 
 // Kittle二值化算法
-func CVT_Kittle(srcImg *image.Gray, dstImg *image.Gray) error {
+func CVTGrayWithKittle(srcImg *image.Gray, dstImg *image.Gray) error {
 	threshold := GetThresholdKittle(srcImg)
-	return CVT(srcImg, dstImg, threshold)
+	return CVTGray(srcImg, dstImg, threshold)
 }
 
 //---------------------------------------------

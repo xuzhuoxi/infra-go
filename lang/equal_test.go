@@ -7,6 +7,7 @@ package lang
 
 import (
 	"fmt"
+	"image"
 	"testing"
 )
 
@@ -33,4 +34,10 @@ func TestNil(t *testing.T) {
 	var a []uint16
 	var b []uint16
 	fmt.Println(TypeEqual(a, b))
+}
+
+func TestPointer(t *testing.T) {
+	src := image.NewGray(image.Rect(0, 0, 2, 2))
+	dst := src
+	fmt.Println(src == dst)
 }
