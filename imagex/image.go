@@ -4,7 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
+	"image/color"
+	"image/draw"
 )
 
 type PixelDirection int
@@ -14,6 +17,7 @@ func (d PixelDirection) IncludeDirection(direction PixelDirection) bool {
 	return d&direction > 0
 }
 
+//方向偏移量
 type PixelDirectionAdd struct{ X, Y int }
 
 const (
@@ -28,9 +32,13 @@ const (
 )
 
 const (
-	Horizontal   = Left | Right
-	Vertical     = Up | Down
-	Oblique      = LeftDown | LeftUp | RightDown | RightUp
+	//水平方向，包含Left,Right
+	Horizontal = Left | Right
+	//垂直方向，包含Up,down
+	Vertical = Up | Down
+	//斜方向，包含LeftDown,LeftUp,RightDown,RightUp
+	Oblique = LeftDown | LeftUp | RightDown | RightUp
+	//全部八个方向
 	AllDirection = Horizontal | Vertical | Oblique
 )
 
@@ -106,31 +114,61 @@ func GetPixelDirectionAdds(directions PixelDirection) []PixelDirectionAdd {
 }
 
 // 新建灰度图像
-func NewGray(r image.Rectangle, defaultColor uint8) *image.Gray {
-	rs := image.NewGray(r)
-	FillGray(rs, defaultColor)
+func NewGray(rect image.Rectangle, grayColor uint8) *image.Gray {
+	rs := image.NewGray(rect)
+	FillImage(rs, &color.Gray{Y: grayColor})
 	return rs
 }
 
 // 新建灰度图像
-func NewGray16(r image.Rectangle, defaultColor uint8) *image.Gray16 {
-	rs := image.NewGray16(r)
-	FillGray16(rs, defaultColor)
+func NewGray16(rect image.Rectangle, grayColor uint16) *image.Gray16 {
+	rs := image.NewGray16(rect)
+	FillImage(rs, &color.Gray16{Y: grayColor})
 	return rs
 }
 
-//填充图像
-func FillGray(grayImg *image.Gray, pix uint8) {
-	ln := len(grayImg.Pix)
-	for index := 0; index > ln; index++ {
-		grayImg.Pix[index] = pix
+// 新建RGBA图像
+func NewRGBA(rect image.Rectangle, rgbaColor uint32) *image.RGBA {
+	rs := image.NewRGBA(rect)
+	r := (rgbaColor & 0xff000000) >> 24
+	g := (rgbaColor & 0x00ff0000) >> 16
+	b := (rgbaColor & 0x0000ff00) >> 8
+	a := rgbaColor & 0x000000ff
+	FillImage(rs, &color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)})
+	return rs
+}
+
+// 新建RGBA64图像
+func NewRGBA64(rect image.Rectangle, rgbaColor uint64) *image.RGBA64 {
+	rs := image.NewRGBA64(rect)
+	r := (rgbaColor & 0xffff000000000000) >> 24
+	g := (rgbaColor & 0x0000ffff00000000) >> 16
+	b := (rgbaColor & 0x00000000ffff0000) >> 8
+	a := rgbaColor & 0x000000000000ffff
+	FillImage(rs, &color.RGBA64{R: uint16(r), G: uint16(g), B: uint16(b), A: uint16(a)})
+	return rs
+}
+
+//使用颜色填充图像
+func FillImage(img draw.Image, color color.Color) {
+	rect := img.Bounds()
+	for y := rect.Min.Y; y < rect.Max.Y; y++ {
+		for x := rect.Min.X; x < rect.Max.X; x++ {
+			img.Set(x, y, color)
+		}
 	}
 }
 
-//填充图像
-func FillGray16(grayImg *image.Gray16, pix uint8) {
-	ln := len(grayImg.Pix)
-	for index := 0; index > ln; index++ {
-		grayImg.Pix[index] = pix
+//使用颜色填充图像部分区域
+func FillImagetAt(img draw.Image, color color.Color, rect image.Rectangle) {
+	rect2 := img.Bounds()
+	minX := mathx.MaxInt(rect.Min.X, rect2.Min.X)
+	minY := mathx.MaxInt(rect.Min.Y, rect2.Min.Y)
+	maxX := mathx.MinInt(rect.Max.X, rect2.Max.X)
+	maxY := mathx.MinInt(rect.Max.Y, rect2.Max.Y)
+	for y := minY; y < maxY; y++ {
+		for x := minX; x < maxX; x++ {
+			img.Set(x, y, color)
+		}
 	}
 }
