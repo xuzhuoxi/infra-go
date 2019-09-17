@@ -176,7 +176,7 @@ func FillImageAt(img draw.Image, color color.Color, rect image.Rectangle) {
 
 // 增加背景色
 // 背景色的透明通道会被忽略
-func BlendBackground(foreImg draw.Image, background color.Color) {
+func AppendBackground(foreImg draw.Image, background color.Color) {
 	br, bg, bb, _ := background.RGBA()
 	setColor := &color.RGBA64{A: math.MaxUint16}
 	rect := foreImg.Bounds()

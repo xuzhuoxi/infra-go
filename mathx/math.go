@@ -67,18 +67,107 @@ func System26To10(s string) int {
 	return n
 }
 
-func MinInt(a int, b int) int {
+func MinInt(a, b int) int {
 	if a > b {
 		return b
 	} else {
 		return a
 	}
 }
-
-func MaxInt(a int, b int) int {
+func MaxInt(a, b int) int {
 	if a > b {
 		return a
 	} else {
 		return b
 	}
+}
+func Min3Int(a, b, c int) int {
+	min := a
+	if b < min {
+		min = b
+	}
+	if c < min {
+		min = c
+	}
+	return min
+}
+func Max3Int(a, b, c int) int {
+	max := a
+	if b > max {
+		max = b
+	}
+	if c > max {
+		max = c
+	}
+	return max
+}
+
+func MinUint(a, b uint) uint {
+	if a > b {
+		return b
+	} else {
+		return a
+	}
+}
+func MaxUint(a, b uint) uint {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+func Min3Uint(a, b, c uint) uint {
+	min := a
+	if b < min {
+		min = b
+	}
+	if c < min {
+		min = c
+	}
+	return min
+}
+func Max3Uint(a, b, c uint) uint {
+	max := a
+	if b > max {
+		max = b
+	}
+	if c > max {
+		max = c
+	}
+	return max
+}
+
+func MinFloat64(a, b float64) float64 {
+	if a > b {
+		return b
+	} else {
+		return a
+	}
+}
+func MaxFloat64(a, b float64) float64 {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+func Min3Float64(a, b, c float64) float64 {
+	min := a
+	if b < min {
+		min = b
+	}
+	if c < min {
+		min = c
+	}
+	return min
+}
+func Max3Float64(a, b, c float64) float64 {
+	max := a
+	if b > max {
+		max = b
+	}
+	if c > max {
+		max = c
+	}
+	return max
 }

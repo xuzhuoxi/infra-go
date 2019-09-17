@@ -6,32 +6,46 @@
 package graphicx
 
 import (
-	"image/color"
+	"math"
 )
 
-// 亮度 [0,1]
-// Y = 0.299 * r + 0.587 * g + 0.114 * b
-func Luminosity(c color.RGBA) float64 {
-	return (0.299*float64(c.R) + 0.587*float64(c.G) + 0.114*float64(c.B)) / 255
-}
-
-// 饱和度
-// V = 0.5 * r - 0.4187*g - 0.0813*b + 128
-func Saturation(c color.RGBA) float64 {
-	return 0.5*float64(c.R) + 0.4187*float64(c.G) + 0.0813*float64(c.B) + 128
-}
-
-// 色度
-// U = 0.1687* r - 0.3313* g + 0.5 * b + 128
-func Chroma(c color.RGBA) float64 {
-	return 0.1687*float64(c.R) + 0.3313*float64(c.G) + 0.5*float64(c.B) + 128
-}
-
 // 反相
-func Inverse(c color.RGBA) color.RGBA {
-	c.R = 255 - c.R
-	c.G = 255 - c.G
-	c.B = 255 - c.B
-	c.A = 255 - c.A
-	return c
+func Inverse(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB, targetA uint32) {
+	max := uint32(math.MaxUint16)
+	targetR, targetG, targetB, targetA = max-pixelR, max-pixelG, max-pixelB, max-pixelA
+	return
+}
+
+// RGBA颜色转RGB，使用白色作底
+func RGBA2RGB_White(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB uint32) {
+	targetR, targetG, targetB, _ = BlendPixelNormal(pixelR, pixelG, pixelB, pixelA, math.MaxUint16, math.MaxUint16, math.MaxUint16, math.MaxUint16)
+	return
+}
+
+// RGBA颜色转RGB，使用黑色作底
+func RGBA2RGB_Black(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB uint32) {
+	targetR, targetG, targetB, _ = BlendPixelNormal(pixelR, pixelG, pixelB, pixelA, 0, 0, 0, math.MaxUint16)
+	return
+}
+
+// 混全两个像素，使用normal模式
+// 使用纯黑或纯白作背景色，可实现去除前景Alpha通道功能
+// 使用64位图像数据，R,G,B的值范围为uint16
+//	Target.R = BGColorR *(1-Source.A ) + Source.R*Source.A ;
+//	Target.G = BGColorG *(1-Source.A ) + Source.G*Source.A ;
+//	Target.B = BGColorB *(1-Source.A ) + Source.B*Source.A ;
+//	Target.A = BGColorA *(1-Source.A ) + Source.A*Source.A ;
+func BlendPixelNormal(foreR, foreG, foreB, foreA uint32, bgR, bgG, bgB, bgA uint32) (targetR, targetG, targetB, targetA uint32) {
+	if math.MaxUint16 == foreA { //前景不透明
+		return foreR, foreG, foreB, foreA
+	}
+	if 0 == foreA { //前景全透明
+		return bgR, bgG, bgB, bgA
+	}
+	rfa := math.MaxUint16 - foreA
+	targetR = (bgR*rfa + foreR*foreA) >> 16
+	targetG = (bgG*rfa + foreG*foreA) >> 16
+	targetB = (bgB*rfa + foreB*foreA) >> 16
+	targetA = (bgA*rfa + foreA*foreA) >> 16
+	return
 }

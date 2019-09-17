@@ -5,7 +5,7 @@ import "image/color"
 type GrayAlgMode uint8
 
 const (
-	Green   GrayAlgMode = iota + 1
+	Green GrayAlgMode = iota + 1
 	Average
 	BitMove
 	Integer
@@ -15,70 +15,57 @@ const (
 var DefaultAlgMode = BitMove
 
 // 仅取绿色求灰度图
-func GrayWithGreen(r, g, b uint8) uint8 {
-	return g
+func GrayWithGreen(R, G, B uint32) uint32 {
+	return G
 }
 
 // 平均值法求灰度图
-func GrayWithAverage(r, g, b uint8) uint8 {
-	tmp := uint16(r) + uint16(g) + uint16(b)
-	return uint8(tmp / 3)
+func GrayWithAverage(R, G, B uint32) uint32 {
+	return (R + G + B) / 3
 }
 
 // 移位方法求灰度图
-func GrayWithBitMove(r, g, b uint8) uint8 {
-	return uint8((uint16(r)*76 + uint16(g)*151 + uint16(b)*28) >> 8)
+func GrayWithBitMove(R, G, B uint32) uint32 {
+	return (R*76 + G*151 + B*28) >> 8
 }
 
 // 整数方法求灰度图
-func GrayWithInteger(r, g, b uint8) uint8 {
-	return uint8((uint16(r)*30 + uint16(g)*59 + uint16(b)*11) / 100)
+func GrayWithInteger(R, G, B uint32) uint32 {
+	return (R*299 + G*578 + B*114) / 1000
 }
 
 // 浮点算法求灰度图
-func GrayWithFloat(r, g, b uint8) uint8 {
-	return uint8(float64(r)*0.3 + float64(g)*0.59 + float64(b)*0.11)
+func GrayWithFloat(R, G, B uint32) uint32 {
+	return uint32(float64(R)*0.299 + float64(G)*0.587 + float64(B)*0.114)
 }
 
 //-------------------------------------------------
 
-// 转换自身为灰度
-func GraySelfDefault(rgba *color.RGBA) {
-	gray := GrayValue(rgba.R, rgba.G, rgba.B, DefaultAlgMode)
-	rgba.R, rgba.G, rgba.B = gray, gray, gray
+// 返回灰度颜色
+func GrayColorDefault(c color.Color) color.Color {
+	return GrayColor(c, DefaultAlgMode)
 }
 
-// 转换自身为灰度
-func GraySelf(rgba *color.RGBA, algMode GrayAlgMode) {
-	gray := GrayValue(rgba.R, rgba.G, rgba.B, algMode)
-	rgba.R, rgba.G, rgba.B = gray, gray, gray
+// 返回灰度颜色
+func GrayColor(c color.Color, algMode GrayAlgMode) color.Color {
+	R, G, B, _ := c.RGBA()
+	Y := uint16(GrayRGB(R, G, B, algMode))
+	return &color.Gray16{Y: Y}
 }
 
-// 返回灰度
-func GrayDefault(rgba *color.RGBA) color.Gray {
-	gray := GrayValue(rgba.R, rgba.G, rgba.B, DefaultAlgMode)
-	return color.Gray{gray}
-}
-
-// 返回灰度
-func Gray(rgba *color.RGBA, algMode GrayAlgMode) color.Gray {
-	gray := GrayValue(rgba.R, rgba.G, rgba.B, algMode)
-	return color.Gray{gray}
-}
-
-// 灰度
-func GrayValue(r, g, b uint8, algMode GrayAlgMode) uint8 {
+// 转换为灰度值
+func GrayRGB(R, G, B uint32, algMode GrayAlgMode) uint32 {
 	switch algMode {
 	case Green:
-		return GrayWithGreen(r, g, b)
+		return GrayWithGreen(R, G, B)
 	case Average:
-		return GrayWithAverage(r, g, b)
+		return GrayWithAverage(R, G, B)
 	case BitMove:
-		return GrayWithBitMove(r, g, b)
+		return GrayWithBitMove(R, G, B)
 	case Integer:
-		return GrayWithInteger(r, g, b)
+		return GrayWithInteger(R, G, B)
 	case Float:
-		return GrayWithFloat(r, g, b)
+		return GrayWithFloat(R, G, B)
 	default:
 		return 0
 	}
