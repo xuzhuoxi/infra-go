@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
+	_ "github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
+	_ "github.com/xuzhuoxi/infra-go/imagex/formatx/pngx"
 	"github.com/xuzhuoxi/infra-go/osxu"
+	"golang.org/x/image/colornames"
 	"image"
 	"image/color"
+	"image/draw"
 	"math"
 	"testing"
 )
@@ -47,9 +51,44 @@ func TestNewRGBA64(t *testing.T) {
 
 func TestFillImage(t *testing.T) {
 	img := NewRGBA64(rect, math.MaxUint64>>1)
-	FillImagetAt(img, color.Black, image.Rect(16, 16, 48, 48))
+	FillImageAt(img, color.Black, image.Rect(16, 16, 48, 48))
 	err := SaveImage(img, osxu.RunningBaseDir()+"test/fill.jpeg", formatx.JPEG, jpegx.DefaultJPEGOptions)
 	if nil != err {
 		fmt.Println(err)
+	}
+}
+
+func TestCopyImageTo(t *testing.T) {
+	src := []string{"test/src01.png", "test/src02.png"}
+	dst := []string{"test/copy_dst01.jpeg", "test/copy_dst02.jpeg"}
+	for index, _ := range src {
+		srcImg, err := LoadImage(osxu.RunningBaseDir()+src[index], formatx.PNG)
+		if nil != err {
+			fmt.Println(err)
+		}
+		dstImg := image.NewNRGBA(srcImg.Bounds())
+		CopyImageTo(srcImg, dstImg)
+		err = SaveImage(dstImg, osxu.RunningBaseDir()+dst[index], formatx.PNG, jpegx.DefaultJPEGOptions)
+		if nil != err {
+			fmt.Println(err)
+		}
+	}
+}
+
+func TestBlendBackground(t *testing.T) {
+	src := []string{"test/src01.png", "test/src02.png"}
+	dst := []string{"test/blend_dst01.jpeg", "test/blend_dst02.jpeg"}
+	bg := []color.Color{color.White, colornames.Yellow}
+	for index, _ := range src {
+		img, err := LoadImage(osxu.RunningBaseDir()+src[index], formatx.PNG)
+		if nil != err {
+			fmt.Println(err)
+		}
+		BlendBackground(img.(draw.Image), bg[index])
+		err = SaveImage(img, osxu.RunningBaseDir()+dst[index], formatx.PNG, jpegx.DefaultJPEGOptions)
+		if nil != err {
+			fmt.Println(err)
+		}
+		fmt.Println()
 	}
 }

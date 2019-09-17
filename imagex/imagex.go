@@ -8,6 +8,7 @@ import (
 	"image"
 	"image/color"
 	"image/draw"
+	"math"
 )
 
 type PixelDirection int
@@ -160,7 +161,7 @@ func FillImage(img draw.Image, color color.Color) {
 }
 
 //使用颜色填充图像部分区域
-func FillImagetAt(img draw.Image, color color.Color, rect image.Rectangle) {
+func FillImageAt(img draw.Image, color color.Color, rect image.Rectangle) {
 	rect2 := img.Bounds()
 	minX := mathx.MaxInt(rect.Min.X, rect2.Min.X)
 	minY := mathx.MaxInt(rect.Min.Y, rect2.Min.Y)
@@ -169,6 +170,47 @@ func FillImagetAt(img draw.Image, color color.Color, rect image.Rectangle) {
 	for y := minY; y < maxY; y++ {
 		for x := minX; x < maxX; x++ {
 			img.Set(x, y, color)
+		}
+	}
+}
+
+// 增加背景色
+// 背景色的透明通道会被忽略
+func BlendBackground(foreImg draw.Image, background color.Color) {
+	br, bg, bb, _ := background.RGBA()
+	setColor := &color.RGBA64{A: math.MaxUint16}
+	rect := foreImg.Bounds()
+	for y := rect.Min.Y; y < rect.Max.Y; y++ {
+		for x := rect.Min.X; x < rect.Max.X; x++ {
+			fr, fg, fb, fa := foreImg.At(x, y).RGBA()
+			if math.MaxUint16 == fa { //前景不透明
+				continue
+			}
+			if 0 == fa { //前景全透明
+				foreImg.Set(x, y, background)
+				continue
+			}
+			ra := math.MaxUint16 - fa
+			fr = (fr*fa + br*ra) >> 16
+			fg = (fg*fa + bg*ra) >> 16
+			fb = (fb*fa + bb*ra) >> 16
+			setColor.R, setColor.G, setColor.B = uint16(fr), uint16(fg), uint16(fb)
+			foreImg.Set(x, y, setColor)
+		}
+	}
+}
+
+//把源图像复制到目标图像
+func CopyImageTo(srcImg image.Image, dstImg draw.Image) {
+	srcRect := srcImg.Bounds()
+	dstRect := dstImg.Bounds()
+	minX := mathx.MaxInt(dstRect.Min.X, srcRect.Min.X)
+	minY := mathx.MaxInt(dstRect.Min.Y, srcRect.Min.Y)
+	maxX := mathx.MinInt(dstRect.Max.X, srcRect.Max.X)
+	maxY := mathx.MinInt(dstRect.Max.Y, srcRect.Max.Y)
+	for y := minY; y < maxY; y++ {
+		for x := minX; x < maxX; x++ {
+			dstImg.Set(x, y, srcImg.At(x, y))
 		}
 	}
 }
