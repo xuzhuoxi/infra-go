@@ -10,29 +10,37 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(PlusDarker, PlusDarkerBlend)
+	RegisterBlendFunc(PlusDarker, BlendPlusDarkerColor, BlendPlusDarkerRGBA)
 }
 
-//
-// R = MAX(0, (1 - D) + (1 - S)) [0,1]
-// R = MAX(0, (255 - D) + (255 - S)) [0,255]
-func PlusDarkerBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	if !keepAlpha {
-		source.A = PlusDarkerUnit(source.A, target.A, factor)
-	}
-	source.R = PlusDarkerUnit(source.R, target.R, factor)
-	source.G = PlusDarkerUnit(source.G, target.G, factor)
-	source.B = PlusDarkerUnit(source.B, target.B, factor)
-	return source
+// R = MAX(0, (1-D) + (1-S)) [0,1]
+// R = MAX(0, (255-D) + (255-S)) [0,255]
+// R = MAX(0, (65535-D) + (65535-S)) [0,65535]
+func BlendPlusDarkerColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendPlusDarkerRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// R = MAX(0, (1 - D) + (1 - S)) [0,1]
-// R = MAX(0, (255 - D) + (255 - S)) [0,255]
-func PlusDarkerUnit(S uint8, D uint8, factor float64) uint8 {
-	temp := 510 - uint16(S) - uint16(D)
-	if temp > 0 {
-		return uint8(temp)
+// R = MAX(0, (1-D) + (1-S)) [0,1]
+// R = MAX(0, (255-D) + (255-S)) [0,255]
+// R = MAX(0, (65535-D) + (65535-S)) [0,65535]
+func BlendPlusDarkerRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = plusDarker(foreR, backR)
+	G = plusDarker(foreG, backG)
+	B = plusDarker(foreB, backB)
+	if keepForegroundAlpha {
+		A = foreA
 	} else {
-		return 0
+		A = plusDarker(foreA, backA)
 	}
+	return
+}
+
+// R = MAX(0, (1-D) + (1-S)) [0,1]
+// R = MAX(0, (255-D) + (255-S)) [0,255]
+// R = MAX(0, (65535-D) + (65535-S)) [0,65535]
+func plusDarker(F, B uint32) uint32 {
+	return 65535 + 65535 - F - B
 }

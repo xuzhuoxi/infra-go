@@ -6,32 +6,41 @@
 package blendx
 
 import (
+	"github.com/xuzhuoxi/infra-go/mathx"
 	"image/color"
+	"math"
 )
 
 func init() {
-	RegisterBlendFunc(Add, AddBlend)
+	RegisterBlendFunc(Add, BlendAddColor, BlendAddRGBA)
 }
 
 // 增加模式
 // 是将原始图像及混合图像的对应像素取出来并加在一起；
-// R = Min(255, S+D)
-func AddBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	if !keepAlpha {
-		source.A = AddUnit(source.A, target.A, factor)
-	}
-	source.R = AddUnit(source.R, target.R, factor)
-	source.G = AddUnit(source.G, target.G, factor)
-	source.B = AddUnit(source.B, target.B, factor)
-	return source
+// R = Min(255, B+F)
+func BlendAddColor(foreColor, backColor color.Color, factor float64, keepForegroundAlpha bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendAddRGBA(fR, fG, fB, fA, bR, bG, bB, bA, factor, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// R = Min(255, S+D)
-func AddUnit(S uint8, D uint8, _ float64) uint8 {
-	Add := uint16(S) + uint16(D)
-	if 255 < Add {
-		return 255
+// 增加模式
+// 是将原始图像及混合图像的对应像素取出来并加在一起；
+// R = Min(255, B+F)
+func BlendAddRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, factor float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = blendAdd(foreR, backR)
+	G = blendAdd(foreG, backG)
+	B = blendAdd(foreB, backB)
+	if keepForegroundAlpha {
+		A = foreA
 	} else {
-		return uint8(Add)
+		A = blendAdd(foreA, backA)
 	}
+	return
+}
+
+// R = Min(255, B+F)
+func blendAdd(F, B uint32) uint32 {
+	return uint32(mathx.MinUint(uint(B+F), math.MaxUint16))
 }

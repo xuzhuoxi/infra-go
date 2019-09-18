@@ -6,26 +6,41 @@
 package blendx
 
 import (
-	"image/color"
 	"errors"
 	"fmt"
+	"image/color"
 )
 
 type BlendMode int
 
-type FuncColorBlend func(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA
+type FuncBlendColor func(foregroundColor, backgroundColor color.Color, factor float64, keepForegroundAlpha bool) color.Color
+type FuncBlendRGBA func(foregroundR, foregroundG, foregroundB, foregroundA uint32,
+	backgroundR, backgroundG, backgroundB, backgroundA uint32,
+	factor float64, keepForegroundAlpha bool) (R, G, B, A uint32)
 
 var (
-	funcBlendArr = make([]FuncColorBlend, 128, 128)
+	funcBlendColorArr = make([]FuncBlendColor, 128, 128)
+	funcBlendRGBAArr  = make([]FuncBlendRGBA, 128, 128)
 )
 
-func (m BlendMode) Blend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) error {
-	funcBlendArr[m](source, target, factor, keepAlpha)
-	if f := funcBlendArr[m]; nil != f {
-		f(source, target, factor, keepAlpha)
-		return nil
+func (m BlendMode) BlendColor(foregroundColor, backgroundColor color.Color, factor float64, keepForegroundAlpha bool) (c color.Color, err error) {
+	if funcBlendColor := funcBlendColorArr[m]; nil != funcBlendColor {
+		c = funcBlendColor(foregroundColor, backgroundColor, factor, keepForegroundAlpha)
+		return
 	}
-	return errors.New(fmt.Sprint("BlendMode undefinde", m))
+	err = errors.New(fmt.Sprint("BlendMode undefinde: ", m))
+	return
+}
+
+func (m BlendMode) BlendRGBA(foregroundR, foregroundG, foregroundB, foregroundA uint32,
+	backgroundR, backgroundG, backgroundB, backgroundA uint32,
+	factor float64, keepForegroundAlpha bool) (R, G, B, A uint32, err error) {
+	if funcBlendRGB := funcBlendRGBAArr[m]; nil != funcBlendRGB {
+		R, G, B, A = funcBlendRGB(foregroundR, foregroundG, foregroundB, foregroundA, backgroundR, backgroundG, backgroundB, backgroundA, factor, keepForegroundAlpha)
+		return
+	}
+	err = errors.New(fmt.Sprint("BlendMode undefinde: ", m))
+	return
 }
 
 const (
@@ -36,6 +51,8 @@ const (
 
 	// 正常模式(已实现)
 	Normal
+	// 阈值模式(已实现)
+	NormalThreshold
 	// 溶解模式(已实现)
 	Dissolve
 	// 背后模式(已实现)
@@ -138,6 +155,7 @@ const (
 	Xor
 )
 
-func RegisterBlendFunc(blendMode BlendMode, funcBlend FuncColorBlend) {
-	funcBlendArr[blendMode] = funcBlend
+func RegisterBlendFunc(blendMode BlendMode, funcBlendColor FuncBlendColor, funcBlendRGBA FuncBlendRGBA) {
+	funcBlendColorArr[blendMode] = funcBlendColor
+	funcBlendRGBAArr[blendMode] = funcBlendRGBA
 }

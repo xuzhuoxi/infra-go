@@ -10,26 +10,37 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(DestinationIn, DestinationInBlend)
+	RegisterBlendFunc(DestinationIn, BlendDestinationInColor, BlendDestinationInRGBA)
 }
 
-//
-// R = D*Sa [0,1]
-// R = D*Sa/255 [0,255]
-func DestinationInBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	Sa := source.A
-	Da := target.A
-	if !keepAlpha {
-		source.A = DestinationInUnit(source.A, target.A, Sa, Da, factor)
+// R = B*Fa [0,1]
+// R = B*Fa/255 [0,255]
+// R = B*Fa/65535 [0,65535]
+func BlendDestinationInColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
+	_, _, _, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendDestinationInRGBA(0, 0, 0, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
+}
+
+// R = B*Fa [0,1]
+// R = B*Fa/255 [0,255]
+// R = B*Fa/65535 [0,65535]
+func BlendDestinationInRGBA(_, _, _, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = destinationIn(backR, foreA)
+	G = destinationIn(backG, foreA)
+	B = destinationIn(backB, foreA)
+	if keepForegroundAlpha {
+		A = foreA
+	} else {
+		A = destinationIn(backA, foreA)
 	}
-	source.R = DestinationInUnit(source.R, target.R, Sa, Da, factor)
-	source.G = DestinationInUnit(source.G, target.G, Sa, Da, factor)
-	source.B = DestinationInUnit(source.B, target.B, Sa, Da, factor)
-	return source
+	return
 }
 
-// R = D*Sa [0,1]
-// R = D*Sa/255 [0,255]
-func DestinationInUnit(_ uint8, D uint8, Sa uint8, _ uint8, _ float64) uint8 {
-	return uint8(uint16(D) * uint16(Sa) / 255)
+// R = B*Fa [0,1]
+// R = B*Fa/255 [0,255]
+// R = B*Fa/65535 [0,65535]
+func destinationIn(B, Fa uint32) uint32 {
+	return B * Fa / 65535
 }

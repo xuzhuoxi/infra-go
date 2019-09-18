@@ -10,26 +10,39 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(SourceOver, SourceOverBlend)
+	RegisterBlendFunc(SourceOver, BlendSourceOverColor, BlendSourceOverRGBA)
 }
 
 //
-// R = S + D*(1 - Sa)
-// R = S + D*(255 - Sa)/255
-func SourceOverBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	Sa := source.A
-	Da := target.A
-	if !keepAlpha {
-		source.A = SourceOverUnit(source.A, target.A, Sa, Da, factor)
-	}
-	source.R = SourceOverUnit(source.R, target.R, Sa, Da, factor)
-	source.G = SourceOverUnit(source.G, target.G, Sa, Da, factor)
-	source.B = SourceOverUnit(source.B, target.B, Sa, Da, factor)
-	return source
+// R = B + F*(1 - Ba)
+// R = B + F*(255 - Ba)/255
+// R = B + F*(65535 - Ba)/65535
+func BlendSourceOverColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendSourceOverRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// R = S + D*(1 - Sa)
-// R = S + D*(255 - Sa)/255
-func SourceOverUnit(S uint8, D uint8, Sa uint8, Da uint8, _ float64) uint8 {
-	return uint8(uint16(S) + uint16(D)*(255-uint16(Sa))/255)
+//
+// R = B + F*(1 - Ba)
+// R = B + F*(255 - Ba)/255
+// R = B + F*(65535 - Ba)/65535
+func BlendSourceOverRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = sourceOver(foreR, backR, backA)
+	G = sourceOver(foreG, backG, backA)
+	B = sourceOver(foreB, backB, backA)
+	if keepForegroundAlpha {
+		A = foreA
+	} else {
+		A = sourceOver(foreA, backA, backA)
+	}
+	return
+}
+
+// R = B + F*(1 - Ba)
+// R = B + F*(255 - Ba)/255
+// R = B + F*(65535 - Ba)/65535
+func sourceOver(F, B, Ba uint32) uint32 {
+	return B + F*(65535-Ba)/65535
 }

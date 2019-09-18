@@ -10,24 +10,29 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(LighterColor, LighterColorBlend)
+	RegisterBlendFunc(LighterColor, BlendLighterColor, BlendLighterColorRGBA)
 }
 
-// 线性变浅模式
-// 公式：rB+gB+bBrB+gB+bB>=rA+gA+bA 则 C=B
+// 浅色模式
+// 公式：fR+fG+fB>=bR+bG+bB 则 R=F
 // 比较混合色和基色的所有通道值的总和并显示值较大的颜色。“浅色”不会生成第三种颜色（可以通过“变亮”混合获得），因为它将从基色和混合色中选取最大的通道值来创建结果色。
-func LighterColorBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	if !keepAlpha {
-		source.A = LighterColorUnit(source.A, target.A, factor)
+func BlendLighterColor(foreColor, backColor color.Color, _ float64, _ bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	if fR+fG+fB+fA >= bR+bG+bB+bA {
+		return foreColor
+	} else {
+		return backColor
 	}
-	source.R = LighterColorUnit(source.R, target.R, factor)
-	source.G = LighterColorUnit(source.G, target.G, factor)
-	source.B = LighterColorUnit(source.B, target.B, factor)
-	return source
 }
 
-// 公式：rB+gB+bBrB+gB+bB>=rA+gA+bA 则 C=B
+// 浅色模式
+// 公式：fR+fG+fB>=bR+bG+bB 则 R=F
 // 比较混合色和基色的所有通道值的总和并显示值较大的颜色。“浅色”不会生成第三种颜色（可以通过“变亮”混合获得），因为它将从基色和混合色中选取最大的通道值来创建结果色。
-func LighterColorUnit(S uint8, D uint8, _ float64) uint8 {
-	return uint8(uint16(S) + uint16(D) - 255)
+func BlendLighterColorRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, _ bool) (R, G, B, A uint32) {
+	if foreR+foreG+foreB+foreA >= backR+backG+backB+backA {
+		return foreR, foreG, foreB, foreA
+	} else {
+		return backR, backG, backB, backA
+	}
 }

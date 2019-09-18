@@ -10,26 +10,39 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(DestinationAtop, DestinationAtopBlend)
+	RegisterBlendFunc(DestinationAtop, BlendDestinationAtopColor, BlendDestinationAtopRGBA)
 }
 
 //
-// R = S*(1 - Da) + D*Sa
-// R = S*(255-Da)/255 + D*Sa/255/255
-func DestinationAtopBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	Sa := source.A
-	Da := target.A
-	if !keepAlpha {
-		source.A = DestinationAtopUnit(source.A, target.A, Sa, Da, factor)
-	}
-	source.R = DestinationAtopUnit(source.R, target.R, Sa, Da, factor)
-	source.G = DestinationAtopUnit(source.G, target.G, Sa, Da, factor)
-	source.B = DestinationAtopUnit(source.B, target.B, Sa, Da, factor)
-	return source
+// R = B*(1 - Fa) + F*Ba
+// R = (B*(255-Fa) + F*Ba)/255
+// R = (B*(65535-Fa) + F*Ba)/65535
+func BlendDestinationAtopColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendDestinationAtopRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// R = S*(1 - Da) + D*Sa
-// R = S*(255-Da)/255 + D*Sa/255/255
-func DestinationAtopUnit(S uint8, D uint8, Sa uint8, Da uint8, _ float64) uint8 {
-	return uint8(uint16(S)*(255-uint16(Da))/255 + uint16(D)*uint16(Sa)/65025)
+//
+// R = B*(1 - Fa) + F*Ba
+// R = (B*(255-Fa) + F*Ba)/255
+// R = (B*(65535-Fa) + F*Ba)/65535
+func BlendDestinationAtopRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = destinationAtop(foreR, backR, foreA, backA)
+	G = destinationAtop(foreG, backG, foreA, backA)
+	B = destinationAtop(foreB, backB, foreA, backA)
+	if keepForegroundAlpha {
+		A = foreA
+	} else {
+		A = destinationAtop(foreA, backA, foreA, backA)
+	}
+	return
+}
+
+// R = B*(1 - Fa) + F*Ba
+// R = (B*(255-Fa) + F*Ba)/255
+// R = (B*(65535-Fa) + F*Ba)/65535
+func destinationAtop(F, B, Fa, Ba uint32) uint32 {
+	return (B*(65535-Fa) + F*Ba) / 65535
 }

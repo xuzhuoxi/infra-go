@@ -11,40 +11,62 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(SoftLight, SoftLightBlend)
+	RegisterBlendFunc(SoftLight, BlendSoftLightColor, BlendSoftLightRGBA)
 }
 
 // 柔光模式
 // 根据绘图色的明暗程度来决定最终色是变亮还是变暗，当绘图色比50%的灰要亮时，则底色图像变亮。当绘图色比50%的灰要暗时，则底色图像就变暗。如果绘图色有纯黑色或纯白色，最终色不是黑色或白色，而是稍微变暗或变亮。
 // 如果底色是纯白色或纯黑色，不产生任何效果。此效果与发散的聚光灯照在图像上相似。
-// (D<=0.5): R = 2*S*D + S*S*(1 - 2*D)
-// (D>0.5): R = 2*S*(1 - D) + (2*D - 1)*√S
+// (F<=0.5): R = 2*B*D + S*S*(1 - 2*D)
+// (F>0.5): R = 2*B*(1 - D) + (2*D - 1)*√S
 //
-// (D<=128): R = S*D/128 + (255-2*D)*S*S/65025
-// (D>128): R = S*(255-B)/128 + (2*D-255)*√(S/255)
-func SoftLightBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	if !keepAlpha {
-		source.A = SoftLightUnit(source.A, target.A, factor)
-	}
-	source.R = SoftLightUnit(source.R, target.R, factor)
-	source.G = SoftLightUnit(source.G, target.G, factor)
-	source.B = SoftLightUnit(source.B, target.B, factor)
-	return source
+// (D<=128): R = B*F/128 + (255-2*F)*B*B/65025
+// (D>128): R = B*(255-F)/128 + (2*F-255)*√(B/255)
+//
+// (F<=32768): R = B*F/32768 + (65535-2*F)*B*B/65025
+// (F>32768): R = B*(65535-F)/32768 + (2*F-65535)*√(B/65535)
+func BlendSoftLightColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendSoftLightRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// (D<=0.5): R = 2*S*D + S*S*(1 - 2*D)
-// (D>0.5): R = 2*S*(1 - D) + (2*D - 1)*√S
+// 柔光模式
+// 根据绘图色的明暗程度来决定最终色是变亮还是变暗，当绘图色比50%的灰要亮时，则底色图像变亮。当绘图色比50%的灰要暗时，则底色图像就变暗。如果绘图色有纯黑色或纯白色，最终色不是黑色或白色，而是稍微变暗或变亮。
+// 如果底色是纯白色或纯黑色，不产生任何效果。此效果与发散的聚光灯照在图像上相似。
+// (F<=0.5): R = 2*B*D + S*S*(1 - 2*D)
+// (F>0.5): R = 2*B*(1 - D) + (2*D - 1)*√S
 //
-// (D<=128): R = S*D/128 + (255-2*D)*S*S/65025
-// (D>128): R = S*(255-B)/128 + (2*D-255)*√(S/255)
-func SoftLightUnit(S uint8, D uint8, _ float64) uint8 {
-	S16 := uint16(S)
-	D16 := uint16(D)
-	var temp uint16
-	if D <= 128 {
-		temp = S16*D16/128 + (255-2*D16)*S16*S16/65025
+// (D<=128): R = B*F/128 + (255-2*F)*B*B/65025
+// (D>128): R = B*(255-F)/128 + (2*F-255)*√(B/255)
+//
+// (F<=32768): R = B*F/32768 + (65535-2*F)*B*B/65025
+// (F>32768): R = B*(65535-F)/32768 + (2*F-65535)*√(B/65535)
+func BlendSoftLightRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = softLight(foreR, backR)
+	G = softLight(foreG, backG)
+	B = softLight(foreB, backB)
+	if keepForegroundAlpha {
+		A = foreA
 	} else {
-		temp = S16*(255-D16)/128 + (2*D16-255)*uint16(math.Sqrt(float64(S)/255))
+		A = softLight(foreA, backA)
 	}
-	return uint8(temp)
+	return
+}
+
+// (F<=0.5): R = 2*B*D + S*S*(1 - 2*D)
+// (F>0.5): R = 2*B*(1 - D) + (2*D - 1)*√S
+//
+// (D<=128): R = B*F/128 + (255-2*F)*B*B/65025
+// (D>128): R = B*(255-F)/128 + (2*F-255)*√(B/255)
+//
+// (F<=32768): R = B*F/32768 + (65535-2*F)*B*B/65025
+// (F>32768): R = B*(65535-F)/32768 + (2*F-65535)*√(B/65535)
+func softLight(F, B uint32) uint32 {
+	if F <= 32768 {
+		return B*F/32768 + (65535-2*F)*B*B/65025
+	} else {
+		return B*(65535-F)/32768 + (2*F-65535)*uint32(math.Sqrt(float64(B)/255))
+	}
 }

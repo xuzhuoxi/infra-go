@@ -10,28 +10,40 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(LinearDodge, LinearDodgeBlend)
+	RegisterBlendFunc(LinearDodge, BlendLinearDodgeColor, BlendLinearDodgeRGBA)
 }
 
 // 线性减淡模式
 // 查看每个通道的颜色信息，通过增加“亮度”使底色的颜色变亮来反映绘图色，和黑色混合没变化。
-// R = S + D
-func LinearDodgeBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	if !keepAlpha {
-		source.A = LinearDodgeUnit(source.A, target.A, factor)
-	}
-	source.R = LinearDodgeUnit(source.R, target.R, factor)
-	source.G = LinearDodgeUnit(source.G, target.G, factor)
-	source.B = LinearDodgeUnit(source.B, target.B, factor)
-	return source
+// R = B + F
+func BlendLinearDodgeColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendLinearDodgeRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// R = S + D
-func LinearDodgeUnit(S uint8, D uint8, _ float64) uint8 {
-	Add := uint16(S) + uint16(D)
-	if 255 < Add {
-		return 255
+// 线性减淡模式
+// 查看每个通道的颜色信息，通过增加“亮度”使底色的颜色变亮来反映绘图色，和黑色混合没变化。
+// R = B + F
+func BlendLinearDodgeRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = linearDodge(foreR, backR)
+	G = linearDodge(foreG, backG)
+	B = linearDodge(foreB, backB)
+	if keepForegroundAlpha {
+		A = foreA
 	} else {
-		return uint8(Add)
+		A = linearDodge(foreA, backA)
+	}
+	return
+}
+
+// R = B + F
+func linearDodge(F, B uint32) uint32 {
+	Add := B + F
+	if Add <= 65535 {
+		return Add
+	} else {
+		return 255
 	}
 }

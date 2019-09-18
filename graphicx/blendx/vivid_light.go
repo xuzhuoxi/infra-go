@@ -10,31 +10,51 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(VividLight, VividLightBlend)
+	RegisterBlendFunc(VividLight, BlendVividLightColor, BlendVividLightRGBA)
 }
 
 // 亮光模式
 // 根据绘图色通过增加或降低“对比度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过降低对比度被照亮，如果绘图色比50%的灰暗，图像通过增加对比度变暗。
-// (D<=128): R = S - (255-S)*(255-2*D) / (2*D)
-// (D>128): R = S + S * (2*D - 255) / (2*(255-D))
-func VividLightBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	if !keepAlpha {
-		source.A = VividLightUnit(source.A, target.A, factor)
-	}
-	source.R = VividLightUnit(source.R, target.R, factor)
-	source.G = VividLightUnit(source.G, target.G, factor)
-	source.B = VividLightUnit(source.B, target.B, factor)
-	return source
+// (F<=128): R = B - (255-B)*(255-2*F) / (2*F)
+// (F>128): R = B + B*(2*F-255)/(2*(255-F))
+//
+// (F<=32768): R = B - (65535-B)*(65535-2*F) / (2*F)
+// (F>32768): R = B + B*(2*F-65535)/(2*(65535-F))
+func BlendVividLightColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendVividLightRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// (D<=128): R = S - (255-S)*(255-2*D) / (2*D)
-// (D>128): R = S + S * (2*D - 255) / (2*(255-D))
-func VividLightUnit(S uint8, D uint8, _ float64) uint8 {
-	S16 := uint16(S)
-	D16 := uint16(D)
-	if D <= 128 {
-		return uint8(S16 - (255-S16)*(255-2*D16)/(2*D16))
+// 亮光模式
+// 根据绘图色通过增加或降低“对比度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过降低对比度被照亮，如果绘图色比50%的灰暗，图像通过增加对比度变暗。
+// (F<=128): R = B - (255-B)*(255-2*F) / (2*F)
+// (F>128): R = B + B*(2*F-255)/(2*(255-F))
+//
+// (F<=32768): R = B - (65535-B)*(65535-2*F) / (2*F)
+// (F>32768): R = B + B*(2*F-65535)/(2*(65535-F))
+func BlendVividLightRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = vividLight(foreR, backR)
+	G = vividLight(foreG, backG)
+	B = vividLight(foreB, backB)
+	if keepForegroundAlpha {
+		A = foreA
 	} else {
-		return uint8(S16 + (S16*(2*D16-255)/(255-D16))>>1)
+		A = vividLight(foreA, backA)
+	}
+	return
+}
+
+// (F<=128): R = B - (255-B)*(255-2*F) / (2*F)
+// (F>128): R = B + B*(2*F-255)/(2*(255-F))
+//
+// (F<=32768): R = B - (65535-B)*(65535-2*F) / (2*F)
+// (F>32768): R = B + B*(2*F-65535)/(2*(65535-F))
+func vividLight(F, B uint32) uint32 {
+	if F <= 32768 {
+		return B - (65535-B)*(65535-2*F)/(2*F)
+	} else {
+		return B + B*(2*F-65535)/(2*(65535-F))
 	}
 }

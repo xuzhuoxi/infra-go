@@ -10,23 +10,38 @@ import (
 )
 
 func init() {
-	RegisterBlendFunc(LinearLight, LinearLightBlend)
+	RegisterBlendFunc(LinearLight, BlendLinearLightColor, BlendLinearLightRGBA)
 }
 
 // 线性光模式
 // 根据绘图色通过增加或降低“亮度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过增加亮度被照亮，如果绘图色比50%的灰暗，图像通过降低亮度变暗。
-// R = S + 2 * D - 255
-func LinearLightBlend(source color.RGBA, target color.RGBA, factor float64, keepAlpha bool) color.RGBA {
-	if !keepAlpha {
-		source.A = LinearLightUnit(source.A, target.A, factor)
-	}
-	source.R = LinearLightUnit(source.R, target.R, factor)
-	source.G = LinearLightUnit(source.G, target.G, factor)
-	source.B = LinearLightUnit(source.B, target.B, factor)
-	return source
+// R = B + 2*F - 255
+// R = B + 2*F - 65535
+func BlendLinearLightColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
+	fR, fG, fB, fA := foreColor.RGBA()
+	bR, bG, bB, bA := backColor.RGBA()
+	R, G, B, A := BlendLinearLightRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// R = S + 2 * D - 255
-func LinearLightUnit(S uint8, D uint8, _ float64) uint8 {
-	return uint8(uint16(S) + 2*uint16(D) - 255)
+// 线性光模式
+// 根据绘图色通过增加或降低“亮度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过增加亮度被照亮，如果绘图色比50%的灰暗，图像通过降低亮度变暗。
+// R = B + 2*F - 255
+// R = B + 2*F - 65535
+func BlendLinearLightRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
+	R = linearLight(foreR, backR)
+	G = linearLight(foreG, backG)
+	B = linearLight(foreB, backB)
+	if keepForegroundAlpha {
+		A = foreA
+	} else {
+		A = linearLight(foreA, backA)
+	}
+	return
+}
+
+// R = B + 2*F - 255
+// R = B + 2*F - 65535
+func linearLight(F, B uint32) uint32 {
+	return B + 2*F - 65535
 }
