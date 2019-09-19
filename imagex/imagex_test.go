@@ -84,7 +84,7 @@ func TestBlendBackground(t *testing.T) {
 		if nil != err {
 			fmt.Println(err)
 		}
-		AppendBackground(img.(draw.Image), bg[index])
+		BlendSourceNormal(img.(draw.Image), bg[index])
 		err = SaveImage(img, osxu.RunningBaseDir()+dst[index], formatx.PNG, jpegx.DefaultJPEGOptions)
 		if nil != err {
 			fmt.Println(err)

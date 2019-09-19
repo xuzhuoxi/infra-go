@@ -176,26 +176,27 @@ func FillImageAt(img draw.Image, color color.Color, rect image.Rectangle) {
 
 // 增加背景色
 // 背景色的透明通道会被忽略
-func AppendBackground(foreImg draw.Image, background color.Color) {
-	br, bg, bb, _ := background.RGBA()
+// R = S*(1-Da) + D*Da [0,1]
+func BlendSourceNormal(destinationImg draw.Image, sourceColor color.Color) {
+	Sr, Sg, Sb, _ := sourceColor.RGBA()
 	setColor := &color.RGBA64{A: math.MaxUint16}
-	rect := foreImg.Bounds()
+	rect := destinationImg.Bounds()
 	for y := rect.Min.Y; y < rect.Max.Y; y++ {
 		for x := rect.Min.X; x < rect.Max.X; x++ {
-			fr, fg, fb, fa := foreImg.At(x, y).RGBA()
-			if math.MaxUint16 == fa { //前景不透明
+			Dr, Dg, Db, Da := destinationImg.At(x, y).RGBA()
+			if math.MaxUint16 == Da { //前景不透明
 				continue
 			}
-			if 0 == fa { //前景全透明
-				foreImg.Set(x, y, background)
+			if 0 == Da { //前景全透明
+				destinationImg.Set(x, y, sourceColor)
 				continue
 			}
-			ra := math.MaxUint16 - fa
-			fr = (fr*fa + br*ra) >> 16
-			fg = (fg*fa + bg*ra) >> 16
-			fb = (fb*fa + bb*ra) >> 16
-			setColor.R, setColor.G, setColor.B = uint16(fr), uint16(fg), uint16(fb)
-			foreImg.Set(x, y, setColor)
+			RDa := math.MaxUint16 - Da
+			Dr = (Sr*RDa + Dr*Da) / 65535
+			Dg = (Sg*RDa + Dg*Da) / 65535
+			Db = (Sb*RDa + Db*Da) / 65535
+			setColor.R, setColor.G, setColor.B = uint16(Dr), uint16(Dg), uint16(Db)
+			destinationImg.Set(x, y, setColor)
 		}
 	}
 }

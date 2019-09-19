@@ -14,8 +14,8 @@ import (
 type BlendMode int
 
 // resultColor		: 结果色
-// sourceColor		: 源颜色/背景色/基色
-// destinationColor	：目标色/前景色/绘图色
+// sourceColor		: 源颜色/背景色/混合色(ps概念)
+// destinationColor	：目标色/前景色/基色(ps概念)
 type FuncBlendColor func(source, destination color.Color, factor float64, destinationAlpha bool) (resultColor color.Color)
 type FuncBlendRGBA func(sourceR, sourceG, sourceB, sourceA uint32, destinationR, destinationG, destinationB, destinationA uint32,
 	factor float64, destinationAlpha bool) (R, G, B, A uint32)
