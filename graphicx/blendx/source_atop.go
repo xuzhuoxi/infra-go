@@ -14,35 +14,35 @@ func init() {
 }
 
 //
-// R = B*Fa + F*(1-Ba)
-// R = B*Fa/255 + F*(255 - Ba)/255
-// R = B*Fa/65535 + F*(65535 - Ba)/65535
-func BlendSourceAtopColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	fR, fG, fB, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendSourceAtopRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+// R = S*Da + D*(1 - Sa)
+// R = (S*Da + D*(255 - Sa))/255
+// R = (S*Da + D*(65535 - Sa))/65535
+func BlendSourceAtopColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	Sr, Sg, Sb, Sa := S.RGBA()
+	Dr, Dg, Db, Da := D.RGBA()
+	R, G, B, A := BlendSourceAtopRGBA(Sr, Sg, Sb, Sa, Dr, Dg, Db, Da, 0, destinationAlpha)
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
 //
-// R = B*Fa + F*(1-Ba)
-// R = B*Fa/255 + F*(255 - Ba)/255
-// R = B*Fa/65535 + F*(65535 - Ba)/65535
-func BlendSourceAtopRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R = sourceAtop(foreR, backR, foreA, backA)
-	G = sourceAtop(foreG, backG, foreA, backA)
-	B = sourceAtop(foreB, backB, foreA, backA)
-	if keepForegroundAlpha {
-		A = foreA
+// R = S*Da + D*(1 - Sa)
+// R = (S*Da + D*(255 - Sa))/255
+// R = (S*Da + D*(65535 - Sa))/65535
+func BlendSourceAtopRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R = sourceAtop(Sr, Dr, Sa, Da)
+	G = sourceAtop(Sg, Dg, Sa, Da)
+	B = sourceAtop(Sb, Db, Sa, Da)
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = sourceAtop(foreA, backA, foreA, backA)
+		A = sourceAtop(Sa, Da, Sa, Da)
 	}
 	return
 }
 
-// R = B*Fa + F*(1-Ba)
-// R = B*Fa/255 + F*(255 - Ba)/255
-// R = B*Fa/65535 + F*(65535 - Ba)/65535
-func sourceAtop(F, B, Fa, Ba uint32) uint32 {
-	return B*Fa/65535 + F*(65535-Ba)/65535
+// R = S*Da + D*(1 - Sa)
+// R = (S*Da + D*(255 - Sa))/255
+// R = (S*Da + D*(65535 - Sa))/65535
+func sourceAtop(S, D, Sa, Da uint32) uint32 {
+	return (S*Da + D*(65535-Sa)) / 65535
 }

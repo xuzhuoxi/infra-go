@@ -19,12 +19,12 @@ func init() {
 // 这模式被用来在一个图层内透明的部分进行涂画；但当图层里的“保持透明区域”选中时就不可用了。
 // 它只可以在你用涂画工具（画笔，喷枪，图章，历史记录画笔，油漆桶）或是填充命令在图层内的一个对象之后画上阴影或色彩。
 // 当在有透明区域的图层上操作时背后模式才会出现
-func BlendBehindColor(foreColor, backColor color.Color, _ float64, _ bool) color.Color {
-	_, _, _, A := foreColor.RGBA()
-	if A < math.MaxUint16 {
-		return backColor
+func BlendBehindColor(S, D color.Color, _ float64, _ bool) color.Color {
+	_, _, _, Da := D.RGBA()
+	if Da < math.MaxUint16 {
+		return S
 	} else {
-		return foreColor
+		return D
 	}
 }
 
@@ -33,10 +33,10 @@ func BlendBehindColor(foreColor, backColor color.Color, _ float64, _ bool) color
 // 这模式被用来在一个图层内透明的部分进行涂画；但当图层里的“保持透明区域”选中时就不可用了。
 // 它只可以在你用涂画工具（画笔，喷枪，图章，历史记录画笔，油漆桶）或是填充命令在图层内的一个对象之后画上阴影或色彩。
 // 当在有透明区域的图层上操作时背后模式才会出现
-func BlendBehindRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, _ bool) (R, G, B, A uint32) {
-	if foreA < math.MaxUint16 {
-		return backR, backG, backB, backA
+func BlendBehindRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, _ bool) (R, G, B, A uint32) {
+	if Da < math.MaxUint16 {
+		return Sr, Sg, Sb, Sa
 	} else {
-		return foreR, foreG, foreB, foreA
+		return Dr, Dg, Db, Da
 	}
 }

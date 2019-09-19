@@ -14,35 +14,35 @@ func init() {
 }
 
 //
-// R = B*(1 - Fa) + F*Ba
-// R = (B*(255-Fa) + F*Ba)/255
-// R = (B*(65535-Fa) + F*Ba)/65535
-func BlendDestinationAtopColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	fR, fG, fB, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendDestinationAtopRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+// R = S*(1 - Da) + D*Sa
+// R = (S*(255 - Da) + D*Sa) / 255
+// R = (S*(65535 - Da) + D*Sa) / 65535
+func BlendDestinationAtopColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	Sr, Sg, Sb, Sa := S.RGBA()
+	Dr, Dg, Db, Da := D.RGBA()
+	R, G, B, A := BlendDestinationAtopRGBA(Sr, Sg, Sb, Sa, Dr, Dg, Db, Da, 0, destinationAlpha)
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
 //
-// R = B*(1 - Fa) + F*Ba
-// R = (B*(255-Fa) + F*Ba)/255
-// R = (B*(65535-Fa) + F*Ba)/65535
-func BlendDestinationAtopRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R = destinationAtop(foreR, backR, foreA, backA)
-	G = destinationAtop(foreG, backG, foreA, backA)
-	B = destinationAtop(foreB, backB, foreA, backA)
-	if keepForegroundAlpha {
-		A = foreA
+// R = S*(1 - Da) + D*Sa
+// R = (S*(255 - Da) + D*Sa) / 255
+// R = (S*(65535 - Da) + D*Sa) / 65535
+func BlendDestinationAtopRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R = destinationAtop(Sr, Dr, Sa, Da)
+	G = destinationAtop(Sg, Dg, Sa, Da)
+	B = destinationAtop(Sb, Db, Sa, Da)
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = destinationAtop(foreA, backA, foreA, backA)
+		A = destinationAtop(Sa, Da, Sa, Da)
 	}
 	return
 }
 
-// R = B*(1 - Fa) + F*Ba
-// R = (B*(255-Fa) + F*Ba)/255
-// R = (B*(65535-Fa) + F*Ba)/65535
-func destinationAtop(F, B, Fa, Ba uint32) uint32 {
-	return (B*(65535-Fa) + F*Ba) / 65535
+// R = S*(1 - Da) + D*Sa
+// R = (S*(255 - Da) + D*Sa) / 255
+// R = (S*(65535 - Da) + D*Sa) / 65535
+func destinationAtop(S, D, Sa, Da uint32) uint32 {
+	return (S*(65535-Da) + D*Sa) / 65535
 }

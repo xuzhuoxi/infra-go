@@ -13,30 +13,31 @@ import (
 
 type BlendMode int
 
-type FuncBlendColor func(foregroundColor, backgroundColor color.Color, factor float64, keepForegroundAlpha bool) color.Color
-type FuncBlendRGBA func(foregroundR, foregroundG, foregroundB, foregroundA uint32,
-	backgroundR, backgroundG, backgroundB, backgroundA uint32,
-	factor float64, keepForegroundAlpha bool) (R, G, B, A uint32)
+// resultColor		: 结果色
+// sourceColor		: 源颜色/背景色/基色
+// destinationColor	：目标色/前景色/绘图色
+type FuncBlendColor func(source, destination color.Color, factor float64, destinationAlpha bool) (resultColor color.Color)
+type FuncBlendRGBA func(sourceR, sourceG, sourceB, sourceA uint32, destinationR, destinationG, destinationB, destinationA uint32,
+	factor float64, destinationAlpha bool) (R, G, B, A uint32)
 
 var (
 	funcBlendColorArr = make([]FuncBlendColor, 128, 128)
 	funcBlendRGBAArr  = make([]FuncBlendRGBA, 128, 128)
 )
 
-func (m BlendMode) BlendColor(foregroundColor, backgroundColor color.Color, factor float64, keepForegroundAlpha bool) (c color.Color, err error) {
+func (m BlendMode) BlendColor(source, destination color.Color, factor float64, destinationAlpha bool) (c color.Color, err error) {
 	if funcBlendColor := funcBlendColorArr[m]; nil != funcBlendColor {
-		c = funcBlendColor(foregroundColor, backgroundColor, factor, keepForegroundAlpha)
+		c = funcBlendColor(source, destination, factor, destinationAlpha)
 		return
 	}
 	err = errors.New(fmt.Sprint("BlendMode undefinde: ", m))
 	return
 }
 
-func (m BlendMode) BlendRGBA(foregroundR, foregroundG, foregroundB, foregroundA uint32,
-	backgroundR, backgroundG, backgroundB, backgroundA uint32,
-	factor float64, keepForegroundAlpha bool) (R, G, B, A uint32, err error) {
+func (m BlendMode) BlendRGBA(sourceR, sourceG, sourceB, sourceA uint32, destinationR, destinationG, destinationB, destinationA uint32,
+	factor float64, destinationAlpha bool) (R, G, B, A uint32, err error) {
 	if funcBlendRGB := funcBlendRGBAArr[m]; nil != funcBlendRGB {
-		R, G, B, A = funcBlendRGB(foregroundR, foregroundG, foregroundB, foregroundA, backgroundR, backgroundG, backgroundB, backgroundA, factor, keepForegroundAlpha)
+		R, G, B, A = funcBlendRGB(sourceR, sourceG, sourceB, destinationR, destinationG, destinationB, destinationA, sourceA, factor, destinationAlpha)
 		return
 	}
 	err = errors.New(fmt.Sprint("BlendMode undefinde: ", m))
@@ -159,3 +160,39 @@ func RegisterBlendFunc(blendMode BlendMode, funcBlendColor FuncBlendColor, funcB
 	funcBlendColorArr[blendMode] = funcBlendColor
 	funcBlendRGBAArr[blendMode] = funcBlendRGBA
 }
+
+//kCGBlendModeNormal,
+//kCGBlendModeMultiply,
+//kCGBlendModeScreen,
+//kCGBlendModeOverlay,
+//kCGBlendModeDarken,
+//kCGBlendModeLighten,
+//kCGBlendModeColorDodge,
+//kCGBlendModeColorBurn,
+//kCGBlendModeSoftLight,
+//kCGBlendModeHardLight,
+//kCGBlendModeDifference,
+//kCGBlendModeExclusion,
+//kCGBlendModeHue,
+//kCGBlendModeSaturation,
+//kCGBlendModeColor,
+//kCGBlendModeLuminosity,
+//kCGBlendModeClear,                  /* R = 0 */
+//kCGBlendModeCopy,                   /* R = S */
+//kCGBlendModeSourceIn,               /* R = S*Da */
+//kCGBlendModeSourceOut,              /* R = S*(1 - Da) */
+//kCGBlendModeSourceAtop,             /* R = S*Da + D*(1 - Sa) */
+//kCGBlendModeDestinationOver,        /* R = S*(1 - Da) + D */
+//kCGBlendModeDestinationIn,          /* R = D*Sa */
+//kCGBlendModeDestinationOut,         /* R = D*(1 - Sa) */
+//kCGBlendModeDestinationAtop,        /* R = S*(1 - Da) + D*Sa */
+//kCGBlendModeXOR,                    /* R = S*(1 - Da) + D*(1 - Sa) */
+//kCGBlendModePlusDarker,             /* R = MAX(0, (1 - D) + (1 - S)) */
+//kCGBlendModePlusLighter             /* R = MIN(1, S + D) */
+
+//Apple额外定义的枚举
+//R: premultiplied result, 表示混合结果
+//S: Source, 表示源颜色(Sa对应透明度值: 0.0-1.0)
+//D: destination colors with alpha, 表示带透明度的目标颜色(Da对应透明度值: 0.0-1.0)
+// 	 R表示结果，S表示包含alpha的原色，D表示包含alpha的目标色，Ra，Sa和Da分别是三个的alpha。
+//   明白了这些以后，就可以开始寻找我们所需要的blend模式了。相信你可以和我一样，很快找到这个模式

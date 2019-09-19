@@ -6,9 +6,9 @@ import (
 )
 
 // 求RGB 64位
-// H [0,360]
-// S [0,1]
-// V [0,1]
+// H: 色调(色相) [0,360]
+// S: 饱和度 [0,1]
+// V: 明度(亮度) [0,1]
 func HSV2RGB(H, S, V float64) (R, G, B uint32) {
 	if 0 == S {
 		return 0, 0, 0
@@ -39,9 +39,9 @@ func HSV2RGB(H, S, V float64) (R, G, B uint32) {
 }
 
 // 取HSV
-// 色调 H [0,360]
-// 饱和度 S [0,1]
-// 明度 [0,1]
+// H: 色调(色相) [0,360]
+// S: 饱和度 [0,1]
+// V: 明度(亮度) [0,1]
 func RGB2HSV(R, G, B uint32) (H, S, V float64) {
 	fr, fg, fb := float64(R), float64(G), float64(B)
 	max := mathx.Max3Float64(fr, fg, fb)

@@ -14,24 +14,24 @@ func init() {
 }
 
 // 覆盖模式
-// R = D
-func BlendCopyColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	if !keepForegroundAlpha {
-		return backColor
+// R = S
+func BlendCopyColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	if !destinationAlpha {
+		return S
 	}
-	_, _, _, fA := foreColor.RGBA()
-	bR, bG, bB, _ := backColor.RGBA()
-	return &color.RGBA64{R: uint16(bR), G: uint16(bG), B: uint16(bB), A: uint16(fA)}
+	Sr, Sg, Sb, _ := S.RGBA()
+	_, _, _, Da := D.RGBA()
+	return &color.RGBA64{R: uint16(Sr), G: uint16(Sg), B: uint16(Sb), A: uint16(Da)}
 }
 
 // 覆盖模式
-// R = D
-func BlendCopyRGBA(_, _, _, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R, G, B = backR, backG, backB
-	if keepForegroundAlpha {
-		A = foreA
+// R = S
+func BlendCopyRGBA(Sr, Sg, Sb, Sa uint32, _, _, _, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R, G, B = Sr, Sg, Sb
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = backA
+		A = Sa
 	}
 	return
 }

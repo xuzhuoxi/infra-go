@@ -14,35 +14,35 @@ func init() {
 }
 
 //
-// R = B*(1 - Fa) [0,1]
-// R = B*(255-Fa)/255 [0,255]
-// R = B*(65535-Fa)/65535 [0,65535]
-func BlendDestinationOutColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	_, _, _, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendDestinationOutRGBA(0, 0, 0, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+// R = D*(1 - Sa) [0,1]
+// R = D*(255 - Sa)/255 [0,255]
+// R = D*(65535 - Sa)/65535 [0,65535]
+func BlendDestinationOutColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	_, _, _, Sa := S.RGBA()
+	Dr, Dg, Db, Da := D.RGBA()
+	R, G, B, A := BlendDestinationOutRGBA(0, 0, 0, Sa, Dr, Dg, Db, Da, 0, destinationAlpha)
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
 //
-// R = B*(1 - Fa) [0,1]
-// R = B*(255-Fa)/255 [0,255]
-// R = B*(65535-Fa)/65535 [0,65535]
-func BlendDestinationOutRGBA(_, _, _, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R = destinationOut(backR, foreA)
-	G = destinationOut(backG, foreA)
-	B = destinationOut(backB, foreA)
-	if keepForegroundAlpha {
-		A = foreA
+// R = D*(1 - Sa) [0,1]
+// R = D*(255 - Sa)/255 [0,255]
+// R = D*(65535 - Sa)/65535 [0,65535]
+func BlendDestinationOutRGBA(_, _, _, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R = destinationOut(Dr, Sa)
+	G = destinationOut(Dg, Sa)
+	B = destinationOut(Db, Sa)
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = destinationOut(backA, foreA)
+		A = destinationOut(Da, Sa)
 	}
 	return
 }
 
-// R = B*(1 - Fa) [0,1]
-// R = B*(255-Fa)/255 [0,255]
-// R = B*(65535-Fa)/65535 [0,65535]
-func destinationOut(B, Fa uint32) uint32 {
-	return B * (65535 - Fa) / 65535
+// R = D*(1 - Sa) [0,1]
+// R = D*(255 - Sa)/255 [0,255]
+// R = D*(65535 - Sa)/65535 [0,65535]
+func destinationOut(D, Sa uint32) uint32 {
+	return D * (65535 - Sa) / 65535
 }

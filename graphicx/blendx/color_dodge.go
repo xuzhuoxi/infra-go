@@ -16,35 +16,37 @@ func init() {
 // 颜色减淡模式
 // 查看每个通道的颜色信息，通过降低“对比度”使底色的颜色变亮来反映绘图色，和黑色混合没变化。
 // 除了指定在这个模式的层上边缘区域更尖锐，以及在这个模式下着色的笔画之外， Color Dodge模式类似于Screen模式创建的效果。另外，不管何时定义color Dodge模式混合 前景与背景像素，背景图像上的暗区域都将会消失。
+// R = S + S*D/(1-D)
 // R = S + S*D/(255-D) (32位)
 // R = S + S*D/(65535-D) (64位)
-func BlendColorDodgeColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	fR, fG, fB, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendAddRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+func BlendColorDodgeColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	Sr, Sg, Sb, Sa := S.RGBA()
+	Dr, Dg, Db, Da := D.RGBA()
+	R, G, B, A := BlendAddRGBA(Sr, Sg, Sb, Sa, Dr, Dg, Db, Da, 0, destinationAlpha)
 	return &color.NRGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
 // 颜色减淡模式
 // 查看每个通道的颜色信息，通过降低“对比度”使底色的颜色变亮来反映绘图色，和黑色混合没变化。
 // 除了指定在这个模式的层上边缘区域更尖锐，以及在这个模式下着色的笔画之外， Color Dodge模式类似于Screen模式创建的效果。另外，不管何时定义color Dodge模式混合 前景与背景像素，背景图像上的暗区域都将会消失。
+// R = S + S*D/(1-D)
 // R = S + S*D/(255-D) (32位)
 // R = S + S*D/(65535-D) (64位)
-func BlendColorDodgeRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, factor float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R = colorDodge(foreR, backR)
-	G = colorDodge(foreG, backG)
-	B = colorDodge(foreB, backB)
-	if keepForegroundAlpha {
-		A = foreA
+func BlendColorDodgeRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R = colorDodge(Sr, Dr)
+	G = colorDodge(Sg, Dg)
+	B = colorDodge(Sb, Db)
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = colorDodge(foreA, backA)
+		A = colorDodge(Sa, Da)
 	}
 	return
 }
 
-// R = B + B*F/(1-F)
-// R = B + B*F/(255-F) (32位)
-// R = B + B*F/(65535-F) (64位)
-func colorDodge(F, B uint32) uint32 {
-	return B + B*F/(65535-F)
+// R = S + S*D/(1-D)
+// R = S + S*D/(255-D) (32位)
+// R = S + S*D/(65535-D) (64位)
+func colorDodge(S, D uint32) uint32 {
+	return S + S*D/(65535-D)
 }

@@ -14,35 +14,35 @@ func init() {
 }
 
 //
-// R = F*(1 - Ba) + B
-// R = F*(255 - Ba)/255 + B
-// R = F*(65535 - Ba)/65535 + B
-func BlendDestinationOverColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	fR, fG, fB, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendDestinationOverRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+// R = S*(1 - Da) + D
+// R = S*(255 - Da)/255 + D
+// R = S*(65535 - Da)/65535 + D
+func BlendDestinationOverColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	Sr, Sg, Sb, Sa := S.RGBA()
+	Dr, Dg, Db, Da := D.RGBA()
+	R, G, B, A := BlendDestinationOverRGBA(Sr, Sg, Sb, Sa, Dr, Dg, Db, Da, 0, destinationAlpha)
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
 //
-// R = F*(1 - Ba) + B
-// R = F*(255 - Ba)/255 + B
-// R = F*(65535 - Ba)/65535 + B
-func BlendDestinationOverRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R = destinationOver(foreR, backR, backA)
-	G = destinationOver(foreG, backG, backA)
-	B = destinationOver(foreB, backB, backA)
-	if keepForegroundAlpha {
-		A = foreA
+// R = S*(1 - Da) + D
+// R = S*(255 - Da)/255 + D
+// R = S*(65535 - Da)/65535 + D
+func BlendDestinationOverRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R = destinationOver(Sr, Dr, Da)
+	G = destinationOver(Sg, Dg, Da)
+	B = destinationOver(Sb, Db, Da)
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = destinationOver(foreA, backA, backA)
+		A = destinationOver(Sa, Da, Da)
 	}
 	return
 }
 
-// R = F*(1 - Ba) + B
-// R = F*(255 - Ba)/255 + B
-// R = F*(65535 - Ba)/65535 + B
-func destinationOver(F, B, Ba uint32) uint32 {
-	return F*(65535-Ba)/65535 + B
+// R = S*(1 - Da) + D
+// R = S*(255 - Da)/255 + D
+// R = S*(65535 - Da)/65535 + D
+func destinationOver(S, D, Da uint32) uint32 {
+	return S*(65535-Da)/65535 + D
 }

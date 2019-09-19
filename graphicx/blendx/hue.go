@@ -17,31 +17,31 @@ func init() {
 
 // 色相模式
 // 是采用底色的亮度、饱和度以及绘图色的色相来创建最终色。
-// HSV = fH, bS, bV
-func BlendHueColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	fR, fG, fB, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendHueRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+// HSV = Dh, Ss, Sv
+func BlendHueColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	Sr, Sg, Sb, Sa := S.RGBA()
+	Dr, Dg, Db, Da := D.RGBA()
+	R, G, B, A := BlendHueRGBA(Sr, Sg, Sb, Sa, Dr, Dg, Db, Da, 0, destinationAlpha)
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
 // 色相模式
 // 是采用底色的亮度、饱和度以及绘图色的色相来创建最终色。
-// HSV = fH, bS, bV
-func BlendHueRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, _ uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R, G, B = hueUnit(foreR, foreG, foreB, backR, backG, backB)
-	if keepForegroundAlpha {
-		A = foreA
+// HSV = Dh, Ss, Sv
+func BlendHueRGBA(Sr, Sg, Sb, _ uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R, G, B = hueUnit(Sr, Sg, Sb, Dr, Dg, Db)
+	if destinationAlpha {
+		A = Da
 	} else {
 		A = math.MaxUint16
 	}
 	return
 }
 
-// HSV = fH, bS, bV
-func hueUnit(foreR, foreG, foreB uint32, backR, backG, backB uint32) (R, G, B uint32) {
-	_, backS, backV := graphicx.RGB2HSV(backR, backG, backB)
-	foreH, _, _ := graphicx.RGB2HSV(foreR, foreG, foreB)
-	R, G, B = graphicx.HSV2RGB(foreH, backS, backV)
+// HSV = Dh, Ss, Sv
+func hueUnit(Sr, Sg, Sb uint32, Dr, Dg, Db uint32) (R, G, B uint32) {
+	_, Ss, Sv := graphicx.RGB2HSV(Sr, Sg, Sb)
+	Dh, _, _ := graphicx.RGB2HSV(Dr, Dg, Db)
+	R, G, B = graphicx.HSV2RGB(Dh, Ss, Sv)
 	return
 }

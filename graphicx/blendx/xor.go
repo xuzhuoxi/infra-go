@@ -14,37 +14,37 @@ func init() {
 }
 
 // 异或模式
-// R = S*(1-Da) + D*(1-Sa)
-// R = (B*(255 - Fa)+ F*(255 - Ba)) / 255
-// R = (B*(65535 - Fa)+ F*(65535 - Ba)) / 65535
+// R = S*(1 - Da) + D*(1 - Sa)
+// R = (S*(255 - Da) + D*(255 - Sa))/255
+// R = (S*(65535 - Da) + D*(65535 - Sa))/65535
 // Note that the Porter-Duff "XOR" mode is only titularly related to the classical bitmap XOR operation (which is unsupported by CoreGraphics)
-func BlendXorColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	fR, fG, fB, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendXorRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+func BlendXorColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	Sr, Sg, Sb, Sa := S.RGBA()
+	Dr, Dg, Db, Da := D.RGBA()
+	R, G, B, A := BlendXorRGBA(Sr, Sg, Sb, Sa, Dr, Dg, Db, Da, 0, destinationAlpha)
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
 // 异或模式
-// R = S*(1-Da) + D*(1-Sa)
-// R = (B*(255 - Fa)+ F*(255 - Ba)) / 255
-// R = (B*(65535 - Fa)+ F*(65535 - Ba)) / 65535
+// R = S*(1 - Da) + D*(1 - Sa)
+// R = (S*(255 - Da) + D*(255 - Sa))/255
+// R = (S*(65535 - Da) + D*(65535 - Sa))/65535
 // Note that the Porter-Duff "XOR" mode is only titularly related to the classical bitmap XOR operation (which is unsupported by CoreGraphics)
-func BlendXorRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R = xor(foreR, backR, foreA, backA)
-	G = xor(foreG, backG, foreA, backA)
-	B = xor(foreB, backB, foreA, backA)
-	if keepForegroundAlpha {
-		A = foreA
+func BlendXorRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R = xor(Sr, Dr, Sa, Da)
+	G = xor(Sg, Dg, Sa, Da)
+	B = xor(Sb, Db, Sa, Da)
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = xor(foreA, backA, foreA, backA)
+		A = xor(Sa, Da, Sa, Da)
 	}
 	return
 }
 
-// R = S*(1-Da) + D*(1-Sa)
-// R = (B*(255 - Fa)+ F*(255 - Ba)) / 255
-// R = (B*(65535 - Fa)+ F*(65535 - Ba)) / 65535
-func xor(F, B, Fa, Ba uint32) uint32 {
-	return (B*(65535-Fa) + F*(65535-Ba)) / 65535
+// R = S*(1 - Da) + D*(1 - Sa)
+// R = (S*(255 - Da) + D*(255 - Sa))/255
+// R = (S*(65535 - Da) + D*(65535 - Sa))/65535
+func xor(S, D, Sa, Da uint32) uint32 {
+	return (S*(65535-Da) + D*(65535-Sa)) / 65535
 }

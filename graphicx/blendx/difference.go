@@ -15,34 +15,34 @@ func init() {
 
 // 差值模式
 // 查看每个通道中的颜色信息，比较底色和绘图色，用较亮的像素点的像素值减去较暗的像素点的像素值。与白色混合将使底色反相；与黑色混合则不产生变化。
-// R = |F - B|
-func BlendDifferenceColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	fR, fG, fB, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendDifferenceRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+// R = |S - D|
+func BlendDifferenceColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	Sr, Sg, Sb, Sa := S.RGBA()
+	Dr, Dg, Db, Da := D.RGBA()
+	R, G, B, A := BlendDifferenceRGBA(Sr, Sg, Sb, Sa, Dr, Dg, Db, Da, 0, destinationAlpha)
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
 // 差值模式
 // 查看每个通道中的颜色信息，比较底色和绘图色，用较亮的像素点的像素值减去较暗的像素点的像素值。与白色混合将使底色反相；与黑色混合则不产生变化。
-// R = |F - B|
-func BlendDifferenceRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	R = difference(foreR, backR)
-	G = difference(foreG, backG)
-	B = difference(foreB, backB)
-	if keepForegroundAlpha {
-		A = foreA
+// R = |S - D|
+func BlendDifferenceRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	R = difference(Sr, Dr)
+	G = difference(Sg, Dg)
+	B = difference(Sb, Db)
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = difference(foreA, backA)
+		A = difference(Sa, Da)
 	}
 	return
 }
 
-// R = |F - B|
-func difference(F, B uint32) uint32 {
-	if F > B {
-		return F - B
+// R = |S - D|
+func difference(S, D uint32) uint32 {
+	if S > D {
+		return S - D
 	} else {
-		return B - F
+		return D - S
 	}
 }

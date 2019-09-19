@@ -13,30 +13,30 @@ func init() {
 	RegisterBlendFunc(Normal, BlendNormalColor, BlendNormalRGBA)
 }
 
-// 阈值模式
+// 正常模式
 // 是默认的状态，其最终色和绘图色相同。可通过改变画笔工具选项栏中的“不透明度”来设定不同的透明度。当图像的颜色模式是“位图”或“索引颜色”时，“正常”模式就变成“阈值”模式。
 // 在基色存在透明度a%时，混合的运算方式是：最终色=基色*a% + 混合色*（1-a%）。
-// R = B * Ba + F * (1-Ba)
-func BlendNormalColor(foreColor, backColor color.Color, _ float64, keepForegroundAlpha bool) color.Color {
-	fR, fG, fB, fA := foreColor.RGBA()
-	bR, bG, bB, bA := backColor.RGBA()
-	R, G, B, A := BlendNormalRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, keepForegroundAlpha)
+// R = S * Sa + D * (1-Sa)
+func BlendNormalColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
+	fR, fG, fB, fA := S.RGBA()
+	bR, bG, bB, bA := D.RGBA()
+	R, G, B, A := BlendNormalRGBA(fR, fG, fB, fA, bR, bG, bB, bA, 0, destinationAlpha)
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// 阈值模式
+// 正常模式
 // 是默认的状态，其最终色和绘图色相同。可通过改变画笔工具选项栏中的“不透明度”来设定不同的透明度。当图像的颜色模式是“位图”或“索引颜色”时，“正常”模式就变成“阈值”模式。
 // 在基色存在透明度a%时，混合的运算方式是：最终色=基色*a% + 混合色*（1-a%）。
-// R = B * Ba + F * (1-Ba)
-func BlendNormalRGBA(foreR, foreG, foreB, foreA uint32, backR, backG, backB, backA uint32, _ float64, keepForegroundAlpha bool) (R, G, B, A uint32) {
-	factor := float64(backA) / 65535
-	R = normalThreshold(foreR, backR, factor)
-	G = normalThreshold(foreG, backG, factor)
-	B = normalThreshold(foreB, backB, factor)
-	if keepForegroundAlpha {
-		A = foreA
+// R = S * Sa + D * (1-Sa)
+func BlendNormalRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
+	factor := float64(Sa) / 65535
+	R = normalThreshold(Sr, Dr, factor)
+	G = normalThreshold(Sg, Dg, factor)
+	B = normalThreshold(Sb, Db, factor)
+	if destinationAlpha {
+		A = Da
 	} else {
-		A = normalThreshold(foreA, backA, factor)
+		A = normalThreshold(Sa, Da, factor)
 	}
 	return
 }
