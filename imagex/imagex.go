@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/xuzhuoxi/infra-go/graphicx/blendx"
 	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"image/color"
@@ -115,47 +116,62 @@ func GetPixelDirectionAdds(directions PixelDirection) []PixelDirectionAdd {
 }
 
 // 新建灰度图像
-func NewGray(rect image.Rectangle, grayColor uint8) *image.Gray {
+func NewGray(rect image.Rectangle, grayY uint8) *image.Gray {
 	rs := image.NewGray(rect)
-	FillImage(rs, &color.Gray{Y: grayColor})
+	FillImage(rs, &color.Gray{Y: grayY})
 	return rs
 }
 
 // 新建灰度图像
-func NewGray16(rect image.Rectangle, grayColor uint16) *image.Gray16 {
+func NewGray16(rect image.Rectangle, grayY uint16) *image.Gray16 {
 	rs := image.NewGray16(rect)
-	FillImage(rs, &color.Gray16{Y: grayColor})
+	FillImage(rs, &color.Gray16{Y: grayY})
 	return rs
 }
 
 // 新建RGBA图像
-func NewRGBA(rect image.Rectangle, rgbaColor uint32) *image.RGBA {
+func NewRGBA(rect image.Rectangle, defaultColor color.Color) *image.RGBA {
 	rs := image.NewRGBA(rect)
-	r := (rgbaColor & 0xff000000) >> 24
-	g := (rgbaColor & 0x00ff0000) >> 16
-	b := (rgbaColor & 0x0000ff00) >> 8
-	a := rgbaColor & 0x000000ff
-	FillImage(rs, &color.RGBA{R: uint8(r), G: uint8(g), B: uint8(b), A: uint8(a)})
+	if nil != defaultColor {
+		FillImage(rs, defaultColor)
+	}
+	return rs
+}
+
+// 新建NRGBA图像
+func NewNRGBA(rect image.Rectangle, defaultColor color.Color) *image.NRGBA {
+	rs := image.NewNRGBA(rect)
+	if nil != defaultColor {
+		FillImage(rs, defaultColor)
+	}
 	return rs
 }
 
 // 新建RGBA64图像
-func NewRGBA64(rect image.Rectangle, rgbaColor uint64) *image.RGBA64 {
+func NewRGBA64(rect image.Rectangle, cdefaultColor color.Color) *image.RGBA64 {
 	rs := image.NewRGBA64(rect)
-	r := (rgbaColor & 0xffff000000000000) >> 24
-	g := (rgbaColor & 0x0000ffff00000000) >> 16
-	b := (rgbaColor & 0x00000000ffff0000) >> 8
-	a := rgbaColor & 0x000000000000ffff
-	FillImage(rs, &color.RGBA64{R: uint16(r), G: uint16(g), B: uint16(b), A: uint16(a)})
+	if nil != cdefaultColor {
+		FillImage(rs, cdefaultColor)
+	}
+	return rs
+}
+
+// 新建RGBA64图像
+func NewNRGBA64(rect image.Rectangle, defaultColor color.Color) *image.NRGBA64 {
+	rs := image.NewNRGBA64(rect)
+	if nil != defaultColor {
+		FillImage(rs, defaultColor)
+	}
 	return rs
 }
 
 //使用颜色填充图像
 func FillImage(img draw.Image, color color.Color) {
 	rect := img.Bounds()
+	setColor := img.ColorModel().Convert(color)
 	for y := rect.Min.Y; y < rect.Max.Y; y++ {
 		for x := rect.Min.X; x < rect.Max.X; x++ {
-			img.Set(x, y, color)
+			img.Set(x, y, setColor)
 		}
 	}
 }
@@ -178,12 +194,14 @@ func FillImageAt(img draw.Image, color color.Color, rect image.Rectangle) {
 // 背景色的透明通道会被忽略
 // R = S*(1-Da) + D*Da [0,1]
 func BlendSourceNormal(destinationImg draw.Image, sourceColor color.Color) {
-	Sr, Sg, Sb, _ := sourceColor.RGBA()
-	setColor := &color.RGBA64{A: math.MaxUint16}
 	rect := destinationImg.Bounds()
+	Sr, Sg, Sb, _ := sourceColor.RGBA()
+	setColor := &color.RGBA64{A: 65535}
+	var Dr, Dg, Db, Da uint32
+	var R, G, B uint32
 	for y := rect.Min.Y; y < rect.Max.Y; y++ {
 		for x := rect.Min.X; x < rect.Max.X; x++ {
-			Dr, Dg, Db, Da := destinationImg.At(x, y).RGBA()
+			Dr, Dg, Db, Da = destinationImg.At(x, y).RGBA()
 			if math.MaxUint16 == Da { //前景不透明
 				continue
 			}
@@ -191,11 +209,8 @@ func BlendSourceNormal(destinationImg draw.Image, sourceColor color.Color) {
 				destinationImg.Set(x, y, sourceColor)
 				continue
 			}
-			RDa := math.MaxUint16 - Da
-			Dr = (Sr*RDa + Dr*Da) / 65535
-			Dg = (Sg*RDa + Dg*Da) / 65535
-			Db = (Sb*RDa + Db*Da) / 65535
-			setColor.R, setColor.G, setColor.B = uint16(Dr), uint16(Dg), uint16(Db)
+			R, G, B, _ = blendx.BlendNormalRGBA(Sr, Sg, Sb, 0, Dr, Dg, Db, Da, 0, false)
+			setColor.R, setColor.G, setColor.B = uint16(R), uint16(G), uint16(B)
 			destinationImg.Set(x, y, setColor)
 		}
 	}

@@ -16,14 +16,14 @@ func Inverse(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB, 
 	return
 }
 
-// RGBA颜色转RGB，使用白色作底
-func RGBA2RGB_White(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB uint32) {
+// RGBA颜色转NRGBA，使用白色作底
+func ToNRGBA_White(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB uint32) {
 	targetR, targetG, targetB = BlendRGBANormal(pixelR, pixelG, pixelB, pixelA, 65535)
 	return
 }
 
-// RGBA颜色转RGB，使用黑色作底
-func RGBA2RGB_Black(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB uint32) {
+// RGBA颜色转NRGBA，使用黑色作底
+func ToNRGBA_Black(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB uint32) {
 	targetR, targetG, targetB = BlendRGBANormal(pixelR, pixelG, pixelB, pixelA, 0)
 	return
 }
