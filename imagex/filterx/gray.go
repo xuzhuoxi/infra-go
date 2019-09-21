@@ -49,3 +49,24 @@ func GrayFromRGBA(rgbaImg image.Image, background color.Color, algMode graphicx.
 	NrgbaAt(rgbaImg, copyImg, background)
 	return GrayFromNRGBA(copyImg, algMode)
 }
+
+func GetGrayPixel(grayImg *image.Gray) (pixel [][]uint8) {
+	size := grayImg.Rect.Size()
+	pixel = make([][]uint8, size.Y, size.Y)
+	for y := 0; y < size.Y; y++ {
+		pixel[y] = grayImg.Pix[y : y+size.X]
+	}
+	return
+}
+
+func GetGray16Pixel(grayImg *image.Gray16) (pixel [][]uint16) {
+	size := grayImg.Rect.Size()
+	pixel = make([][]uint16, size.Y, size.Y)
+	for y := 0; y < size.Y; y++ {
+		pixel[y] = make([]uint16, size.X, size.X)
+		for x := 0; x < size.X; x++ {
+			pixel[y][x] = grayImg.Gray16At(x, y).Y
+		}
+	}
+	return
+}
