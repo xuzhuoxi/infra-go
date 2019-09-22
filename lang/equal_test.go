@@ -8,6 +8,7 @@ package lang
 import (
 	"fmt"
 	"image"
+	"image/draw"
 	"testing"
 )
 
@@ -40,4 +41,11 @@ func TestPointer(t *testing.T) {
 	src := image.NewGray(image.Rect(0, 0, 2, 2))
 	dst := src
 	fmt.Println(src == dst)
+}
+
+func TestPointer2(t *testing.T) {
+	src := image.NewGray(image.Rect(0, 0, 2, 2))
+	var src1 image.Image = src
+	var src2 draw.Image = src
+	fmt.Println(src1 == src2)
 }

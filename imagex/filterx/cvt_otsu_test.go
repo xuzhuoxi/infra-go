@@ -18,13 +18,13 @@ func TestCVTGray16WithOTSU(t *testing.T) {
 		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.PNG)
 		if nil != err {
 			fmt.Println(err)
-			return
+			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
 		err = CVTGray16WithOTSU(img.(*image.Gray16), img.(draw.Image))
 		if nil != err {
 			fmt.Println(err)
-			return
+			continue
 		}
 		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.PNG, nil)
 		if nil != err {

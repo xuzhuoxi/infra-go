@@ -17,13 +17,13 @@ func TestCVTGray(t *testing.T) {
 		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.PNG)
 		if nil != err {
 			fmt.Println(err)
-			return
+			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
 		err = CVTGray(img, img.(draw.Image), 42767)
 		if nil != err {
 			fmt.Println(err)
-			return
+			continue
 		}
 		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.PNG, nil)
 		if nil != err {
