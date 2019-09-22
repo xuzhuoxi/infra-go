@@ -17,6 +17,15 @@ func (i *PixelImage) Set(x, y int, gray uint32) {
 	i.Pix[i.index(x, y)] = gray
 }
 
+func (i *PixelImage) ForEachPixel(eachFunc func(x, y int, pixel uint32)) {
+	var x, y int
+	for y = 0; y < i.Height; y++ {
+		for x = 0; x < i.Width; x++ {
+			eachFunc(x, y, i.Pix[i.index(x, y)])
+		}
+	}
+}
+
 func (i *PixelImage) index(x, y int) int {
 	return y*i.Width + x
 }

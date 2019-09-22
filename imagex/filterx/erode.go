@@ -3,62 +3,81 @@ package filterx
 
 import (
 	"errors"
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/imagex"
+	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"image/color"
+	"image/draw"
 )
 
 // 腐蚀二值图
-func ErodeCVT(srcImg *image.Gray, dstImg *image.Gray, directions imagex.PixelDirection) error {
-	return ErodeGray(srcImg, dstImg, directions, 0, 255)
+func ErodeCVT(cvtSrcImg image.Image, cvtDstImg draw.Image, directions imagex.PixelDirection) error {
+	return ErodeGray(cvtSrcImg, cvtDstImg, directions, 65535, 0)
 }
 
 // 腐蚀灰度图像
-// 保留阈值keepThreshold,
-// 		<keepThreshold的像素点不会被腐蚀,keepThreshold=0时腐蚀全部
-// 腐蚀阈值erodeThreshold,
-// 		像素包围有>erodeThreshold像素的点才会被腐蚀,erodeThreshold=255时只腐蚀边界
-func ErodeGray(srcImg *image.Gray, dstImg *image.Gray, directions imagex.PixelDirection, keepThreshold uint8, erodeThreshold uint8) error {
-	if nil == srcImg || nil == dstImg {
-		return errors.New("SrcImg or dstImg is nil. ")
+// 腐蚀阈值erodeThreshold (0,65535]
+// 		>=erodeThreshold像素的点才具有腐蚀性
+// 		erodeThreshold=1时只要不是纯黑都具有腐蚀性，erodeThreshold=65535时只有纯白具有腐蚀性
+// 抗腐蚀阈值antiErodeThreshold [0, 65535)
+// 		<antiErodeThreshold的像素点不会被腐蚀,
+// 		antiErodeThreshold=0时不抗腐蚀
+// 要求 erodeThreshold > antiErodeThreshold
+func ErodeGray(graySrcImg image.Image, grayDstImg draw.Image, directions imagex.PixelDirection, erodeThreshold uint32, antiErodeThreshold uint32) error {
+	if nil == graySrcImg || nil == grayDstImg {
+		return errors.New("SrcImg or grayDstImg is nil. ")
+	}
+	if erodeThreshold == 0 {
+		return errors.New("erodeThreshold = 0. ")
+	}
+	if erodeThreshold <= antiErodeThreshold {
+		return errors.New(fmt.Sprint("antiErodeThreshold <= erodeThreshold: ", erodeThreshold, antiErodeThreshold))
 	}
 	const blackPix = 0
-	size := srcImg.Rect.Size()
-	dirs := imagex.GetPixelDirectionAdds(imagex.ReverseDirection(directions)) //腐蚀字面意思以浅色作为参考对象，因此要反向
-	//临时白图
-	tempImg := imagex.NewGray(srcImg.Bounds(), blackPix)
+	size := graySrcImg.Bounds().Size()
+	dirs := imagex.GetPixelDirectionAdds(directions.ReverseDirection()) //腐蚀字面意思以浅色作为参考对象，因此要反向
+	//临时黑图
+	changeImg := imagex.NewPixelImage(size.X, size.Y, blackPix)
 	//生成变更记录图
-	nextX, nextY := 0, 0
-	var current, next color.Gray
-	currentGray, nextGray := uint8(0), uint8(0)
+	var current color.Color
+	var currentGray, nextGray uint32
 	for y := 1; y < size.Y-1; y++ {
 		for x := 1; x < size.X-1; x++ {
-			current = srcImg.GrayAt(x, y)
-			dstImg.SetGray(x, y, current)
-			currentGray = current.Y
-			if currentGray < keepThreshold { //比阈值深
+			current = graySrcImg.At(x, y)
+			grayDstImg.Set(x, y, current)
+			_, currentGray, _, _ = current.RGBA()
+			if currentGray < antiErodeThreshold { //比抗腐蚀阈值深，保留
 				continue
 			}
+			if currentGray < changeImg.At(x, y) { //比变更集深，代表已经腐蚀。
+				continue
+			}
+			//以下为查找周围最强腐蚀点
+			var erodeGray uint32
 			for _, dir := range dirs {
-				nextX, nextY = x+dir.X, y+dir.Y
-				next = srcImg.GrayAt(nextX, nextY)
-				nextGray = next.Y
-				if nextGray > erodeThreshold || nextGray < currentGray { //下一个方位:比腐蚀阈值浅 || 比当前色深
-					continue
+				_, nextGray, _, _ = graySrcImg.At(x+dir.X, y+dir.Y).RGBA()
+				if nextGray >= erodeThreshold { //找到腐蚀点
+					erodeGray = mathx.MaxUint32(erodeGray, nextGray)
 				}
-				if nextGray > tempImg.GrayAt(nextX, nextY).Y { //下一个方位:比记录色浅
-					tempImg.SetGray(nextX, nextY, next)
-				}
+			}
+			//fmt.Println("查找...", x, y, currentGray, erodeGray)
+			if erodeGray > 0 && erodeGray > currentGray { //比当前更浅
+				changeImg.Set(x, y, erodeGray)
 			}
 		}
 	}
-	if srcImg != dstImg { //来源与目标不致
-		copy(dstImg.Pix, srcImg.Pix)
-	}
-	for index := 0; index < len(tempImg.Pix); index++ {
-		if tempImg.Pix[index] > blackPix {
-			dstImg.Pix[index] = tempImg.Pix[index]
+	setColor := &color.Gray16{}
+	theSame := graySrcImg == grayDstImg
+	changeImg.ForEachPixel(func(x, y int, changePixel uint32) {
+		if changePixel > blackPix {
+			setColor.Y = uint16(changePixel)
+			grayDstImg.Set(x, y, setColor)
+			return
 		}
-	}
+		if !theSame {
+			grayDstImg.Set(x, y, graySrcImg.At(x, y))
+		}
+	})
 	return nil
 }

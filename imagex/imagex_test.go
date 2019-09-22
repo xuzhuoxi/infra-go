@@ -34,7 +34,7 @@ func TestNewGray16(t *testing.T) {
 }
 
 func TestNewRGBA(t *testing.T) {
-	img := NewRGBA(rect, math.MaxUint32>>1)
+	img := NewRGBA(rect, color.White)
 	err := SaveImage(img, osxu.RunningBaseDir()+"test/rgba.jpeg", formatx.JPEG, jpegx.DefaultJPEGOptions)
 	if nil != err {
 		fmt.Println(err)
@@ -42,7 +42,7 @@ func TestNewRGBA(t *testing.T) {
 }
 
 func TestNewRGBA64(t *testing.T) {
-	img := NewRGBA64(rect, math.MaxUint64>>1)
+	img := NewRGBA64(rect, color.White)
 	err := SaveImage(img, osxu.RunningBaseDir()+"test/rgba64.jpeg", formatx.JPEG, jpegx.DefaultJPEGOptions)
 	if nil != err {
 		fmt.Println(err)
@@ -50,7 +50,7 @@ func TestNewRGBA64(t *testing.T) {
 }
 
 func TestFillImage(t *testing.T) {
-	img := NewRGBA64(rect, math.MaxUint64>>1)
+	img := NewRGBA64(rect, color.White)
 	FillImageAt(img, color.Black, image.Rect(16, 16, 48, 48))
 	err := SaveImage(img, osxu.RunningBaseDir()+"test/fill.jpeg", formatx.JPEG, jpegx.DefaultJPEGOptions)
 	if nil != err {
