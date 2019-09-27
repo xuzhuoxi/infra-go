@@ -125,21 +125,6 @@ func BlendSourceNormal(destinationImg draw.Image, sourceColor color.Color) {
 	}
 }
 
-//把源图像复制到目标图像
-func CopyImageTo(srcImg image.Image, dstImg draw.Image) {
-	srcRect := srcImg.Bounds()
-	dstRect := dstImg.Bounds()
-	minX := mathx.MaxInt(dstRect.Min.X, srcRect.Min.X)
-	minY := mathx.MaxInt(dstRect.Min.Y, srcRect.Min.Y)
-	maxX := mathx.MinInt(dstRect.Max.X, srcRect.Max.X)
-	maxY := mathx.MinInt(dstRect.Max.Y, srcRect.Max.Y)
-	for y := minY; y < maxY; y++ {
-		for x := minX; x < maxX; x++ {
-			dstImg.Set(x, y, srcImg.At(x, y))
-		}
-	}
-}
-
 func ForEachLoc(img image.Image, eachFunc func(x, y int)) {
 	min, max := img.Bounds().Min, img.Bounds().Max
 	for y := min.Y; y < max.Y; y++ {

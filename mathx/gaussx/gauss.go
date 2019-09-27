@@ -19,13 +19,12 @@ func CreateGaussKernel(radius int, sigma float64) [][]float64 {
 	sum := 0.0
 	rs := make([][]float64, kSize, kSize)
 	for i := 0; i < kSize; i++ {
-		arr := make([]float64, kSize, kSize)
+		rs[i] = make([]float64, kSize, kSize)
 		for j := 0; j < kSize; j++ {
 			gr := GaussFunc2(i-center, j-center, sigma)
-			arr[j] = gr
+			rs[i][j] = gr
 			sum += gr
 		}
-		rs[i] = arr
 	}
 	for i := 0; i < kSize; i++ {
 		for j := 0; j < kSize; j++ {
@@ -33,6 +32,42 @@ func CreateGaussKernel(radius int, sigma float64) [][]float64 {
 		}
 	}
 	return rs
+}
+
+func GetAvgArr(radius int, sigma float64) [][]float64 {
+	kSize := radius*2 + 1
+	sum := 0.0
+	arr := make([][]float64, kSize, kSize)
+	for i := 0; i < kSize; i++ {
+		arr[i] = make([]float64, kSize, kSize)
+	}
+	for i := 0; i < radius; i++ {
+		weight := GaussFunc2(i-radius, 0, sigma)
+		arr[i][radius] = weight
+		sum += 4 * weight
+		for j := 0; j < radius; j++ {
+			thisGaussResult := GaussFunc2(i-radius, j-radius, sigma)
+			arr[i][j] = thisGaussResult
+			sum += 4 * thisGaussResult
+		}
+	}
+	weight := GaussFunc2(0, 0, sigma)
+	arr[radius][radius] = weight
+	sum += weight
+
+	for i := 0; i < radius; i++ {
+		arr[i][radius] /= sum
+		arr[2*radius-i][radius], arr[radius][i], arr[radius][2*radius-i] = arr[i][radius], arr[i][radius], arr[i][radius]
+
+		for j := 0; j < radius; j++ {
+			arr[i][j] /= sum
+			arr[i][2*radius-j], arr[2*radius-i][j], arr[2*radius-i][2*radius-j] = arr[i][j], arr[i][j], arr[i][j]
+
+		}
+	}
+	arr[radius][radius] /= sum
+
+	return arr
 }
 
 // 计算高斯卷积核(一维数据)
@@ -67,11 +102,10 @@ func CreateGaussKernelInteger(radius int, sigma float64, scale float64) [][]int 
 	kSize := radius*2 + 1
 	rs := make([][]int, kSize, kSize)
 	for i := 0; i < kSize; i++ {
-		arr := make([]int, kSize, kSize)
+		rs[i] = make([]int, kSize, kSize)
 		for j := 0; j < kSize; j++ {
-			arr[j] = int(kernel[i][j] * scale)
+			rs[i][j] = int(kernel[i][j] * scale)
 		}
-		rs[i] = arr
 	}
 	return rs
 }

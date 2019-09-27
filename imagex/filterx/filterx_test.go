@@ -1,13 +1,13 @@
 package filterx
 
 const (
-	SourcePath01 = "test/01.png"
-	SourcePath02 = "test/02.png"
-	SourcePath03 = "test/03.png"
-	SourcePath04 = "test/04.png"
-	SourcePath05 = "test/05.png"
-	SourcePath06 = "test/06.png"
-	SourcePath07 = "test/07.png"
+	SourcePath01 = "test/source/01.png"
+	SourcePath02 = "test/source/02.png"
+	SourcePath03 = "test/source/03.png"
+	SourcePath04 = "test/source/04.png"
+	SourcePath05 = "test/source/05.png"
+	SourcePath06 = "test/source/06.png"
+	SourcePath07 = "test/source/07.png"
 )
 
 const (

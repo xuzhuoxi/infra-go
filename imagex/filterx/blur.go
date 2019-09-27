@@ -3,155 +3,173 @@ package filterx
 
 import (
 	"errors"
-	"github.com/xuzhuoxi/infra-go/mathx"
+	"fmt"
+	"github.com/xuzhuoxi/infra-go/imagex"
 	"image"
 	"image/color"
 	"image/draw"
 )
 
-type _RGB struct {
-	R, G, B int
+type BlurOffset struct {
+	X, Y  int
+	Value int
 }
 
-func (rgb _RGB) Pixel() int {
-	return (rgb.R&0x0000ff)<<16 | (rgb.R&0x0000ff)<<8 | rgb.R&0x0000ff
+type BlurTemplate struct {
+	Radius, Size int
+	Offsets      []BlurOffset
+	Sum          int
 }
 
-// 模糊
-func FastBlur(srcImg image.Image, dstImg draw.Image, radius int) error {
-	if nil == srcImg {
-		return errors.New("SrcImg is nil! ")
+func (t BlurTemplate) CheckValidity() error {
+	if t.Radius < 1 {
+		return errors.New("Radius < 1. ")
 	}
-	if radius < 1 {
-		return errors.New("Radius should >=1. ")
+	if t.Sum <= 0 {
+		return errors.New("Sum <= 0. ")
 	}
-	rect := srcImg.Bounds()
+	sum := 0
+	for _, offset := range t.Offsets {
+		sum += offset.Value
+	}
+	if sum != t.Sum {
+		return errors.New(fmt.Sprintf("Sum Error! Sum=%d, AddSum=%d.", t.Sum, sum))
+	}
+	return nil
+}
 
-	var w, h = rect.Size().X, rect.Size().Y
-	var pix = make([]_RGB, w*h)
-	for y := rect.Min.Y; y < rect.Max.Y; y++ {
-		for x := rect.Min.X; x < rect.Max.X; x++ {
-			r, g, b, _ := srcImg.At(x, y).RGBA()
-			pix[y*w+x] = _RGB{R: int(r), G: int(g), B: int(b)}
+var (
+	FourNear3 = BlurTemplate{Radius: 1, Size: 3, Sum: 4,
+		Offsets: []BlurOffset{
+			{0, -1, 1}, {-1, 0, 1},
+			{1, +0, 1}, {+0, 1, 1}}}
+	EightNear3 = BlurTemplate{Radius: 1, Size: 3, Sum: 8,
+		Offsets: []BlurOffset{
+			{-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
+			{-1, +0, 1}, {1, +0, 1},
+			{-1, +1, 1}, {0, +1, 1}, {1, +1, 1}}}
+	Average3 = BlurTemplate{Radius: 1, Size: 3, Sum: 9,
+		Offsets: []BlurOffset{
+			{-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
+			{-1, +0, 1}, {0, +0, 1}, {1, +0, 1},
+			{-1, +1, 1}, {0, +1, 1}, {1, +1, 1}}}
+	Gauss3 = BlurTemplate{Radius: 1, Size: 3, Sum: 16,
+		Offsets: []BlurOffset{
+			{-1, -1, 1}, {0, -1, 2}, {1, -1, 1},
+			{-1, +0, 2}, {0, +0, 4}, {1, +0, 2},
+			{-1, +1, 1}, {0, +1, 2}, {1, +1, 1}}}
+	Gauss5 = BlurTemplate{Radius: 2, Size: 5, Sum: 273,
+		Offsets: []BlurOffset{
+			{-2, -2, 1}, {-1, -2, 4}, {0, -2, 7}, {1, -2, 4}, {2, -2, 1},
+			{-2, -1, 4}, {-1, -1, 16}, {0, -1, 26}, {1, -1, 16}, {2, -1, 4},
+			{-2, +0, 7}, {-1, +0, 26}, {0, +0, 41}, {1, +0, 26}, {2, +0, 7},
+			{-2, +1, 4}, {-1, +1, 16}, {0, +1, 26}, {1, +1, 16}, {2, +1, 4},
+			{-2, +2, 1}, {-1, +2, 4}, {1, +2, 7}, {1, +2, 4}, {2, +2, 1}}}
+)
+
+// radius：	卷积核半径 [1，3]
+// sigma:	标准差
+func CreateGaussBlurTemplate(radius int, sigma float64) *BlurTemplate {
+	kSize := radius*2 + 1
+	return &BlurTemplate{Radius: radius, Size: kSize, Sum: 0, Offsets: nil}
+}
+
+//使用模板进行滤波模糊
+func BlurWithTemplate(srcImg image.Image, dstImg draw.Image, template BlurTemplate) error {
+	if nil == srcImg || nil == dstImg {
+		return errors.New("SrcImg or dstImg is nil! ")
+	}
+	if err := template.CheckValidity(); nil != err {
+		return err
+	}
+	sourceImage := srcImg
+	targetImage := dstImg
+	if srcImg == dstImg {
+		sourceImage = imagex.CopyImage(srcImg)
+	}
+	size := srcImg.Bounds().Size()
+	radius := template.Radius
+	var x, y int
+	var sumR, sumG, sumB, sumA int
+	var R, G, B, A uint32
+	var setColor = &color.NRGBA64{}
+	//内部处理
+	for y = radius; y < size.Y-radius; y++ {
+		for x = radius; x < size.X-radius; x++ {
+			sumR, sumG, sumB, sumA = 0, 0, 0, 0
+			for _, offset := range template.Offsets {
+				R, G, B, A = sourceImage.At(x+offset.X, y+offset.Y).RGBA()
+				sumR += int(R) * offset.Value
+				sumG += int(G) * offset.Value
+				sumB += int(B) * offset.Value
+				sumA += int(A) * offset.Value
+			}
+			sumR, sumG, sumB, sumA = sumR/template.Sum, sumG/template.Sum, sumB/template.Sum, sumA/template.Sum
+			setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
+			targetImage.Set(x, y, setColor)
 		}
 	}
-
-	var wm = w - 1
-	var hm = h - 1
-	var wh = w * h
-	var div = radius + radius + 1
-
-	var rgb = make([]_RGB, wh)
-	var rgbSum = &_RGB{}
-
-	var x, y, i, p, yp, yi, yw int
-	var vMin = make([]int, mathx.MaxInt(w, h))
-
-	var divSum = (div + 1) >> 1
-	divSum *= divSum
-	var dv = make([]int, 256*divSum)
-	for i := 0; i < 256*divSum; i++ {
-		dv[i] = i / divSum
+	//边缘处理
+	handleTemp := func(x, y int) {
+		sumR, sumG, sumB, sumA = 0, 0, 0, 0
+		sumValue := 0
+		var cx, cy int
+		for _, offset := range template.Offsets {
+			cx = x + offset.X
+			cy = y + offset.Y
+			if cx < 0 || cx >= size.X || cy < 0 || cy >= size.Y {
+				continue
+			}
+			R, G, B, A = sourceImage.At(x+offset.X, y+offset.Y).RGBA()
+			sumR += int(R) * offset.Value
+			sumG += int(G) * offset.Value
+			sumB += int(B) * offset.Value
+			sumA += int(A) * offset.Value
+			sumValue += offset.Value
+		}
+		sumR, sumG, sumB, sumA = sumR/sumValue, sumG/sumValue, sumB/sumValue, sumA/sumValue
+		setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
+		dstImg.Set(x, y, setColor)
 	}
-
-	var stack = make([]_RGB, div)
-	var stackPointer int
-	var stackStart int
-	var sir *_RGB
-	var rbs int
-	var r1 = radius + 1
-	var outSum, inSum = &_RGB{}, &_RGB{}
-	for y = 0; y < h; y++ {
-		inSum.R, inSum.G, inSum.B = 0, 0, 0
-		outSum.R, outSum.G, outSum.B = 0, 0, 0
-		rgbSum.R, rgbSum.G, rgbSum.B = 0, 0, 0
-		for i = -radius; i <= radius; i++ {
-			stack[i+radius] = pix[yi+mathx.MinInt(wm, mathx.MaxInt(i, 0))]
-			rbs = r1 - mathx.AbsInt(i)
-			rgbSum.R, rgbSum.G, rgbSum.B = sir.R*rbs, sir.G*rbs, sir.B*rbs
-			if i > 0 {
-				inSum.R, inSum.G, inSum.B = inSum.R+sir.R, inSum.G+sir.G, inSum.B+sir.B
-			} else {
-				outSum.R, outSum.G, outSum.B = outSum.R+sir.R, outSum.G+sir.G, outSum.B+sir.B
-			}
-		}
-		stackPointer = radius
-		for x = 0; x < w; x++ {
-			rgb[yi].R, rgb[yi].G, rgb[yi].B = dv[rgbSum.R], dv[rgbSum.G], dv[rgbSum.B]
-			rgbSum.R, rgbSum.G, rgbSum.B = rgbSum.R-outSum.R, rgbSum.G-outSum.G, rgbSum.B-outSum.B
-			stackStart = stackPointer - radius + div
-			sir = &stack[stackStart%div]
-			outSum.R, outSum.G, outSum.B = outSum.R-sir.R, outSum.G-sir.G, outSum.B-sir.B
-			if y == 0 {
-				vMin[x] = mathx.MinInt(x+radius+1, wm)
-			}
-			sir.R, sir.G, sir.B = pix[yw+vMin[x]].R, pix[yw+vMin[x]].G, pix[yw+vMin[x]].B
-			inSum.R, inSum.G, inSum.B = inSum.R+sir.R, inSum.G+sir.G, inSum.B+sir.B
-			rgbSum.R, rgbSum.G, rgbSum.B = rgbSum.R+inSum.R, rgbSum.G+inSum.G, rgbSum.B+inSum.B
-			stackPointer = (stackPointer + 1) % div
-			sir = &stack[(stackPointer)%div]
-			outSum.R, outSum.G, outSum.B = outSum.R+sir.R, outSum.G+sir.G, outSum.B+sir.B
-			inSum.R, inSum.G, inSum.B = inSum.R-sir.R, inSum.G-sir.G, inSum.B-sir.B
-			yi++
-		}
-		yw += w
-	}
-	for x = 0; x < w; x++ {
-		inSum.R, inSum.G, inSum.B = 0, 0, 0
-		outSum.R, outSum.G, outSum.B = 0, 0, 0
-		rgbSum.R, rgbSum.G, rgbSum.B = 0, 0, 0
-		yp = -radius * w
-		for i = -radius; i <= radius; i++ {
-			yi = mathx.MaxInt(0, yp) + x
-			sir = &stack[i+radius]
-			sir.R, sir.G, sir.B = rgb[yi].R, rgb[yi].G, rgb[yi].B
-			rbs = r1 - mathx.AbsInt(i)
-			rgbSum.R, rgbSum.G, rgbSum.B = rgb[yi].R*rbs, rgb[yi].G*rbs, rgb[yi].B*rbs
-
-			if i > 0 {
-				inSum.R, inSum.G, inSum.B = inSum.R+sir.R, inSum.G+sir.G, inSum.B+sir.B
-			} else {
-				outSum.R, outSum.G, outSum.B = outSum.R+sir.R, outSum.G+sir.G, outSum.B+sir.B
-			}
-			if i < hm {
-				yp += w
-			}
-		}
-		yi = x
-		stackPointer = radius
-		for y = 0; y < h; y++ {
-			// Preserve alpha channel: ( 0xff000000 & pix[yi] )
-			pix[yi].R, pix[yi].G, pix[yi].B = dv[rgbSum.R], dv[rgbSum.G], dv[rgbSum.B]
-			rgbSum.R, rgbSum.G, rgbSum.B = rgbSum.R-outSum.R, rgbSum.G-outSum.G, rgbSum.B-outSum.B
-			stackStart = stackPointer - radius + div
-			sir = &stack[stackStart%div]
-			outSum.R, outSum.G, outSum.B = outSum.R-sir.R, outSum.G-sir.G, outSum.B-sir.B
-			if x == 0 {
-				vMin[y] = mathx.MinInt(y+r1, hm) * w
-			}
-			p = x + vMin[y]
-			sir.R, sir.G, sir.B = rgb[p].R, rgb[p].G, rgb[p].B
-			inSum.R, inSum.G, inSum.B = inSum.R+sir.R, inSum.G+sir.G, inSum.B+sir.B
-			rgbSum.R, rgbSum.G, rgbSum.B = rgbSum.R+inSum.R, rgbSum.G+inSum.G, rgbSum.B+inSum.B
-			stackPointer = (stackPointer + 1) % div
-			sir = &stack[stackPointer]
-			outSum.R, outSum.G, outSum.B = outSum.R+sir.R, outSum.G+sir.G, outSum.B+sir.B
-			inSum.R, inSum.G, inSum.B = inSum.R-sir.R, inSum.G-sir.G, inSum.B-sir.B
-			yi += w
+	for y = 0; y < radius; y++ {
+		for x = 0; x < size.X; x++ {
+			handleTemp(x, y)
 		}
 	}
-	//复制像素
-	dstRect := dstImg.Bounds()
-	cm := dstImg.ColorModel()
-	var c = &color.RGBA{}
-	var a uint32
-	for y := dstRect.Min.Y; y < dstRect.Max.Y; y++ {
-		for x := dstRect.Min.X; x < dstRect.Max.X; x++ {
-			_, _, _, a = dstImg.At(x, y).RGBA()
-			sir = &pix[w*y+x]
-			c.R, c.G, c.B, c.A = uint8(sir.R), uint8(sir.G), uint8(sir.B), uint8(a)
-			dstImg.Set(x, y, cm.Convert(*c))
+	for y = size.Y - 1 - radius; y < size.Y-1; y++ {
+		for x = 0; x < size.X; x++ {
+			handleTemp(x, y)
+		}
+	}
+	for x := 0; x < radius; x++ {
+		for y = 0; y < size.Y; y++ {
+			handleTemp(x, y)
+		}
+	}
+	for x := size.X - 1 - radius; x < size.X-1; x++ {
+		for y = 0; y < size.Y; y++ {
+			handleTemp(x, y)
 		}
 	}
 	return nil
+}
+
+func BlurWithForeNear3(srcImg image.Image, dstImg draw.Image) error {
+	return BlurWithTemplate(srcImg, dstImg, FourNear3)
+}
+
+func BlurWithEightNear3(srcImg image.Image, dstImg draw.Image) error {
+	return BlurWithTemplate(srcImg, dstImg, EightNear3)
+}
+
+func BlurWithAverage3(srcImg image.Image, dstImg draw.Image) error {
+	return BlurWithTemplate(srcImg, dstImg, Average3)
+}
+
+func BlurWithGauss3(srcImg image.Image, dstImg draw.Image) error {
+	return BlurWithTemplate(srcImg, dstImg, Gauss3)
+}
+
+func BlurWithGauss5(srcImg image.Image, dstImg draw.Image) error {
+	return BlurWithTemplate(srcImg, dstImg, Gauss5)
 }

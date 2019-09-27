@@ -34,3 +34,10 @@ func TestGetGaussKernelInteger2(t *testing.T) {
 	temp = CreateGaussKernelInteger2(1, 1, 16)
 	fmt.Println(temp)
 }
+
+func TestGetAvgArr(t *testing.T) {
+	temp := GetAvgArr(2, 1.4)
+	fmt.Println(temp)
+	temp = GetAvgArr(1, 1)
+	fmt.Println(temp)
+}
