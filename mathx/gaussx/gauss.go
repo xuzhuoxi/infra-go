@@ -66,7 +66,6 @@ func GetAvgArr(radius int, sigma float64) [][]float64 {
 		}
 	}
 	arr[radius][radius] /= sum
-
 	return arr
 }
 
@@ -96,11 +95,14 @@ func CreateGaussKernel2(radius int, sigma float64) []float64 {
 // 整数值卷积核
 // radius： 	半径
 // sigma： 		标准差
-// integer： 	整数乘数
-func CreateGaussKernelInteger(radius int, sigma float64, scale float64) [][]int {
+// scale： 		整数乘数, =0时使用默认放大模式
+func CreateGaussKernelInt(radius int, sigma float64, scale float64) [][]int {
 	kernel := CreateGaussKernel(radius, sigma)
 	kSize := radius*2 + 1
 	rs := make([][]int, kSize, kSize)
+	if scale <= 0 {
+		scale = math.Ceil(1 / kernel[0][0])
+	}
 	for i := 0; i < kSize; i++ {
 		rs[i] = make([]int, kSize, kSize)
 		for j := 0; j < kSize; j++ {
@@ -114,11 +116,14 @@ func CreateGaussKernelInteger(radius int, sigma float64, scale float64) [][]int 
 // 整数值卷积核
 // radius： 	半径
 // sigma： 		标准差
-// integer： 	整数乘数
-func CreateGaussKernelInteger2(radius int, sigma float64, scale float64) []int {
+// scale： 		整数乘数, =0时使用默认放大模式
+func CreateGaussKernelInt2(radius int, sigma float64, scale float64) []int {
 	kernel := CreateGaussKernel2(radius, sigma)
 	kSize := radius*2 + 1
 	rs := make([]int, kSize*kSize, kSize*kSize)
+	if scale <= 0 {
+		scale = math.Ceil(1 / kernel[0])
+	}
 	for index, _ := range kernel {
 		rs[index] = int(kernel[index] * float64(scale))
 	}
