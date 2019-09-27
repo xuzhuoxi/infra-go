@@ -122,10 +122,10 @@ func CreateGaussKernelInt2(radius int, sigma float64, scale float64) []int {
 	kSize := radius*2 + 1
 	rs := make([]int, kSize*kSize, kSize*kSize)
 	if scale <= 0 {
-		scale = math.Ceil(1 / kernel[0])
+		scale = 1 / kernel[0]
 	}
 	for index, _ := range kernel {
-		rs[index] = int(kernel[index] * float64(scale))
+		rs[index] = int(math.Round(kernel[index] * float64(scale)))
 	}
 	return rs
 }

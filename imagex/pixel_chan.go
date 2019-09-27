@@ -107,10 +107,10 @@ func (i *PixelChan4Image64) RGB64At(x, y int) (A, R, G, B uint16) {
 }
 
 func (i *PixelChan4Image64) SetPixel(x, y int, pixel uint64) {
-	A := (pixel & 0xffff00000000000000) >> 48
-	R := (pixel & 0x0000ffff0000000000) >> 32
-	G := (pixel & 0x00000000ffff000000) >> 16
-	B := (pixel & 0x00000000000000ffff) >> 0
+	A := (pixel & 0xffff000000000000) >> 48
+	R := (pixel & 0x0000ffff00000000) >> 32
+	G := (pixel & 0x00000000ffff0000) >> 16
+	B := (pixel & 0x000000000000ffff) >> 0
 	index := i.getIndex(x, y)
 	i.A[index], i.R[index], i.G[index], i.B[index] = uint16(A), uint16(R), uint16(G), uint16(B)
 }

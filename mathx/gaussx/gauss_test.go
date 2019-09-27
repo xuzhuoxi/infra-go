@@ -29,9 +29,9 @@ func TestGetGaussKernelInteger(t *testing.T) {
 }
 
 func TestGetGaussKernelInteger2(t *testing.T) {
-	temp := CreateGaussKernelInt2(2, 1, 300)
+	temp := CreateGaussKernelInt2(2, 1, 0)
 	fmt.Println(temp)
-	temp = CreateGaussKernelInt2(1, 1, 16)
+	temp = CreateGaussKernelInt2(2, 0.8, 0)
 	fmt.Println(temp)
 	temp = CreateGaussKernelInt2(1, 0.8, 0)
 	fmt.Println(temp)

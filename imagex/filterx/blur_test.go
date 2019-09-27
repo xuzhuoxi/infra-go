@@ -38,7 +38,7 @@ func TestFastBlur(t *testing.T) {
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
 		//err = BlurWithAverage(img, img.(draw.Image), 2)
-		err = BlurWithTemplate(img, img.(draw.Image), FourNear3)
+		err = FilterImageWithTemplate(img, img.(draw.Image), FourNear3)
 		if nil != err {
 			fmt.Println(err)
 			continue
@@ -57,32 +57,22 @@ func TestSimple(t *testing.T) {
 	fmt.Println(rgb[0])
 }
 
-func TestCreateGaussTemplate(t *testing.T) {
-	var temp *BlurTemplate
-	temp = CreateGaussBlurTemplate(2, 1.4)
+func TestCreateGaussBlurFilter(t *testing.T) {
+	var temp *FilterTemplate
+	temp, _ = CreateGaussBlurFilter(2, 1.4)
 	fmt.Println(temp)
-	temp = CreateGaussBlurTemplate(2, 1.0)
+	temp, _ = CreateGaussBlurFilter(2, 1.0)
 	fmt.Println(temp)
 }
 
-func TestBlurWithTemplate(t *testing.T) {
-	sources := SourcePaths
-	targets := BlurPaths
-	for index, source := range sources {
-		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.PNG)
-		if nil != err {
-			fmt.Println(err)
-			continue
-		}
-		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		err = BlurWithTemplate(img, img.(draw.Image), EightNear3)
-		if nil != err {
-			fmt.Println(err)
-			continue
-		}
-		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.PNG, nil)
-		if nil != err {
-			fmt.Println(err)
-		}
-	}
+func TestCreateMotionBlurFilter(t *testing.T) {
+	var temp *FilterTemplate
+	temp, _ = CreateMotionBlurFilter(1, imagex.AllDirection)
+	fmt.Println(temp)
+	temp, _ = CreateMotionBlurFilter(2, imagex.Vertical)
+	fmt.Println(temp)
+	temp, _ = CreateMotionBlurFilter(2, imagex.Horizontal)
+	fmt.Println(temp)
+	temp, _ = CreateMotionBlurFilter(2, imagex.Oblique)
+	fmt.Println(temp)
 }

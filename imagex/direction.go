@@ -23,6 +23,30 @@ func (d PixelDirection) Name() string {
 	return "Multi"
 }
 
+// 无方向
+func (d PixelDirection) IsNone() bool {
+	return 0 == d
+}
+
+// 多方向
+func (d PixelDirection) IsMulti() bool {
+	if d.IsNone() {
+		return false
+	}
+	if len(DecomposeDirection(d)) > 1 {
+		return true
+	}
+	return false
+}
+
+// 单方向
+func (d PixelDirection) IsSingle() bool {
+	if d.IsNone() {
+		return false
+	}
+	return len(DecomposeDirection(d)) == 1
+}
+
 // 取反方向
 func (d PixelDirection) ReverseDirection() PixelDirection {
 	var rs PixelDirection
@@ -112,7 +136,7 @@ func GetPixelDirectionAdd(direction PixelDirection) (PixelDirectionAdd, error) {
 	if ok {
 		return rs, nil
 	} else {
-		return PixelDirectionAdd{0, 0}, errors.New("Direction Error! ")
+		return PixelDirectionAdd{}, errors.New("Direction Error! ")
 	}
 }
 
@@ -125,6 +149,20 @@ func GetPixelDirectionAdds(directions PixelDirection) []PixelDirectionAdd {
 	for index, dir := range dirs {
 		if dir&directions > 0 {
 			rs = append(rs, dirAdds[index])
+		}
+	}
+	return rs
+}
+
+//分解方向
+func DecomposeDirection(directions PixelDirection) []PixelDirection {
+	if directions <= 0 {
+		return nil
+	}
+	var rs []PixelDirection
+	for index, dir := range dirs {
+		if dir&directions > 0 {
+			rs = append(rs, dirs[index])
 		}
 	}
 	return rs
