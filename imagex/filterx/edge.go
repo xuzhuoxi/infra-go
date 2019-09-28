@@ -44,7 +44,7 @@ func CreateEdgeFilter(radius int, direction imagex.PixelDirection, diff uint) (f
 	if nil == dirAdds {
 		return nil, errors.New("Direction Error. ")
 	}
-	kSize := radius*2 + 1
+	kSize := radius + radius + 1
 	ln := len(dirAdds)*radius + 1
 	var offsets = make([]FilterOffset, 0, ln)
 	var value int

@@ -47,7 +47,7 @@ func DilateGray(graySrcImg image.Image, grayDstImg draw.Image, directions imagex
 				if nextGray <= threshold || nextGray <= currentGray { //下一个方位:比阈值深 || 比当前色深
 					continue
 				}
-				if currentGray < changeImg.At(nextX, nextY) { //下一个方位: 当前比记录色深
+				if currentGray < uint32(changeImg.At(nextX, nextY)) { //下一个方位: 当前比记录色深
 					changeImg.Set(nextX, nextY, currentGray)
 				}
 			}
@@ -55,7 +55,9 @@ func DilateGray(graySrcImg image.Image, grayDstImg draw.Image, directions imagex
 	}
 	setColor := &color.Gray16{}
 	theSame := graySrcImg == grayDstImg
-	changeImg.ForEachPixel(func(x, y int, changePixel uint32) {
+	var changePixel uint32
+	changeImg.ForEachPixel(func(x, y int) {
+		changePixel = changeImg.At(x, y)
 		if changePixel < whitePix {
 			setColor.Y = uint16(changePixel)
 			grayDstImg.Set(x, y, setColor)

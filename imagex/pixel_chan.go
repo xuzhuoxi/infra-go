@@ -1,131 +1,246 @@
 package imagex
 
-import "image/color"
+type IPixelChanImage interface {
+	Max() (maxX, maxY int)
+	NumberChanel() int
+}
+
+//-------------------------------
 
 type PixelChanImage struct {
 	C             []uint8
 	Width, Height int
+	NumChan       int
 }
 
-func (i *PixelChanImage) Max() (maxX, maxY int) {
-	return i.Width, i.Height
+func (p *PixelChanImage) Max() (maxX, maxY int) {
+	return p.Width, p.Height
 }
 
-func (i *PixelChanImage) ChanAt(x, y int) (C uint8) {
-	index := i.getIndex(x, y)
-	return i.C[index]
+func (p *PixelChanImage) NumberChanel() int {
+	return p.NumChan
 }
 
-func (i *PixelChanImage) SetChan(x, y int, C uint8) {
-	index := i.getIndex(x, y)
-	i.C[index] = C
+func (p *PixelChanImage) ChanValueAt(x, y int, chanNum int) uint8 {
+	index := p.getIndex(x, y)
+	return p.C[index+chanNum]
 }
 
-func (i *PixelChanImage) getIndex(x, y int) int {
-	return 4 * (y*i.Width + x)
+func (p *PixelChanImage) ChanValuesAt(x, y int) []uint8 {
+	index := p.getIndex(x, y)
+	return p.C[index : index+p.NumChan : index+p.NumChan]
 }
 
-//---------------------------
+func (p *PixelChanImage) PixelAt(x, y int) uint32 {
+	values := p.ChanValuesAt(x, y)
+	var rs uint32 = 0
+	for i := 0; i < p.NumChan; i-- {
+		rs = rs | (uint32(values[i]) << (uint32(p.NumChan - 1 - i)) * 8)
+	}
+	return rs
+}
 
-type PixelChanImage16 struct {
+func (p *PixelChanImage) SetChanValue(x, y int, chanNum int, value uint8) {
+	index := p.getIndex(x, y)
+	p.C[index+chanNum] = value
+}
+
+func (p *PixelChanImage) SetChanValues(x, y int, value ...uint8) {
+	index := p.getIndex(x, y)
+	for i := 0; i < p.NumChan && i < len(value); i++ {
+		p.C[index+1] = value[i]
+	}
+}
+
+func (p *PixelChanImage) getIndex(x, y int) int {
+	return 4 * (y*p.Width + x)
+}
+
+//----------------------------------------
+
+type Pixel64ChanImage struct {
 	C             []uint16
 	Width, Height int
+	NumChan       int
 }
 
-func (i *PixelChanImage16) Max() (maxX, maxY int) {
-	return i.Width, i.Height
+func (p *Pixel64ChanImage) Max() (maxX, maxY int) {
+	return p.Width, p.Height
 }
 
-func (i *PixelChanImage16) ChanAt(x, y int) (C uint16) {
-	index := i.getIndex(x, y)
-	return i.C[index]
+func (p *Pixel64ChanImage) NumberChanel() int {
+	return p.NumChan
 }
 
-func (i *PixelChanImage16) SetChan(x, y int, C uint16) {
-	index := i.getIndex(x, y)
-	i.C[index] = C
+func (p *Pixel64ChanImage) ChanValueAt(x, y int, chanNum int) uint16 {
+	index := p.getIndex(x, y)
+	return p.C[index+chanNum]
 }
 
-func (i *PixelChanImage16) getIndex(x, y int) int {
-	return 4 * (y*i.Width + x)
+func (p *Pixel64ChanImage) ChanValuesAt(x, y int) []uint16 {
+	index := p.getIndex(x, y)
+	return p.C[index : index+p.NumChan : index+p.NumChan]
 }
 
-//---------------------------
-
-type PixelChan4Image struct {
-	A, R, G, B    []uint8
-	Width, Height int
+func (p *Pixel64ChanImage) PixelAt(x, y int) uint32 {
+	values := p.ChanValuesAt(x, y)
+	var rs uint32 = 0
+	for i := 0; i < p.NumChan; i-- {
+		rs = rs | (uint32(values[i]) << (uint32(p.NumChan - 1 - i)) * 8)
+	}
+	return rs
 }
 
-func (i *PixelChan4Image) Max() (maxX, maxY int) {
-	return i.Width, i.Height
+func (p *Pixel64ChanImage) SetChanValue(x, y int, chanNum int, value uint16) {
+	index := p.getIndex(x, y)
+	p.C[index+chanNum] = value
 }
 
-func (i *PixelChan4Image) RGBAt(x, y int) (A, R, G, B uint8) {
-	index := i.getIndex(x, y)
-	return i.A[index], i.R[index], i.G[index], i.B[index]
+func (p *Pixel64ChanImage) SetChanValues(x, y int, value ...uint16) {
+	index := p.getIndex(x, y)
+	for i := 0; i < p.NumChan && i < len(value); i++ {
+		p.C[index+1] = value[i]
+	}
 }
 
-func (i *PixelChan4Image) SetPixel(x, y int, pixel uint32) {
-	A := (pixel & 0xff000000) >> 24
-	R := (pixel & 0x00ff0000) >> 16
-	G := (pixel & 0x0000ff00) >> 8
-	B := (pixel & 0x000000ff) >> 0
-	index := i.getIndex(x, y)
-	i.A[index], i.R[index], i.G[index], i.B[index] = uint8(A), uint8(R), uint8(G), uint8(B)
+func (p *Pixel64ChanImage) getIndex(x, y int) int {
+	return 4 * (y*p.Width + x)
 }
 
-func (i *PixelChan4Image) SetRGB(x, y int, A, R, G, B uint8) {
-	index := i.getIndex(x, y)
-	i.A[index], i.R[index], i.G[index], i.B[index] = A, R, G, B
+//---------------------------------------------
+
+type GrayChanImage struct {
+	PixelChanImage
 }
 
-func (i *PixelChan4Image) SetColor(x, y int, c color.Color) {
-	R, G, B, A := c.RGBA()
-	index := i.getIndex(x, y)
-	i.A[index], i.R[index], i.G[index], i.B[index] = uint8(A>>8), uint8(R>>8), uint8(G>>8), uint8(B>>8)
+func (p *GrayChanImage) SetGray(x, y int, gray uint8) {
+	p.SetChanValue(x, y, 0, gray)
 }
 
-func (i *PixelChan4Image) getIndex(x, y int) int {
-	return 4 * (y*i.Width + x)
+func (p *GrayChanImage) GrayAt(x, y int) uint8 {
+	return p.ChanValueAt(x, y, 0)
 }
 
-//--------------------------------------------------------------
+//---------------------------------------------
 
-type PixelChan4Image64 struct {
-	A, R, G, B    []uint16
-	Width, Height int
+type Gray16ChanImage struct {
+	Pixel64ChanImage
 }
 
-func (i *PixelChan4Image64) Max() (maxX, maxY int) {
-	return i.Width, i.Height
+func (p *Gray16ChanImage) SetGray16(x, y int, gray uint16) {
+	p.SetChanValue(x, y, 0, gray)
 }
 
-func (i *PixelChan4Image64) RGB64At(x, y int) (A, R, G, B uint16) {
-	index := i.getIndex(x, y)
-	return i.A[index], i.R[index], i.G[index], i.B[index]
+func (p *Gray16ChanImage) Gray16At(x, y int) uint16 {
+	return p.ChanValueAt(x, y, 0)
 }
 
-func (i *PixelChan4Image64) SetPixel(x, y int, pixel uint64) {
-	A := (pixel & 0xffff000000000000) >> 48
-	R := (pixel & 0x0000ffff00000000) >> 32
-	G := (pixel & 0x00000000ffff0000) >> 16
-	B := (pixel & 0x000000000000ffff) >> 0
-	index := i.getIndex(x, y)
-	i.A[index], i.R[index], i.G[index], i.B[index] = uint16(A), uint16(R), uint16(G), uint16(B)
+//---------------------------------------------
+
+type RGBChanImage struct {
+	PixelChanImage
 }
 
-func (i *PixelChan4Image64) SetRGB64(x, y int, A, R, G, B uint16) {
-	index := i.getIndex(x, y)
-	i.A[index], i.R[index], i.G[index], i.B[index] = A, R, G, B
+func (p *RGBChanImage) SetRGB(x, y int, R, G, B uint8) {
+	p.SetChanValues(x, y, R, G, B)
 }
 
-func (i *PixelChan4Image64) SetColor(x, y int, c color.Color) {
-	R, G, B, A := c.RGBA()
-	index := i.getIndex(x, y)
-	i.A[index], i.R[index], i.G[index], i.B[index] = uint16(A), uint16(R), uint16(G), uint16(B)
+func (p *RGBChanImage) SetPixel(x, y int, pixel uint32) {
+	R := uint8((pixel & 0xff0000) >> 16)
+	G := uint8((pixel & 0x00ff00) >> 8)
+	B := uint8(pixel & 0x0000ff)
+	p.SetChanValues(x, y, R, G, B)
 }
 
-func (i *PixelChan4Image64) getIndex(x, y int) int {
-	return 4 * (y*i.Width + x)
+func (p *RGBChanImage) RGBAt(x, y int) (R, G, B uint8) {
+	values := p.ChanValuesAt(x, y)
+	return values[0], values[1], values[2]
+}
+
+func (p *RGBChanImage) PixelAt(x, y int) (pixel uint32) {
+	values := p.ChanValuesAt(x, y)
+	return (uint32(values[0]) << 16) | (uint32(values[1]) << 8) | uint32(values[2])
+}
+
+//---------------------------------------------
+
+type RGB64ChanImage struct {
+	Pixel64ChanImage
+}
+
+func (p *RGB64ChanImage) SetRGB64(x, y int, R, G, B uint16) {
+	p.SetChanValues(x, y, R, G, B)
+}
+
+func (p *RGB64ChanImage) SetPixel64(x, y int, pixel uint64) {
+	R := uint16((pixel & 0xffff00000000) >> 32)
+	G := uint16((pixel & 0x0000ffff0000) >> 16)
+	B := uint16(pixel & 0x00000000ffff)
+	p.SetChanValues(x, y, R, G, B)
+}
+
+func (p *RGB64ChanImage) RGB64At(x, y int) (R, G, B uint16) {
+	values := p.ChanValuesAt(x, y)
+	return values[0], values[1], values[2]
+}
+
+func (p *RGB64ChanImage) Pixel64At(x, y int) (pixel uint64) {
+	values := p.ChanValuesAt(x, y)
+	return (uint64(values[0]) << 32) | (uint64(values[1]) << 16) | uint64(values[2])
+}
+
+//---------------------------------------------
+
+type ARGBChanImage struct {
+	PixelChanImage
+}
+
+func (p *ARGBChanImage) SetARGB(x, y int, A, R, G, B uint8) {
+	p.SetChanValues(x, y, A, R, G, B)
+}
+
+func (p *ARGBChanImage) SetPixel(x, y int, pixel uint32) {
+	A := uint8((pixel & 0xff000000) >> 24)
+	R := uint8((pixel & 0x00ff0000) >> 16)
+	G := uint8((pixel & 0x0000ff00) >> 8)
+	B := uint8(pixel & 0x000000ff)
+	p.SetChanValues(x, y, A, R, G, B)
+}
+
+func (p *ARGBChanImage) ARGBAt(x, y int) (A, R, G, B uint8) {
+	values := p.ChanValuesAt(x, y)
+	return values[0], values[1], values[2], values[3]
+}
+
+func (p *ARGBChanImage) PixelAt(x, y int) (pixel uint32) {
+	values := p.ChanValuesAt(x, y)
+	return (uint32(values[0]) << 24) | (uint32(values[1]) << 16) | (uint32(values[2]) << 8) | uint32(values[3])
+}
+
+//---------------------------------------------
+
+type ARGB64ChanImage struct {
+	Pixel64ChanImage
+}
+
+func (p *ARGB64ChanImage) SetARGB64(x, y int, A, R, G, B uint16) {
+	p.SetChanValues(x, y, A, R, G, B)
+}
+
+func (p *ARGB64ChanImage) SetPixel64(x, y int, pixel uint64) {
+	A := uint16((pixel & 0xffff000000000000) >> 48)
+	R := uint16((pixel & 0x0000ffff00000000) >> 32)
+	G := uint16((pixel & 0x00000000ffff0000) >> 16)
+	B := uint16(pixel & 0x000000000000ffff)
+	p.SetChanValues(x, y, A, R, G, B)
+}
+
+func (p *ARGB64ChanImage) ARGB64At(x, y int) (A, R, G, B uint16) {
+	values := p.ChanValuesAt(x, y)
+	return values[0], values[1], values[2], values[3]
+}
+
+func (p *ARGB64ChanImage) Pixel64At(x, y int) (pixel uint64) {
+	values := p.ChanValuesAt(x, y)
+	return (uint64(values[0]) << 48) | (uint64(values[1]) << 32) | (uint64(values[2]) << 16) | uint64(values[3])
 }

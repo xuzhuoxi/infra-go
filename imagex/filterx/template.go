@@ -64,17 +64,20 @@ func FilterImageWithTemplate(srcImg image.Image, dstImg draw.Image, template Fil
 		sourceImage = imagex.CopyImage(srcImg)
 	}
 	size := srcImg.Bounds().Size()
-	radius := template.Radius
+	//radius := template.Radius
 	var x, y int
+	var ox, oy int
 	var sumR, sumG, sumB, sumA int
 	var R, G, B, A uint32
 	var setColor = &color.NRGBA64{}
 	//内部处理
-	for y = radius; y < size.Y-radius; y++ {
-		for x = radius; x < size.X-radius; x++ {
+	for y = 0; y < size.Y; y++ {
+		for x = 0; x < size.X; x++ {
 			sumR, sumG, sumB, sumA = 0, 0, 0, 0
 			for _, offset := range template.Offsets {
-				R, G, B, A = sourceImage.At(x+offset.X, y+offset.Y).RGBA()
+				ox = x + mathx.MinInt(size.X, mathx.MaxInt(offset.X, 0))
+				oy = y + mathx.MinInt(size.Y, mathx.MaxInt(offset.Y, 0))
+				R, G, B, A = sourceImage.At(ox, oy).RGBA()
 				sumR += int(R) * offset.Value
 				sumG += int(G) * offset.Value
 				sumB += int(B) * offset.Value
@@ -87,44 +90,43 @@ func FilterImageWithTemplate(srcImg image.Image, dstImg draw.Image, template Fil
 			targetImage.Set(x, y, setColor)
 		}
 	}
-	//边缘处理
-	var ox, oy int
-	handleEdge := func(x, y int) {
-		sumR, sumG, sumB, sumA = 0, 0, 0, 0
-		for _, offset := range template.Offsets {
-			ox = x + mathx.MinInt(size.X, mathx.MaxInt(offset.X, 0))
-			oy = y + mathx.MinInt(size.Y, mathx.MaxInt(offset.Y, 0))
-			R, G, B, A = sourceImage.At(ox, oy).RGBA()
-			sumR += int(R) * offset.Value
-			sumG += int(G) * offset.Value
-			sumB += int(B) * offset.Value
-			sumA += int(A) * offset.Value
-		}
-		if template.Scale != 0 && template.Scale != 1 {
-			sumR, sumG, sumB, sumA = sumR/template.Scale, sumG/template.Scale, sumB/template.Scale, sumA/template.Scale
-		}
-		setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
-		targetImage.Set(x, y, setColor)
-	}
-	for y = 0; y < radius; y++ {
-		for x = 0; x < size.X; x++ {
-			handleEdge(x, y)
-		}
-	}
-	for y = size.Y - radius; y < size.Y; y++ {
-		for x = 0; x < size.X; x++ {
-			handleEdge(x, y)
-		}
-	}
-	for x := 0; x < radius; x++ {
-		for y = 0; y < size.Y; y++ {
-			handleEdge(x, y)
-		}
-	}
-	for x := size.X - radius; x < size.X; x++ {
-		for y = 0; y < size.Y; y++ {
-			handleEdge(x, y)
-		}
-	}
+	////边缘处理
+	//handleEdge := func(x, y int) {
+	//	sumR, sumG, sumB, sumA = 0, 0, 0, 0
+	//	for _, offset := range template.Offsets {
+	//		ox = x + mathx.MinInt(size.X, mathx.MaxInt(offset.X, 0))
+	//		oy = y + mathx.MinInt(size.Y, mathx.MaxInt(offset.Y, 0))
+	//		R, G, B, A = sourceImage.At(ox, oy).RGBA()
+	//		sumR += int(R) * offset.Value
+	//		sumG += int(G) * offset.Value
+	//		sumB += int(B) * offset.Value
+	//		sumA += int(A) * offset.Value
+	//	}
+	//	if template.Scale != 0 && template.Scale != 1 {
+	//		sumR, sumG, sumB, sumA = sumR/template.Scale, sumG/template.Scale, sumB/template.Scale, sumA/template.Scale
+	//	}
+	//	setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
+	//	targetImage.Set(x, y, setColor)
+	//}
+	//for y = 0; y < radius; y++ {
+	//	for x = 0; x < size.X; x++ {
+	//		handleEdge(x, y)
+	//	}
+	//}
+	//for y = size.Y - radius; y < size.Y; y++ {
+	//	for x = 0; x < size.X; x++ {
+	//		handleEdge(x, y)
+	//	}
+	//}
+	//for x := 0; x < radius; x++ {
+	//	for y = 0; y < size.Y; y++ {
+	//		handleEdge(x, y)
+	//	}
+	//}
+	//for x := size.X - radius; x < size.X; x++ {
+	//	for y = 0; y < size.Y; y++ {
+	//		handleEdge(x, y)
+	//	}
+	//}
 	return nil
 }

@@ -50,7 +50,7 @@ func ErodeGray(graySrcImg image.Image, grayDstImg draw.Image, directions imagex.
 			if currentGray < antiErodeThreshold { //比抗腐蚀阈值深，保留
 				continue
 			}
-			if currentGray < changeImg.At(x, y) { //比变更集深，代表已经腐蚀。
+			if currentGray < uint32(changeImg.At(x, y)) { //比变更集深，代表已经腐蚀。
 				continue
 			}
 			//以下为查找周围最强腐蚀点
@@ -69,7 +69,9 @@ func ErodeGray(graySrcImg image.Image, grayDstImg draw.Image, directions imagex.
 	}
 	setColor := &color.Gray16{}
 	theSame := graySrcImg == grayDstImg
-	changeImg.ForEachPixel(func(x, y int, changePixel uint32) {
+	var changePixel uint32
+	changeImg.ForEachPixel(func(x, y int) {
+		changePixel = changeImg.At(x, y)
 		if changePixel > blackPix {
 			setColor.Y = uint16(changePixel)
 			grayDstImg.Set(x, y, setColor)
