@@ -20,7 +20,9 @@ func TestFilterImageWithTemplate(t *testing.T) {
 			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		err = FilterImageWithTemplate(img, img.(draw.Image), EightNear3)
+		//filter := Gauss5
+		filter, _ := CreateMotionBlurFilter(5, imagex.Vertical)
+		err = FilterImageWithTemplate(img, img.(draw.Image), *filter)
 		if nil != err {
 			fmt.Println(err)
 			continue

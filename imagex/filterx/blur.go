@@ -11,19 +11,19 @@ import (
 
 // 均值模糊滤波器
 var (
-	//4邻域均值滤波器
-	FourNear3 = FilterTemplate{Radius: 1, Size: 3, Scale: 4,
+	//3x3 4邻域均值滤波器
+	BoxFourNear3 = FilterTemplate{Radius: 1, Size: 3, Scale: 4,
 		Offsets: []FilterOffset{
 			{0, -1, 1}, {-1, 0, 1},
 			{1, +0, 1}, {+0, 1, 1}, {0, 0, 1}}}
-	//8邻域均值滤波器
-	EightNear3 = FilterTemplate{Radius: 1, Size: 3, Scale: 8,
+	//3x3 8邻域均值滤波器
+	BoxEightNear3 = FilterTemplate{Radius: 1, Size: 3, Scale: 8,
 		Offsets: []FilterOffset{
 			{-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
 			{-1, +0, 1}, {1, +0, 1},
 			{-1, +1, 1}, {0, +1, 1}, {1, +1, 1}}}
-	//均值滤波器
-	Average3 = FilterTemplate{Radius: 1, Size: 3, Scale: 9,
+	//3x3 均值滤波器
+	BoxAverage3 = FilterTemplate{Radius: 1, Size: 3, Scale: 9,
 		Offsets: []FilterOffset{
 			{-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
 			{-1, +0, 1}, {0, +0, 1}, {1, +0, 1},
@@ -32,13 +32,13 @@ var (
 
 //高斯模糊滤波器
 var (
-	//3x3高斯滤波器
+	//3x3 高斯滤波器
 	Gauss3 = FilterTemplate{Radius: 1, Size: 3, Scale: 16,
 		Offsets: []FilterOffset{
 			{-1, -1, 1}, {0, -1, 2}, {1, -1, 1},
 			{-1, +0, 2}, {0, +0, 4}, {1, +0, 2},
 			{-1, +1, 1}, {0, +1, 2}, {1, +1, 1}}}
-	//5x5高斯滤波器
+	//5x5 高斯滤波器
 	Gauss5 = FilterTemplate{Radius: 2, Size: 5, Scale: 273,
 		Offsets: []FilterOffset{
 			{-2, -2, 1}, {-1, -2, 4}, {0, -2, 7}, {1, -2, 4}, {2, -2, 1},
@@ -48,7 +48,7 @@ var (
 			{-2, +2, 1}, {-1, +2, 4}, {1, +2, 7}, {1, +2, 4}, {2, +2, 1}}}
 )
 
-// 运动滤波器
+// 运动模糊滤波器
 var (
 	//3x3水平运动滤波器
 	Motion3Horizontal = FilterTemplate{Radius: 1, Size: 3, Scale: 3,
@@ -80,16 +80,16 @@ func CreateGaussBlurFilter(radius int, sigma float64) (filter *FilterTemplate, e
 	var offsets = make([]FilterOffset, 0, kSize*kSize)
 	var scale = 0
 	var value int
-	for y := -kSize; y <= kSize; y++ {
-		for x := -kSize; x <= kSize; x++ {
-			value = kernel[y+kSize][x+kSize]
+	for y := -radius; y <= radius; y++ {
+		for x := -radius; x <= radius; x++ {
+			value = kernel[y+radius][x+radius]
 			if value != 0 {
 				scale += value
 				offsets = append(offsets, FilterOffset{X: x, Y: y, Value: value})
 			}
 		}
 	}
-	return &FilterTemplate{Radius: radius, Size: kSize, Scale: 0, Offsets: offsets}, nil
+	return &FilterTemplate{Radius: radius, Size: kSize, Scale: scale, Offsets: offsets}, nil
 }
 
 // 创建运动模糊滤波器
@@ -119,17 +119,17 @@ func CreateMotionBlurFilter(radius int, direction imagex.PixelDirection) (filter
 
 // 4邻域均值模糊
 func BlurWithForeNear3(srcImg image.Image, dstImg draw.Image) error {
-	return FilterImageWithTemplate(srcImg, dstImg, FourNear3)
+	return FilterImageWithTemplate(srcImg, dstImg, BoxFourNear3)
 }
 
 // 8邻域均值模糊
 func BlurWithEightNear3(srcImg image.Image, dstImg draw.Image) error {
-	return FilterImageWithTemplate(srcImg, dstImg, EightNear3)
+	return FilterImageWithTemplate(srcImg, dstImg, BoxEightNear3)
 }
 
 // 均值模糊
 func BlurWithAverage3(srcImg image.Image, dstImg draw.Image) error {
-	return FilterImageWithTemplate(srcImg, dstImg, Average3)
+	return FilterImageWithTemplate(srcImg, dstImg, BoxAverage3)
 }
 
 // 高斯3x3模糊

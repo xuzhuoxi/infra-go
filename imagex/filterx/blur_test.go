@@ -38,7 +38,7 @@ func TestFastBlur(t *testing.T) {
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
 		//err = BlurWithAverage(img, img.(draw.Image), 2)
-		err = FilterImageWithTemplate(img, img.(draw.Image), FourNear3)
+		err = FilterImageWithTemplate(img, img.(draw.Image), BoxFourNear3)
 		if nil != err {
 			fmt.Println(err)
 			continue

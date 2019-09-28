@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/imagex"
+	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"image/color"
 	"image/draw"
@@ -36,8 +37,8 @@ func (t FilterTemplate) CheckValidity() error {
 	if t.Radius < 1 {
 		return errors.New("Radius < 1. ")
 	}
-	if t.Scale <= 0 {
-		return errors.New("Scale <= 0. ")
+	if t.Scale < 0 {
+		return errors.New("Scale < 0. ")
 	}
 	sum := 0
 	for _, offset := range t.Offsets {
@@ -87,47 +88,42 @@ func FilterImageWithTemplate(srcImg image.Image, dstImg draw.Image, template Fil
 		}
 	}
 	//边缘处理
-	handleTemp := func(x, y int) {
+	var ox, oy int
+	handleEdge := func(x, y int) {
 		sumR, sumG, sumB, sumA = 0, 0, 0, 0
-		sumValue := 0
-		var cx, cy int
 		for _, offset := range template.Offsets {
-			cx = x + offset.X
-			cy = y + offset.Y
-			if cx < 0 || cx >= size.X || cy < 0 || cy >= size.Y {
-				continue
-			}
-			R, G, B, A = sourceImage.At(x+offset.X, y+offset.Y).RGBA()
+			ox = x + mathx.MinInt(size.X, mathx.MaxInt(offset.X, 0))
+			oy = y + mathx.MinInt(size.Y, mathx.MaxInt(offset.Y, 0))
+			R, G, B, A = sourceImage.At(ox, oy).RGBA()
 			sumR += int(R) * offset.Value
 			sumG += int(G) * offset.Value
 			sumB += int(B) * offset.Value
 			sumA += int(A) * offset.Value
-			sumValue += offset.Value
 		}
-		if sumValue != 0 && sumValue != 1 {
-			sumR, sumG, sumB, sumA = sumR/sumValue, sumG/sumValue, sumB/sumValue, sumA/sumValue
+		if template.Scale != 0 && template.Scale != 1 {
+			sumR, sumG, sumB, sumA = sumR/template.Scale, sumG/template.Scale, sumB/template.Scale, sumA/template.Scale
 		}
 		setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
-		dstImg.Set(x, y, setColor)
+		targetImage.Set(x, y, setColor)
 	}
 	for y = 0; y < radius; y++ {
 		for x = 0; x < size.X; x++ {
-			handleTemp(x, y)
+			handleEdge(x, y)
 		}
 	}
-	for y = size.Y - 1 - radius; y < size.Y-1; y++ {
+	for y = size.Y - radius; y < size.Y; y++ {
 		for x = 0; x < size.X; x++ {
-			handleTemp(x, y)
+			handleEdge(x, y)
 		}
 	}
 	for x := 0; x < radius; x++ {
 		for y = 0; y < size.Y; y++ {
-			handleTemp(x, y)
+			handleEdge(x, y)
 		}
 	}
-	for x := size.X - 1 - radius; x < size.X-1; x++ {
+	for x := size.X - radius; x < size.X; x++ {
 		for y = 0; y < size.Y; y++ {
-			handleTemp(x, y)
+			handleEdge(x, y)
 		}
 	}
 	return nil
