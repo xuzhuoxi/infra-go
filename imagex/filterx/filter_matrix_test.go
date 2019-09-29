@@ -9,6 +9,14 @@ import (
 	"testing"
 )
 
+func TestFilterKernelRotate(t *testing.T) {
+	filter := Gauss5
+	fmt.Println(filter)
+	filter2 := filter.RotateClockwise90()
+	fmt.Println(filter)
+	fmt.Println(filter2)
+}
+
 func TestFilterImageWithTemplate(t *testing.T) {
 	sources := SourcePaths
 	targets := BlurPaths
@@ -25,7 +33,7 @@ func TestFilterImageWithTemplate(t *testing.T) {
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
 		dstImg := imagex.CopyImage(img)
-		err = FilterImageWithTemplate(img, dstImg, *filter)
+		err = FilterImageWithMatrix(img, dstImg, *filter)
 		if nil != err {
 			fmt.Println(err)
 			continue

@@ -3,10 +3,6 @@ package filterx
 import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/imagex"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
-	"github.com/xuzhuoxi/infra-go/osxu"
-	"image/draw"
-	"reflect"
 	"testing"
 )
 
@@ -27,28 +23,28 @@ func TestPoint(t *testing.T) {
 	fmt.Println(pix)
 }
 
-func TestFastBlur(t *testing.T) {
-	sources := SourcePaths
-	targets := BlurPaths
-	for index, source := range sources {
-		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.PNG)
-		if nil != err {
-			fmt.Println(err)
-			continue
-		}
-		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		//err = BlurWithAverage(img, img.(draw.Image), 2)
-		err = FilterImageWithTemplate(img, img.(draw.Image), BoxFourNear3)
-		if nil != err {
-			fmt.Println(err)
-			continue
-		}
-		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.PNG, nil)
-		if nil != err {
-			fmt.Println(err)
-		}
-	}
-}
+//func TestBlurWithStack(t *testing.T) {
+//	sources := SourcePaths
+//	targets := BlurPaths
+//	for index, source := range sources {
+//		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.PNG)
+//		if nil != err {
+//			fmt.Println(err)
+//			continue
+//		}
+//		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
+//		//err = BlurWithAverage(img, img.(draw.Image), 2)
+//		err = BlurWithFast(img, img.(draw.Image), 1)
+//		if nil != err {
+//			fmt.Println(err)
+//			continue
+//		}
+//		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.PNG, nil)
+//		if nil != err {
+//			fmt.Println(err)
+//		}
+//	}
+//}
 
 func TestSimple(t *testing.T) {
 	var rgb = make([]_RGB, 20)
@@ -58,15 +54,17 @@ func TestSimple(t *testing.T) {
 }
 
 func TestCreateGaussBlurFilter(t *testing.T) {
-	var temp *FilterTemplate
+	var temp *FilterMatrix
 	temp, _ = CreateGaussBlurFilter(2, 1.4)
 	fmt.Println(temp)
 	temp, _ = CreateGaussBlurFilter(2, 1.0)
 	fmt.Println(temp)
+	temp, _ = CreateGaussBlurFilter(2, 0.8)
+	fmt.Println(temp)
 }
 
 func TestCreateMotionBlurFilter(t *testing.T) {
-	var temp *FilterTemplate
+	var temp *FilterMatrix
 	temp, _ = CreateMotionBlurFilter(1, imagex.AllDirection)
 	fmt.Println(temp)
 	temp, _ = CreateMotionBlurFilter(2, imagex.Vertical)

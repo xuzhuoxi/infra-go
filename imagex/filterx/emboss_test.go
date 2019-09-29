@@ -32,7 +32,7 @@ func TestEmbossImage(t *testing.T) {
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
 		dstImg := imagex.CopyImage(img)
-		err = FilterImageWithTemplate(img, dstImg, *filter)
+		err = FilterImageWithMatrix(img, dstImg, *filter)
 		if nil != err {
 			fmt.Println(err)
 			continue
