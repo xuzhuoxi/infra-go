@@ -11,7 +11,7 @@ import (
 )
 
 // 滤波器向量单元
-type FilterOffset struct {
+type KernelVector struct {
 	//向量X
 	X int
 	//向量Y
@@ -21,37 +21,37 @@ type FilterOffset struct {
 }
 
 // 滤波器
-type FilterTemplate struct {
+type FilterMatrix struct {
 	// 滤波器半径
 	Radius int
 	// 滤波器边长
 	Size int
-	// 滤波器核
-	Offsets []FilterOffset
+	// 滤波器卷积核
+	Kernel []KernelVector
 	// 滤波器卷积核倍率
-	Scale int
+	KernelScale int
 }
 
 // 滤波模板有效性
-func (t FilterTemplate) CheckValidity() error {
+func (t FilterMatrix) CheckValidity() error {
 	if t.Radius < 1 {
 		return errors.New("Radius < 1. ")
 	}
-	if t.Scale < 0 {
-		return errors.New("Scale < 0. ")
+	if t.KernelScale < 0 {
+		return errors.New("KernelScale < 0. ")
 	}
 	sum := 0
-	for _, offset := range t.Offsets {
-		sum += offset.Value
+	for _, vector := range t.Kernel {
+		sum += vector.Value
 	}
-	if sum != t.Scale {
-		return errors.New(fmt.Sprintf("Scale Error! Scale=%d, AddSum=%d.", t.Scale, sum))
+	if sum != t.KernelScale {
+		return errors.New(fmt.Sprintf("KernelScale Error! KernelScale=%d, AddSum=%d.", t.KernelScale, sum))
 	}
 	return nil
 }
 
 //使用滤波器
-func FilterImageWithTemplate(srcImg image.Image, dstImg draw.Image, template FilterTemplate) error {
+func FilterImageWithTemplate(srcImg image.Image, dstImg draw.Image, template FilterMatrix) error {
 	if nil == srcImg || nil == dstImg {
 		return errors.New("SrcImg or dstImg is nil! ")
 	}
@@ -74,17 +74,17 @@ func FilterImageWithTemplate(srcImg image.Image, dstImg draw.Image, template Fil
 	for y = 0; y < size.Y; y++ {
 		for x = 0; x < size.X; x++ {
 			sumR, sumG, sumB, sumA = 0, 0, 0, 0
-			for _, offset := range template.Offsets {
-				ox = x + mathx.MinInt(size.X, mathx.MaxInt(offset.X, 0))
-				oy = y + mathx.MinInt(size.Y, mathx.MaxInt(offset.Y, 0))
+			for _, vector := range template.Kernel {
+				ox = x + mathx.MinInt(size.X, mathx.MaxInt(vector.X, 0))
+				oy = y + mathx.MinInt(size.Y, mathx.MaxInt(vector.Y, 0))
 				R, G, B, A = sourceImage.At(ox, oy).RGBA()
-				sumR += int(R) * offset.Value
-				sumG += int(G) * offset.Value
-				sumB += int(B) * offset.Value
-				sumA += int(A) * offset.Value
+				sumR += int(R) * vector.Value
+				sumG += int(G) * vector.Value
+				sumB += int(B) * vector.Value
+				sumA += int(A) * vector.Value
 			}
-			if template.Scale != 0 && template.Scale != 1 {
-				sumR, sumG, sumB, sumA = sumR/template.Scale, sumG/template.Scale, sumB/template.Scale, sumA/template.Scale
+			if template.KernelScale != 0 && template.KernelScale != 1 {
+				sumR, sumG, sumB, sumA = sumR/template.KernelScale, sumG/template.KernelScale, sumB/template.KernelScale, sumA/template.KernelScale
 			}
 			setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
 			targetImage.Set(x, y, setColor)
@@ -93,7 +93,7 @@ func FilterImageWithTemplate(srcImg image.Image, dstImg draw.Image, template Fil
 	////边缘处理
 	//handleEdge := func(x, y int) {
 	//	sumR, sumG, sumB, sumA = 0, 0, 0, 0
-	//	for _, offset := range template.Offsets {
+	//	for _, offset := range template.Kernel {
 	//		ox = x + mathx.MinInt(size.X, mathx.MaxInt(offset.X, 0))
 	//		oy = y + mathx.MinInt(size.Y, mathx.MaxInt(offset.Y, 0))
 	//		R, G, B, A = sourceImage.At(ox, oy).RGBA()
@@ -102,8 +102,8 @@ func FilterImageWithTemplate(srcImg image.Image, dstImg draw.Image, template Fil
 	//		sumB += int(B) * offset.Value
 	//		sumA += int(A) * offset.Value
 	//	}
-	//	if template.Scale != 0 && template.Scale != 1 {
-	//		sumR, sumG, sumB, sumA = sumR/template.Scale, sumG/template.Scale, sumB/template.Scale, sumA/template.Scale
+	//	if template.KernelScale != 0 && template.KernelScale != 1 {
+	//		sumR, sumG, sumB, sumA = sumR/template.KernelScale, sumG/template.KernelScale, sumB/template.KernelScale, sumA/template.KernelScale
 	//	}
 	//	setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
 	//	targetImage.Set(x, y, setColor)

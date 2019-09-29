@@ -6,15 +6,16 @@
 package formatx
 
 import (
-	"io"
-	"image"
 	"errors"
+	"image"
+	"io"
 )
 
 type ImageFormat string
 
 const (
-	PNG  ImageFormat = "png"
+	Auto ImageFormat = ""
+	PNG              = "png"
 	JPEG             = "jpeg"
 	JPG              = "jpg"
 	JPS              = "jps"

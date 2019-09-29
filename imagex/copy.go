@@ -16,6 +16,16 @@ func CopyImage(srcImg image.Image) draw.Image {
 	return copyImg
 }
 
+//复制图像
+func XCopyImage(srcImg image.Image) draw.Image {
+	copyImg := CopyImageStruct(srcImg)
+	if nil == copyImg {
+		return nil
+	}
+	XCopyImageTo(srcImg, copyImg)
+	return copyImg
+}
+
 //把源图像复制到目标图像
 func CopyImageTo(srcImg image.Image, dstImg draw.Image) {
 	srcRect := srcImg.Bounds()
@@ -29,6 +39,11 @@ func CopyImageTo(srcImg image.Image, dstImg draw.Image) {
 			dstImg.Set(x, y, srcImg.At(x, y))
 		}
 	}
+}
+
+//把源图像复制到目标图像
+func XCopyImageTo(srcImg image.Image, dstImg draw.Image) {
+	draw.Draw(dstImg, srcImg.Bounds(), srcImg, image.Pt(0, 0), draw.Over)
 }
 
 //复制图像
@@ -54,6 +69,10 @@ func CopyImageStruct(srcImg image.Image) draw.Image {
 		clone = image.NewRGBA(rect)
 	case *image.RGBA64:
 		clone = image.NewRGBA64(rect)
+	case *image.YCbCr:
+		clone = image.NewNRGBA(rect)
+	case *image.NYCbCrA:
+		clone = image.NewNRGBA(rect)
 	default:
 		return nil
 	}

@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/imagex"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
-	_ "github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
-	_ "github.com/xuzhuoxi/infra-go/imagex/formatx/pngx"
 	"github.com/xuzhuoxi/infra-go/osxu"
 	"image/color"
 	"reflect"
@@ -16,7 +14,10 @@ func TestGrayRGBAImage(t *testing.T) {
 	sources := SourcePaths
 	targets := GrayPaths
 	for index, source := range sources {
-		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.PNG)
+		if index >= len(targets) {
+			return
+		}
+		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.Auto)
 		if nil != err {
 			fmt.Println(err)
 			continue
@@ -28,7 +29,7 @@ func TestGrayRGBAImage(t *testing.T) {
 			continue
 		}
 		fmt.Println("灰度图像内存类型(grayImg)：", reflect.ValueOf(grayImg).Type())
-		err = imagex.SaveImage(grayImg, osxu.RunningBaseDir()+targets[index], formatx.PNG, nil)
+		err = imagex.SaveImage(grayImg, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
 		if nil != err {
 			fmt.Println(err)
 		}

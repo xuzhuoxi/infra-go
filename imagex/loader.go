@@ -6,9 +6,9 @@
 package imagex
 
 import (
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image"
 	"os"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func LoadImage(fullPath string, format formatx.ImageFormat) (img image.Image, err error) {
@@ -17,7 +17,7 @@ func LoadImage(fullPath string, format formatx.ImageFormat) (img image.Image, er
 	if nil != e {
 		return nil, e
 	}
-	if "" == format {
+	if formatx.Auto == format {
 		img, _, err = image.Decode(file)
 	} else {
 		img, err = format.Decode(file)

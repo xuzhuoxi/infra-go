@@ -34,40 +34,41 @@ func CreateGaussKernel(radius int, sigma float64) [][]float64 {
 	return rs
 }
 
-func GetAvgArr(radius int, sigma float64) [][]float64 {
-	kSize := radius + radius + 1
-	sum := 0.0
-	arr := make([][]float64, kSize, kSize)
-	for i := 0; i < kSize; i++ {
-		arr[i] = make([]float64, kSize, kSize)
-	}
-	for i := 0; i < radius; i++ {
-		weight := GaussFunc2(i-radius, 0, sigma)
-		arr[i][radius] = weight
-		sum += 4 * weight
-		for j := 0; j < radius; j++ {
-			thisGaussResult := GaussFunc2(i-radius, j-radius, sigma)
-			arr[i][j] = thisGaussResult
-			sum += 4 * thisGaussResult
-		}
-	}
-	weight := GaussFunc2(0, 0, sigma)
-	arr[radius][radius] = weight
-	sum += weight
-
-	for i := 0; i < radius; i++ {
-		arr[i][radius] /= sum
-		arr[2*radius-i][radius], arr[radius][i], arr[radius][2*radius-i] = arr[i][radius], arr[i][radius], arr[i][radius]
-
-		for j := 0; j < radius; j++ {
-			arr[i][j] /= sum
-			arr[i][2*radius-j], arr[2*radius-i][j], arr[2*radius-i][2*radius-j] = arr[i][j], arr[i][j], arr[i][j]
-
-		}
-	}
-	arr[radius][radius] /= sum
-	return arr
-}
+//
+//func GetAvgArr(radius int, sigma float64) [][]float64 {
+//	kSize := radius + radius + 1
+//	sum := 0.0
+//	arr := make([][]float64, kSize, kSize)
+//	for i := 0; i < kSize; i++ {
+//		arr[i] = make([]float64, kSize, kSize)
+//	}
+//	for i := 0; i < radius; i++ {
+//		weight := GaussFunc2(i-radius, 0, sigma)
+//		arr[i][radius] = weight
+//		sum += 4 * weight
+//		for j := 0; j < radius; j++ {
+//			thisGaussResult := GaussFunc2(i-radius, j-radius, sigma)
+//			arr[i][j] = thisGaussResult
+//			sum += 4 * thisGaussResult
+//		}
+//	}
+//	weight := GaussFunc2(0, 0, sigma)
+//	arr[radius][radius] = weight
+//	sum += weight
+//
+//	for i := 0; i < radius; i++ {
+//		arr[i][radius] /= sum
+//		arr[2*radius-i][radius], arr[radius][i], arr[radius][2*radius-i] = arr[i][radius], arr[i][radius], arr[i][radius]
+//
+//		for j := 0; j < radius; j++ {
+//			arr[i][j] /= sum
+//			arr[i][2*radius-j], arr[2*radius-i][j], arr[2*radius-i][2*radius-j] = arr[i][j], arr[i][j], arr[i][j]
+//
+//		}
+//	}
+//	arr[radius][radius] /= sum
+//	return arr
+//}
 
 // 计算高斯卷积核(一维数据)
 // radius： 半径
