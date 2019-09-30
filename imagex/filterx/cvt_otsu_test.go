@@ -5,7 +5,6 @@ import (
 	"github.com/xuzhuoxi/infra-go/imagex"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"github.com/xuzhuoxi/infra-go/osxu"
-	"image"
 	"reflect"
 	"testing"
 )
@@ -24,7 +23,7 @@ func TestCVTGray16WithOTSU(t *testing.T) {
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
 		dstImg := imagex.CopyImage(img)
-		err = CVTGray16WithOTSU(img.(*image.Gray16), dstImg)
+		err = CVTWithOTSU64(img, dstImg)
 		if nil != err {
 			fmt.Println(err)
 			continue
