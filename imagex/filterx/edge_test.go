@@ -27,11 +27,17 @@ func TestCheckEdge(t *testing.T) {
 	fmt.Println(Edge3All.CheckValidity())
 }
 
+func Test000(t *testing.T) {
+	var v = -8
+	var v2 = uint32(v)
+	fmt.Println(v, v2)
+}
+
 func TestEdgeImage(t *testing.T) {
 	sources := SourcePaths
 	targets := EdgePaths
-	//filter := &Edge3All
-	filter, _ := CreateEdgeFilter(1, imagex.AllDirection, 2)
+	filter := &Edge3All
+	//filter, _ := CreateEdgeFilter(1, imagex.AllDirection, 2)
 	fmt.Println("Filter: ", filter)
 	for index, source := range sources {
 		if index >= len(targets) {
@@ -49,7 +55,7 @@ func TestEdgeImage(t *testing.T) {
 			fmt.Println(err)
 			continue
 		}
-		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
+		err = imagex.SaveImage(dstImg, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
 		if nil != err {
 			fmt.Println(err)
 		}

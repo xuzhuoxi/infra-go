@@ -70,7 +70,7 @@ func CopyImageStruct(srcImg image.Image) draw.Image {
 	case *image.RGBA64:
 		clone = image.NewRGBA64(rect)
 	case *image.YCbCr:
-		clone = image.NewNRGBA(rect)
+		clone = image.NewRGBA(rect)
 	case *image.NYCbCrA:
 		clone = image.NewNRGBA(rect)
 	default:

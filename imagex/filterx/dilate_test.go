@@ -28,7 +28,7 @@ func TestDilateCVT(t *testing.T) {
 		if nil != err {
 			fmt.Println(err)
 		}
-		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
+		err = imagex.SaveImage(dstImg, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
 		if nil != err {
 			fmt.Println(err)
 		}

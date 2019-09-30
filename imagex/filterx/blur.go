@@ -12,18 +12,18 @@ import (
 // 均值模糊滤波器
 var (
 	//3x3 4邻域均值滤波器
-	BoxFourNear3 = FilterMatrix{Radius: 1, Size: 3, KernelScale: 4,
+	BoxFourNear3 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 4,
 		Kernel: []KernelVector{
 			{0, -1, 1}, {-1, 0, 1},
 			{1, +0, 1}, {+0, 1, 1}, {0, 0, 1}}}
 	//3x3 8邻域均值滤波器
-	BoxEightNear3 = FilterMatrix{Radius: 1, Size: 3, KernelScale: 8,
+	BoxEightNear3 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 8,
 		Kernel: []KernelVector{
 			{-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
 			{-1, +0, 1}, {1, +0, 1},
 			{-1, +1, 1}, {0, +1, 1}, {1, +1, 1}}}
 	//3x3 均值滤波器
-	BoxAverage3 = FilterMatrix{Radius: 1, Size: 3, KernelScale: 9,
+	BoxAverage3 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 9,
 		Kernel: []KernelVector{
 			{-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
 			{-1, +0, 1}, {0, +0, 1}, {1, +0, 1},
@@ -33,13 +33,13 @@ var (
 //高斯模糊滤波器
 var (
 	//3x3 高斯滤波器
-	Gauss3 = FilterMatrix{Radius: 1, Size: 3, KernelScale: 16,
+	Gauss3 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 16,
 		Kernel: []KernelVector{
 			{-1, -1, 1}, {0, -1, 2}, {1, -1, 1},
 			{-1, +0, 2}, {0, +0, 4}, {1, +0, 2},
 			{-1, +1, 1}, {0, +1, 2}, {1, +1, 1}}}
 	//5x5 高斯滤波器
-	Gauss5 = FilterMatrix{Radius: 2, Size: 5, KernelScale: 273,
+	Gauss5 = FilterMatrix{KernelRadius: 2, KernelSize: 5, KernelScale: 273,
 		Kernel: []KernelVector{
 			{-2, -2, 1}, {-1, -2, 4}, {0, -2, 7}, {1, -2, 4}, {2, -2, 1},
 			{-2, -1, 4}, {-1, -1, 16}, {0, -1, 26}, {1, -1, 16}, {2, -1, 4},
@@ -51,19 +51,19 @@ var (
 // 运动模糊滤波器
 var (
 	//3x3水平运动滤波器
-	Motion3Horizontal = FilterMatrix{Radius: 1, Size: 3, KernelScale: 3,
+	Motion3Horizontal = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 3,
 		Kernel: []KernelVector{
 			{-1, 0, 1}, {0, 0, 1}, {1, 0, 1}}}
 	//3x3垂直运动滤波器
-	Motion3Vertical = FilterMatrix{Radius: 1, Size: 3, KernelScale: 3,
+	Motion3Vertical = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 3,
 		Kernel: []KernelVector{
 			{0, -1, 1}, {0, 0, 1}, {0, 1, 1}}}
 	//3x3 45度运动滤波器(左上右下)
-	Motion3Oblique45 = FilterMatrix{Radius: 1, Size: 3, KernelScale: 3,
+	Motion3Oblique45 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 3,
 		Kernel: []KernelVector{
 			{1, -1, 1}, {0, +0, 1}, {-1, +1, 1}}}
 	//3x3 135度运动滤波器(左下右上)
-	Motion3Oblique135 = FilterMatrix{Radius: 1, Size: 3, KernelScale: 3,
+	Motion3Oblique135 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 3,
 		Kernel: []KernelVector{
 			{-1, -1, 1}, {0, 0, 1}, {1, 1, 1}}}
 )
@@ -75,7 +75,7 @@ var (
 // sigma:	标准差
 func CreateGaussBlurFilter(radius int, sigma float64) (filter *FilterMatrix, err error) {
 	if radius < 1 {
-		return nil, errors.New("Radius < 1. ")
+		return nil, errors.New("KernelRadius < 1. ")
 	}
 	kSize := radius + radius + 1
 	gaussKernel := gaussx.CreateGaussKernelInt(radius, sigma, 0)
@@ -91,7 +91,7 @@ func CreateGaussBlurFilter(radius int, sigma float64) (filter *FilterMatrix, err
 			}
 		}
 	}
-	return &FilterMatrix{Radius: radius, Size: kSize, KernelScale: scale, Kernel: kernel}, nil
+	return &FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: scale, Kernel: kernel}, nil
 }
 
 // 创建运动模糊滤波器
@@ -99,7 +99,7 @@ func CreateGaussBlurFilter(radius int, sigma float64) (filter *FilterMatrix, err
 // direction: 	运动方向
 func CreateMotionBlurFilter(radius int, direction imagex.PixelDirection) (filter *FilterMatrix, err error) {
 	if radius < 1 {
-		return nil, errors.New("Radius < 1. ")
+		return nil, errors.New("KernelRadius < 1. ")
 	}
 	dirAdds := imagex.GetPixelDirectionAdds(direction)
 	if nil == dirAdds {
@@ -114,7 +114,7 @@ func CreateMotionBlurFilter(radius int, direction imagex.PixelDirection) (filter
 			kernel = append(kernel, KernelVector{X: add.X * i, Y: add.Y * i, Value: 1})
 		}
 	}
-	return &FilterMatrix{Radius: radius, Size: kSize, KernelScale: scale, Kernel: kernel}, nil
+	return &FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: scale, Kernel: kernel}, nil
 }
 
 //------------------------------------------------------

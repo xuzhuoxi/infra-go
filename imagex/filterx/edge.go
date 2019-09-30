@@ -9,23 +9,23 @@ import (
 // 边缘滤波器
 var (
 	//5x5 水平边缘滤波器
-	Edge5Horizontal = FilterMatrix{Radius: 1, Size: 3, KernelScale: 0,
+	Edge5Horizontal = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, 0, -1}, {-1, 0, -1}, {0, 0, 4}, {1, 0, -1}, {2, 0, -1}}}
 	//5x5 垂直边缘滤波器
-	Edge5Vertical = FilterMatrix{Radius: 1, Size: 3, KernelScale: 0,
+	Edge5Vertical = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{0, -2, -1}, {0, -1, -1}, {0, 0, 4}, {0, 1, -1}, {0, 2, -1}}}
 	//5x5 45度边缘滤波器(左上右下)
-	Edge5Oblique45 = FilterMatrix{Radius: 1, Size: 3, KernelScale: 0,
+	Edge5Oblique45 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, -2, -1}, {-1, -1, -1}, {0, 0, 4}, {1, 1, -1}, {1, 2, -1}}}
 	//5x5 135度边缘滤波器(左下右上)
-	Edge5Oblique135 = FilterMatrix{Radius: 1, Size: 3, KernelScale: 0,
+	Edge5Oblique135 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, 2, -1}, {-1, 1, -1}, {0, 0, 4}, {1, -1, -1}, {2, -2, -1}}}
 	//5x5 全方向边缘滤波器
-	Edge3All = FilterMatrix{Radius: 1, Size: 3, KernelScale: 0,
+	Edge3All = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-1, -1, -1}, {0, -1, -1}, {1, -1, -1},
 			{-1, +0, -1}, {0, +0, +8}, {1, +0, -1},
@@ -38,7 +38,7 @@ var (
 // diff:		梯度差
 func CreateEdgeFilter(radius int, direction imagex.PixelDirection, diff uint) (filter *FilterMatrix, err error) {
 	if radius < 1 {
-		return nil, errors.New("Radius < 1. ")
+		return nil, errors.New("KernelRadius < 1. ")
 	}
 	dirAdds := imagex.GetPixelDirectionAdds(direction)
 	if nil == dirAdds {
@@ -57,5 +57,5 @@ func CreateEdgeFilter(radius int, direction imagex.PixelDirection, diff uint) (f
 		}
 	}
 	kernel = append(kernel, KernelVector{X: 0, Y: 0, Value: -sumValue})
-	return &FilterMatrix{Radius: radius, Size: kSize, KernelScale: 0, Kernel: kernel}, nil
+	return &FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: 0, Kernel: kernel}, nil
 }

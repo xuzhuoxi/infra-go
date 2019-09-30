@@ -19,7 +19,8 @@ func TestCheckSharpen(t *testing.T) {
 func TestSharpen(t *testing.T) {
 	sources := SourcePaths
 	targets := SharpenPaths
-	filter := &Sharpen5All
+	filter := &SharpenStrengthen3All
+	fmt.Println("check:", filter.IsScaleMatrix(), filter.IsPixelUnsafe())
 	//filter, _ := CreateMotionBlurFilter(8, imagex.Vertical)
 	fmt.Println("Filter: ", filter)
 	for index, source := range sources {
@@ -38,7 +39,7 @@ func TestSharpen(t *testing.T) {
 			fmt.Println(err)
 			continue
 		}
-		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
+		err = imagex.SaveImage(dstImg, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
 		if nil != err {
 			fmt.Println(err)
 		}

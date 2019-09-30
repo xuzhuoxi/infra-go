@@ -28,7 +28,7 @@ func TestImage2NRGBA(t *testing.T) {
 			fmt.Println(err)
 			continue
 		}
-		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
+		err = imagex.SaveImage(dstImg, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
 		if nil != err {
 			fmt.Println(err)
 			continue

@@ -12,14 +12,34 @@ import (
 
 // 滤波器
 type FilterMatrix struct {
-	// 滤波器半径
-	Radius int
-	// 滤波器边长
-	Size int
 	// 滤波器卷积核
 	Kernel FilterKernel
+	// 滤波器半径
+	KernelRadius int
+	// 滤波器边长
+	KernelSize int
 	// 滤波器卷积核倍率
 	KernelScale int
+	// 运算结果偏移量
+	ResultOffset int
+}
+
+//是否为倍率滤波器
+func (fm FilterMatrix) IsScaleMatrix() bool {
+	return fm.KernelScale != 0 && fm.KernelScale != 1
+}
+
+//运算结果是否可能超出像素范围(非安全像素值)
+func (fm FilterMatrix) IsPixelUnsafe() bool {
+	if fm.ResultOffset != 0 {
+		return true
+	}
+	for _, kv := range fm.Kernel {
+		if kv.Value < 0 {
+			return true
+		}
+	}
+	return false
 }
 
 //顺时针旋转90度
@@ -48,8 +68,8 @@ func (fm FilterMatrix) RotateClockwise270() FilterMatrix {
 
 // 滤波模板有效性
 func (fm FilterMatrix) CheckValidity() error {
-	if fm.Radius < 1 {
-		return errors.New("Radius < 1. ")
+	if fm.KernelRadius < 1 {
+		return errors.New("KernelRadius < 1. ")
 	}
 	if fm.KernelScale < 0 {
 		return errors.New("KernelScale < 0. ")
@@ -65,11 +85,11 @@ func (fm FilterMatrix) CheckValidity() error {
 }
 
 //使用滤波器
-func FilterImageWithMatrix(srcImg image.Image, dstImg draw.Image, template FilterMatrix) error {
+func FilterImageWithMatrix(srcImg image.Image, dstImg draw.Image, m FilterMatrix) error {
 	if nil == srcImg || nil == dstImg {
 		return errors.New("SrcImg or dstImg is nil! ")
 	}
-	if err := template.CheckValidity(); nil != err {
+	if err := m.CheckValidity(); nil != err {
 		return err
 	}
 	sourceImage := srcImg
@@ -78,69 +98,101 @@ func FilterImageWithMatrix(srcImg image.Image, dstImg draw.Image, template Filte
 		sourceImage = imagex.CopyImage(srcImg)
 	}
 	size := srcImg.Bounds().Size()
-	//radius := template.Radius
 	var x, y int
 	var ox, oy int
-	var sumR, sumG, sumB, sumA int
+	var sumR, sumG, sumB int
 	var R, G, B, A uint32
-	var setColor = &color.NRGBA64{}
-	//内部处理
-	for y = 0; y < size.Y; y++ {
-		for x = 0; x < size.X; x++ {
-			sumR, sumG, sumB, sumA = 0, 0, 0, 0
-			for _, vector := range template.Kernel {
-				ox = x + mathx.MinInt(size.X, mathx.MaxInt(vector.X, 0))
-				oy = y + mathx.MinInt(size.Y, mathx.MaxInt(vector.Y, 0))
-				R, G, B, A = sourceImage.At(ox, oy).RGBA()
-				sumR += int(R) * vector.Value
-				sumG += int(G) * vector.Value
-				sumB += int(B) * vector.Value
-				sumA += int(A) * vector.Value
+	var setColor = &color.NRGBA64{A: 0xffff}
+
+	needScale := m.IsScaleMatrix()
+	kScale := m.KernelScale
+	unSafe := m.IsPixelUnsafe()
+	resultOffset := m.ResultOffset
+	switch {
+	case needScale && unSafe:
+		//放大 负结果
+		for y = 0; y < size.Y; y++ {
+			for x = 0; x < size.X; x++ {
+				sumR, sumG, sumB = 0, 0, 0
+				_, _, _, A = sourceImage.At(x, y).RGBA()
+				setColor.A = uint16(A)
+				for _, vector := range m.Kernel {
+					ox = mathx.MinInt(size.X, mathx.MaxInt(x+vector.X, 0))
+					oy = mathx.MinInt(size.Y, mathx.MaxInt(y+vector.Y, 0))
+					R, G, B, _ = sourceImage.At(ox, oy).RGBA()
+					sumR += int(R) * vector.Value
+					sumG += int(G) * vector.Value
+					sumB += int(B) * vector.Value
+				}
+				sumR, sumG, sumB = sumR/kScale, sumG/kScale, sumB/kScale
+				sumR = mathx.MinInt(mathx.MaxInt(sumR+resultOffset, 0), 65535)
+				sumG = mathx.MinInt(mathx.MaxInt(sumG+resultOffset, 0), 65535)
+				sumB = mathx.MinInt(mathx.MaxInt(sumB+resultOffset, 0), 65535)
+				setColor.R, setColor.G, setColor.B = uint16(sumR), uint16(sumG), uint16(sumB)
+				targetImage.Set(x, y, setColor)
 			}
-			if template.KernelScale != 0 && template.KernelScale != 1 {
-				sumR, sumG, sumB, sumA = sumR/template.KernelScale, sumG/template.KernelScale, sumB/template.KernelScale, sumA/template.KernelScale
+		}
+	case needScale && !unSafe:
+		//放大 非负结果
+		for y = 0; y < size.Y; y++ {
+			for x = 0; x < size.X; x++ {
+				sumR, sumG, sumB = 0, 0, 0
+				_, _, _, A = sourceImage.At(x, y).RGBA()
+				setColor.A = uint16(A)
+				for _, vector := range m.Kernel {
+					ox = mathx.MinInt(size.X, mathx.MaxInt(x+vector.X, 0))
+					oy = mathx.MinInt(size.Y, mathx.MaxInt(y+vector.Y, 0))
+					R, G, B, _ = sourceImage.At(ox, oy).RGBA()
+					sumR += int(R) * vector.Value
+					sumG += int(G) * vector.Value
+					sumB += int(B) * vector.Value
+				}
+				sumR, sumG, sumB = sumR/kScale, sumG/kScale, sumB/kScale
+				setColor.R, setColor.G, setColor.B = uint16(sumR), uint16(sumG), uint16(sumB)
+				targetImage.Set(x, y, setColor)
 			}
-			setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
-			targetImage.Set(x, y, setColor)
+		}
+	case !needScale && unSafe:
+		//非放大 负结果
+		for y = 0; y < size.Y; y++ {
+			for x = 0; x < size.X; x++ {
+				sumR, sumG, sumB = 0, 0, 0
+				_, _, _, A = sourceImage.At(x, y).RGBA()
+				setColor.A = uint16(A)
+				for _, vector := range m.Kernel {
+					ox = mathx.MinInt(size.X, mathx.MaxInt(x+vector.X, 0))
+					oy = mathx.MinInt(size.Y, mathx.MaxInt(y+vector.Y, 0))
+					R, G, B, _ = sourceImage.At(ox, oy).RGBA()
+					sumR += int(R) * vector.Value
+					sumG += int(G) * vector.Value
+					sumB += int(B) * vector.Value
+				}
+				sumR = mathx.MinInt(mathx.MaxInt(sumR+resultOffset, 0), 65535)
+				sumG = mathx.MinInt(mathx.MaxInt(sumG+resultOffset, 0), 65535)
+				sumB = mathx.MinInt(mathx.MaxInt(sumB+resultOffset, 0), 65535)
+				setColor.R, setColor.G, setColor.B = uint16(sumR), uint16(sumG), uint16(sumB)
+				targetImage.Set(x, y, setColor)
+			}
+		}
+	case !needScale && !unSafe:
+		//非放大 非负结果
+		for y = 0; y < size.Y; y++ {
+			for x = 0; x < size.X; x++ {
+				sumR, sumG, sumB = 0, 0, 0
+				_, _, _, A = sourceImage.At(x, y).RGBA()
+				setColor.A = uint16(A)
+				for _, vector := range m.Kernel {
+					ox = mathx.MinInt(size.X, mathx.MaxInt(x+vector.X, 0))
+					oy = mathx.MinInt(size.Y, mathx.MaxInt(y+vector.Y, 0))
+					R, G, B, _ = sourceImage.At(ox, oy).RGBA()
+					sumR += int(R) * vector.Value
+					sumG += int(G) * vector.Value
+					sumB += int(B) * vector.Value
+				}
+				setColor.R, setColor.G, setColor.B = uint16(sumR), uint16(sumG), uint16(sumB)
+				targetImage.Set(x, y, setColor)
+			}
 		}
 	}
-	////边缘处理
-	//handleEdge := func(x, y int) {
-	//	sumR, sumG, sumB, sumA = 0, 0, 0, 0
-	//	for _, offset := range template.Kernel {
-	//		ox = x + mathx.MinInt(size.X, mathx.MaxInt(offset.X, 0))
-	//		oy = y + mathx.MinInt(size.Y, mathx.MaxInt(offset.Y, 0))
-	//		R, G, B, A = sourceImage.At(ox, oy).RGBA()
-	//		sumR += int(R) * offset.Value
-	//		sumG += int(G) * offset.Value
-	//		sumB += int(B) * offset.Value
-	//		sumA += int(A) * offset.Value
-	//	}
-	//	if template.KernelScale != 0 && template.KernelScale != 1 {
-	//		sumR, sumG, sumB, sumA = sumR/template.KernelScale, sumG/template.KernelScale, sumB/template.KernelScale, sumA/template.KernelScale
-	//	}
-	//	setColor.R, setColor.G, setColor.B, setColor.A = uint16(sumR), uint16(sumG), uint16(sumB), uint16(sumA)
-	//	targetImage.Set(x, y, setColor)
-	//}
-	//for y = 0; y < radius; y++ {
-	//	for x = 0; x < size.X; x++ {
-	//		handleEdge(x, y)
-	//	}
-	//}
-	//for y = size.Y - radius; y < size.Y; y++ {
-	//	for x = 0; x < size.X; x++ {
-	//		handleEdge(x, y)
-	//	}
-	//}
-	//for x := 0; x < radius; x++ {
-	//	for y = 0; y < size.Y; y++ {
-	//		handleEdge(x, y)
-	//	}
-	//}
-	//for x := size.X - radius; x < size.X; x++ {
-	//	for y = 0; y < size.Y; y++ {
-	//		handleEdge(x, y)
-	//	}
-	//}
 	return nil
 }
