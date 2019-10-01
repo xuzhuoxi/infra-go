@@ -4,28 +4,30 @@ package filterx
 import (
 	"errors"
 	"github.com/xuzhuoxi/infra-go/imagex"
+	"image"
+	"image/draw"
 )
 
 // 边缘滤波器
 var (
-	//5x5 水平边缘滤波器
-	Edge5Horizontal = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
+	//5x5 左右边缘滤波器
+	Edge5LR = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, 0, -1}, {-1, 0, -1}, {0, 0, 4}, {1, 0, -1}, {2, 0, -1}}}
-	//5x5 垂直边缘滤波器
-	Edge5Vertical = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
+	//5x5 上下边缘滤波器
+	Edge5UD = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{0, -2, -1}, {0, -1, -1}, {0, 0, 4}, {0, 1, -1}, {0, 2, -1}}}
-	//5x5 45度边缘滤波器(左上右下)
-	Edge5Oblique45 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
+	//5x5 左上右下边缘滤波器
+	Edge5LuRd = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, -2, -1}, {-1, -1, -1}, {0, 0, 4}, {1, 1, -1}, {1, 2, -1}}}
-	//5x5 135度边缘滤波器(左下右上)
-	Edge5Oblique135 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
+	//5x5 左下右上边缘滤波器
+	Edge5LdRu = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, 2, -1}, {-1, 1, -1}, {0, 0, 4}, {1, -1, -1}, {2, -2, -1}}}
 	//5x5 全方向边缘滤波器
-	Edge3All = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
+	Edge3Direction8 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-1, -1, -1}, {0, -1, -1}, {1, -1, -1},
 			{-1, +0, -1}, {0, +0, +8}, {1, +0, -1},
@@ -36,13 +38,13 @@ var (
 // radius：		卷积核半径
 // direction: 	运动方向
 // diff:		梯度差
-func CreateEdgeFilter(radius int, direction imagex.PixelDirection, diff uint) (filter *FilterMatrix, err error) {
+func CreateEdgeFilter(radius int, direction imagex.PixelDirection, diff uint) (filter FilterMatrix, err error) {
 	if radius < 1 {
-		return nil, errors.New("KernelRadius < 1. ")
+		return filter, errors.New("KernelRadius < 1. ")
 	}
 	dirAdds := imagex.GetPixelDirectionAdds(direction)
 	if nil == dirAdds {
-		return nil, errors.New("Direction Error. ")
+		return filter, errors.New("Direction Error. ")
 	}
 	kSize := radius + radius + 1
 	ln := len(dirAdds)*radius + 1
@@ -57,5 +59,41 @@ func CreateEdgeFilter(radius int, direction imagex.PixelDirection, diff uint) (f
 		}
 	}
 	kernel = append(kernel, KernelVector{X: 0, Y: 0, Value: -sumValue})
-	return &FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: 0, Kernel: kernel}, nil
+	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: 0, Kernel: kernel}, nil
+}
+
+//-----------------------------------------------
+
+// 使用左右边缘滤波器处理图像
+func EdgeWithLR(srcImg image.Image, dstImg draw.Image) error {
+	return FilterImageWithMatrix(srcImg, dstImg, Edge5LR)
+}
+
+// 使用上下边缘滤波器处理图像
+func EdgeWithUD(srcImg image.Image, dstImg draw.Image) error {
+	return FilterImageWithMatrix(srcImg, dstImg, Edge5UD)
+}
+
+// 使用左上右下边缘滤波器处理图像
+func EdgeWithLuRd(srcImg image.Image, dstImg draw.Image) error {
+	return FilterImageWithMatrix(srcImg, dstImg, Edge5LuRd)
+}
+
+// 使用左下右上边缘滤波器处理图像
+func EdgeWithLdRu(srcImg image.Image, dstImg draw.Image) error {
+	return FilterImageWithMatrix(srcImg, dstImg, Edge5LdRu)
+}
+
+// 使用全方向边缘滤波器处理图像
+func EdgeWithDirection8(srcImg image.Image, dstImg draw.Image) error {
+	return FilterImageWithMatrix(srcImg, dstImg, Edge3Direction8)
+}
+
+// 使用自定义边缘滤波器处理图像
+func EdgeImageCustomize(srcImg image.Image, dstImg draw.Image, radius int, direction imagex.PixelDirection, diff uint) error {
+	filter, err := CreateEdgeFilter(radius, direction, diff)
+	if nil != err {
+		return err
+	}
+	return FilterImageWithMatrix(srcImg, dstImg, filter)
 }

@@ -42,26 +42,26 @@ func (fm FilterMatrix) IsPixelUnsafe() bool {
 	return false
 }
 
+// 上下翻转
+func (fm FilterMatrix) FlipUD() FilterMatrix {
+	rs := fm
+	rs.Kernel = fm.Kernel.FlipUD()
+	rs.Kernel.Sorted()
+	return rs
+}
+
+// 左右翻转
+func (fm FilterMatrix) FlipLR() FilterMatrix {
+	rs := fm
+	rs.Kernel = fm.Kernel.FlipLR()
+	rs.Kernel.Sorted()
+	return rs
+}
+
 //顺时针旋转90度
-func (fm FilterMatrix) RotateClockwise90() FilterMatrix {
+func (fm FilterMatrix) Rotate(clockwise bool, count90 int) FilterMatrix {
 	rs := fm
-	rs.Kernel = fm.Kernel.RotateClockwise90()
-	rs.Kernel.Sorted()
-	return rs
-}
-
-//顺时针旋转180度
-func (fm FilterMatrix) RotateClockwise180() FilterMatrix {
-	rs := fm
-	rs.Kernel = fm.Kernel.RotateClockwise180()
-	rs.Kernel.Sorted()
-	return rs
-}
-
-//顺时针旋转270度
-func (fm FilterMatrix) RotateClockwise270() FilterMatrix {
-	rs := fm
-	rs.Kernel = fm.Kernel.RotateClockwise270()
+	rs.Kernel = fm.Kernel.Rotate(clockwise, count90)
 	rs.Kernel.Sorted()
 	return rs
 }

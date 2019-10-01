@@ -152,7 +152,7 @@ func (d *MongoDriver) indexOfName(name string) int {
 	if "" == name {
 		return -1
 	}
-	for index, _ := range d.Clients {
+	for index := range d.Clients {
 		if name == d.Clients[index].Name() {
 			return index
 		}

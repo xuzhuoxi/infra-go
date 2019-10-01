@@ -127,7 +127,7 @@ func (ph *PackHandlerContainer) ClearHandler(handler FuncPackHandler) error {
 	if nil == handler {
 		return errors.New("PackHandlerContainer.ClearHandler:handler is nil")
 	}
-	for index, _ := range ph.handlers {
+	for index := range ph.handlers {
 		if lang.Equal(ph.handlers[index], handler) {
 			ph.handlers = append(ph.handlers[:index], ph.handlers[index+1:]...)
 			return nil

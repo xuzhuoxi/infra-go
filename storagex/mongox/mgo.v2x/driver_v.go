@@ -165,7 +165,7 @@ func (d *MongoDriverV) indexOfName(name string) int {
 	if "" == name {
 		return -1
 	}
-	for index, _ := range d.Sessions {
+	for index := range d.Sessions {
 		if name == d.Sessions[index].GetSessionName() {
 			return index
 		}

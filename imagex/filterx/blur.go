@@ -73,9 +73,9 @@ var (
 // 创建高斯模糊滤波器
 // radius：	卷积核半径 [1，3]
 // sigma:	标准差
-func CreateGaussBlurFilter(radius int, sigma float64) (filter *FilterMatrix, err error) {
+func CreateGaussBlurFilter(radius int, sigma float64) (filter FilterMatrix, err error) {
 	if radius < 1 {
-		return nil, errors.New("KernelRadius < 1. ")
+		return filter, errors.New("KernelRadius < 1. ")
 	}
 	kSize := radius + radius + 1
 	gaussKernel := gaussx.CreateGaussKernelInt(radius, sigma, 0)
@@ -91,19 +91,19 @@ func CreateGaussBlurFilter(radius int, sigma float64) (filter *FilterMatrix, err
 			}
 		}
 	}
-	return &FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: scale, Kernel: kernel}, nil
+	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: scale, Kernel: kernel}, nil
 }
 
 // 创建运动模糊滤波器
 // radius：		卷积核半径
 // direction: 	运动方向
-func CreateMotionBlurFilter(radius int, direction imagex.PixelDirection) (filter *FilterMatrix, err error) {
+func CreateMotionBlurFilter(radius int, direction imagex.PixelDirection) (filter FilterMatrix, err error) {
 	if radius < 1 {
-		return nil, errors.New("KernelRadius < 1. ")
+		return filter, errors.New("KernelRadius < 1. ")
 	}
 	dirAdds := imagex.GetPixelDirectionAdds(direction)
 	if nil == dirAdds {
-		return nil, errors.New("Direction Error. ")
+		return filter, errors.New("Direction Error. ")
 	}
 	kSize := radius + radius + 1
 	scale := len(dirAdds)*radius + 1
@@ -114,7 +114,7 @@ func CreateMotionBlurFilter(radius int, direction imagex.PixelDirection) (filter
 			kernel = append(kernel, KernelVector{X: add.X * i, Y: add.Y * i, Value: 1})
 		}
 	}
-	return &FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: scale, Kernel: kernel}, nil
+	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: scale, Kernel: kernel}, nil
 }
 
 //------------------------------------------------------
@@ -170,5 +170,5 @@ func BlurWithMotion(srcImg image.Image, dstImg draw.Image, radius int, direction
 	if nil != err {
 		return err
 	}
-	return FilterImageWithMatrix(srcImg, dstImg, *filter)
+	return FilterImageWithMatrix(srcImg, dstImg, filter)
 }

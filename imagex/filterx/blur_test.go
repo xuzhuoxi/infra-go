@@ -59,7 +59,7 @@ func TestSimple(t *testing.T) {
 }
 
 func TestCreateGaussBlurFilter(t *testing.T) {
-	var temp *FilterMatrix
+	var temp FilterMatrix
 	temp, _ = CreateGaussBlurFilter(2, 1.4)
 	fmt.Println(temp)
 	temp, _ = CreateGaussBlurFilter(2, 1.0)
@@ -69,7 +69,7 @@ func TestCreateGaussBlurFilter(t *testing.T) {
 }
 
 func TestCreateMotionBlurFilter(t *testing.T) {
-	var temp *FilterMatrix
+	var temp FilterMatrix
 	temp, _ = CreateMotionBlurFilter(1, imagex.AllDirection)
 	fmt.Println(temp)
 	temp, _ = CreateMotionBlurFilter(2, imagex.Vertical)

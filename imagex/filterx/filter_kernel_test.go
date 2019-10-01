@@ -6,10 +6,34 @@ import (
 )
 
 func TestFilterKernelSort(t *testing.T) {
-	kernel := Emboss3Asymmetrical.Kernel
+	var kernel FilterKernel
+	kernel = Emboss3Asymmetrical.Kernel
 	fmt.Println(kernel)
-	filter2 := kernel.RotateClockwise90()
-	fmt.Println(filter2)
-	filter2.Sorted()
-	fmt.Println(filter2)
+	kernel = kernel.Rotate90(true)
+	kernel.Sorted()
+	fmt.Println(kernel)
+	kernel = kernel.Rotate90(true)
+	kernel.Sorted()
+	fmt.Println(kernel)
+	kernel = kernel.Rotate90(true)
+	kernel.Sorted()
+	fmt.Println(kernel)
+	fmt.Println("--------------------------")
+	kernel = Emboss3Asymmetrical.Kernel
+	kernel = kernel.Rotate90(false)
+	kernel.Sorted()
+	fmt.Println(kernel)
+	kernel = kernel.Rotate90(false)
+	kernel.Sorted()
+	fmt.Println(kernel)
+	kernel = kernel.Rotate90(false)
+	kernel.Sorted()
+	fmt.Println(kernel)
+}
+
+func TestFor(t *testing.T) {
+	s := []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
+	for index := range s {
+		fmt.Println(index)
+	}
 }

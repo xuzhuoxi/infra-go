@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreateEdgeFilter(t *testing.T) {
-	var temp *FilterMatrix
+	var temp FilterMatrix
 	temp, _ = CreateEdgeFilter(1, imagex.AllDirection, 0)
 	fmt.Println(temp)
 	temp, _ = CreateEdgeFilter(2, imagex.Vertical, 1)
@@ -20,11 +20,11 @@ func TestCreateEdgeFilter(t *testing.T) {
 }
 
 func TestCheckEdge(t *testing.T) {
-	fmt.Println(Edge5Horizontal.CheckValidity())
-	fmt.Println(Edge5Vertical.CheckValidity())
-	fmt.Println(Edge5Oblique45.CheckValidity())
-	fmt.Println(Edge5Oblique135.CheckValidity())
-	fmt.Println(Edge3All.CheckValidity())
+	fmt.Println(Edge5LR.CheckValidity())
+	fmt.Println(Edge5UD.CheckValidity())
+	fmt.Println(Edge5LuRd.CheckValidity())
+	fmt.Println(Edge5LdRu.CheckValidity())
+	fmt.Println(Edge3Direction8.CheckValidity())
 }
 
 func Test000(t *testing.T) {
@@ -36,7 +36,7 @@ func Test000(t *testing.T) {
 func TestEdgeImage(t *testing.T) {
 	sources := SourcePaths
 	targets := EdgePaths
-	filter := &Edge3All
+	filter := &Edge3Direction8
 	//filter, _ := CreateEdgeFilter(1, imagex.AllDirection, 2)
 	fmt.Println("Filter: ", filter)
 	for index, source := range sources {
