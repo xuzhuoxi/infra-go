@@ -22,7 +22,7 @@ func TestCVTGray16WithOTSU(t *testing.T) {
 			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		dstImg := imagex.CopyImage(img)
+		dstImg := imagex.CopyImageStruct(img)
 		err = CVTWithOTSU64(img, dstImg)
 		if nil != err {
 			fmt.Println(err)

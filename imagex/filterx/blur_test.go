@@ -38,7 +38,7 @@ func TestBlurMatrix(t *testing.T) {
 			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		dstImg := imagex.CopyImage(img)
+		dstImg := imagex.CopyImageStruct(img)
 		err = FilterImageWithMatrix(img, dstImg, *filter)
 		if nil != err {
 			fmt.Println(err)

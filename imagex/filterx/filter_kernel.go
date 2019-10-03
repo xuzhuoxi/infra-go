@@ -101,6 +101,7 @@ func (fk FilterKernel) RotateSelf(clockwise bool, count90 int) {
 	for c < 0 {
 		c += 4
 	}
+	c = c % 4
 	for c > 0 {
 		fk.Rotate90Self(clockwise)
 		c--

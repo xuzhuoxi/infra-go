@@ -10,8 +10,8 @@ import (
 )
 
 func TestCheckEmboss(t *testing.T) {
-	fmt.Println(Emboss3Oblique45.CheckValidity())
-	fmt.Println(Emboss5Oblique45.CheckValidity())
+	fmt.Println(Emboss3Lu2Rd.CheckValidity())
+	fmt.Println(Emboss5Lu2Rd.CheckValidity())
 	fmt.Println(Emboss3Asymmetrical.CheckValidity())
 }
 
@@ -31,7 +31,7 @@ func TestEmbossImage(t *testing.T) {
 			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		dstImg := imagex.CopyImage(img)
+		dstImg := imagex.CopyImageStruct(img)
 		err = FilterImageWithMatrix(img, dstImg, *filter)
 		if nil != err {
 			fmt.Println(err)

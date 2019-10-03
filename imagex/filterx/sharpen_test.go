@@ -10,8 +10,8 @@ import (
 )
 
 func TestCheckSharpen(t *testing.T) {
-	fmt.Println(Sharpen3AllSimple.CheckValidity())
-	fmt.Println(Sharpen3All.CheckValidity())
+	fmt.Println(Sharpen3Laplace4.CheckValidity())
+	fmt.Println(Sharpen3Laplace8.CheckValidity())
 	fmt.Println(SharpenStrengthen3All.CheckValidity())
 	fmt.Println(Sharpen5All.CheckValidity())
 }
@@ -33,7 +33,7 @@ func TestSharpen(t *testing.T) {
 			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		dstImg := imagex.CopyImage(img)
+		dstImg := imagex.CopyImageStruct(img)
 		err = FilterImageWithMatrix(img, dstImg, *filter)
 		if nil != err {
 			fmt.Println(err)

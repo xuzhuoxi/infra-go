@@ -22,7 +22,7 @@ func TestErodeCVT(t *testing.T) {
 			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		dstImg := imagex.CopyImage(img)
+		dstImg := imagex.CopyImageStruct(img)
 		err = ErodeCVT(img, dstImg, imagex.AllDirection)
 		if nil != err {
 			fmt.Println(err)

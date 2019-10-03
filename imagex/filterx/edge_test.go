@@ -24,7 +24,7 @@ func TestCheckEdge(t *testing.T) {
 	fmt.Println(Edge5UD.CheckValidity())
 	fmt.Println(Edge5LuRd.CheckValidity())
 	fmt.Println(Edge5LdRu.CheckValidity())
-	fmt.Println(Edge3Direction8.CheckValidity())
+	fmt.Println(Edge3Laplace8.CheckValidity())
 }
 
 func Test000(t *testing.T) {
@@ -36,7 +36,7 @@ func Test000(t *testing.T) {
 func TestEdgeImage(t *testing.T) {
 	sources := SourcePaths
 	targets := EdgePaths
-	filter := &Edge3Direction8
+	filter := &Edge3Laplace8
 	//filter, _ := CreateEdgeFilter(1, imagex.AllDirection, 2)
 	fmt.Println("Filter: ", filter)
 	for index, source := range sources {
@@ -49,7 +49,7 @@ func TestEdgeImage(t *testing.T) {
 			continue
 		}
 		fmt.Println("读取的图像内存类型(img)：", reflect.ValueOf(img).Type())
-		dstImg := imagex.CopyImage(img)
+		dstImg := imagex.CopyImageStruct(img)
 		err = FilterImageWithMatrix(img, dstImg, *filter)
 		if nil != err {
 			fmt.Println(err)
