@@ -4,6 +4,7 @@ package filterx
 import (
 	"errors"
 	"github.com/xuzhuoxi/infra-go/imagex"
+	"github.com/xuzhuoxi/infra-go/mathx"
 	"github.com/xuzhuoxi/infra-go/mathx/gaussx"
 	"image"
 	"image/draw"
@@ -70,6 +71,57 @@ var (
 
 //-------------------------------------------
 
+// 创建自定义4邻均值模糊滤波器
+// radius 半径
+// includeCenter 包含中心
+func CreateBoxFourNearBlurFilter(radius int, includeCenter bool) (filter FilterMatrix, err error) {
+	if radius < 1 {
+		return filter, errors.New("KernelRadius < 1. ")
+	}
+	kSize := radius + radius + 1
+	ln := 2*kSize + 3
+	if !includeCenter {
+		ln -= 1
+	}
+	var kernel FilterKernel = make([]KernelVector, 0, ln)
+	for y := -radius; y <= radius; y++ {
+		for x := -radius; x <= radius; x++ {
+			if !includeCenter && 0 == x && 0 == y {
+				continue
+			}
+			if mathx.AbsInt(x)+mathx.AbsInt(y) > radius {
+				continue
+			}
+			kernel = append(kernel, KernelVector{X: x, Y: y, Value: 1})
+		}
+	}
+	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: ln, Kernel: kernel}, nil
+}
+
+// 创建自定义8邻均值模糊滤波器
+// radius 半径
+// includeCenter 包含中心
+func CreateBoxEightNearBlurFilter(radius int, includeCenter bool) (filter FilterMatrix, err error) {
+	if radius < 1 {
+		return filter, errors.New("KernelRadius < 1. ")
+	}
+	kSize := radius + radius + 1
+	ln := kSize * kSize
+	if !includeCenter {
+		ln -= 1
+	}
+	var kernel FilterKernel = make([]KernelVector, 0, ln)
+	for y := -radius; y <= radius; y++ {
+		for x := -radius; x <= radius; x++ {
+			if !includeCenter && 0 == x && 0 == y {
+				continue
+			}
+			kernel = append(kernel, KernelVector{X: x, Y: y, Value: 1})
+		}
+	}
+	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: ln, Kernel: kernel}, nil
+}
+
 // 创建高斯模糊滤波器
 // radius：	卷积核半径 [1，3]
 // sigma:	标准差
@@ -134,6 +186,26 @@ func BlurWithAverage3(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, BoxAverage3)
 }
 
+// 自定义4邻均值模糊
+func BlurWithBoxFour(srcImg image.Image, dstImg draw.Image, radius int, includeCenter bool) error {
+	filter, err := CreateBoxFourNearBlurFilter(radius, includeCenter)
+	if nil != err {
+		return err
+	}
+	return FilterImageWithMatrix(srcImg, dstImg, filter)
+}
+
+// 自定义8邻均值模糊
+func BlurWithBoxEight(srcImg image.Image, dstImg draw.Image, radius int, includeCenter bool) error {
+	filter, err := CreateBoxEightNearBlurFilter(radius, includeCenter)
+	if nil != err {
+		return err
+	}
+	return FilterImageWithMatrix(srcImg, dstImg, filter)
+}
+
+//------------------------------------------------------------------
+
 // 高斯3x3模糊
 func BlurWithGauss3(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Gauss3)
@@ -143,6 +215,17 @@ func BlurWithGauss3(srcImg image.Image, dstImg draw.Image) error {
 func BlurWithGauss5(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Gauss5)
 }
+
+// 自定义高斯模糊
+func BlurWithGauss(srcImg image.Image, dstImg draw.Image, radius int, sigma float64) error {
+	filter, err := CreateGaussBlurFilter(radius, sigma)
+	if nil != err {
+		return err
+	}
+	return FilterImageWithMatrix(srcImg, dstImg, filter)
+}
+
+//------------------------------------------------------------------
 
 // 水平运动模糊
 func BlurWithMotion3Horizontal(srcImg image.Image, dstImg draw.Image) error {

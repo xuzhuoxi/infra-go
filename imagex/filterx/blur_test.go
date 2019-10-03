@@ -58,6 +58,22 @@ func TestSimple(t *testing.T) {
 	fmt.Println(rgb[0])
 }
 
+func TestCreateBoxEightNearBlurFilter(t *testing.T) {
+	var temp FilterMatrix
+	temp, _ = CreateBoxFourNearBlurFilter(2, true)
+	fmt.Println(temp)
+	temp, _ = CreateBoxFourNearBlurFilter(2, false)
+	fmt.Println(temp)
+}
+
+func TestCreateBoxFourNearBlurFilter(t *testing.T) {
+	var temp FilterMatrix
+	temp, _ = CreateBoxEightNearBlurFilter(2, true)
+	fmt.Println(temp)
+	temp, _ = CreateBoxEightNearBlurFilter(2, false)
+	fmt.Println(temp)
+}
+
 func TestCreateGaussBlurFilter(t *testing.T) {
 	var temp FilterMatrix
 	temp, _ = CreateGaussBlurFilter(2, 1.4)
