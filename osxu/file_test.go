@@ -24,3 +24,11 @@ func TestGetFolderSize(t *testing.T) {
 	path := "D://VMOS//Windows 7 x64//"
 	fmt.Println(GetFolderSize(path))
 }
+
+func TestCheckExtensionName(t *testing.T) {
+	fileNames := []string{"o.exe2", "a.exe", "b", "c.abc", "d.abc"}
+	extNames := []string{".exe", ".exe", ".", "abc", "abc"}
+	for index, fn := range fileNames {
+		fmt.Println(CheckExtensionName(fn, extNames[index]))
+	}
+}
