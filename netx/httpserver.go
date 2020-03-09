@@ -1,13 +1,8 @@
 package netx
 
 import (
-	"errors"
 	"net/http"
 	"time"
-)
-
-var (
-	ErrServerStarted = errors.New("http: Server started")
 )
 
 func NewHttpServer() IHttpServer {
@@ -17,6 +12,8 @@ func NewHttpServer() IHttpServer {
 }
 
 type IHttpServer interface {
+	// 启动中
+	Running() bool
 	// 启动Http服务
 	StartServer(addr string) error
 	// 停止Http服务
@@ -33,12 +30,16 @@ type HttpServer struct {
 	Server   *http.Server
 }
 
+func (s *HttpServer) Running() bool {
+	return s.Server != nil
+}
+
 func (s *HttpServer) StartServer(addr string) error {
 	if nil == s.ServeMux {
 		s.ServeMux = http.NewServeMux()
 	}
 	if nil != s.Server { //启动中
-		return ErrServerStarted
+		return ErrHttpServerStarted
 	}
 	s.Server = &http.Server{Addr: addr, Handler: s.ServeMux}
 	err := s.Server.ListenAndServe()
@@ -51,6 +52,7 @@ func (s *HttpServer) StopServer() error {
 		return http.ErrServerClosed
 	}
 	s.Server.Close()
+	s.Server = nil
 	return nil
 }
 
