@@ -7,12 +7,6 @@ import (
 	"sync"
 )
 
-const (
-	TcpNetwork  = "tcp"
-	TcpNetwork4 = "tcp4"
-	TcpNetwork6 = "tcp6"
-)
-
 var (
 	mapTCPAddr = make(map[string]*net.TCPAddr)
 	mapTCPLock sync.RWMutex

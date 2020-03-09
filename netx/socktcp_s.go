@@ -10,13 +10,39 @@ import (
 )
 
 func NewTCPServer() ITCPServer {
+	return newTCPServer().(ITCPServer)
+}
+
+func NewTCP4Server() ITCPServer {
+	return newTCP4Server().(ITCPServer)
+}
+
+func NewTCP6Server() ITCPServer {
+	return newTCP6Server().(ITCPServer)
+}
+
+func newTCPServer() ISockServer {
+	return newTcpS("TCPServer", TcpNetwork)
+}
+
+func newTCP4Server() ISockServer {
+	return newTcpS("TCP4Server", TcpNetwork4)
+}
+
+func newTCP6Server() ISockServer {
+	return newTcpS("TCP6Server", TcpNetwork6)
+}
+
+func newTcpS(name string, network SockNetwork) ISockServer {
 	server := &TCPServer{}
-	server.Name = "TCPServer"
-	server.Network = TcpNetwork
+	server.Name = name
+	server.Network = network
 	server.Logger = logx.DefaultLogger()
 	server.PackHandlerContainer = NewIPackHandler(nil)
 	return server
 }
+
+//----------------------------
 
 type ITCPServer interface {
 	ISockServer
@@ -44,7 +70,7 @@ func (s *TCPServer) StartServer(params SockParams) error {
 	if "" != params.Network {
 		s.Network = params.Network
 	}
-	listener, err := listenTCP(s.Network, params.LocalAddress)
+	listener, err := listenTCP(s.Network.String(), params.LocalAddress)
 	if nil != err {
 		defer s.serverMu.Unlock()
 		return err

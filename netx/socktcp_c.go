@@ -7,13 +7,39 @@ import (
 )
 
 func NewTCPClient() ITCPClient {
+	return newTCPClient().(ITCPClient)
+}
+
+func NewTCP4Client() ITCPClient {
+	return newTCP4Client().(ITCPClient)
+}
+
+func NewTCP6Client() ITCPClient {
+	return newTCP6Client().(ITCPClient)
+}
+
+func newTCPClient() ISockClient {
+	return newTcpC("TCPClient", TcpNetwork)
+}
+
+func newTCP4Client() ISockClient {
+	return newTcpC("TCP4Client", TcpNetwork4)
+}
+
+func newTCP6Client() ISockClient {
+	return newTcpC("TCP6Client", TcpNetwork6)
+}
+
+func newTcpC(name string, network SockNetwork) ISockClient {
 	client := &TCPClient{}
-	client.Name = "TCPClient"
-	client.Network = TcpNetwork
+	client.Name = name
+	client.Network = network
 	client.Logger = logx.DefaultLogger()
 	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
+
+//----------------------------
 
 type ITCPClient interface {
 	ISockClient
@@ -30,7 +56,7 @@ func (c *TCPClient) OpenClient(params SockParams) error {
 	if "" != params.Network {
 		c.Network = params.Network
 	}
-	conn, err := net.Dial(c.Network, params.RemoteAddress)
+	conn, err := net.Dial(c.Network.String(), params.RemoteAddress)
 	if nil != err {
 		return err
 	}

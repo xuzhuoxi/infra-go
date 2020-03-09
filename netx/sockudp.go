@@ -7,12 +7,6 @@ import (
 	"sync"
 )
 
-const (
-	UDPNetwork  = "udp"
-	UDPNetwork4 = "udp4"
-	UDPNetwork6 = "udp6"
-)
-
 var (
 	mapUDPAddr = make(map[string]*net.UDPAddr)
 	mapUDPLock sync.RWMutex

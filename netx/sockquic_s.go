@@ -10,6 +10,10 @@ import (
 )
 
 func NewQuicServer() IQUICServer {
+	return newQuicServer().(IQUICServer)
+}
+
+func newQuicServer() ISockServer {
 	server := &QUICServer{}
 	server.Name = "QuicServer"
 	server.Network = QuicNetwork
@@ -17,6 +21,8 @@ func NewQuicServer() IQUICServer {
 	server.PackHandlerContainer = NewIPackHandler(nil)
 	return server
 }
+
+//----------------------------
 
 type IQUICServer interface {
 	ISockServer

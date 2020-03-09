@@ -7,22 +7,72 @@ import (
 )
 
 func NewUDPDialClient() IUDPClient {
+	return newUDPDialClient().(IUDPClient)
+}
+
+func NewUDP4DialClient() IUDPClient {
+	return newUDP4DialClient().(IUDPClient)
+}
+
+func NewUDP6DialClient() IUDPClient {
+	return newUDP6DialClient().(IUDPClient)
+}
+
+func NewUDPListenClient() IUDPClient {
+	return newUDPListenClient().(IUDPClient)
+}
+
+func NewUDP4ListenClient() IUDPClient {
+	return newUDP4ListenClient().(IUDPClient)
+}
+
+func NewUDP6ListenClient() IUDPClient {
+	return newUDP6ListenClient().(IUDPClient)
+}
+
+func newUDPDialClient() ISockClient {
+	return newUdpDC("UDPDialClient", UDPNetwork)
+}
+
+func newUDP4DialClient() ISockClient {
+	return newUdpDC("UDP4DialClient", UDPNetwork4)
+}
+
+func newUDP6DialClient() ISockClient {
+	return newUdpDC("UDP6DialClient", UDPNetwork6)
+}
+
+func newUDPListenClient() ISockClient {
+	return newUdpLC("UDPListenClient", UDPNetwork)
+}
+
+func newUDP4ListenClient() ISockClient {
+	return newUdpLC("UDP4ListenClient", UDPNetwork4)
+}
+
+func newUDP6ListenClient() ISockClient {
+	return newUdpLC("UDP6ListenClient", UDPNetwork6)
+}
+
+func newUdpDC(name string, network SockNetwork) ISockClient {
 	client := &UDPDialClient{}
-	client.Name = "UDPDialClient"
-	client.Network = UDPNetwork
+	client.Name = name
+	client.Network = network
 	client.Logger = logx.DefaultLogger()
 	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
 
-func NewUDPListenClient() IUDPClient {
+func newUdpLC(name string, network SockNetwork) ISockClient {
 	client := &UDPListenClient{}
-	client.Name = "UDPListenClient"
-	client.Network = UDPNetwork
+	client.Name = name
+	client.Network = network
 	client.Logger = logx.DefaultLogger()
 	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
+
+//---------------------------
 
 type IUDPClient interface {
 	ISockClient
@@ -43,11 +93,11 @@ func (c *UDPDialClient) OpenClient(params SockParams) error {
 	if "" != params.Network {
 		c.Network = params.Network
 	}
-	rAddr, err := GetUDPAddr(c.Network, params.RemoteAddress)
+	rAddr, err := GetUDPAddr(c.Network.String(), params.RemoteAddress)
 	if nil != err {
 		return err
 	}
-	conn, cErr := net.DialUDP(c.Network, nil, rAddr)
+	conn, cErr := net.DialUDP(c.Network.String(), nil, rAddr)
 	if nil != cErr {
 		return cErr
 	}
@@ -90,11 +140,11 @@ func (c *UDPListenClient) OpenClient(params SockParams) error {
 	if "" != params.Network {
 		c.Network = params.Network
 	}
-	lAddr, err := GetUDPAddr(c.Network, params.LocalAddress)
+	lAddr, err := GetUDPAddr(c.Network.String(), params.LocalAddress)
 	if nil != err {
 		return err
 	}
-	conn, cErr := net.ListenUDP(c.Network, lAddr)
+	conn, cErr := net.ListenUDP(c.Network.String(), lAddr)
 	if nil != cErr {
 		return cErr
 	}

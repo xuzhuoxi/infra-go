@@ -7,6 +7,10 @@ import (
 )
 
 func NewWebSocketClient() IWebSocketClient {
+	return newWebSocketClient().(IWebSocketClient)
+}
+
+func newWebSocketClient() ISockClient {
 	client := &WebSocketClient{}
 	client.Name = "WSClient"
 	client.Network = WSNetwork
@@ -14,6 +18,8 @@ func NewWebSocketClient() IWebSocketClient {
 	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
+
+//---------------------------
 
 type IWebSocketClient interface {
 	ISockClient

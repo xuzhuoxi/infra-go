@@ -11,6 +11,10 @@ import (
 )
 
 func NewWebSocketServer() IWebSocketServer {
+	return newWebSocketServer().(IWebSocketServer)
+}
+
+func newWebSocketServer() ISockServer {
 	server := &WebSocketServer{}
 	server.Name = "WSServer"
 	server.Network = WSNetwork
@@ -18,6 +22,8 @@ func NewWebSocketServer() IWebSocketServer {
 	server.PackHandlerContainer = NewIPackHandler(nil)
 	return server
 }
+
+//-------------------------
 
 type IWebSocketServer interface {
 	ISockServer

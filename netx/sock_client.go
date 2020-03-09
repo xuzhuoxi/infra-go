@@ -41,7 +41,7 @@ type ISockClient interface {
 
 type SockClientBase struct {
 	Name     string
-	Network  string
+	Network  SockNetwork
 	clientMu sync.RWMutex
 	opening  bool
 
