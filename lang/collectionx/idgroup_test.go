@@ -21,7 +21,7 @@ func newIdSupport2() IIdSupport {
 
 func TestIdGroup_Collection(t *testing.T) {
 	var list []IIdSupport
-	group := IdGroup{ids: nil, idMap: make(map[string]IIdSupport)}
+	group := IdGroup{supports: nil, supportMap: make(map[string]IIdSupport)}
 	for i := 0; i < 20; i++ {
 		support := newIdSupport2()
 		group.add(support)
@@ -32,6 +32,6 @@ func TestIdGroup_Collection(t *testing.T) {
 	group.Remove("10")
 	group.Removes([]string{"1", "5", "15", "20"})
 	fmt.Println(group.Collection())
-	fmt.Println(group.idMap)
+	fmt.Println(group.supportMap)
 
 }

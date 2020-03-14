@@ -33,8 +33,10 @@ func (s *IdSupport) SetId(Id string) {
 type IIdGroup interface {
 	// 数量
 	Size() int
-	// 信息
+	// 元素列表
 	Collection() []IIdSupport
+	// id列表
+	Ids() []string
 
 	// 加入一个Id
 	// err:
@@ -66,16 +68,25 @@ type IIdGroup interface {
 }
 
 type IdGroup struct {
-	ids   []IIdSupport
-	idMap map[string]IIdSupport
+	supports   []IIdSupport
+	supportMap map[string]IIdSupport
 }
 
 func (g *IdGroup) Size() int {
-	return len(g.ids)
+	return len(g.supports)
 }
 
 func (g *IdGroup) Collection() []IIdSupport {
-	return g.ids
+	return g.supports
+}
+
+func (g *IdGroup) Ids() []string {
+	ln := len(g.supports)
+	rs := make([]string, ln, ln)
+	for index, q := range g.supports {
+		rs[index] = q.Id()
+	}
+	return rs
 }
 
 func (g *IdGroup) Add(support IIdSupport) error {
@@ -132,11 +143,11 @@ func (g *IdGroup) Update(support IIdSupport) {
 	sId := support.Id()
 	if g.isIdExists(sId) {
 		index := g.findIndex(sId)
-		g.ids[index] = support
+		g.supports[index] = support
 	} else {
-		g.ids = append(g.ids, support)
+		g.supports = append(g.supports, support)
 	}
-	g.idMap[sId] = support
+	g.supportMap[sId] = support
 }
 
 func (g *IdGroup) Updates(supports []IIdSupport) {
@@ -150,21 +161,21 @@ func (g *IdGroup) Updates(supports []IIdSupport) {
 }
 
 func (g *IdGroup) add(support IIdSupport) {
-	g.ids = append(g.ids, support)
-	g.idMap[support.Id()] = support
+	g.supports = append(g.supports, support)
+	g.supportMap[support.Id()] = support
 }
 
 func (g *IdGroup) removeArrayAt(index int) (support IIdSupport) {
-	if index >= 0 && index < len(g.ids) {
-		support = g.ids[index]
-		g.ids = append(g.ids[:index], g.ids[index+1:]...)
+	if index >= 0 && index < len(g.supports) {
+		support = g.supports[index]
+		g.supports = append(g.supports[:index], g.supports[index+1:]...)
 	}
 	return
 }
 
 func (g *IdGroup) removeMapBy(supportId string) (support IIdSupport) {
-	if q, ok := g.idMap[supportId]; ok {
-		delete(g.idMap, supportId)
+	if q, ok := g.supportMap[supportId]; ok {
+		delete(g.supportMap, supportId)
 		return q
 	} else {
 		return nil
@@ -172,7 +183,7 @@ func (g *IdGroup) removeMapBy(supportId string) (support IIdSupport) {
 }
 
 func (g *IdGroup) findIndex(supportId string) int {
-	for index, q := range g.ids {
+	for index, q := range g.supports {
 		if q.Id() == supportId {
 			return index
 		}
@@ -181,7 +192,7 @@ func (g *IdGroup) findIndex(supportId string) int {
 }
 
 func (g *IdGroup) isIdExists(supportId string) bool {
-	if _, ok := g.idMap[supportId]; ok {
+	if _, ok := g.supportMap[supportId]; ok {
 		return true
 	}
 	return false
