@@ -43,6 +43,8 @@ type IOrderHashGroup interface {
 
 	// 取一个Element
 	Get(eleId string) (ele IOrderHashElement, ok bool)
+	// 取一个Element
+	GetAt(index int) (ele IOrderHashElement, ok bool)
 	// 判断
 	Exists(eleId string) (ok bool)
 	// 加入一个Element
@@ -123,6 +125,13 @@ func (g *OrderHashGroup) Ids() []string {
 func (g *OrderHashGroup) Get(eleId string) (ele IOrderHashElement, ok bool) {
 	ele, ok = g.exists(eleId)
 	return
+}
+
+func (g *OrderHashGroup) GetAt(index int) (ele IOrderHashElement, ok bool) {
+	if index < 0 || index >= g.Size() {
+		return nil, false
+	}
+	return g.eles[index], ok
 }
 
 func (g *OrderHashGroup) Exists(eleId string) (ok bool) {
