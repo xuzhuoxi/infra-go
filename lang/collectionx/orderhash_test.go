@@ -9,19 +9,19 @@ import (
 
 var index = 0
 
-func newIdSupport() IIdSupport {
+func newIdSupport() IOrderHashSupport {
 	now := time.Now().Nanosecond()
-	return &IdSupport{id: strconv.Itoa(now)}
+	return &OrderHashSupport{id: strconv.Itoa(now)}
 }
 
-func newIdSupport2() IIdSupport {
+func newIdSupport2() IOrderHashSupport {
 	index++
-	return &IdSupport{id: strconv.Itoa(index)}
+	return &OrderHashSupport{id: strconv.Itoa(index)}
 }
 
 func TestIdGroup_Collection(t *testing.T) {
-	var list []IIdSupport
-	group := IdGroup{supports: nil, supportMap: make(map[string]IIdSupport)}
+	var list []IOrderHashSupport
+	group := OrderHashGroup{supports: nil, supportMap: make(map[string]IOrderHashSupport)}
 	for i := 0; i < 20; i++ {
 		support := newIdSupport2()
 		group.add(support)
