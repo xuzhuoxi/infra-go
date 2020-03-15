@@ -91,6 +91,13 @@ type IOrderHashGroup interface {
 	Updates(eles []IOrderHashElement) (err []error)
 }
 
+func NewOrderHashGroup() *OrderHashGroup {
+	rs := &OrderHashGroup{}
+	rs.eleMap = make(map[string]IOrderHashElement)
+	rs.eles = make([]IOrderHashElement, 0, 32)
+	return rs
+}
+
 type OrderHashGroup struct {
 	eles   []IOrderHashElement
 	eleMap map[string]IOrderHashElement
