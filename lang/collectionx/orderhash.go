@@ -3,33 +3,33 @@ package collectionx
 import "errors"
 
 var (
-	ErrSupportIdUnknown = errors.New("OrderHash: Id Unknown. ")
-	ErrSupportIdExists  = errors.New("OrderHash: Id Exists. ")
-	ErrSupportNil       = errors.New("OrderHash: Support is nil. ")
-	ErrSupportIndex     = errors.New("OrderHash: Index out of range. ")
+	ErrElementIdUnknown = errors.New("OrderHash: Id Unknown. ")
+	ErrElementIdExists  = errors.New("OrderHash: Id Exists. ")
+	ErrElementNil       = errors.New("OrderHash: Support is nil. ")
+	ErrElementIndex     = errors.New("OrderHash: Index out of range. ")
 )
 
 var Threshold = 1000 //阀值
 
 // 唯一标识支持
-type IOrderHashSupport interface {
+type IOrderHashElement interface {
 	Id() string
 	SetId(Id string)
 }
 
-type OrderHashSupport struct {
+type OrderHashElement struct {
 	id string
 }
 
-func (s *OrderHashSupport) String() string {
+func (s *OrderHashElement) String() string {
 	return s.id
 }
 
-func (s *OrderHashSupport) Id() string {
+func (s *OrderHashElement) Id() string {
 	return s.id
 }
 
-func (s *OrderHashSupport) SetId(Id string) {
+func (s *OrderHashElement) SetId(Id string) {
 	s.id = Id
 }
 
@@ -37,126 +37,126 @@ type IOrderHashGroup interface {
 	// 数量
 	Size() int
 	// 元素列表
-	Collection() []IOrderHashSupport
+	Collection() []IOrderHashElement
 	// id列表
 	Ids() []string
 
-	// 取一个
-	Get(supportId string) (support IOrderHashSupport, ok bool)
+	// 取一个Element
+	Get(eleId string) (ele IOrderHashElement, ok bool)
 	// 判断
-	Exists(supportId string) (ok bool)
-	// 加入一个Id
+	Exists(eleId string) (ok bool)
+	// 加入一个Element
 	// err:
-	//		ErrSupportNil,ErrSupportIdExists
-	Add(support IOrderHashSupport) error
-	// 加入一个Id
+	//		ErrElementNil,ErrElementIdExists
+	Add(ele IOrderHashElement) error
+	// 加入一个Element
 	// err:
-	//		ErrSupportNil,ErrSupportIndex,ErrSupportIdExists
-	AddAt(support IOrderHashSupport, index int) error
-	// 加入多个Id
-	// count: 成功加入的Id数量
-	// err:
-	//		每个加入时产生的错误
-	Adds(supports []IOrderHashSupport) (count int, failArr []IOrderHashSupport, err []error)
-	// 加入多个Id
-	// count: 成功加入的Id数量
+	//		ErrElementNil,ErrElementIndex,ErrElementIdExists
+	AddAt(ele IOrderHashElement, index int) error
+	// 加入多个Element
+	// count: 成功加入的Element数量
 	// err:
 	//		每个加入时产生的错误
-	AddsAt(supports []IOrderHashSupport, index int) (count int, failArr []IOrderHashSupport, err []error)
-	// 移除一个Id
-	// support: 返回被移除的Id
+	Adds(eles []IOrderHashElement) (count int, failArr []IOrderHashElement, err []error)
+	// 加入多个Element
+	// count: 成功加入的Element数量
 	// err:
-	//		ErrSupportIdUnknown
-	Remove(supportId string) (support IOrderHashSupport, err error)
-	// 移除一个Id
-	// support: 返回被移除的Id
+	//		每个加入时产生的错误
+	AddsAt(eles []IOrderHashElement, index int) (count int, failArr []IOrderHashElement, err []error)
+	// 移除一个Element
+	// ele: 返回被移除的Element
 	// err:
-	//		ErrSupportIndex
-	RemoveAt(index int) (support IOrderHashSupport, err error)
-	// 移除多个Id
-	// supports: 返回被移除的Id数组
+	//		ErrElementIdUnknown
+	Remove(eleId string) (ele IOrderHashElement, err error)
+	// 移除一个Element
+	// ele: 返回被移除的Element
 	// err:
-	//		ErrSupportIdUnknown
-	Removes(supportIdArr []string) (supports []IOrderHashSupport, err []error)
-	// 移除多个Id
-	// supports: 返回被移除的Id数组
+	//		ErrElementIndex
+	RemoveAt(index int) (ele IOrderHashElement, err error)
+	// 移除多个Element
+	// eles: 返回被移除的Element数组
 	// err:
-	//		ErrSupportIndex
-	RemovesAt(index int, count int) (supports []IOrderHashSupport, err error)
-	// 替换一个Id
+	//		ErrElementIdUnknown
+	Removes(eleIdArr []string) (eles []IOrderHashElement, err []error)
+	// 移除多个Element
+	// eles: 返回被移除的Element数组
+	// err:
+	//		ErrElementIndex
+	RemovesAt(index int, count int) (eles []IOrderHashElement, err error)
+	// 替换一个Element
 	// 根据Id进行替换，如果找不到相同Id，直接加入
-	Update(support IOrderHashSupport) (err error)
-	// 替换一个Id
+	Update(ele IOrderHashElement) (err error)
+	// 替换一个Element
 	// 根据Id进行替换，如果找不到相同Id，直接加入
-	Updates(supports []IOrderHashSupport) (err []error)
+	Updates(eles []IOrderHashElement) (err []error)
 }
 
 type OrderHashGroup struct {
-	supports   []IOrderHashSupport
-	supportMap map[string]IOrderHashSupport
+	eles   []IOrderHashElement
+	eleMap map[string]IOrderHashElement
 }
 
 func (g *OrderHashGroup) Size() int {
-	return len(g.supports)
+	return len(g.eles)
 }
 
-func (g *OrderHashGroup) Collection() []IOrderHashSupport {
-	return g.supports
+func (g *OrderHashGroup) Collection() []IOrderHashElement {
+	return g.eles
 }
 
 func (g *OrderHashGroup) Ids() []string {
-	ln := len(g.supports)
+	ln := len(g.eles)
 	rs := make([]string, ln, ln)
-	for index, q := range g.supports {
+	for index, q := range g.eles {
 		rs[index] = q.Id()
 	}
 	return rs
 }
 
-func (g *OrderHashGroup) Get(supportId string) (support IOrderHashSupport, ok bool) {
-	support, ok = g.exists(supportId)
+func (g *OrderHashGroup) Get(eleId string) (ele IOrderHashElement, ok bool) {
+	ele, ok = g.exists(eleId)
 	return
 }
 
-func (g *OrderHashGroup) Exists(supportId string) (ok bool) {
-	_, ok = g.exists(supportId)
+func (g *OrderHashGroup) Exists(eleId string) (ok bool) {
+	_, ok = g.exists(eleId)
 	return
 }
 
-func (g *OrderHashGroup) Add(support IOrderHashSupport) error {
-	if nil == support {
-		return ErrSupportNil
+func (g *OrderHashGroup) Add(ele IOrderHashElement) error {
+	if nil == ele {
+		return ErrElementNil
 	}
-	_, ok := g.exists(support.Id())
+	_, ok := g.exists(ele.Id())
 	if ok {
-		return ErrSupportIdExists
+		return ErrElementIdExists
 	}
-	g.add(support)
+	g.add(ele)
 	return nil
 
 }
 
-func (g *OrderHashGroup) AddAt(support IOrderHashSupport, index int) error {
-	if nil == support {
-		return ErrSupportNil
+func (g *OrderHashGroup) AddAt(ele IOrderHashElement, index int) error {
+	if nil == ele {
+		return ErrElementNil
 	}
-	if index < 0 || index >= len(g.supports) {
-		return ErrSupportIndex
+	if index < 0 || index >= len(g.eles) {
+		return ErrElementIndex
 	}
-	_, ok := g.exists(support.Id())
+	_, ok := g.exists(ele.Id())
 	if ok {
-		return ErrSupportIdExists
+		return ErrElementIdExists
 	}
-	g.addAt(support, index)
+	g.addAt(ele, index)
 	return nil
 }
 
-func (g *OrderHashGroup) Adds(supports []IOrderHashSupport) (count int, failArr []IOrderHashSupport, err []error) {
-	for idx, _ := range supports {
-		e := g.Add(supports[idx])
+func (g *OrderHashGroup) Adds(eles []IOrderHashElement) (count int, failArr []IOrderHashElement, err []error) {
+	for idx, _ := range eles {
+		e := g.Add(eles[idx])
 		if nil != e {
 			err = append(err, e)
-			failArr = append(failArr, supports[idx])
+			failArr = append(failArr, eles[idx])
 		} else {
 			count += 1
 		}
@@ -164,12 +164,12 @@ func (g *OrderHashGroup) Adds(supports []IOrderHashSupport) (count int, failArr 
 	return
 }
 
-func (g *OrderHashGroup) AddsAt(supports []IOrderHashSupport, index int) (count int, failArr []IOrderHashSupport, err []error) {
-	for idx, _ := range supports {
-		e := g.AddAt(supports[idx], index)
+func (g *OrderHashGroup) AddsAt(eles []IOrderHashElement, index int) (count int, failArr []IOrderHashElement, err []error) {
+	for idx, _ := range eles {
+		e := g.AddAt(eles[idx], index)
 		if nil != e {
 			err = append(err, e)
-			failArr = append(failArr, supports[idx])
+			failArr = append(failArr, eles[idx])
 		} else {
 			count += 1
 			index += 1
@@ -178,71 +178,71 @@ func (g *OrderHashGroup) AddsAt(supports []IOrderHashSupport, index int) (count 
 	return
 }
 
-func (g *OrderHashGroup) Remove(supportId string) (support IOrderHashSupport, err error) {
-	support, ok := g.exists(supportId)
+func (g *OrderHashGroup) Remove(eleId string) (ele IOrderHashElement, err error) {
+	ele, ok := g.exists(eleId)
 	if !ok {
-		return nil, ErrSupportIdUnknown
+		return nil, ErrElementIdUnknown
 	}
-	support = g.removeMapBy(supportId)
-	_, index := g.findIndex(supportId)
+	ele = g.removeMapBy(eleId)
+	_, index := g.findIndex(eleId)
 	g.removeArrayAt(index)
 	return
 }
 
-func (g *OrderHashGroup) RemoveAt(index int) (support IOrderHashSupport, err error) {
-	if index < 0 || index >= len(g.supports) {
-		return nil, ErrSupportIndex
+func (g *OrderHashGroup) RemoveAt(index int) (ele IOrderHashElement, err error) {
+	if index < 0 || index >= len(g.eles) {
+		return nil, ErrElementIndex
 	}
-	support = g.removeAt(index)
+	ele = g.removeAt(index)
 	return
 }
 
-func (g *OrderHashGroup) Removes(supportIdArr []string) (supports []IOrderHashSupport, err []error) {
-	for _, sId := range supportIdArr {
-		support, e := g.Remove(sId)
+func (g *OrderHashGroup) Removes(eleIdArr []string) (eles []IOrderHashElement, err []error) {
+	for _, sId := range eleIdArr {
+		ele, e := g.Remove(sId)
 		if nil != e {
 			err = append(err, e)
 			continue
 		}
-		supports = append(supports, support)
+		eles = append(eles, ele)
 	}
 	return
 }
 
-func (g *OrderHashGroup) RemovesAt(index int, count int) (supports []IOrderHashSupport, err error) {
-	if index < 0 || index >= len(g.supports) {
-		return nil, ErrSupportIndex
+func (g *OrderHashGroup) RemovesAt(index int, count int) (eles []IOrderHashElement, err error) {
+	if index < 0 || index >= len(g.eles) {
+		return nil, ErrElementIndex
 	}
 	for count >= 0 {
-		support, e := g.RemoveAt(index)
+		ele, e := g.RemoveAt(index)
 		if e != nil {
 			err = e
 			return
 		}
-		supports = append(supports, support)
+		eles = append(eles, ele)
 		count -= 1
 	}
 	return
 }
 
-func (g *OrderHashGroup) Update(support IOrderHashSupport) (err error) {
-	if nil == support {
-		return ErrSupportNil
+func (g *OrderHashGroup) Update(ele IOrderHashElement) (err error) {
+	if nil == ele {
+		return ErrElementNil
 	}
-	sId := support.Id()
+	sId := ele.Id()
 	_, index := g.findIndex(sId)
 	if -1 != index {
-		g.supports[index] = support
+		g.eles[index] = ele
 	} else {
-		g.supports = append(g.supports, support)
+		g.eles = append(g.eles, ele)
 	}
-	g.supportMap[sId] = support
+	g.eleMap[sId] = ele
 	return
 }
 
-func (g *OrderHashGroup) Updates(supports []IOrderHashSupport) (err []error) {
-	for idx, _ := range supports {
-		e := g.Update(supports[idx])
+func (g *OrderHashGroup) Updates(eles []IOrderHashElement) (err []error) {
+	for idx, _ := range eles {
+		e := g.Update(eles[idx])
 		if nil != e {
 			err = append(err, e)
 		}
@@ -252,63 +252,63 @@ func (g *OrderHashGroup) Updates(supports []IOrderHashSupport) (err []error) {
 
 //-------------------
 
-func (g *OrderHashGroup) add(support IOrderHashSupport) {
-	g.supports = append(g.supports, support)
-	g.supportMap[support.Id()] = support
+func (g *OrderHashGroup) add(ele IOrderHashElement) {
+	g.eles = append(g.eles, ele)
+	g.eleMap[ele.Id()] = ele
 }
 
-func (g *OrderHashGroup) addAt(support IOrderHashSupport, index int) {
-	g.supports = append(g.supports, support)
-	g.supportMap[support.Id()] = support
+func (g *OrderHashGroup) addAt(ele IOrderHashElement, index int) {
+	g.eles = append(g.eles, ele)
+	g.eleMap[ele.Id()] = ele
 }
 
-func (g *OrderHashGroup) remove(supportId string) (support IOrderHashSupport) {
-	support = g.removeMapBy(supportId)
-	if nil != support {
-		_, index := g.findIndex(supportId)
+func (g *OrderHashGroup) remove(eleId string) (ele IOrderHashElement) {
+	ele = g.removeMapBy(eleId)
+	if nil != ele {
+		_, index := g.findIndex(eleId)
 		g.removeArrayAt(index)
 	}
-	return support
+	return ele
 }
 
-func (g *OrderHashGroup) removeAt(index int) (support IOrderHashSupport) {
-	support = g.removeArrayAt(index)
-	if nil != support {
-		g.removeMapBy(support.Id())
+func (g *OrderHashGroup) removeAt(index int) (ele IOrderHashElement) {
+	ele = g.removeArrayAt(index)
+	if nil != ele {
+		g.removeMapBy(ele.Id())
 	}
 	return
 }
 
-func (g *OrderHashGroup) removeArrayAt(index int) (support IOrderHashSupport) {
-	if index >= 0 && index < len(g.supports) {
-		support = g.supports[index]
-		g.supports = append(g.supports[:index], g.supports[index+1:]...)
+func (g *OrderHashGroup) removeArrayAt(index int) (ele IOrderHashElement) {
+	if index >= 0 && index < len(g.eles) {
+		ele = g.eles[index]
+		g.eles = append(g.eles[:index], g.eles[index+1:]...)
 	}
 	return
 }
 
-func (g *OrderHashGroup) removeMapBy(supportId string) (support IOrderHashSupport) {
-	if q, ok := g.supportMap[supportId]; ok {
-		delete(g.supportMap, supportId)
+func (g *OrderHashGroup) removeMapBy(eleId string) (ele IOrderHashElement) {
+	if q, ok := g.eleMap[eleId]; ok {
+		delete(g.eleMap, eleId)
 		return q
 	} else {
 		return nil
 	}
 }
 
-func (g *OrderHashGroup) exists(supportId string) (support IOrderHashSupport, ok bool) {
-	if len(g.supports) <= Threshold {
-		s, index := g.findIndex(supportId)
+func (g *OrderHashGroup) exists(eleId string) (ele IOrderHashElement, ok bool) {
+	if len(g.eles) <= Threshold {
+		s, index := g.findIndex(eleId)
 		return s, -1 != index
 	} else {
-		support, ok = g.supportMap[supportId]
+		ele, ok = g.eleMap[eleId]
 		return
 	}
 }
 
-func (g *OrderHashGroup) findIndex(supportId string) (support IOrderHashSupport, index int) {
-	for index, q := range g.supports {
-		if q.Id() == supportId {
+func (g *OrderHashGroup) findIndex(eleId string) (ele IOrderHashElement, index int) {
+	for index, q := range g.eles {
+		if q.Id() == eleId {
 			return q, index
 		}
 	}
