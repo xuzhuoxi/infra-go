@@ -87,10 +87,10 @@ type IOrderHashGroup interface {
 	RemovesAt(index int, count int) (eles []IOrderHashElement, err error)
 	// 替换一个Element
 	// 根据Id进行替换，如果找不到相同Id，直接加入
-	Update(ele IOrderHashElement) (err error)
+	Update(ele IOrderHashElement) (replaced IOrderHashElement, err error)
 	// 替换一个Element
 	// 根据Id进行替换，如果找不到相同Id，直接加入
-	Updates(eles []IOrderHashElement) (err []error)
+	Updates(eles []IOrderHashElement) (replaced []IOrderHashElement, err []error)
 }
 
 func NewOrderHashGroup() *OrderHashGroup {
@@ -241,13 +241,14 @@ func (g *OrderHashGroup) RemovesAt(index int, count int) (eles []IOrderHashEleme
 	return
 }
 
-func (g *OrderHashGroup) Update(ele IOrderHashElement) (err error) {
+func (g *OrderHashGroup) Update(ele IOrderHashElement) (replaced IOrderHashElement, err error) {
 	if nil == ele {
-		return ErrElementNil
+		return nil, ErrElementNil
 	}
 	sId := ele.Id()
 	_, index := g.findIndex(sId)
 	if -1 != index {
+		replaced = g.eles[index]
 		g.eles[index] = ele
 	} else {
 		g.eles = append(g.eles, ele)
@@ -256,11 +257,13 @@ func (g *OrderHashGroup) Update(ele IOrderHashElement) (err error) {
 	return
 }
 
-func (g *OrderHashGroup) Updates(eles []IOrderHashElement) (err []error) {
+func (g *OrderHashGroup) Updates(eles []IOrderHashElement) (replaced []IOrderHashElement, err []error) {
 	for idx, _ := range eles {
-		e := g.Update(eles[idx])
+		r, e := g.Update(eles[idx])
 		if nil != e {
 			err = append(err, e)
+		} else {
+			replaced = append(replaced, r)
 		}
 	}
 	return
