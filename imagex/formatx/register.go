@@ -6,8 +6,8 @@
 package formatx
 
 import (
-	"io"
 	"image"
+	"io"
 	"strings"
 )
 
@@ -20,7 +20,7 @@ type formatDefined struct {
 	decode ImageDecodeFunc
 }
 
-var formats = make([]formatDefined, 128)[0:0]
+var formats = make([]formatDefined, 0, 128)
 
 func CheckFormatRegistered(format string) bool {
 	format = strings.ToLower(format)

@@ -11,6 +11,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
+// 实例化一个基于链表实现的List
+// LinkedList
 func NewLinkedList() *LinkedList {
 	rs := &LinkedList{list: list.New()}
 	return rs

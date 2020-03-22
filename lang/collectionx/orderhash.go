@@ -91,6 +91,8 @@ type IOrderHashGroup interface {
 	// 替换一个Element
 	// 根据Id进行替换，如果找不到相同Id，直接加入
 	Updates(eles []IOrderHashElement) (replaced []IOrderHashElement, err []error)
+	// 遍历元素
+	ForEachElement(f func(index int, ele IOrderHashElement) (stop bool))
 }
 
 func NewOrderHashGroup() *OrderHashGroup {
@@ -267,6 +269,14 @@ func (g *OrderHashGroup) Updates(eles []IOrderHashElement) (replaced []IOrderHas
 		}
 	}
 	return
+}
+
+func (g *OrderHashGroup) ForEachElement(f func(index int, ele IOrderHashElement) (stop bool)) {
+	for idx, _ := range g.eles {
+		if f(idx, g.eles[idx]) {
+			return
+		}
+	}
 }
 
 //-------------------
