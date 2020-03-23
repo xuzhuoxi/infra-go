@@ -28,6 +28,13 @@ func RunningBaseDir() string {
 	return FormatDirPath(filepath.Dir(os.Args[0]))
 }
 
+// 运行时的可执行文件名
+// 以"/"结尾
+func RunningExecFile() string {
+	_, file := SplitFilePath(os.Args[0])
+	return file
+}
+
 //检查路径是否存在
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
