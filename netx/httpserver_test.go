@@ -1,7 +1,16 @@
 package netx
 
-import "testing"
+import (
+	"net/http"
+	"testing"
+	"time"
+)
 
 func TestStartServer(t *testing.T) {
-	NewHttpServer().StartServer(":9999")
+	server := NewHttpServer()
+	server.MapFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		tm := time.Now().Format(time.RFC1123)
+		w.Write([]byte("The time is: " + tm))
+	})
+	server.StartServer(":9000")
 }

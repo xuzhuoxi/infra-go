@@ -7,7 +7,7 @@ import (
 
 func NewHttpServer() IHttpServer {
 	rs := &HttpServer{Network: "http", ServeMux: http.NewServeMux(), Server: nil}
-	rs.MapFunc("/test", testHandler)
+	//rs.MapFunc("/test", testHandler)
 	return rs
 }
 
