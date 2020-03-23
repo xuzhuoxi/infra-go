@@ -55,6 +55,11 @@ func (ed *EventData) StopImmediatePropagation() {
 	ed.stopped = true
 }
 
+// 创建一个EventDispatcher
+func NewEventDispatcher() *EventDispatcher {
+	return &EventDispatcher{}
+}
+
 type IEventDispatcher interface {
 	/**
 	* 添加事件
@@ -86,6 +91,7 @@ type IEventDispatcher interface {
 	/**
 	 * 触发某一类型的事件  并传递数据
 	 * @param eventType 事件类型
+	 * @param currentTarget 当前对象
 	 * @param data 事件的数据(可为null)
 	 */
 	DispatchEvent(eventType string, currentTarget interface{}, data interface{})

@@ -194,6 +194,25 @@ func SplitFilePath(fileFullPath string) (fileDir string, fileName string) {
 	return
 }
 
+// 检查文件名的扩展名, 要求带"."
+func CheckExtensionName(fileName string, extensionName string) bool {
+	if len(fileName) < len(extensionName) {
+		return false
+	}
+	fs := []rune(fileName)
+	es := []rune(extensionName)
+	fIndex := len(fs) - 1
+	eIndex := len(es) - 1
+	for eIndex >= 0 {
+		if fs[fIndex] != es[eIndex] {
+			return false
+		}
+		eIndex -= 1
+		fIndex -= 1
+	}
+	return true
+}
+
 //Format ------------------------------------
 
 // 标准化目录路径，以"/"结尾

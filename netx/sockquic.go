@@ -10,10 +10,6 @@ import (
 	"math/big"
 )
 
-const (
-	QuicNetwork = "quic"
-)
-
 var QuicDataBlockHandler = bytex.NewDefaultDataBlockHandler()
 
 func generateTLSConfig() *tls.Config {

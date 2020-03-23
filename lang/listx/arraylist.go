@@ -9,8 +9,16 @@ import (
 	"github.com/xuzhuoxi/infra-go/lang"
 )
 
-func NewArrayList(max, cap int) *ArrayList {
-	rs := &ArrayList{maxSize: max, initCap: cap}
+// 实例化一个用数组实现的List
+// ArrayList
+// maxSize: 列表允许的最大长度
+// initCap: 列表数组的初始化cap
+// maxSize >= initCap
+func NewArrayList(maxSize, initCap int) *ArrayList {
+	if initCap > maxSize {
+		return nil
+	}
+	rs := &ArrayList{maxSize: maxSize, initCap: initCap}
 	rs.Clear()
 	return rs
 }
@@ -31,7 +39,7 @@ func (l *ArrayList) Swap(i, j int) {
 
 func (l *ArrayList) Clear() {
 	if l.initCap > 0 {
-		l.elements = make([]interface{}, l.initCap)[0:0]
+		l.elements = make([]interface{}, 0, l.initCap)
 	} else {
 		l.elements = nil
 	}

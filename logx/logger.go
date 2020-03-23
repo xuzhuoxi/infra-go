@@ -20,9 +20,13 @@ const (
 )
 
 const (
+	//命令行
 	TypeConsole LogType = iota
+	//基于体积分割的文件日志
 	TypeRollingFile
+	//基于日期分割的文件日志
 	TypeDailyFile
+	//基于日期及体积分割的文件日志
 	TypeDailyRollingFile
 )
 

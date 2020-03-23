@@ -14,13 +14,39 @@ const (
 )
 
 func NewUDPServer() IUDPServer {
+	return newUDPServer().(IUDPServer)
+}
+
+func NewUDP4Server() IUDPServer {
+	return newUDP4Server().(IUDPServer)
+}
+
+func NewUDP6Server() IUDPServer {
+	return newUDP6Server().(IUDPServer)
+}
+
+func newUDPServer() ISockServer {
+	return newUdpS("UDPServer", UDPNetwork)
+}
+
+func newUDP4Server() ISockServer {
+	return newUdpS("UDP4Server", UDPNetwork4)
+}
+
+func newUDP6Server() ISockServer {
+	return newUdpS("UDP6Server", UDPNetwork6)
+}
+
+func newUdpS(name string, network SockNetwork) ISockServer {
 	server := &UDPServer{}
-	server.Name = "UDPServer"
-	server.Network = UDPNetwork
+	server.Name = name
+	server.Network = network
 	server.Logger = logx.DefaultLogger()
 	server.PackHandlerContainer = NewIPackHandler(nil)
 	return server
 }
+
+//---------------------------
 
 type IUDPServer interface {
 	ISockServer
@@ -47,7 +73,7 @@ func (s *UDPServer) StartServer(params SockParams) error {
 	if "" != params.Network {
 		s.Network = params.Network
 	}
-	conn, err := listenUDP(s.Network, params.LocalAddress)
+	conn, err := listenUDP(s.Network.String(), params.LocalAddress)
 	if nil != err {
 		defer s.serverMu.Unlock()
 		return err

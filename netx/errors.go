@@ -1,5 +1,7 @@
 package netx
 
+import "errors"
+
 type EmptyAddrError string
 
 func (e EmptyAddrError) Error() string   { return "EmptyAddrError Address At:" + string(e) }
@@ -23,3 +25,6 @@ type ReaderUnSupportError string
 func (e ReaderUnSupportError) Error() string   { return "Reader Is Not Support At:" + string(e) }
 func (e ReaderUnSupportError) Timeout() bool   { return false }
 func (e ReaderUnSupportError) Temporary() bool { return false }
+
+var ErrHttpServerStarted = errors.New("http: Server started")
+var ErrSockServerStarted = errors.New("socket: Server started")

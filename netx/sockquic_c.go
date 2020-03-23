@@ -8,6 +8,10 @@ import (
 )
 
 func NewQUICClient() IQuicClient {
+	return newQUICClient().(IQuicClient)
+}
+
+func newQUICClient() ISockClient {
 	client := &QUICClient{}
 	client.Name = "QUICClient"
 	client.Network = QuicNetwork
@@ -15,6 +19,8 @@ func NewQUICClient() IQuicClient {
 	client.PackHandler = NewIPackHandler(nil)
 	return client
 }
+
+//----------------------------
 
 type IQuicClient interface {
 	ISockClient

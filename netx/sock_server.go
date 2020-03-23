@@ -62,7 +62,7 @@ type ISockServer interface {
 
 type SockServerBase struct {
 	Name     string
-	Network  string
+	Network  SockNetwork
 	serverMu sync.RWMutex
 	running  bool
 

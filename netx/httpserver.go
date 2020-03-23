@@ -12,10 +12,12 @@ func NewHttpServer() IHttpServer {
 }
 
 type IHttpServer interface {
+	// 启动中
+	Running() bool
 	// 启动Http服务
-	StartServer(addr string)
+	StartServer(addr string) error
 	// 停止Http服务
-	StopServer()
+	StopServer() error
 	// 映射请求响应处理器
 	MapHandle(pattern string, handler http.Handler)
 	// 映射请求响应函数
@@ -28,20 +30,30 @@ type HttpServer struct {
 	Server   *http.Server
 }
 
-func (s *HttpServer) StartServer(addr string) {
-	if nil != s.Server {
-		return
-	}
+func (s *HttpServer) Running() bool {
+	return s.Server != nil
+}
+
+func (s *HttpServer) StartServer(addr string) error {
 	if nil == s.ServeMux {
 		s.ServeMux = http.NewServeMux()
 	}
+	if nil != s.Server { //启动中
+		return ErrHttpServerStarted
+	}
 	s.Server = &http.Server{Addr: addr, Handler: s.ServeMux}
-	s.Server.ListenAndServe()
+	err := s.Server.ListenAndServe()
+	s.Server = nil
+	return err
 }
 
-func (s *HttpServer) StopServer() {
+func (s *HttpServer) StopServer() error {
+	if nil == s.Server {
+		return http.ErrServerClosed
+	}
 	s.Server.Close()
 	s.Server = nil
+	return nil
 }
 
 func (s *HttpServer) MapHandle(pattern string, handler http.Handler) {
