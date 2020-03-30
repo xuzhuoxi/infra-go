@@ -67,3 +67,15 @@ func TestRemoveValueAll(t *testing.T) {
 	fmt.Println(RemoveAllValueT(s1, 4))
 	fmt.Println(RemoveAllValueT(s1, 6))
 }
+
+func TestThree(t *testing.T) {
+	source := make([]int, 3, 3)
+	fmt.Println(1111, source)
+	source1 := source[1:]
+	source1[0] = 1
+	fmt.Println(2222, source, source1)
+	source2 := source[0:2:2]
+	source2[0] = 1
+	fmt.Println(3333, source, source1, source2)
+
+}
