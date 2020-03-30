@@ -93,13 +93,13 @@ func RemoveAtComplex64(slice []complex64, pos int) ([]complex64, complex64, bool
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadComplex64(slice []complex64, pos int) ([]complex64, complex64, bool) {
+//删除头
+func RemoveHeadComplex64(slice []complex64) ([]complex64, complex64, bool) {
 	return RemoveAtComplex64(slice, 0)
 }
 
-//删除头
-func RemoveComplex64ailComplex64(slice []complex64, pos int) ([]complex64, complex64, bool) {
+//删除尾
+func RemoveTailComplex64(slice []complex64) ([]complex64, complex64, bool) {
 	return RemoveAtComplex64(slice, len(slice)-1)
 }
 

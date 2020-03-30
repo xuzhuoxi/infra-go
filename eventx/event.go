@@ -9,35 +9,23 @@ func (c EventCall) Equal(c1 EventCall) bool {
 	return &c == &c1 || reflect.ValueOf(c).Pointer() == reflect.ValueOf(c1).Pointer()
 }
 
-//事件数据
-//@author xuzhuoxi
-//Created  on 2019/01/08.
+// 事件数据
+// @author xuzhuoxi
+// Created  on 2019/01/08.
 type EventData struct {
-	//事件类型
+	// 事件类型
 	EventType string
-	//事件传递的数据
+	// 事件传递的数据
 	Data interface{}
 
-	currentTarget     interface{}
-	currentDispatcher IEventDispatcher
-	target            interface{}
-	stopped           bool
-}
+	// 事件当前目标
+	// 抛出事件时传入
+	CurrentTarget interface{}
+	// 事件的发生器
+	// 分发事件的对象，DispatchEvent行为的所属对象，可能是内嵌对象
+	CurrentDispatcher IEventDispatcher
 
-/**
- * 事件的发生器
- * @returns {IEventDispatcher}
- */
-func (ed *EventData) CurrentDispatcher() IEventDispatcher {
-	return ed.currentDispatcher
-}
-
-/**
- * 事件当前目标
- * @returns interface{}
- */
-func (ed *EventData) CurrentTarget() interface{} {
-	return ed.currentTarget
+	stopped bool
 }
 
 /**
@@ -131,7 +119,7 @@ func (e *EventDispatcher) DispatchEvent(eventType string, currentTarget interfac
 	if !e.hasType(eventType) {
 		return
 	}
-	d := &EventData{EventType: eventType, Data: data, currentTarget: currentTarget, currentDispatcher: e}
+	d := &EventData{EventType: eventType, Data: data, CurrentTarget: currentTarget, CurrentDispatcher: e}
 	e.getDelegate(eventType).Handle(d)
 }
 

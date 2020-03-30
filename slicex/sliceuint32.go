@@ -93,13 +93,13 @@ func RemoveAtUint32(slice []uint32, pos int) ([]uint32, uint32, bool) {
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadUint32(slice []uint32, pos int) ([]uint32, uint32, bool) {
+//删除头
+func RemoveHeadUint32(slice []uint32) ([]uint32, uint32, bool) {
 	return RemoveAtUint32(slice, 0)
 }
 
-//删除头
-func RemoveUint32ailUint32(slice []uint32, pos int) ([]uint32, uint32, bool) {
+//删除尾
+func RemoveTailUint32(slice []uint32) ([]uint32, uint32, bool) {
 	return RemoveAtUint32(slice, len(slice)-1)
 }
 

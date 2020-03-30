@@ -85,6 +85,9 @@ type IOrderHashGroup interface {
 	// err:
 	//		ErrElementIndex
 	RemovesAt(index int, count int) (eles []IOrderHashElement, err error)
+	// 移除全部Element
+	// eles: 返回被移除的Element数组
+	RemoveAll() (eles []IOrderHashElement)
 	// 替换一个Element
 	// 根据Id进行替换，如果找不到相同Id，直接加入
 	Update(ele IOrderHashElement) (replaced IOrderHashElement, err error)
@@ -240,6 +243,13 @@ func (g *OrderHashGroup) RemovesAt(index int, count int) (eles []IOrderHashEleme
 		eles = append(eles, ele)
 		count -= 1
 	}
+	return
+}
+
+func (g *OrderHashGroup) RemoveAll() (eles []IOrderHashElement) {
+	eles = g.eles
+	g.eleMap = make(map[string]IOrderHashElement)
+	g.eles = make([]IOrderHashElement, 0, 32)
 	return
 }
 

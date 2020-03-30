@@ -105,13 +105,13 @@ func RemoveAtT(slice []interface{}, pos int) ([]interface{}, interface{}, bool) 
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadT(slice []interface{}, pos int) ([]interface{}, interface{}, bool) {
+//删除头
+func RemoveHeadT(slice []interface{}) ([]interface{}, interface{}, bool) {
 	return RemoveAtT(slice, 0)
 }
 
-//删除头
-func RemoveTailT(slice []interface{}, pos int) ([]interface{}, interface{}, bool) {
+//删除尾
+func RemoveTailT(slice []interface{}) ([]interface{}, interface{}, bool) {
 	return RemoveAtT(slice, len(slice)-1)
 }
 

@@ -93,13 +93,13 @@ func RemoveAtInt64(slice []int64, pos int) ([]int64, int64, bool) {
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadInt64(slice []int64, pos int) ([]int64, int64, bool) {
+//删除头
+func RemoveHeadInt64(slice []int64) ([]int64, int64, bool) {
 	return RemoveAtInt64(slice, 0)
 }
 
-//删除头
-func RemoveInt64ailInt64(slice []int64, pos int) ([]int64, int64, bool) {
+//删除尾
+func RemoveTailInt64(slice []int64) ([]int64, int64, bool) {
 	return RemoveAtInt64(slice, len(slice)-1)
 }
 

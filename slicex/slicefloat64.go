@@ -93,13 +93,13 @@ func RemoveAtFloat64(slice []float64, pos int) ([]float64, float64, bool) {
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadFloat64(slice []float64, pos int) ([]float64, float64, bool) {
+//删除头
+func RemoveHeadFloat64(slice []float64) ([]float64, float64, bool) {
 	return RemoveAtFloat64(slice, 0)
 }
 
-//删除头
-func RemoveFloat64ailFloat64(slice []float64, pos int) ([]float64, float64, bool) {
+//删除尾
+func RemoveTailFloat64(slice []float64) ([]float64, float64, bool) {
 	return RemoveAtFloat64(slice, len(slice)-1)
 }
 

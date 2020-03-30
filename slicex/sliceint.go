@@ -93,13 +93,13 @@ func RemoveAtInt(slice []int, pos int) ([]int, int, bool) {
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadInt(slice []int, pos int) ([]int, int, bool) {
+//删除头
+func RemoveHeadInt(slice []int) ([]int, int, bool) {
 	return RemoveAtInt(slice, 0)
 }
 
-//删除头
-func RemoveIntailInt(slice []int, pos int) ([]int, int, bool) {
+//删除尾
+func RemoveTailInt(slice []int) ([]int, int, bool) {
 	return RemoveAtInt(slice, len(slice)-1)
 }
 

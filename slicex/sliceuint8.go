@@ -97,13 +97,13 @@ func RemoveAtUint8(slice []uint8, pos int) ([]uint8, uint8, bool) {
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadUint8(slice []uint8, pos int) ([]uint8, uint8, bool) {
+//删除头
+func RemoveHeadUint8(slice []uint8) ([]uint8, uint8, bool) {
 	return RemoveAtUint8(slice, 0)
 }
 
-//删除头
-func RemoveUint8ailUint8(slice []uint8, pos int) ([]uint8, uint8, bool) {
+//删除尾
+func RemoveTailUint8(slice []uint8) ([]uint8, uint8, bool) {
 	return RemoveAtUint8(slice, len(slice)-1)
 }
 

@@ -93,13 +93,13 @@ func RemoveAtComplex128(slice []complex128, pos int) ([]complex128, complex128, 
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadComplex128(slice []complex128, pos int) ([]complex128, complex128, bool) {
+//删除头
+func RemoveHeadComplex128(slice []complex128) ([]complex128, complex128, bool) {
 	return RemoveAtComplex128(slice, 0)
 }
 
-//删除头
-func RemoveComplex128ailComplex128(slice []complex128, pos int) ([]complex128, complex128, bool) {
+//删除尾
+func RemoveTailComplex128(slice []complex128) ([]complex128, complex128, bool) {
 	return RemoveAtComplex128(slice, len(slice)-1)
 }
 

@@ -93,13 +93,13 @@ func RemoveAtString(slice []string, pos int) ([]string, string, bool) {
 	return rs, obj, true
 }
 
-//删除尾
-func RemoveHeadString(slice []string, pos int) ([]string, string, bool) {
+//删除头
+func RemoveHeadString(slice []string) ([]string, string, bool) {
 	return RemoveAtString(slice, 0)
 }
 
-//删除头
-func RemoveStringailString(slice []string, pos int) ([]string, string, bool) {
+//删除尾
+func RemoveTailString(slice []string) ([]string, string, bool) {
 	return RemoveAtString(slice, len(slice)-1)
 }
 
@@ -192,4 +192,20 @@ func EqualString(a, b []string) bool {
 		}
 	}
 	return true
+}
+
+// 清除重复值
+func ClearDuplicateString(slice []string) {
+	if nil == slice || len(slice) < 2 {
+		return
+	}
+	var headIndex = 0
+	for tailIndex := len(slice) - 1; tailIndex >= 0; tailIndex-- {
+		for headIndex = 0; headIndex < tailIndex; headIndex++ {
+			if slice[tailIndex] == slice[headIndex] {
+				slice = append(slice[:tailIndex], slice[tailIndex+1:]...)
+				break
+			}
+		}
+	}
 }
