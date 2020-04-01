@@ -3,9 +3,9 @@ package collectionx
 import "errors"
 
 var (
-	ErrElementIdUnknown = errors.New("OrderHash: Id Unknown. ")
-	ErrElementIdExists  = errors.New("OrderHash: Id Exists. ")
-	ErrElementNil       = errors.New("OrderHash: Support is nil. ")
+	ErrElementIdUnknown = errors.New("OrderHash: ElementId Unknown. ")
+	ErrElementIdExists  = errors.New("OrderHash: ElementId Exists. ")
+	ErrElementNil       = errors.New("OrderHash: Element is nil. ")
 	ErrElementIndex     = errors.New("OrderHash: Index out of range. ")
 )
 
