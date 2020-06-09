@@ -22,6 +22,8 @@ type IHttpServer interface {
 	MapHandle(pattern string, handler http.Handler)
 	// 映射请求响应函数
 	MapFunc(pattern string, f func(w http.ResponseWriter, r *http.Request))
+	// 清除映射
+	ClearMaps()
 }
 
 type HttpServer struct {
@@ -62,6 +64,10 @@ func (s *HttpServer) MapHandle(pattern string, handler http.Handler) {
 
 func (s *HttpServer) MapFunc(pattern string, f func(w http.ResponseWriter, r *http.Request)) {
 	s.MapHandle(pattern, http.HandlerFunc(f))
+}
+
+func (s *HttpServer) ClearMaps() {
+	s.ServeMux = http.NewServeMux()
 }
 
 func testHandler(w http.ResponseWriter, r *http.Request) {
