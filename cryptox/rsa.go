@@ -10,6 +10,9 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"errors"
+	"github.com/xuzhuoxi/infra-go/osxu"
+	"io/ioutil"
 )
 
 type IRSAPublicCipher interface {
@@ -133,6 +136,32 @@ func splitGroup(buf []byte, lim int) [][]byte {
 }
 
 //Public-------------------------------------------
+
+var (
+	errPath = errors.New("Path is not exist! ")
+)
+
+func LoadRsaPublicCipher(path string) (IRSAPublicCipher, error) {
+	if !osxu.IsExist(path) {
+		return nil, errPath
+	}
+	data, err := ioutil.ReadFile(path)
+	if nil != err {
+		return nil, err
+	}
+	return NewRsaPublicCipher(data)
+}
+
+func LoadRsaPrivateCipher(path string, pkcs8 bool) (IRSAPrivateCipher, error) {
+	if !osxu.IsExist(path) {
+		return nil, errPath
+	}
+	data, err := ioutil.ReadFile(path)
+	if nil != err {
+		return nil, err
+	}
+	return NewRsaPrivateCipher(data, pkcs8)
+}
 
 func NewRsaPublicCipher(pemPublic []byte) (IRSAPublicCipher, error) {
 	publicKey, err := ParseRSAPublicKey(pemPublic)
