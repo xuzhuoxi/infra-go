@@ -5,9 +5,9 @@ import (
 )
 
 func TestGet(t *testing.T) {
-	Get("http://localhost:8080/", nil)
+	HttpGet("http://localhost:8080/", nil)
 }
 
 func TestPost(t *testing.T) {
-	PostString("http://localhost:8080/", "", nil)
+	HttpPostString("http://localhost:8080/", "", nil)
 }

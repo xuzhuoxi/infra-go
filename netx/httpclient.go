@@ -12,7 +12,7 @@ import (
 
 type ReqCallBack func(res *http.Response, body *[]byte)
 
-func Get(url string, cb ReqCallBack) {
+func HttpGet(url string, cb ReqCallBack) {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -22,7 +22,7 @@ func Get(url string, cb ReqCallBack) {
 	handleResponse(resp, cb)
 }
 
-func Post(url, contentType string, body io.Reader, cb ReqCallBack) {
+func HttpPost(url, contentType string, body io.Reader, cb ReqCallBack) {
 	resp, err := http.Post(url, contentType, body)
 	if err != nil {
 		log.Fatal(err)
@@ -32,11 +32,11 @@ func Post(url, contentType string, body io.Reader, cb ReqCallBack) {
 	handleResponse(resp, cb)
 }
 
-func PostString(url, body string, cb ReqCallBack) {
-	Post(url, "application/x-www-form-urlencoded", strings.NewReader(body), cb)
+func HttpPostString(url, body string, cb ReqCallBack) {
+	HttpPost(url, "application/x-www-form-urlencoded", strings.NewReader(body), cb)
 }
 
-func PostForm(url string, data url.Values, cb ReqCallBack) {
+func HttpPostForm(url string, data url.Values, cb ReqCallBack) {
 	resp, err := http.PostForm(url, data)
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +48,7 @@ func PostForm(url string, data url.Values, cb ReqCallBack) {
 
 //func Do(url, contentType, body string, cb ReqCallBack) {
 //	client := &http.Client{}
-//	req, errsx := http.NewRequest("POST", url, stringx.NewReader(body))
+//	req, errsx := http.NewRequest("POST", url, strings.NewReader(body))
 //	if errsx != nil {
 //		logx.Fatal(errsx)
 //		return
