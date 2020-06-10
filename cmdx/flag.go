@@ -32,9 +32,10 @@ type FlagSetExtend struct {
 	errorHandling flag.ErrorHandling
 }
 
+// 只有预定义了参数才能使用
 func (fs *FlagSetExtend) Parse(arguments []string) error {
 	if fs.FlagSet.Parsed() {
-		return errors.New("Parsed!")
+		return errors.New("Parsed! ")
 	}
 	err := fs.FlagSet.Parse(arguments)
 	if nil != err {

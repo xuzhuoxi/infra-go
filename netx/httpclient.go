@@ -65,8 +65,9 @@ func handleResponse(resp *http.Response, cb ReqCallBack) {
 		log.Fatal(err)
 		return
 	}
-	fmt.Println(string(body))
 	if nil != cb {
 		cb(resp, &body)
+	} else {
+		fmt.Println(string(body))
 	}
 }
