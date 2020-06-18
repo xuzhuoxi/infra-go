@@ -32,9 +32,25 @@ type IPackReceiver interface {
 	logx.ILoggerSupport
 }
 
+type IPackReceiverSetter interface {
+	SetPackReceiver(receiver IPackReceiver)
+}
+
+type IPackReceiverGetter interface {
+	GetPackReceiver() IPackReceiver
+}
+
 type IPackSender interface {
 	iPackSender
 	logx.ILoggerSupport
+}
+
+type IPackSenderSetter interface {
+	SetPackSender(sender IPackSender)
+}
+
+type IPackSenderGetter interface {
+	GetPackSender() IPackSender
 }
 
 type IPackSendReceiver interface {
