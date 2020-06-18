@@ -19,7 +19,7 @@ type IExtensionManager interface {
 	netx.IAddressProxySetter
 
 	// 初始化
-	InitManager(handlerContainer netx.IPackHandlerContainer, container IProtocolExtensionContainer, sockSender netx.ISockSender)
+	InitManager(handlerContainer netx.IPackHandlerContainer, extensionContainer IProtocolExtensionContainer, sockSender netx.ISockSender)
 
 	// 开始运行
 	StartManager()
@@ -66,10 +66,11 @@ type ExtensionManager struct {
 	ExtensionManagerCustomizeSupport
 }
 
-func (m *ExtensionManager) InitManager(handlerContainer netx.IPackHandlerContainer, container IProtocolExtensionContainer, sockSender netx.ISockSender) {
+func (m *ExtensionManager) InitManager(handlerContainer netx.IPackHandlerContainer, extensionContainer IProtocolExtensionContainer,
+	sockSender netx.ISockSender) {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.HandlerContainer, m.ExtensionContainer, m.SockSender = handlerContainer, container, sockSender
+	m.HandlerContainer, m.ExtensionContainer, m.SockSender = handlerContainer, extensionContainer, sockSender
 }
 
 func (m *ExtensionManager) SetAddressProxy(proxy netx.IAddressProxy) {
