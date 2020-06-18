@@ -5,7 +5,7 @@
 //
 package extendx
 
-import "github.com/pkg/errors"
+import "errors"
 
 type IExtensionContainer interface {
 	//增加Extension
