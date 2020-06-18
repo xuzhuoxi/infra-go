@@ -1,4 +1,4 @@
-package netx
+package tcpx
 
 import (
 	"github.com/xuzhuoxi/infra-go/bytex"
