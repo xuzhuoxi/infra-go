@@ -1,8 +1,9 @@
-package netx
+package wsx
 
 import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 	"golang.org/x/net/websocket"
 	"net/http"
 	"testing"
@@ -19,11 +20,11 @@ func TestWSServer(t *testing.T) {
 		server.SendPackTo(rs, senderAddress)
 		return true
 	}
-	server.GetPackHandlerContainer().SetPackHandlers([]FuncPackHandler{packHandler})
-	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999", WSPattern: "/"})
+	server.GetPackHandlerContainer().SetPackHandlers([]netx.FuncPackHandler{packHandler})
+	go server.StartServer(netx.SockParams{LocalAddress: "127.0.0.1:9999", WSPattern: "/"})
 
 	client := NewWebSocketClient()
-	client.OpenClient(SockParams{RemoteAddress: "ws://127.0.0.1:9999", WSPattern: "/", WSOrigin: "http://127.0.0.1:9999/"})
+	client.OpenClient(netx.SockParams{RemoteAddress: "ws://127.0.0.1:9999", WSPattern: "/", WSOrigin: "http://127.0.0.1:9999/"})
 	go client.StartReceiving()
 	client.SendPackTo([]byte{3, 1, 3, 4})
 	client.SendPackTo([]byte{3, 2, 0, 0})

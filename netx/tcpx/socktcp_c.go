@@ -3,6 +3,7 @@ package netx
 import (
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 	"net"
 )
 
@@ -18,41 +19,41 @@ func NewTCP6Client() ITCPClient {
 	return newTCP6Client().(ITCPClient)
 }
 
-func newTCPClient() ISockClient {
-	return newTcpC("TCPClient", TcpNetwork)
+func newTCPClient() netx.ISockClient {
+	return newTcpC("TCPClient", netx.TcpNetwork)
 }
 
-func newTCP4Client() ISockClient {
-	return newTcpC("TCP4Client", TcpNetwork4)
+func newTCP4Client() netx.ISockClient {
+	return newTcpC("TCP4Client", netx.TcpNetwork4)
 }
 
-func newTCP6Client() ISockClient {
-	return newTcpC("TCP6Client", TcpNetwork6)
+func newTCP6Client() netx.ISockClient {
+	return newTcpC("TCP6Client", netx.TcpNetwork6)
 }
 
-func newTcpC(name string, network SockNetwork) ISockClient {
+func newTcpC(name string, network netx.SockNetwork) netx.ISockClient {
 	client := &TCPClient{}
 	client.Name = name
 	client.Network = network
 	client.Logger = logx.DefaultLogger()
-	client.PackHandler = NewIPackHandler(nil)
+	client.PackHandler = netx.NewIPackHandler(nil)
 	return client
 }
 
 //----------------------------
 
 type ITCPClient interface {
-	ISockClient
+	netx.ISockClient
 }
 
 type TCPClient struct {
-	SockClientBase
+	netx.SockClientBase
 }
 
-func (c *TCPClient) OpenClient(params SockParams) error {
+func (c *TCPClient) OpenClient(params netx.SockParams) error {
 	funcName := "TCPClient.OpenClient"
-	c.clientMu.Lock()
-	defer c.clientMu.Unlock()
+	c.ClientMu.Lock()
+	defer c.ClientMu.Unlock()
 	if "" != params.Network {
 		c.Network = params.Network
 	}
@@ -60,25 +61,25 @@ func (c *TCPClient) OpenClient(params SockParams) error {
 	if nil != err {
 		return err
 	}
-	c.conn = conn
-	connProxy := &ReadWriterAdapter{Reader: conn, Writer: conn, remoteAddr: conn.RemoteAddr()}
-	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, c.Logger, false)
-	c.opening = true
+	c.Conn = conn
+	connProxy := &netx.ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, c.Logger, false)
+	c.Opening = true
 	c.Logger.Infoln(funcName + "()")
 	return nil
 }
 
 func (c *TCPClient) CloseClient() error {
 	funcName := "TCPClient.CloseClient"
-	c.clientMu.Lock()
-	defer c.clientMu.Unlock()
-	if !c.opening {
+	c.ClientMu.Lock()
+	defer c.ClientMu.Unlock()
+	if !c.Opening {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
-	c.opening = false
-	if nil != c.conn {
-		c.conn.Close()
-		c.conn = nil
+	c.Opening = false
+	if nil != c.Conn {
+		c.Conn.Close()
+		c.Conn = nil
 	}
 	c.Logger.Infoln(funcName + "()")
 	return nil

@@ -1,7 +1,8 @@
-package netx
+package udpx
 
 import (
 	"github.com/xuzhuoxi/infra-go/bytex"
+	"github.com/xuzhuoxi/infra-go/netx"
 	"log"
 	"net"
 	"sync"
@@ -25,7 +26,7 @@ func GetUDPAddr(network string, address string) (*net.UDPAddr, error) {
 	mapUDPLock.Lock()
 	defer mapUDPLock.Unlock()
 	if "" == address {
-		return nil, EmptyAddrError("netx.GetUDPAddr")
+		return nil, netx.EmptyAddrError("netx.GetUDPAddr")
 	}
 	addr, ok := mapUDPAddr[address]
 	if ok {

@@ -1,4 +1,4 @@
-package netx
+package wsx
 
 import "github.com/xuzhuoxi/infra-go/bytex"
 

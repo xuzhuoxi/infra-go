@@ -1,10 +1,11 @@
-package netx
+package udpx
 
 import (
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 	"net"
 	"sync"
 )
@@ -25,48 +26,48 @@ func NewUDP6Server() IUDPServer {
 	return newUDP6Server().(IUDPServer)
 }
 
-func newUDPServer() ISockServer {
-	return newUdpS("UDPServer", UDPNetwork)
+func newUDPServer() netx.ISockServer {
+	return newUdpS("UDPServer", netx.UDPNetwork)
 }
 
-func newUDP4Server() ISockServer {
-	return newUdpS("UDP4Server", UDPNetwork4)
+func newUDP4Server() netx.ISockServer {
+	return newUdpS("UDP4Server", netx.UDPNetwork4)
 }
 
-func newUDP6Server() ISockServer {
-	return newUdpS("UDP6Server", UDPNetwork6)
+func newUDP6Server() netx.ISockServer {
+	return newUdpS("UDP6Server", netx.UDPNetwork6)
 }
 
-func newUdpS(name string, network SockNetwork) ISockServer {
+func newUdpS(name string, network netx.SockNetwork) netx.ISockServer {
 	server := &UDPServer{}
 	server.Name = name
 	server.Network = network
 	server.Logger = logx.DefaultLogger()
-	server.PackHandlerContainer = NewIPackHandler(nil)
+	server.PackHandlerContainer = netx.NewIPackHandler(nil)
 	return server
 }
 
 //---------------------------
 
 type IUDPServer interface {
-	ISockServer
+	netx.ISockServer
 	eventx.IEventDispatcher
 }
 
 type UDPServer struct {
 	eventx.EventDispatcher
-	SockServerBase
+	netx.SockServerBase
 	lang.ChannelLimitNone
 
 	conn         *net.UDPConn
-	messageProxy IPackSendReceiver
+	messageProxy netx.IPackSendReceiver
 	serverMu     sync.RWMutex
 }
 
-func (s *UDPServer) StartServer(params SockParams) error {
+func (s *UDPServer) StartServer(params netx.SockParams) error {
 	funcName := "UDPServer.StartServer"
 	s.serverMu.Lock()
-	if s.running {
+	if s.Running {
 		defer s.serverMu.Unlock()
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
@@ -79,13 +80,13 @@ func (s *UDPServer) StartServer(params SockParams) error {
 		return err
 	}
 	s.Logger.Infoln("[UDPServer] listening on:", params.LocalAddress)
-	s.running = true
+	s.Running = true
 	s.conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
-	s.messageProxy = NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, UdpDataBlockHandler, s.Logger, true)
+	s.messageProxy = netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, UdpDataBlockHandler, s.Logger, true)
 	s.serverMu.Unlock()
 	s.Logger.Infoln(funcName + "()")
-	s.dispatchServerStartedEvent(s)
+	s.DispatchServerStartedEvent(s)
 	err2 := s.messageProxy.StartReceiving()
 	return err2
 }
@@ -93,19 +94,19 @@ func (s *UDPServer) StartServer(params SockParams) error {
 func (s *UDPServer) StopServer() error {
 	funcName := "UDPServer.StopServer"
 	s.serverMu.Lock()
-	if !s.running {
+	if !s.Running {
 		defer s.serverMu.Unlock()
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
 	defer func() {
 		s.serverMu.Unlock()
 		s.Logger.Infoln(funcName + "()")
-		s.dispatchServerStoppedEvent(s)
+		s.DispatchServerStoppedEvent(s)
 	}()
 	if nil != s.conn {
 		s.conn.Close()
 	}
-	s.running = false
+	s.Running = false
 	return nil
 }
 
@@ -126,11 +127,11 @@ func (s *UDPServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 	funcName := "UDPServer.SendPackTo"
 	s.serverMu.RLock()
 	defer s.serverMu.RUnlock()
-	if !s.running || s.messageProxy == nil || s.conn == nil {
-		return ConnNilError(funcName)
+	if !s.Running || s.messageProxy == nil || s.conn == nil {
+		return netx.ConnNilError(funcName)
 	}
 	if len(rAddress) == 0 {
-		return NoAddrError(funcName)
+		return netx.NoAddrError(funcName)
 	}
 	_, err := s.messageProxy.SendBytes(bytes, rAddress...)
 	return err

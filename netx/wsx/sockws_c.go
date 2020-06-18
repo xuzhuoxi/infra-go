@@ -1,8 +1,9 @@
-package netx
+package wsx
 
 import (
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 	"golang.org/x/net/websocket"
 )
 
@@ -10,29 +11,29 @@ func NewWebSocketClient() IWebSocketClient {
 	return newWebSocketClient().(IWebSocketClient)
 }
 
-func newWebSocketClient() ISockClient {
+func newWebSocketClient() netx.ISockClient {
 	client := &WebSocketClient{}
 	client.Name = "WSClient"
-	client.Network = WSNetwork
+	client.Network = netx.WSNetwork
 	client.Logger = logx.DefaultLogger()
-	client.PackHandler = NewIPackHandler(nil)
+	client.PackHandler = netx.NewIPackHandler(nil)
 	return client
 }
 
 //---------------------------
 
 type IWebSocketClient interface {
-	ISockClient
+	netx.ISockClient
 }
 
 type WebSocketClient struct {
-	SockClientBase
+	netx.SockClientBase
 }
 
-func (c *WebSocketClient) OpenClient(params SockParams) error {
+func (c *WebSocketClient) OpenClient(params netx.SockParams) error {
 	funcName := "WebSocketClient.OpenClient"
-	c.clientMu.Lock()
-	defer c.clientMu.Unlock()
+	c.ClientMu.Lock()
+	defer c.ClientMu.Unlock()
 	if "" != params.Network {
 		c.Network = params.Network
 	}
@@ -40,25 +41,25 @@ func (c *WebSocketClient) OpenClient(params SockParams) error {
 	if nil != err {
 		return err
 	}
-	c.conn = conn //LocalAddr=Origin
+	c.Conn = conn //LocalAddr=Origin
 	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: params.RemoteAddress}
-	c.PackProxy = NewPackSendReceiver(connProxy, connProxy, c.PackHandler, WsDataBlockHandler, c.Logger, false)
-	c.opening = true
+	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, WsDataBlockHandler, c.Logger, false)
+	c.Opening = true
 	c.Logger.Infoln(funcName + "()")
 	return nil
 }
 
 func (c *WebSocketClient) CloseClient() error {
 	funcName := "WebSocketClient.CloseClient"
-	c.clientMu.Lock()
-	defer c.clientMu.Unlock()
-	if !c.opening {
+	c.ClientMu.Lock()
+	defer c.ClientMu.Unlock()
+	if !c.Opening {
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
-	c.opening = false
-	if nil != c.conn {
-		c.conn.Close()
-		c.conn = nil
+	c.Opening = false
+	if nil != c.Conn {
+		c.Conn.Close()
+		c.Conn = nil
 	}
 	c.Logger.Infoln(funcName + "()")
 	return nil

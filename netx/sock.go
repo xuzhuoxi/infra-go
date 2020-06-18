@@ -134,17 +134,3 @@ func RegisterNetwork(network SockNetwork, newServer func() ISockServer, newClien
 	networkClientMap[network] = newClient
 	networkClient2Map[network] = newClient2
 }
-
-func init() {
-	RegisterNetwork(QuicNetwork, newQuicServer, newQUICClient, newQUICClient)
-
-	RegisterNetwork(TcpNetwork, newTCPServer, newTCPClient, newTCPClient)
-	RegisterNetwork(TcpNetwork4, newTCP4Server, newTCP4Client, newTCP4Client)
-	RegisterNetwork(TcpNetwork6, newTCP6Server, newTCP6Client, newTCP6Client)
-
-	RegisterNetwork(UDPNetwork, newUDPServer, newUDPDialClient, newUDPListenClient)
-	RegisterNetwork(UDPNetwork4, newUDP4Server, newUDP4DialClient, newUDP4ListenClient)
-	RegisterNetwork(UDPNetwork6, newUDP6Server, newUDP6DialClient, newUDP6ListenClient)
-
-	RegisterNetwork(WSNetwork, newWebSocketServer, newWebSocketClient, newWebSocketClient)
-}

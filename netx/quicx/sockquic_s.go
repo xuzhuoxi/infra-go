@@ -1,4 +1,4 @@
-package netx
+package quicx
 
 import (
 	"errors"
@@ -7,44 +7,45 @@ import (
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 )
 
 func NewQuicServer() IQUICServer {
 	return newQuicServer().(IQUICServer)
 }
 
-func newQuicServer() ISockServer {
+func newQuicServer() netx.ISockServer {
 	server := &QUICServer{}
 	server.Name = "QuicServer"
-	server.Network = QuicNetwork
+	server.Network = netx.QuicNetwork
 	server.Logger = logx.DefaultLogger()
-	server.PackHandlerContainer = NewIPackHandler(nil)
+	server.PackHandlerContainer = netx.NewIPackHandler(nil)
 	return server
 }
 
 //----------------------------
 
 type IQUICServer interface {
-	ISockServer
+	netx.ISockServer
 	eventx.IEventDispatcher
 }
 
 type QUICServer struct {
 	eventx.EventDispatcher
-	SockServerBase
+	netx.SockServerBase
 	lang.ChannelLimitNone
 
 	listener   quic.Listener
-	mapProxy   map[string]IPackSendReceiver
+	mapProxy   map[string]netx.IPackSendReceiver
 	mapSession map[string]quic.Session
 	mapStream  map[string]quic.Stream
 }
 
-func (s *QUICServer) StartServer(params SockParams) error {
+func (s *QUICServer) StartServer(params netx.SockParams) error {
 	funcName := "QUICServer.StartServer"
-	s.serverMu.Lock()
-	if s.running {
-		defer s.serverMu.Unlock()
+	s.ServerMu.Lock()
+	if s.Running {
+		defer s.ServerMu.Unlock()
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
 	if "" != params.Network {
@@ -52,21 +53,21 @@ func (s *QUICServer) StartServer(params SockParams) error {
 	}
 	listener, err := listenQuic(params.LocalAddress)
 	if err != nil {
-		defer s.serverMu.Unlock()
+		defer s.ServerMu.Unlock()
 		return err
 	}
 	s.Logger.Infoln("[QUICServer] listening on:", params.LocalAddress)
 	s.listener = listener
-	s.mapProxy = make(map[string]IPackSendReceiver)
+	s.mapProxy = make(map[string]netx.IPackSendReceiver)
 	s.mapSession = make(map[string]quic.Session)
 	s.mapStream = make(map[string]quic.Stream)
-	s.running = true
-	s.serverMu.Unlock()
+	s.Running = true
+	s.ServerMu.Unlock()
 	s.Logger.Infoln(funcName + "()")
-	s.dispatchServerStartedEvent(s)
-	for s.running {
+	s.DispatchServerStartedEvent(s)
+	for s.Running {
 		session, err := listener.Accept()
-		if !s.running || nil != err {
+		if !s.Running || nil != err {
 			return err
 		}
 		go s.handlerSession(session.RemoteAddr().String(), session)
@@ -76,15 +77,15 @@ func (s *QUICServer) StartServer(params SockParams) error {
 
 func (s *QUICServer) StopServer() error {
 	funcName := "QUICServer.StopServer"
-	s.serverMu.Lock()
-	if !s.running {
-		defer s.serverMu.Unlock()
+	s.ServerMu.Lock()
+	if !s.Running {
+		defer s.ServerMu.Unlock()
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
 	defer func() {
-		s.serverMu.Unlock()
+		s.ServerMu.Unlock()
 		s.Logger.Infoln(funcName + "()")
-		s.dispatchServerStoppedEvent(s)
+		s.DispatchServerStoppedEvent(s)
 	}()
 	if nil != s.listener {
 		s.listener.Close()
@@ -102,7 +103,7 @@ func (s *QUICServer) StopServer() error {
 		sess.Close()
 	}
 	s.mapSession = nil
-	s.running = false
+	s.Running = false
 	return nil
 }
 
@@ -111,8 +112,8 @@ func (s *QUICServer) Connections() int {
 }
 
 func (s *QUICServer) CloseConnection(address string) (err error, ok bool) {
-	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
+	s.ServerMu.Lock()
+	defer s.ServerMu.Unlock()
 	stream, ok1 := s.mapStream[address]
 	session, ok2 := s.mapSession[address]
 	if !ok1 && !ok2 {
@@ -145,13 +146,13 @@ func (s *QUICServer) SendPackTo(pack []byte, rAddress ...string) error {
 
 func (s *QUICServer) SendBytesTo(data []byte, rAddress ...string) error {
 	funcName := "QUICServer.SendBytesTo"
-	s.serverMu.RLock()
-	defer s.serverMu.RUnlock()
-	if !s.running || nil == s.mapProxy || nil == s.mapStream || nil == s.mapSession {
-		return ConnNilError(funcName)
+	s.ServerMu.RLock()
+	defer s.ServerMu.RUnlock()
+	if !s.Running || nil == s.mapProxy || nil == s.mapStream || nil == s.mapSession {
+		return netx.ConnNilError(funcName)
 	}
 	if 0 == len(rAddress) {
-		return NoAddrError(funcName)
+		return netx.NoAddrError(funcName)
 	}
 	for _, address := range rAddress {
 		ts, ok := s.mapProxy[address]
@@ -164,30 +165,30 @@ func (s *QUICServer) SendBytesTo(data []byte, rAddress ...string) error {
 
 func (s *QUICServer) handlerSession(address string, session quic.Session) {
 	funcName := "QUICServer.handlerSession"
-	s.serverMu.Lock()
+	s.ServerMu.Lock()
 	var stream quic.Stream
 	var err error
 	stream, err = session.AcceptStream()
 	if nil != err {
-		s.serverMu.Unlock()
+		s.ServerMu.Unlock()
 		s.Logger.Warnln(funcName, err)
 		return
 	}
 	s.mapSession[address] = session
 	s.mapStream[address] = stream
-	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, remoteAddr: session.RemoteAddr()}
-	proxy := NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, QuicDataBlockHandler, s.Logger, false)
+	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
+	proxy := netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, QuicDataBlockHandler, s.Logger, false)
 	s.mapProxy[address] = proxy
-	s.serverMu.Unlock()
-	s.dispatchServerConnOpenEvent(s, address)
+	s.ServerMu.Unlock()
+	s.DispatchServerConnOpenEvent(s, address)
 	s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Opened!")
 
 	defer func() {
-		s.dispatchServerConnCloseEvent(s, address)
+		s.DispatchServerConnCloseEvent(s, address)
 		s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Closed!")
 	}()
 	defer func() {
-		s.serverMu.Lock()
+		s.ServerMu.Lock()
 		delete(s.mapProxy, address)
 		delete(s.mapStream, address)
 		delete(s.mapSession, address)
@@ -199,7 +200,7 @@ func (s *QUICServer) handlerSession(address string, session quic.Session) {
 			session.Close()
 			session = nil
 		}
-		s.serverMu.Unlock()
+		s.ServerMu.Unlock()
 	}()
 	proxy.StartReceiving() //这里会阻塞
 }

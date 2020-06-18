@@ -2,6 +2,7 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/infra-go/bytex"
+	"github.com/xuzhuoxi/infra-go/netx"
 	"log"
 	"net"
 	"sync"
@@ -25,7 +26,7 @@ func GetTCPAddr(network string, address string) (*net.TCPAddr, error) {
 	mapTCPLock.Lock()
 	defer mapTCPLock.Unlock()
 	if "" == address {
-		return nil, EmptyAddrError("netx.GetTCPAddr")
+		return nil, netx.EmptyAddrError("netx.GetTCPAddr")
 	}
 	addr, ok := mapTCPAddr[address]
 	if ok {

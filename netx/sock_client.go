@@ -19,7 +19,7 @@ type ISockClientGetter interface {
 }
 
 type IClientOpening interface {
-	Opening() bool
+	IsOpening() bool
 }
 
 type IClient interface {
@@ -42,11 +42,11 @@ type ISockClient interface {
 type SockClientBase struct {
 	Name     string
 	Network  SockNetwork
-	clientMu sync.RWMutex
-	opening  bool
+	ClientMu sync.RWMutex
+	Opening  bool
 
-	localAddress string
-	conn         ISockConn
+	LocalAddr string
+	Conn      ISockConn
 
 	PackProxy IPackSendReceiver
 	Logger    logx.ILogger
@@ -63,14 +63,14 @@ func (c *SockClientBase) GetName() string {
 }
 
 func (c *SockClientBase) GetPackHandlerContainer() IPackHandlerContainer {
-	c.clientMu.RLock()
-	defer c.clientMu.RUnlock()
+	c.ClientMu.RLock()
+	defer c.ClientMu.RUnlock()
 	return c.PackHandler
 }
 
 func (c *SockClientBase) SetPackHandlerContainer(packHandler IPackHandlerContainer) {
-	c.clientMu.Lock()
-	defer c.clientMu.Unlock()
+	c.ClientMu.Lock()
+	defer c.ClientMu.Unlock()
 	c.PackHandler = packHandler
 	if c.PackProxy != nil {
 		c.PackProxy.SetPackHandlerContainer(c.PackHandler)
@@ -78,17 +78,17 @@ func (c *SockClientBase) SetPackHandlerContainer(packHandler IPackHandlerContain
 }
 
 func (c *SockClientBase) LocalAddress() string {
-	return c.conn.LocalAddr().String()
+	return c.Conn.LocalAddr().String()
 }
 
 func (c *SockClientBase) IsReceiving() bool {
 	return c.PackProxy.IsReceiving()
 }
 
-func (c *SockClientBase) Opening() bool {
-	c.clientMu.RLock()
-	defer c.clientMu.RUnlock()
-	return c.opening
+func (c *SockClientBase) IsOpening() bool {
+	c.ClientMu.RLock()
+	defer c.ClientMu.RUnlock()
+	return c.Opening
 }
 
 func (c *SockClientBase) GetLogger() logx.ILogger {

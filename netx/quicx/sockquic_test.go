@@ -1,8 +1,9 @@
-package netx
+package quicx
 
 import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 	"testing"
 	"time"
 )
@@ -18,11 +19,11 @@ func TestQUICServer(t *testing.T) {
 		server.SendPackTo(rs, senderAddress)
 		return true
 	}
-	server.GetPackHandlerContainer().SetPackHandlers([]FuncPackHandler{packHandler})
-	go server.StartServer(SockParams{LocalAddress: "127.0.0.1:9999"})
+	server.GetPackHandlerContainer().SetPackHandlers([]netx.FuncPackHandler{packHandler})
+	go server.StartServer(netx.SockParams{LocalAddress: "127.0.0.1:9999"})
 	time.Sleep(1 * time.Second)
 	client := NewQUICClient()
-	client.OpenClient(SockParams{RemoteAddress: "127.0.0.1:9999"})
+	client.OpenClient(netx.SockParams{RemoteAddress: "127.0.0.1:9999"})
 	go client.StartReceiving()
 	b := true
 	go func() {
@@ -80,8 +81,8 @@ func TestQUICServer(t *testing.T) {
 //	fmt.Printf("Server: Got '%s'\n", string(b))
 //	return w.Writer.Write(b)
 //}
-
-//Client
+//
+////Client
 //const addr = "localhost:9999"
 //const message = "ccc"
 //

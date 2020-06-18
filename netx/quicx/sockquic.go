@@ -1,4 +1,4 @@
-package netx
+package quicx
 
 import (
 	"crypto/rand"

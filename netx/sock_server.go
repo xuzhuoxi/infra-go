@@ -21,7 +21,7 @@ type ISockServerGetter interface {
 }
 
 type IServerRunning interface {
-	Running() bool
+	IsRunning() bool
 }
 
 type IServer interface {
@@ -55,8 +55,8 @@ type ISockServer interface {
 type SockServerBase struct {
 	Name     string
 	Network  SockNetwork
-	serverMu sync.RWMutex
-	running  bool
+	ServerMu sync.RWMutex
+	Running  bool
 
 	Logger logx.ILogger
 
@@ -79,36 +79,36 @@ func (s *SockServerBase) SetLogger(logger logx.ILogger) {
 	s.Logger = logger
 }
 
-func (s *SockServerBase) Running() bool {
-	s.serverMu.RLock()
-	defer s.serverMu.RUnlock()
-	return s.running
+func (s *SockServerBase) IsRunning() bool {
+	s.ServerMu.RLock()
+	defer s.ServerMu.RUnlock()
+	return s.Running
 }
 
 func (s *SockServerBase) GetPackHandlerContainer() IPackHandlerContainer {
-	s.serverMu.RLock()
-	defer s.serverMu.RUnlock()
+	s.ServerMu.RLock()
+	defer s.ServerMu.RUnlock()
 	return s.PackHandlerContainer
 }
 
 func (s *SockServerBase) SetPackHandlerContainer(packHandlerContainer IPackHandlerContainer) {
-	s.serverMu.Lock()
-	defer s.serverMu.Unlock()
+	s.ServerMu.Lock()
+	defer s.ServerMu.Unlock()
 	s.PackHandlerContainer = packHandlerContainer
 }
 
-func (s *SockServerBase) dispatchServerStartedEvent(dispatcher eventx.IEventDispatcher) {
+func (s *SockServerBase) DispatchServerStartedEvent(dispatcher eventx.IEventDispatcher) {
 	dispatcher.DispatchEvent(ServerEventStart, dispatcher, nil)
 }
 
-func (s *SockServerBase) dispatchServerStoppedEvent(dispatcher eventx.IEventDispatcher) {
+func (s *SockServerBase) DispatchServerStoppedEvent(dispatcher eventx.IEventDispatcher) {
 	dispatcher.DispatchEvent(ServerEventStop, dispatcher, nil)
 }
 
-func (s *SockServerBase) dispatchServerConnOpenEvent(dispatcher eventx.IEventDispatcher, address string) {
+func (s *SockServerBase) DispatchServerConnOpenEvent(dispatcher eventx.IEventDispatcher, address string) {
 	dispatcher.DispatchEvent(ServerEventConnOpened, dispatcher, address)
 }
 
-func (s *SockServerBase) dispatchServerConnCloseEvent(dispatcher eventx.IEventDispatcher, address string) {
+func (s *SockServerBase) DispatchServerConnCloseEvent(dispatcher eventx.IEventDispatcher, address string) {
 	dispatcher.DispatchEvent(ServerEventConnClosed, dispatcher, address)
 }
