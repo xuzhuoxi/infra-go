@@ -95,6 +95,10 @@ func (c *SockClientBase) GetLogger() logx.ILogger {
 	return c.Logger
 }
 
+func (s *SockClientBase) SetLogger(logger logx.ILogger) {
+	s.Logger = logger
+}
+
 func (c *SockClientBase) SendPackTo(msg []byte, rAddress ...string) error {
 	_, err := c.PackProxy.SendPack(msg, rAddress...)
 	return err

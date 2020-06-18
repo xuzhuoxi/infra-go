@@ -29,18 +29,18 @@ type iPackSender interface {
 
 type IPackReceiver interface {
 	iPackReceiver
-	logx.ILoggerGetter
+	logx.ILoggerSupport
 }
 
 type IPackSender interface {
 	iPackSender
-	logx.ILoggerGetter
+	logx.ILoggerSupport
 }
 
 type IPackSendReceiver interface {
 	iPackSender
 	iPackReceiver
-	logx.ILoggerGetter
+	logx.ILoggerSupport
 }
 
 //--------------------------------------------------------------------------

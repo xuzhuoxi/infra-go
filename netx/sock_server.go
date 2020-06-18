@@ -12,14 +12,6 @@ import (
 	"sync"
 )
 
-const (
-	ServerEventStart = "netx.ServerEventStart"
-	ServerEventStop  = "netx.ServerEventStop"
-
-	ServerEventConnOpened = "netx.ServerEventConnOpened"
-	ServerEventConnClosed = "netx.ServerEventConnClosed"
-)
-
 type ISockServerSetter interface {
 	SetSockServer(server ISockServer)
 }
