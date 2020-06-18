@@ -19,7 +19,7 @@ type IExtensionManager interface {
 	netx.IAddressProxySetter
 
 	// 初始化
-	InitManager(sock netx.ISockServer, container IProtocolExtensionContainer)
+	InitManager(handlerContainer netx.IPackHandlerContainer, container IProtocolExtensionContainer, sockSender netx.ISockSender)
 
 	// 开始运行
 	StartManager()
@@ -55,8 +55,10 @@ func NewExtensionManager() *ExtensionManager {
 }
 
 type ExtensionManager struct {
-	SockServer   netx.ISockServer
-	Container    IProtocolExtensionContainer
+	HandlerContainer   netx.IPackHandlerContainer
+	ExtensionContainer IProtocolExtensionContainer
+	SockSender         netx.ISockSender
+
 	Logger       logx.ILogger
 	AddressProxy netx.IAddressProxy
 	Mutex        sync.RWMutex
@@ -64,16 +66,16 @@ type ExtensionManager struct {
 	ExtensionManagerCustomizeSupport
 }
 
+func (m *ExtensionManager) InitManager(handlerContainer netx.IPackHandlerContainer, container IProtocolExtensionContainer, sockSender netx.ISockSender) {
+	m.Mutex.Lock()
+	defer m.Mutex.Unlock()
+	m.HandlerContainer, m.ExtensionContainer, m.SockSender = handlerContainer, container, sockSender
+}
+
 func (m *ExtensionManager) SetAddressProxy(proxy netx.IAddressProxy) {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
 	m.AddressProxy = proxy
-}
-
-func (m *ExtensionManager) InitManager(sock netx.ISockServer, container IProtocolExtensionContainer) {
-	m.Mutex.Lock()
-	defer m.Mutex.Unlock()
-	m.SockServer, m.Container = sock, container
 }
 
 func (m *ExtensionManager) SetLogger(logger logx.ILogger) {
@@ -85,51 +87,51 @@ func (m *ExtensionManager) SetLogger(logger logx.ILogger) {
 func (m *ExtensionManager) StartManager() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.Container.InitExtensions()
-	m.SockServer.GetPackHandlerContainer().AppendPackHandler(m.onPack)
+	m.ExtensionContainer.InitExtensions()
+	m.HandlerContainer.AppendPackHandler(m.onPack)
 }
 
 func (m *ExtensionManager) StopManager() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.SockServer.GetPackHandlerContainer().ClearHandler(m.onPack)
-	m.Container.DestroyExtensions()
+	m.HandlerContainer.ClearHandler(m.onPack)
+	m.ExtensionContainer.DestroyExtensions()
 }
 
 func (m *ExtensionManager) SaveExtensions() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.Container.SaveExtensions()
+	m.ExtensionContainer.SaveExtensions()
 }
 
 func (m *ExtensionManager) SaveExtension(name string) {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.Container.SaveExtension(name)
+	m.ExtensionContainer.SaveExtension(name)
 }
 
 func (m *ExtensionManager) EnableExtension(name string) {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.Container.EnableExtension(name, true)
+	m.ExtensionContainer.EnableExtension(name, true)
 }
 
 func (m *ExtensionManager) DisableExtension(name string) {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.Container.EnableExtension(name, false)
+	m.ExtensionContainer.EnableExtension(name, false)
 }
 
 func (m *ExtensionManager) EnableExtensions() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.Container.EnableExtensions(true)
+	m.ExtensionContainer.EnableExtensions(true)
 }
 
 func (m *ExtensionManager) DisableExtensions() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.Container.EnableExtensions(false)
+	m.ExtensionContainer.EnableExtensions(false)
 }
 
 //---------------------------------
@@ -224,7 +226,7 @@ func (m *ExtensionManager) GenParams(extension IProtocolExtension, senderAddress
 	t, h := extension.GetParamInfo(pid)
 	response := DefaultResponsePool.GetInstance()
 	response.SetHeader(name, pid, uid, senderAddress)
-	response.SetSockServer(m.SockServer)
+	response.SetSockSender(m.SockSender)
 	response.SetAddressProxy(m.AddressProxy)
 	response.SetParamInfo(t, h)
 	request := DefaultRequestPool.GetInstance()
@@ -234,7 +236,7 @@ func (m *ExtensionManager) GenParams(extension IProtocolExtension, senderAddress
 }
 
 func (m *ExtensionManager) GetProtocolExtension(pid string) (pe IProtocolExtension, ok bool) {
-	if pe, ok := m.Container.GetExtension(pid).(IProtocolExtension); ok {
+	if pe, ok := m.ExtensionContainer.GetExtension(pid).(IProtocolExtension); ok {
 		return pe, true
 	}
 	return nil, false

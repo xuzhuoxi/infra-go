@@ -14,7 +14,7 @@ import (
 type IExtensionResponse interface {
 	IExtensionHeader
 	netx.IAddressProxySetter
-	netx.ISockServerSetter
+	netx.ISockSenderSetter
 	// 设置参数类型与处理器
 	SetParamInfo(paramType ExtensionParamType, paramHandler IProtocolParamsHandler)
 }
@@ -52,7 +52,7 @@ func NewSockResponse() *SockResponse {
 type SockResponse struct {
 	ExtensionHeader
 
-	SockServer   netx.ISockServer
+	SockSender   netx.ISockSender
 	AddressProxy netx.IAddressProxy
 
 	ParamType    ExtensionParamType
@@ -63,43 +63,45 @@ type SockResponse struct {
 func (resp *SockResponse) SetAddressProxy(proxy netx.IAddressProxy) {
 	resp.AddressProxy = proxy
 }
-func (resp *SockResponse) SetSockServer(server netx.ISockServer) {
-	resp.SockServer = server
+
+func (resp *SockResponse) SetSockSender(sockSender netx.ISockSender) {
+	resp.SockSender = sockSender
 }
+
 func (resp *SockResponse) SetParamInfo(paramType ExtensionParamType, paramHandler IProtocolParamsHandler) {
 	resp.ParamType, resp.ParamHandler = paramType, paramHandler
 }
 
 func (resp *SockResponse) SendBinaryResponse(data ...[]byte) {
 	msg := resp.makePackMessage(data)
-	resp.SockServer.SendPackTo(msg, resp.CAddress)
+	resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
 func (resp *SockResponse) SendBinaryResponseToClient(clientId string, data ...[]byte) {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
 		msg := resp.makePackMessage(data)
-		resp.SockServer.SendPackTo(msg, address)
+		resp.SockSender.SendPackTo(msg, address)
 	}
 }
 
 func (resp *SockResponse) SendJsonResponse(data ...string) {
 	msg := resp.makePackMessage(data)
-	resp.SockServer.SendPackTo(msg, resp.CAddress)
+	resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
 func (resp *SockResponse) SendJsonResponseToClient(clientId string, data ...string) {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
 		msg := resp.makePackMessage(data)
-		resp.SockServer.SendPackTo(msg, address)
+		resp.SockSender.SendPackTo(msg, address)
 	}
 }
 
 func (resp *SockResponse) SendObjectResponse(data ...interface{}) {
 	msg := resp.makePackMessage(data)
-	resp.SockServer.SendPackTo(msg, resp.CAddress)
+	resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
 func (resp *SockResponse) SendObjectResponseToClient(clientId string, data ...interface{}) {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
 		msg := resp.makePackMessage(data)
-		resp.SockServer.SendPackTo(msg, address)
+		resp.SockSender.SendPackTo(msg, address)
 	}
 }
 

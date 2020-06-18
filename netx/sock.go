@@ -120,6 +120,14 @@ type ISockSender interface {
 	SendBytesTo(bytes []byte, rAddress ...string) error
 }
 
+type ISockSenderSetter interface {
+	SetSockSender(sockSender ISockSender)
+}
+
+type ISockSenderGetter interface {
+	GetSockSender() ISockSender
+}
+
 type ISockName interface {
 	// 设置标识名称
 	SetName(name string)
