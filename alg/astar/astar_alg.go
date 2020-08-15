@@ -158,7 +158,8 @@ func (alg *AStarAlg) SetData(data []int) (sourceData [][][]int, err error) {
 		return nil, errors.New("Data Error. ")
 	}
 	alg.sourceMap, _ = alg.copyData(data)
-	alg.resetMapSearch()
+	alg.updateSearchMapFromSource()
+	alg.clearHistory()
 	return alg.sourceMap, nil
 }
 
@@ -172,7 +173,8 @@ func (alg *AStarAlg) SetData2D(data [][]int) (sourceData [][][]int, err error) {
 		return nil, errors.New("Data Error. ")
 	}
 	alg.sourceMap = data3d
-	alg.resetMapSearch()
+	alg.updateSearchMapFromSource()
+	alg.clearHistory()
 	return data3d, nil
 }
 
@@ -186,7 +188,8 @@ func (alg *AStarAlg) SetData3D(data [][][]int) (sourceData [][][]int, err error)
 		return nil, errors.New("Data Error. ")
 	}
 	alg.sourceMap = data3d
-	alg.resetMapSearch()
+	alg.updateSearchMapFromSource()
+	alg.clearHistory()
 	return data3d, nil
 }
 
@@ -228,7 +231,7 @@ func (alg *AStarAlg) initPath() {
 	if alg.baseMask > MAX_MASK {
 		alg.baseMask = DEFAULT_MASK_ADD
 		alg.maxMask = alg.baseMask + DEFAULT_MASK_ADD
-		alg.resetMapSearch()
+		alg.updateSearchMapFromSource()
 	}
 }
 
@@ -237,7 +240,7 @@ func (alg *AStarAlg) initPath() {
 // 通过数据值来标记地图路径
 // 从开始点向目标点检索
 func (alg *AStarAlg) searchPath() bool {
-	if alg.outMap(alg.startPos) || alg.outMap(alg.endPos) {
+	if alg.isOutOfMap(alg.startPos) || alg.isOutOfMap(alg.endPos) {
 		return false
 	}
 	// 以开始点为初始点搜索
@@ -256,7 +259,7 @@ func (alg *AStarAlg) searchPath() bool {
 			nextVector := GetDirVector(n)
 			nextPos := pos.AddVector(nextVector)
 			// 如果下一个超出地图范围
-			if alg.outMap(nextPos) {
+			if alg.isOutOfMap(nextPos) {
 				continue
 			}
 			adjX, adjY, adjZ := nextPos.X, nextPos.Y, nextPos.Z
@@ -309,7 +312,7 @@ func (alg *AStarAlg) genPath() []Position {
 			nextDirVector := GetDirVector(n)
 			adjPos := nextPos.AddVector(nextDirVector)
 			// 如果下一个超出地图范围
-			if alg.outMap(adjPos) {
+			if alg.isOutOfMap(adjPos) {
 				continue
 			}
 			//到达目标点
@@ -339,18 +342,22 @@ func (alg *AStarAlg) genPath() []Position {
 	return walk
 }
 
-func (alg *AStarAlg) outMap(pos Position) bool {
-	x, y, z := pos.X, pos.Y, pos.Z
-	return x < 0 || y < 0 || z < 0 || x >= alg.size.Width || y >= alg.size.Height || z >= alg.size.Depth
+func (alg *AStarAlg) isOutOfMap(pos Position) bool {
+	return pos.X < 0 || pos.Y < 0 || pos.Z < 0 || pos.X >= alg.size.Width || pos.Y >= alg.size.Height || pos.Z >= alg.size.Depth
 }
 
-func (alg *AStarAlg) outMap2(x, y, z int) bool {
+func (alg *AStarAlg) isOutOfMap2(x, y, z int) bool {
 	return x < 0 || y < 0 || z < 0 || x >= alg.size.Width || y >= alg.size.Height || z >= alg.size.Depth
 }
 
 //重置检索地图
-func (alg *AStarAlg) resetMapSearch() {
+func (alg *AStarAlg) updateSearchMapFromSource() {
 	alg.searchMap, _ = alg.copyData3D(alg.sourceMap)
+}
+
+//清除历史记录
+func (alg *AStarAlg) clearHistory() {
+	alg.history = history{}
 }
 
 //----------------------------------------
