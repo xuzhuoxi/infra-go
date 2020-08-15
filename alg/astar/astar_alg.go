@@ -220,7 +220,7 @@ func (alg *AStarAlg) searchPath() bool {
 		info, _ := openQueue.Shift()
 		pos := info.Position
 		for _, n := range alg.nextDirs {
-			nextVector := GetNextDir(n)
+			nextVector := GetDirVector(n)
 			nextPos := pos.AddVector(nextVector)
 			// 如果下一个超出地图范围
 			if alg.outMap(nextPos) {
@@ -273,7 +273,7 @@ func (alg *AStarAlg) genPath() []Position {
 		//fmt.Println("for 0", pos, minGnVal)
 		var nextDirPos Position
 		for _, n := range alg.nextDirs {
-			nextDirVector := GetNextDir(n)
+			nextDirVector := GetDirVector(n)
 			adjPos := nextPos.AddVector(nextDirVector)
 			// 如果下一个超出地图范围
 			if alg.outMap(adjPos) {

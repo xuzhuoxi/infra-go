@@ -141,6 +141,6 @@ var vectors = []DirectionVector{
 	Vector_X0_Y0_Z_, Vector_X0_Y1_Z_, Vector_X1_Y1_Z_, Vector_X1_Y0_Z_, Vector_X1_Y__Z_, Vector_X0_Y__Z_, Vector_X__Y__Z_, Vector_X__Y0_Z_, Vector_X__Y1_Z_}
 
 // 取方向对应的矢量定义
-func GetNextDir(dir Direction) DirectionVector {
+func GetDirVector(dir Direction) DirectionVector {
 	return vectors[dir]
 }
