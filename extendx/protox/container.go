@@ -13,7 +13,7 @@ type IProtocolExtensionContainer interface {
 	extendx.IExtensionContainer
 	// 初始化全部Extension
 	InitExtensions() []error
-	// 反初始化全部Extension
+	// 销毁全部Extension
 	DestroyExtensions() []error
 
 	// 保存

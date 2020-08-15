@@ -41,7 +41,9 @@ type IExtensionManager interface {
 	DisableExtensions()
 
 	// 消息处理入口，这里是并发方法
-	onPack(msgData []byte, senderAddress string, other interface{}) bool
+	OnMessageUnpack(msgData []byte, senderAddress string, other interface{}) bool
+	// 消息处理入口，这里是并发方法
+	DoRequest(extension IProtocolExtension, req IExtensionRequest, resp IExtensionResponse)
 }
 
 //---------------------------------------------
@@ -89,13 +91,13 @@ func (m *ExtensionManager) StartManager() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
 	m.ExtensionContainer.InitExtensions()
-	m.HandlerContainer.AppendPackHandler(m.onPack)
+	m.HandlerContainer.AppendPackHandler(m.OnMessageUnpack)
 }
 
 func (m *ExtensionManager) StopManager() {
 	m.Mutex.Lock()
 	defer m.Mutex.Unlock()
-	m.HandlerContainer.ClearHandler(m.onPack)
+	m.HandlerContainer.ClearHandler(m.OnMessageUnpack)
 	m.ExtensionContainer.DestroyExtensions()
 }
 
@@ -141,7 +143,7 @@ func (m *ExtensionManager) DisableExtensions() {
 // 并发注意:本方法是否并发，取决于SockServer的并发性
 // 在netx中，TCP,Quic,WebSocket为并发响应，UDP为非并发响应
 // msgData非共享的，但在parsePackMessage后这部分数据会发生变化
-func (m *ExtensionManager) onPack(msgData []byte, senderAddress string, other interface{}) bool {
+func (m *ExtensionManager) OnMessageUnpack(msgData []byte, senderAddress string, other interface{}) bool {
 	//m.logger.Infoln("ExtensionManager.onPack", senderAddress, msgData)
 	m.CustomStartOnPack(senderAddress)
 	name, pid, uid, data := m.ParseMessage(msgData)
@@ -156,17 +158,7 @@ func (m *ExtensionManager) onPack(msgData []byte, senderAddress string, other in
 		DefaultResponsePool.Recycle(response)
 	}()
 	//响应处理
-	if be, ok := extension.(IBeforeRequestExtension); ok { //前置处理
-		be.BeforeRequest(request)
-	}
-	if re, ok := extension.(IRequestExtension); ok {
-		m.CustomStartOnRequest(response, request)
-		re.OnRequest(response, request)
-		m.CustomFinishOnRequest(response, request)
-	}
-	if ae, ok := extension.(IAfterRequestExtension); ok { //后置处理
-		ae.AfterRequest(response, request)
-	}
+	m.DoRequest(extension, request, response)
 	return true
 }
 
@@ -236,8 +228,23 @@ func (m *ExtensionManager) GenParams(extension IProtocolExtension, senderAddress
 	return response, request
 }
 
-func (m *ExtensionManager) GetProtocolExtension(pid string) (pe IProtocolExtension, ok bool) {
-	if pe, ok := m.ExtensionContainer.GetExtension(pid).(IProtocolExtension); ok {
+func (m *ExtensionManager) DoRequest(extension IProtocolExtension, request IExtensionRequest, response IExtensionResponse) {
+	//响应处理
+	if be, ok := extension.(IBeforeRequestExtension); ok { //前置处理
+		be.BeforeRequest(request)
+	}
+	if re, ok := extension.(IRequestExtension); ok {
+		m.CustomStartOnRequest(response, request)
+		re.OnRequest(response, request)
+		m.CustomFinishOnRequest(response, request)
+	}
+	if ae, ok := extension.(IAfterRequestExtension); ok { //后置处理
+		ae.AfterRequest(response, request)
+	}
+}
+
+func (m *ExtensionManager) GetProtocolExtension(eName string) (pe IProtocolExtension, ok bool) {
+	if pe, ok := m.ExtensionContainer.GetExtension(eName).(IProtocolExtension); ok {
 		return pe, true
 	}
 	return nil, false
