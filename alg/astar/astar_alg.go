@@ -64,20 +64,55 @@ func NewAStartAlg() *AStarAlg {
 type history struct {
 	startPos Position
 	endPos   Position
-	path     []Position
-	pathOk   bool
+	// 包含startPos,endPos
+	path   []Position
+	pathOk bool
 }
 
-func (h history) getPath() []Position {
+func (h history) getSubPath(sIndex, eIndex int) []Position {
 	if nil == h.path {
 		return nil
 	}
 	if 0 == len(h.path) {
-		return []Position{}
+		return h.path
 	}
-	rs := make([]Position, len(h.path))
-	copy(rs, h.path)
+	ln := eIndex - sIndex + 1
+	rs := make([]Position, ln)
+	copy(rs, h.path[sIndex:eIndex+1])
 	return rs
+}
+
+func (h history) checkSubPath(startPos Position, endPos Position) (sub bool, sIndex int, eIndex int) {
+	if !h.pathOk {
+		return
+	}
+	sIndex = h.getFirstPositionIndex(startPos)
+	eIndex = h.getLastPositionIndex(endPos)
+	if -1 == sIndex || -1 == eIndex {
+		return
+	}
+	if sIndex > eIndex {
+		return
+	}
+	return true, sIndex, eIndex
+}
+
+func (h history) getFirstPositionIndex(pos Position) int {
+	for index, _ := range h.path {
+		if h.path[index].EqualTo(pos) {
+			return index
+		}
+	}
+	return -1
+}
+
+func (h history) getLastPositionIndex(pos Position) int {
+	for index := len(h.path) - 1; index >= 0; index-- {
+		if h.path[index].EqualTo(pos) {
+			return index
+		}
+	}
+	return -1
 }
 
 type AStarAlg struct {
@@ -166,19 +201,17 @@ func (alg *AStarAlg) Search(sx, sy, sz, ex, ey, ez int) (path []Position, ok boo
 }
 
 func (alg *AStarAlg) SearchPosition(startPos, endPos Position) (path []Position, ok bool) {
-	if alg.history.startPos.EqualTo(startPos) && alg.history.endPos.EqualTo(endPos) { //相同的检索
-		return alg.history.getPath(), alg.history.pathOk
+	if ok, s, e := alg.history.checkSubPath(startPos, endPos); ok {
+		return alg.history.getSubPath(s, e), ok
 	}
 	alg.startPos, alg.endPos = startPos, endPos
-	history := alg.history
-	history.startPos, history.endPos = startPos, endPos
 	alg.initPath()
 	if alg.searchPath() {
 		path := alg.genPath()
-		history.path, history.pathOk = path, true
+		alg.history.startPos, alg.history.endPos = startPos, endPos
+		alg.history.path, alg.history.pathOk = path, true
 		return path, true
 	} else {
-		history.path, history.pathOk = nil, false
 		return nil, false
 	}
 }
