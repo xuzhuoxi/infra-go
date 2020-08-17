@@ -5,6 +5,8 @@
 //
 package astar
 
+import "fmt"
+
 // 新建2D坐标点
 func NewPosition2D(x, y int) Position {
 	return Position{X: x, Y: y}
@@ -20,6 +22,10 @@ type Position struct {
 	X int
 	Y int
 	Z int
+}
+
+func (pos Position) String() string {
+	return fmt.Sprintf("[%d,%d,%d]", pos.X, pos.Y, pos.Z)
 }
 
 // 判断坐标点是否相同
@@ -38,6 +44,10 @@ func (pos Position) AddVector(vector DirectionVector) Position {
 type PriorityPosition struct {
 	Position
 	Priority int
+}
+
+func (pos PriorityPosition) String() string {
+	return fmt.Sprintf("[%d,%d,%d,%d]", pos.X, pos.Y, pos.Z, pos.Priority)
 }
 
 // 新建2D带权值的坐标点

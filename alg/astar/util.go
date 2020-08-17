@@ -39,10 +39,23 @@ func IsInStandardLine(pos1, pos2 Position, includeOblique bool) bool {
 	if IsSamePosition(pos1, pos2) {
 		return false
 	}
-	if pos1.X == pos2.X || pos1.Y == pos2.Y {
+	var xe = pos1.X == pos2.X
+	var ye = pos1.Y == pos2.Y
+	var ze = pos1.Z == pos2.Z
+
+	if (xe != ye) != ze {
 		return true
 	}
-	return includeOblique && mathx.AbsInt(pos1.X-pos2.X) == mathx.AbsInt(pos1.Y-pos2.Y)
+
+	if !includeOblique {
+		return false
+	}
+
+	var lx = mathx.AbsInt(pos1.X - pos2.X)
+	var ly = mathx.AbsInt(pos1.Y - pos2.Y)
+	var lz = mathx.AbsInt(pos1.Z - pos2.Z)
+
+	return (lx == ly && lz == 0) || (lx == lz && ly == 0) || (ly == lz && lx == 0) || (lx == ly && ly == lz)
 }
 
 // 判断方向,前提是两点为线向

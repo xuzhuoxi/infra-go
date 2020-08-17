@@ -51,7 +51,6 @@ type GridMap struct {
 	dataSize Size
 
 	mapData  [][][]int
-	oblique  bool
 	aStarAlg IAStarAlg
 }
 
@@ -172,10 +171,10 @@ func (m *GridMap) searchPath(startPos, endPos Position, keepInflection bool) (pa
 
 //是否可以直线行走
 func (m *GridMap) canLineTo(startPos, endPos Position) bool {
-	if !IsInStandardLine(startPos, endPos, m.oblique) {
+	if !IsInStandardLine(startPos, endPos, true) {
 		return false
 	}
-	funcGetAdd := func(start, end int) int {
+	funcGetAddDiff := func(start, end int) int {
 		diff := end - start
 		switch {
 		case diff == 0:
@@ -186,8 +185,9 @@ func (m *GridMap) canLineTo(startPos, endPos Position) bool {
 			return -1
 		}
 	}
-	addX := funcGetAdd(startPos.X, endPos.X)
-	addY := funcGetAdd(startPos.Y, endPos.Y)
+	addX := funcGetAddDiff(startPos.X, endPos.X)
+	addY := funcGetAddDiff(startPos.Y, endPos.Y)
+	addZ := funcGetAddDiff(startPos.Z, endPos.Z)
 	temp := startPos
 	for !temp.EqualTo(endPos) {
 		if !m.isPathGrid(temp) {
@@ -195,6 +195,7 @@ func (m *GridMap) canLineTo(startPos, endPos Position) bool {
 		}
 		(&temp).X += addX
 		(&temp).Y += addY
+		(&temp).Z += addZ
 	}
 	return true
 }
