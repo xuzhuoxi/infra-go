@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+const (
+	PathSeparator     = "/" // OS-specific path separator
+	PathListSeparator = ":" // OS-specific path list separator
+)
+
 //检查路径是否存在
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
@@ -35,7 +40,7 @@ func WalkCurrent(currentDir string, walkFn filepath.WalkFunc) error {
 		return walkFn(currentDir, nil, err)
 	}
 	for _, file := range list {
-		path := currentDir + "/" + file.Name()
+		path := currentDir + PathSeparator + file.Name()
 		err := walkFn(path, file, nil)
 		if nil != err {
 			return nil
@@ -105,7 +110,7 @@ func Split(path string) (formatDir string, fileName string) {
 // dir要求是经过FormatPath处理后的路径格式
 func GetUpDir(dir string) (upDir string, ok bool) {
 	dir = FormatDirPath(dir)
-	if "/" == dir {
+	if PathSeparator == dir {
 		return "", false
 	}
 	upDir, _ = filepath.Split(dir)
@@ -133,5 +138,5 @@ func FormatDirPath(path string) string {
 // 如果结果路径为目录，并以"/"结尾，清除"/"
 // 不检测有效性
 func FormatPath(path string) string {
-	return strings.Replace(path, `\`, "/", -1)
+	return strings.Replace(path, `\`, PathSeparator, -1)
 }
