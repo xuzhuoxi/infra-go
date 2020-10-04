@@ -37,7 +37,7 @@ func MoveAuto(oldPath string, newPath string, autoPerm os.FileMode) error {
 // 目标已存在：覆盖
 func MoveTo(oldPath string, targetDir string) error {
 	var _, name = filepath.Split(oldPath)
-	var newPath = targetDir + PathSeparator + name
+	var newPath = Combine(targetDir, name)
 	return os.Rename(oldPath, newPath)
 }
 

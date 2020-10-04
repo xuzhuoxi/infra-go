@@ -30,6 +30,23 @@ func IsFolder(path string) bool {
 	return fi.IsDir()
 }
 
+// 合并路径
+// 不检测有效性
+func Combine(dir string, add string) string {
+	dir = FormatDirPath(dir)
+	if "" == add {
+		return dir
+	}
+	add = FormatDirPath(add)
+	if dir == PathSeparator && add == PathSeparator {
+		return PathSeparator
+	}
+	if add[0] == '/' {
+		return dir + add
+	}
+	return dir + "/" + add
+}
+
 //Folder Func ------------------------------------
 
 // 遍历当前目录

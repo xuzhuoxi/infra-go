@@ -60,6 +60,14 @@ func TestWalkCurrent(t *testing.T) {
 	})
 }
 
+func TestCombine(t *testing.T) {
+	dirs := []string{"/", "/a", "/a/", "/a/b", "/a/b/", "o.exe2", "a.exe", "b", "c.abc", "d.abc"}
+	adds := []string{"/", "/a", "/a/", "/a/b", "/a/b/", "o.exe2", "a.exe", "b", "c.abc", "d.abc"}
+	for index, dir := range dirs {
+		fmt.Println(index, ":", fmt.Sprint(Combine(dir, adds[index])))
+	}
+}
+
 func TestWalk(t *testing.T) {
 	var current = FormatDirPath(filepath.Dir(os.Args[0]))
 	var dir = current + "/source"
