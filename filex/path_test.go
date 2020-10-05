@@ -44,10 +44,11 @@ func TestCheckExtName(t *testing.T) {
 	}
 }
 
-func TestGetShortName(t *testing.T) {
+func TestSplitFileName(t *testing.T) {
 	paths := []string{"/", "/a", "/a/", "/a/b", "/a/b/", "o.exe2", "a.exe", "b", "c.abc", "d.abc"}
 	for index, path := range paths {
-		fmt.Println(index, ":", fmt.Sprint(GetShortName(path)))
+		shortName, ext := SplitFileName(path, false)
+		fmt.Println(index, ":", shortName+" , "+ext)
 	}
 }
 

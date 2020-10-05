@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/imagex"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
-	"github.com/xuzhuoxi/infra-go/osxu"
 	"image/draw"
 	"reflect"
 	"testing"
@@ -17,7 +16,7 @@ func TestDilateCVT(t *testing.T) {
 		if index >= len(targets) {
 			return
 		}
-		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.Auto)
+		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
 		if nil != err {
 			fmt.Println(err)
 			continue
@@ -28,7 +27,7 @@ func TestDilateCVT(t *testing.T) {
 		if nil != err {
 			fmt.Println(err)
 		}
-		err = imagex.SaveImage(dstImg, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
+		err = imagex.SaveImage(dstImg, RunningDir+"/"+targets[index], formatx.Auto, nil)
 		if nil != err {
 			fmt.Println(err)
 		}
@@ -39,7 +38,7 @@ func TestDilateGray(t *testing.T) {
 	sources := GrayPaths
 	targets := DilatePaths
 	for index, source := range sources {
-		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.PNG)
+		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.PNG)
 		if nil != err {
 			fmt.Println(err)
 			continue
@@ -49,7 +48,7 @@ func TestDilateGray(t *testing.T) {
 		if nil != err {
 			fmt.Println(err)
 		}
-		err = imagex.SaveImage(img, osxu.RunningBaseDir()+targets[index], formatx.PNG, nil)
+		err = imagex.SaveImage(img, RunningDir+"/"+targets[index], formatx.PNG, nil)
 		if nil != err {
 			fmt.Println(err)
 		}

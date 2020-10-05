@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/imagex"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
-	"github.com/xuzhuoxi/infra-go/osxu"
 	"reflect"
 	"testing"
 )
+
+type _RGB struct {
+	R, G, B int
+}
 
 func TestPoint(t *testing.T) {
 	var pix = make([]_RGB, 2)
@@ -32,7 +35,7 @@ func TestBlurMatrix(t *testing.T) {
 	filter := &Gauss5
 	//filter, _ := CreateMotionBlurFilter(8, imagex.Vertical)
 	for index, source := range sources {
-		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.Auto)
+		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
 		if nil != err {
 			fmt.Println(err)
 			continue
@@ -44,7 +47,7 @@ func TestBlurMatrix(t *testing.T) {
 			fmt.Println(err)
 			continue
 		}
-		err = imagex.SaveImage(dstImg, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
+		err = imagex.SaveImage(dstImg, RunningDir+"/"+targets[index], formatx.Auto, nil)
 		if nil != err {
 			fmt.Println(err)
 		}

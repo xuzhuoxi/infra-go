@@ -6,8 +6,8 @@
 package imagex
 
 import (
+	"github.com/xuzhuoxi/infra-go/filex"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
-	"github.com/xuzhuoxi/infra-go/osxu"
 	"image"
 	"os"
 )
@@ -17,7 +17,7 @@ func SaveImage(img image.Image, fullPath string, format formatx.ImageFormat, opt
 	file, _ := os.Create(fullPath)
 	defer file.Close()
 	if formatx.Auto == format {
-		extF := formatx.ImageFormat(osxu.GetExtensionName(fullPath))
+		extF := formatx.ImageFormat(filex.GetExtWithoutDot(fullPath))
 		return extF.Encode(file, img, options)
 	} else {
 		return format.Encode(file, img, options)

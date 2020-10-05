@@ -3,6 +3,7 @@ package filterx
 import (
 	_ "github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
 	_ "github.com/xuzhuoxi/infra-go/imagex/formatx/pngx"
+	"github.com/xuzhuoxi/infra-go/osxu"
 )
 
 const (
@@ -137,3 +138,5 @@ var (
 	EdgePaths    = []string{EdgePath01, EdgePath02, EdgePath03, EdgePath04, EdgePath05, EdgePath06, EdgePath07, EdgePath08, EdgePath09}
 	EmbossPaths  = []string{EmbossPath01, EmbossPath02, EmbossPath03, EmbossPath04, EmbossPath05, EmbossPath06, EmbossPath07, EmbossPath08, EmbossPath09}
 )
+
+var RunningDir = osxu.GetRunningDir()

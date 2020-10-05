@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/imagex"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
-	"github.com/xuzhuoxi/infra-go/osxu"
 	"reflect"
 	"testing"
 )
@@ -25,7 +24,7 @@ func TestEmbossImage(t *testing.T) {
 		if index >= len(targets) {
 			return
 		}
-		img, err := imagex.LoadImage(osxu.RunningBaseDir()+source, formatx.Auto)
+		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
 		if nil != err {
 			fmt.Println(err)
 			continue
@@ -37,7 +36,7 @@ func TestEmbossImage(t *testing.T) {
 			fmt.Println(err)
 			continue
 		}
-		err = imagex.SaveImage(dstImg, osxu.RunningBaseDir()+targets[index], formatx.Auto, nil)
+		err = imagex.SaveImage(dstImg, RunningDir+"/"+targets[index], formatx.Auto, nil)
 		if nil != err {
 			fmt.Println(err)
 		}

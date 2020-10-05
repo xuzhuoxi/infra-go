@@ -15,38 +15,32 @@ const (
 
 // 复制文件
 // 根据文件大小选择不同的复制算法
+// 要求目录路径的父目录存在
 func Copy(srcFile string, dstFile string) (written int64, err error) {
+	srcFile = FormatPath(srcFile)
 	stat, err := os.Stat(srcFile)
 	if nil != err {
 		return 0, err
 	}
-	size := stat.Size()
-	if size <= LittleFile {
-		return copy1(srcFile, dstFile, stat.Mode())
-	}
-	if size <= MiddleFile {
-		return copy2(srcFile, dstFile, stat.Mode())
-	}
-	return copy3(srcFile, dstFile, stat.Mode())
+	dstFile = FormatPath(dstFile)
+	return copy(srcFile, dstFile, stat, stat.Mode())
 }
 
 // 复制文件
 // 根据文件大小选择不同的复制算法
-// 同时设置新的FileMode
-func CopyMod(srcFile string, dstFile string, perm os.FileMode) (written int64, err error) {
+// 如果目录路径的父目录不存在，自动补全
+func CopyAuto(srcFile string, dstFile string, autoPerm os.FileMode) (written int64, err error) {
+	srcFile = FormatPath(srcFile)
 	stat, err := os.Stat(srcFile)
 	if nil != err {
 		return 0, err
 	}
-	size := stat.Size()
-	if size <= LittleFile {
-		return copy1(srcFile, dstFile, perm)
+	dstFile = FormatPath(dstFile)
+	err = CompletePath(dstFile, autoPerm)
+	if nil != err {
+		return 0, err
 	}
-	if size <= MiddleFile {
-		return copy2(srcFile, dstFile, perm)
-
-	}
-	return copy3(srcFile, dstFile, perm)
+	return copy(srcFile, dstFile, stat, stat.Mode())
 }
 
 // 复制文件到指定目录
@@ -59,11 +53,81 @@ func CopyTo(srcFile string, targetDir string) (written int64, err error) {
 
 // 复制文件到指定目录
 // 根据文件大小选择不同的复制算法
-// 同时设置新的FileMode
-func CopyModTo(srcFile string, targetDir string, perm os.FileMode) (written int64, err error) {
+// 如果目录路径的父目录不存在，自动补全
+func CopyToAuto(srcFile string, targetDir string, autoPerm os.FileMode) (written int64, err error) {
 	var _, name = filepath.Split(srcFile)
 	var newPath = Combine(targetDir, name)
-	return CopyMod(srcFile, newPath, perm)
+	return CopyAuto(srcFile, newPath, autoPerm)
+}
+
+// 复制文件
+// 根据文件大小选择不同的复制算法
+// 同时设置新的FileMode
+func CopyMod(srcFile string, dstFile string, filePerm os.FileMode) (written int64, err error) {
+	srcFile = FormatPath(srcFile)
+	stat, err := os.Stat(srcFile)
+	if nil != err {
+		return 0, err
+	}
+	return copy(srcFile, dstFile, stat, filePerm)
+}
+
+// 复制文件
+// 根据文件大小选择不同的复制算法
+// 同时设置新的FileMode
+// 如果目录路径的父目录不存在，自动补全
+func CopyModAuto(srcFile string, dstFile string, filePerm os.FileMode, autoPerm os.FileMode) (written int64, err error) {
+	srcFile = FormatPath(srcFile)
+	stat, err := os.Stat(srcFile)
+	if nil != err {
+		return 0, err
+	}
+	dstFile = FormatPath(dstFile)
+	err = CompletePath(dstFile, autoPerm)
+	if nil != err {
+		return 0, err
+	}
+	return copy(srcFile, dstFile, stat, filePerm)
+}
+
+// 复制文件到指定目录
+// 根据文件大小选择不同的复制算法
+// 同时设置新的FileMode
+func CopyModTo(srcFile string, targetDir string, filePerm os.FileMode) (written int64, err error) {
+	var _, name = filepath.Split(srcFile)
+	var newPath = Combine(targetDir, name)
+	return CopyMod(srcFile, newPath, filePerm)
+}
+
+// 复制文件到指定目录
+// 根据文件大小选择不同的复制算法
+// 同时设置新的FileMode
+// 如果目录路径的父目录不存在，自动补全
+func CopyModToAuto(srcFile string, targetDir string, filePerm os.FileMode, autoPerm os.FileMode) (written int64, err error) {
+	var _, name = filepath.Split(srcFile)
+	var newPath = Combine(targetDir, name)
+	return CopyModAuto(srcFile, newPath, filePerm, autoPerm)
+}
+
+// 以下为内部函数-------------------------
+
+// 复制文件
+// 根据文件大小选择不同的复制算法
+func copy(srcFile string, dstFile string, srcStat os.FileInfo, perm os.FileMode) (written int64, err error) {
+	if nil == srcStat {
+		srcStat, err = os.Stat(srcFile)
+		if nil != err {
+			return 0, err
+		}
+	}
+	size := srcStat.Size()
+	if size <= LittleFile {
+		return copy1(srcFile, dstFile, perm)
+	}
+	if size <= MiddleFile {
+		return copy2(srcFile, dstFile, perm)
+	}
+	return copy3(srcFile, dstFile, perm)
 }
 
 // 使用ioutil包中的API进行文件复制

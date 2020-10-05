@@ -11,7 +11,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"errors"
-	"github.com/xuzhuoxi/infra-go/osxu"
+	"github.com/xuzhuoxi/infra-go/filex"
 	"io/ioutil"
 )
 
@@ -142,7 +142,7 @@ var (
 )
 
 func LoadRsaPublicCipher(path string) (IRSAPublicCipher, error) {
-	if !osxu.IsExist(path) {
+	if !filex.IsExist(path) {
 		return nil, errPath
 	}
 	data, err := ioutil.ReadFile(path)
@@ -153,7 +153,7 @@ func LoadRsaPublicCipher(path string) (IRSAPublicCipher, error) {
 }
 
 func LoadRsaPrivateCipher(path string, pkcs8 bool) (IRSAPrivateCipher, error) {
-	if !osxu.IsExist(path) {
+	if !filex.IsExist(path) {
 		return nil, errPath
 	}
 	data, err := ioutil.ReadFile(path)

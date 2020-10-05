@@ -1,7 +1,7 @@
 package logx
 
 import (
-	"github.com/xuzhuoxi/infra-go/osxu"
+	"github.com/xuzhuoxi/infra-go/filex"
 	"log"
 	"math"
 	"os"
@@ -89,8 +89,8 @@ func (l *logger) SetConfig(cfg LogConfig) {
 	if "" == cfg.FileDir {
 		return
 	}
-	newFileDir := osxu.FormatDirPath(cfg.FileDir)
-	if !osxu.IsExist(newFileDir) { //目标不存在，创建目录
+	newFileDir := filex.FormatDirPath(cfg.FileDir)
+	if !filex.IsExist(newFileDir) { //目标不存在，创建目录
 		os.MkdirAll(newFileDir, os.ModePerm)
 	}
 	val, ok := l.infoMap[cfg.Type]
@@ -319,8 +319,8 @@ func checkCloseFullFile(file *os.File, fileFullPath string, maxSize uint64) bool
 			return true
 		}
 	} else {
-		if osxu.IsExist(fileFullPath) {
-			size, _ := osxu.GetFileSize(fileFullPath)
+		if filex.IsExist(fileFullPath) {
+			size, _ := filex.GetFileSize(fileFullPath)
 			return size >= maxSize
 		}
 	}
@@ -330,7 +330,7 @@ func checkCloseFullFile(file *os.File, fileFullPath string, maxSize uint64) bool
 func getRollingIndex(fileDir, fileName, fileExtName string) int {
 	for index := 0; index < math.MaxInt16; index++ {
 		path := getFullPath(fileDir, fileName, fileExtName, "_"+strconv.Itoa(index))
-		if !osxu.IsExist(path) {
+		if !filex.IsExist(path) {
 			return index
 		}
 	}
@@ -355,7 +355,7 @@ func closeFile(file *os.File) {
 }
 
 func getFullPath(fileDir string, fileName string, fileExtName string, other string) string {
-	return fileDir + fileName + other + fileExtName
+	return fileDir + "/" + fileName + other + fileExtName
 }
 
 func getTodayStr() string {
