@@ -12,7 +12,7 @@ func GetCharCount(s string) int {
 }
 
 //取单个字符的首位置
-func IndexOfChar(s string, char string) int {
+func IndexOfString(s string, char string) int {
 	if "" == char || "" == s {
 		return -1
 	}
@@ -30,7 +30,7 @@ func IndexOfChar(s string, char string) int {
 }
 
 //取单个字符的尾位置
-func LastIndexOfChar(s string, char string) int {
+func LastIndexOfString(s string, char string) int {
 	if "" == char || "" == s {
 		return -1
 	}
@@ -75,17 +75,17 @@ func SubSuffix(s string, index int) string {
 
 // 把字符串一分为二
 // 当keepIndex=true是，index所在字符会留在第二个返回字符的第一个
-func CutString(s string, index int, keepIndex bool) (string, string) {
+func CutString(s string, runeIndex int, keepIndex bool) (string, string) {
 	runes := []rune(s)
-	if index < 0 {
+	if runeIndex < 0 {
 		return "", s
 	}
-	if index >= len(runes) {
+	if runeIndex >= len(runes) {
 		return s, ""
 	}
 	if keepIndex {
-		return string(runes[:index]), string(runes[index:])
+		return string(runes[:runeIndex]), string(runes[runeIndex:])
 	} else {
-		return string(runes[:index]), string(runes[index+1:])
+		return string(runes[:runeIndex]), string(runes[runeIndex+1:])
 	}
 }

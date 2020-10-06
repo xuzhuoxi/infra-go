@@ -39,8 +39,8 @@ func TestSub(t *testing.T) {
 
 func TestIndex(t *testing.T) {
 	str := "ada顶你个肺bdb"
-	fmt.Println(IndexOfChar(str, "d"))
-	fmt.Println(LastIndexOfChar(str, "d"))
+	fmt.Println(IndexOfString(str, "d"))
+	fmt.Println(LastIndexOfString(str, "d"))
 }
 
 func TestOther(t *testing.T) {

@@ -88,7 +88,7 @@ package osxu
 ////recursive 是否递归子文件夹
 ////filter 过滤器，=nil时为不增加过滤,返回true时的FileInfo将包含到返回结果中
 //func GetFolderFileList(dirPath string, recursive bool, filter func(fileInfo os.FileInfo) bool) ([]FileDetailInfo, error) {
-//	dirPath = FormatDirPath(dirPath)
+//	dirPath = FormatPath(dirPath)
 //	_, err := os.Stat(dirPath)
 //	if nil != err {
 //		return nil, err
@@ -165,7 +165,7 @@ package osxu
 //func SplitFilePath(fileFullPath string) (fileDir string, fileName string) {
 //	fileFullPath = FormatPath(fileFullPath)
 //	if IsFolder(fileFullPath) {
-//		return FormatDirPath(fileFullPath), ""
+//		return FormatPath(fileFullPath), ""
 //	}
 //	dot := stringx.LastIndexOfChar(fileFullPath, "/")
 //	if -1 == dot {
@@ -200,7 +200,7 @@ package osxu
 //// 非"/"结尾补全
 //// 已经转换为"/"形式路径
 //// 不检测有效性
-//func FormatDirPath(dirPath string) string {
+//func FormatPath(dirPath string) string {
 //	fDirPath := FormatPath(dirPath)
 //	dot := stringx.LastIndexOfChar(fDirPath, "/")
 //	// 非"/"结尾

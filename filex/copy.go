@@ -5,7 +5,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 )
 
 const (
@@ -46,7 +45,7 @@ func CopyAuto(srcFile string, dstFile string, autoPerm os.FileMode) (written int
 // 复制文件到指定目录
 // 根据文件大小选择不同的复制算法
 func CopyTo(srcFile string, targetDir string) (written int64, err error) {
-	var _, name = filepath.Split(srcFile)
+	var _, name = Split(srcFile)
 	var newPath = Combine(targetDir, name)
 	return Copy(srcFile, newPath)
 }
@@ -55,7 +54,7 @@ func CopyTo(srcFile string, targetDir string) (written int64, err error) {
 // 根据文件大小选择不同的复制算法
 // 如果目录路径的父目录不存在，自动补全
 func CopyToAuto(srcFile string, targetDir string, autoPerm os.FileMode) (written int64, err error) {
-	var _, name = filepath.Split(srcFile)
+	var _, name = Split(srcFile)
 	var newPath = Combine(targetDir, name)
 	return CopyAuto(srcFile, newPath, autoPerm)
 }
@@ -94,7 +93,7 @@ func CopyModAuto(srcFile string, dstFile string, filePerm os.FileMode, autoPerm 
 // 根据文件大小选择不同的复制算法
 // 同时设置新的FileMode
 func CopyModTo(srcFile string, targetDir string, filePerm os.FileMode) (written int64, err error) {
-	var _, name = filepath.Split(srcFile)
+	var _, name = Split(srcFile)
 	var newPath = Combine(targetDir, name)
 	return CopyMod(srcFile, newPath, filePerm)
 }
@@ -104,7 +103,7 @@ func CopyModTo(srcFile string, targetDir string, filePerm os.FileMode) (written 
 // 同时设置新的FileMode
 // 如果目录路径的父目录不存在，自动补全
 func CopyModToAuto(srcFile string, targetDir string, filePerm os.FileMode, autoPerm os.FileMode) (written int64, err error) {
-	var _, name = filepath.Split(srcFile)
+	var _, name = Split(srcFile)
 	var newPath = Combine(targetDir, name)
 	return CopyModAuto(srcFile, newPath, filePerm, autoPerm)
 }

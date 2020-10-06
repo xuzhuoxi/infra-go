@@ -89,7 +89,7 @@ func (l *logger) SetConfig(cfg LogConfig) {
 	if "" == cfg.FileDir {
 		return
 	}
-	newFileDir := filex.FormatDirPath(cfg.FileDir)
+	newFileDir := filex.FormatPath(cfg.FileDir)
 	if !filex.IsExist(newFileDir) { //目标不存在，创建目录
 		os.MkdirAll(newFileDir, os.ModePerm)
 	}

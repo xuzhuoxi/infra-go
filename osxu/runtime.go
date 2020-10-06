@@ -8,7 +8,7 @@ import (
 //// 运行时的当前目录
 //// 以"/"结尾
 //func RunningBaseDir() string {
-//	return FormatDirPath(filepath.Dir(os.Args[0]))
+//	return FormatPath(filepath.Dir(os.Args[0]))
 //}
 //
 //// 运行时的可执行文件名

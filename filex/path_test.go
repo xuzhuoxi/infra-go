@@ -14,10 +14,11 @@ func TestFormatPath(t *testing.T) {
 	}
 }
 
-func TestFormatDirPath(t *testing.T) {
-	paths := []string{"/", "/a", "/a/", "/a\\b", "/a\\b/"}
+func TestSplit(t *testing.T) {
+	paths := []string{"/", "/a", "/a/", "/a/b", "/a/b/", "o.exe2", "a.exe", "b", "c.abc", "d.abc"}
 	for index, path := range paths {
-		fmt.Println(index, ":", fmt.Sprint(FormatDirPath(FormatPath(path))))
+		dir, name := Split(path)
+		fmt.Println(index, ":", dir, ",", name)
 	}
 }
 
@@ -28,11 +29,11 @@ func TestGetUpDir(t *testing.T) {
 	}
 }
 
-func TestSplit(t *testing.T) {
+func TestSplitFileName(t *testing.T) {
 	paths := []string{"/", "/a", "/a/", "/a/b", "/a/b/", "o.exe2", "a.exe", "b", "c.abc", "d.abc"}
 	for index, path := range paths {
-		dir, name := Split(path)
-		fmt.Println(index, ":", dir, ",", name)
+		shortName, _, ext := SplitFileName(path)
+		fmt.Println(index, ":", shortName+" , "+ext)
 	}
 }
 
@@ -44,18 +45,10 @@ func TestCheckExtName(t *testing.T) {
 	}
 }
 
-func TestSplitFileName(t *testing.T) {
-	paths := []string{"/", "/a", "/a/", "/a/b", "/a/b/", "o.exe2", "a.exe", "b", "c.abc", "d.abc"}
-	for index, path := range paths {
-		shortName, ext := SplitFileName(path, false)
-		fmt.Println(index, ":", shortName+" , "+ext)
-	}
-}
-
 func TestWalkCurrent(t *testing.T) {
-	var current = FormatDirPath(filepath.Dir(os.Args[0]))
+	var current = FormatPath(filepath.Dir(os.Args[0]))
 	var dir = current + "/source"
-	WalkCurrent(dir, func(path string, info os.FileInfo, err error) error {
+	WalkInDir(dir, func(path string, info os.FileInfo, err error) error {
 		fmt.Println(path)
 		return nil
 	})
@@ -70,9 +63,9 @@ func TestCombine(t *testing.T) {
 }
 
 func TestWalk(t *testing.T) {
-	var current = FormatDirPath(filepath.Dir(os.Args[0]))
+	var current = FormatPath(filepath.Dir(os.Args[0]))
 	var dir = current + "/source"
-	Walk(dir, func(path string, info os.FileInfo, err error) error {
+	WalkAll(dir, func(path string, info os.FileInfo, err error) error {
 		fmt.Println(path)
 		return nil
 	})
