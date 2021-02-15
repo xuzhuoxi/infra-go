@@ -87,11 +87,11 @@ func WalkAll(path string, walkFn filepath.WalkFunc) error {
 // 注意：在Walk过程中 不可以 对dir目录(包括子目录)中的文件进行增删
 func WaldAllFiles(path string, walkFn filepath.WalkFunc) error {
 	path = FormatPath(path)
-	return filepath.Walk(path, func(eachPath string, info os.FileInfo, err error) error {
+	return WalkAll(path, func(eachPath string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
-		return walkFn(FormatPath(eachPath), info, err)
+		return walkFn(eachPath, info, err)
 	})
 }
 
@@ -100,11 +100,11 @@ func WaldAllFiles(path string, walkFn filepath.WalkFunc) error {
 // 注意：在Walk过程中 不可以 对dir目录(包括子目录)中的文件进行增删
 func WaldAllDirs(path string, walkFn filepath.WalkFunc) error {
 	path = FormatPath(path)
-	return filepath.Walk(path, func(eachPath string, info os.FileInfo, err error) error {
+	return WalkAll(path, func(eachPath string, info os.FileInfo, err error) error {
 		if !info.IsDir() {
 			return nil
 		}
-		return walkFn(FormatPath(eachPath), info, err)
+		return walkFn(eachPath, info, err)
 	})
 }
 
