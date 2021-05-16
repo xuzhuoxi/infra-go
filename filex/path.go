@@ -203,6 +203,9 @@ func GetExtWithDot(path string) string {
 }
 
 // 拆分文件名[shortName + dotExt + ext]
+// shortName: 不带扩展名的文件名
+// dotExt: 带“.”的扩展名
+// ext: 不带“.”的扩展名
 func SplitFileName(path string) (shortName string, dotExt string, ext string) {
 	_, fileName := Split(path)
 	if "" == fileName {

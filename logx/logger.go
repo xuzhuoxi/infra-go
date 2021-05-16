@@ -106,6 +106,10 @@ type ILogger interface {
 	//移除配置
 	RemoveConfig(t LogType)
 
+	Print(v ...interface{})
+	Printf(format string, v ...interface{})
+	Println(v ...interface{})
+
 	Log(level LogLevel, v ...interface{})
 	Logf(level LogLevel, format string, v ...interface{})
 	Logln(level LogLevel, v ...interface{})
@@ -148,6 +152,18 @@ func SetConfig(cfg LogConfig) {
 
 func RemoveConfig(t LogType) {
 	defaultLogger.RemoveConfig(t)
+}
+
+func Print(v ...interface{}) {
+	defaultLogger.Print(v...)
+}
+
+func Printf(format string, v ...interface{}) {
+	defaultLogger.Printf(format, v...)
+}
+
+func Println(v ...interface{}) {
+	defaultLogger.Println(v...)
 }
 
 func Trace(v ...interface{}) {

@@ -122,6 +122,54 @@ func (l *logger) RemoveConfig(t LogType) {
 	delete(l.infoMap, t)
 }
 
+func (l *logger) Print(v ...interface{}) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if len(l.infoMap) == 0 {
+		return
+	}
+	checkFile(l.infoMap)
+	for _, info := range l.infoMap {
+		flag := info.logger.Flags()
+		info.logger.SetFlags(0)
+		info.logger.SetPrefix("")
+		info.logger.Print(v...)
+		info.logger.SetFlags(flag)
+	}
+}
+
+func (l *logger) Printf(format string, v ...interface{}) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if len(l.infoMap) == 0 {
+		return
+	}
+	checkFile(l.infoMap)
+	for _, info := range l.infoMap {
+		flag := info.logger.Flags()
+		info.logger.SetFlags(0)
+		info.logger.SetPrefix("")
+		info.logger.Printf(format, v...)
+		info.logger.SetFlags(flag)
+	}
+}
+
+func (l *logger) Println(v ...interface{}) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	if len(l.infoMap) == 0 {
+		return
+	}
+	checkFile(l.infoMap)
+	for _, info := range l.infoMap {
+		flag := info.logger.Flags()
+		info.logger.SetFlags(0)
+		info.logger.SetPrefix("")
+		info.logger.Println(v...)
+		info.logger.SetFlags(flag)
+	}
+}
+
 func (l *logger) Log(level LogLevel, v ...interface{}) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
