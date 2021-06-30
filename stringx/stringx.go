@@ -1,6 +1,9 @@
 package stringx
 
-import "unicode/utf8"
+import (
+	"strings"
+	"unicode/utf8"
+)
 
 //取字符串的字符个数
 func GetCharCount(s string) int {
@@ -88,4 +91,32 @@ func CutString(s string, runeIndex int, keepIndex bool) (string, string) {
 	} else {
 		return string(runes[:runeIndex]), string(runes[runeIndex+1:])
 	}
+}
+
+func SplitToken(str string, separator string, trimTokens bool, ignoreEmptyTokens bool) []string {
+	if len(str) == 0 {
+		return nil
+	}
+	arr := strings.Split(str, separator)
+	if len(arr) == 0 {
+		return nil
+	}
+	var rs []string = nil
+	for index := range arr {
+		if trimTokens {
+			arr[index] = strings.TrimSpace(arr[index])
+		}
+		if !ignoreEmptyTokens || len(arr[index]) > 0 {
+			rs = append(rs, arr[index])
+		}
+	}
+	return rs
+}
+
+func HasSuffixAt(str string, prefix string, tOffset int) bool {
+	if tOffset >= len(str) || tOffset < 0 {
+		return false
+	}
+	checkStr := str[tOffset:]
+	return strings.HasSuffix(checkStr, prefix)
 }
