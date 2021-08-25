@@ -173,7 +173,7 @@ func (g *OrderHashGroup) AddAt(ele IOrderHashElement, index int) error {
 }
 
 func (g *OrderHashGroup) Adds(eles []IOrderHashElement) (count int, failArr []IOrderHashElement, err []error) {
-	for idx, _ := range eles {
+	for idx := range eles {
 		e := g.Add(eles[idx])
 		if nil != e {
 			err = append(err, e)
@@ -186,7 +186,7 @@ func (g *OrderHashGroup) Adds(eles []IOrderHashElement) (count int, failArr []IO
 }
 
 func (g *OrderHashGroup) AddsAt(eles []IOrderHashElement, index int) (count int, failArr []IOrderHashElement, err []error) {
-	for idx, _ := range eles {
+	for idx := range eles {
 		e := g.AddAt(eles[idx], index)
 		if nil != e {
 			err = append(err, e)
@@ -270,7 +270,7 @@ func (g *OrderHashGroup) Update(ele IOrderHashElement) (replaced IOrderHashEleme
 }
 
 func (g *OrderHashGroup) Updates(eles []IOrderHashElement) (replaced []IOrderHashElement, err []error) {
-	for idx, _ := range eles {
+	for idx := range eles {
 		r, e := g.Update(eles[idx])
 		if nil != e {
 			err = append(err, e)
@@ -282,7 +282,7 @@ func (g *OrderHashGroup) Updates(eles []IOrderHashElement) (replaced []IOrderHas
 }
 
 func (g *OrderHashGroup) ForEachElement(f func(index int, ele IOrderHashElement) (stop bool)) {
-	for idx, _ := range g.eles {
+	for idx := range g.eles {
 		if f(idx, g.eles[idx]) {
 			return
 		}

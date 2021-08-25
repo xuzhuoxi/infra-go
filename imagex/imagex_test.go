@@ -62,7 +62,7 @@ func TestFillImage(t *testing.T) {
 func TestCopyImageTo(t *testing.T) {
 	src := []string{"test/src01.png", "test/src02.png"}
 	dst := []string{"test/copy_dst01.jpeg", "test/copy_dst02.jpeg"}
-	for index, _ := range src {
+	for index := range src {
 		srcImg, err := LoadImage(RunningDir+"/"+src[index], formatx.PNG)
 		if nil != err {
 			fmt.Println(err)
@@ -80,7 +80,7 @@ func TestBlendBackground(t *testing.T) {
 	src := []string{"test/src01.png", "test/src02.png"}
 	dst := []string{"test/blend_dst01.jpeg", "test/blend_dst02.jpeg"}
 	bg := []color.Color{color.White, colornames.Yellow}
-	for index, _ := range src {
+	for index := range src {
 		img, err := LoadImage(RunningDir+"/"+src[index], formatx.PNG)
 		if nil != err {
 			fmt.Println(err)

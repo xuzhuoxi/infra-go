@@ -86,7 +86,7 @@ func CreateGaussKernel2(radius int, sigma float64) []float64 {
 			sum += gr
 		}
 	}
-	for index, _ := range rs {
+	for index := range rs {
 		rs[index] /= sum
 	}
 	return rs
@@ -125,7 +125,7 @@ func CreateGaussKernelInt2(radius int, sigma float64, scale float64) []int {
 	if scale <= 0 {
 		scale = 1 / kernel[0]
 	}
-	for index, _ := range kernel {
+	for index := range kernel {
 		rs[index] = int(math.Round(kernel[index] * float64(scale)))
 	}
 	return rs

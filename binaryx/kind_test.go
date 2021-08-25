@@ -27,7 +27,7 @@ func TestLen(t *testing.T) {
 	fmt.Println(unsafe.Sizeof(a))
 	var b uint64
 	fmt.Println(unsafe.Sizeof(b))
-	var s string = "aaaaaa"
+	var s = "aaaaaa"
 	fmt.Println(unsafe.Sizeof(s), len(s))
 }
 

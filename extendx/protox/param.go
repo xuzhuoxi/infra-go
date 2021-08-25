@@ -39,7 +39,7 @@ func (h *ProtocolJsonParamsHandler) HandleRequestParam(data []byte) interface{} 
 }
 func (h *ProtocolJsonParamsHandler) HandleRequestParams(data [][]byte) []interface{} {
 	var objData []interface{}
-	for index, _ := range data {
+	for index := range data {
 		objData = append(objData, string(data[index]))
 	}
 	return objData
@@ -51,7 +51,7 @@ func (h *ProtocolJsonParamsHandler) HandleResponseParam(data interface{}) []byte
 func (h *ProtocolJsonParamsHandler) HandleResponseParams(data []interface{}) [][]byte {
 	var byteData [][]byte
 	var str string
-	for index, _ := range data {
+	for index := range data {
 		str = data[index].(string)
 		byteData = append(byteData, []byte(str))
 	}

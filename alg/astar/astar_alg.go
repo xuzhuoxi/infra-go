@@ -98,7 +98,7 @@ func (h history) checkSubPath(startPos Position, endPos Position) (sub bool, sIn
 }
 
 func (h history) getFirstPositionIndex(pos Position) int {
-	for index, _ := range h.path {
+	for index := range h.path {
 		if h.path[index].EqualTo(pos) {
 			return index
 		}

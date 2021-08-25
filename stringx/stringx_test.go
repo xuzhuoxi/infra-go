@@ -8,7 +8,7 @@ import (
 
 func TestCutString(t *testing.T) {
 	str := "aaa顶你个肺bbb"
-	c := GetCharCount(str)
+	c := GetRuneCount(str)
 	fmt.Println("长度：", c)
 	fmt.Println(CutString(str, 0, true))
 	fmt.Println(CutString(str, 0, false))

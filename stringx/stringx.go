@@ -6,12 +6,11 @@ import (
 )
 
 //取字符串的字符个数
-func GetCharCount(s string) int {
-	if "" == s {
+func GetRuneCount(str string) int {
+	if "" == str {
 		return 0
 	}
-	return utf8.RuneCountInString(s)
-	//return len([]rune(s))
+	return utf8.RuneCountInString(str)
 }
 
 //取单个字符的首位置

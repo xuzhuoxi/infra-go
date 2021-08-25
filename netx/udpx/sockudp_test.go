@@ -54,7 +54,7 @@ func TestUDPServer(t *testing.T) {
 func TestUDP2(t *testing.T) {
 	//ports := []int{9990, 9991, 9992, 9993, 9994, 9995, 9996, 9997, 9998, 9999}
 	ports := []int{9990}
-	addrs := []string{}
+	var addrs []string
 	for _, port := range ports {
 		server := NewUDPServer()
 		address := "127.0.0.1:" + strconv.Itoa(port)

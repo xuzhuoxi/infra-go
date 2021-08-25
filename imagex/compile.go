@@ -6,6 +6,6 @@
 package imagex
 
 import (
-	//_ "github.com/xuzhuoxi/infra-go/imagex/formatx/pngx"
-	//_ "github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
+//_ "github.com/xuzhuoxi/infra-go/imagex/formatx/pngx"
+//_ "github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
 )

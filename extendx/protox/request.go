@@ -79,7 +79,7 @@ func (req *SockRequest) toJsonArray(objArr []interface{}) []string {
 		return nil
 	}
 	rs := make([]string, len(objArr))
-	for index, _ := range objArr {
+	for index := range objArr {
 		rs[index] = objArr[index].(string)
 	}
 	return rs

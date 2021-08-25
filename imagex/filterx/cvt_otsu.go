@@ -65,7 +65,7 @@ func getOtsuThreshold(pixelCount []int) (threshold uint) {
 	var u, g int
 	max := -10
 	// 遍历所有阈值，根据公式挑选出最好的
-	for index, _ := range pixelCount {
+	for index := range pixelCount {
 		w0, u0 = getOtsuWU(pixelCount[:index:index])
 		w1, u1 = getOtsuWU(pixelCount[index:])
 		//总平均灰度

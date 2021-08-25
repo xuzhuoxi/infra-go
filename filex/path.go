@@ -8,40 +8,80 @@ import (
 )
 
 const (
-	ExtSeparator      = '.' // OS-specific path separator
-	PathSeparator     = '/' // OS-specific path separator
-	PathListSeparator = ':' // OS-specific path list separator
+	ExtSeparator         = '.' // 扩展名分隔符
+	ExtSeparatorStr      = "." // 扩展名分隔符
+	PathListSeparator    = ';' // 路径列表分隔符
+	PathListSeparatorStr = ";" // 路径列表分隔符
+)
 
-	ExtSeparatorStr      = "." // OS-specific path separator
-	PathSeparatorStr     = "/" // OS-specific path separator
-	PathListSeparatorStr = ":" // OS-specific path list separator
+const (
+	UnixSeparator       = '/'  // Linux路径级分隔符
+	UnixSeparatorStr    = "/"  // Linux路径级分隔符
+	WindowsSeparator    = '\\' // Windows路径级分隔符
+	WindowsSeparatorStr = "\\" // Windows路径级分隔符
 )
 
 //检查路径是否存在
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
+	//return err == nil || errors.Is(err, os.ErrExist)
+}
+
+//是否为文件
+func IsFile(path string) bool {
+	fi, err := os.Stat(path)
+	if nil != err && !os.IsExist(err) {
+		return false
+	}
+	return !fi.IsDir()
 }
 
 //是否为文件夹
-func IsFolder(path string) bool {
-	if !IsExist(path) {
-		return false
-	}
+func IsDir(path string) bool {
 	fi, err := os.Stat(path)
-	if nil != err {
+	if nil != err && !os.IsExist(err) {
 		return false
 	}
 	return fi.IsDir()
 }
 
+//是否为文件夹
+func IsFolder(path string) bool {
+	return IsDir(path)
+}
+
+//是否为空文件夹
+func IsEmptyDir(path string) bool {
+	fi, err := os.Stat(path)
+	if nil != err && !os.IsExist(err) {
+		return false
+	}
+	if !fi.IsDir() {
+		return false
+	}
+	list, err := ioutil.ReadDir(path)
+	if err != nil {
+		return false
+	}
+
+	return len(list) == 0
+}
+
+//是否为空文件夹
+func IsEmptyFolder(path string) bool {
+	return IsEmptyDir(path)
+}
+
 // 根据文件路径补全缺失目录路径
 // filePath必须为文件路径
-func CompletePath(filePath string, perm os.FileMode) error {
-	dstUpDir, err := GetUpDir(filePath)
+// filePath必须绝对路径
+func CompletePath(filePathStr string, perm os.FileMode) error {
+	dstUpDir, err := GetUpDir(filePathStr)
 	if nil != err {
 		return err
 	}
+	filepath.Abs(dstUpDir)
 	return CompleteDir(dstUpDir, perm)
 }
 
@@ -108,7 +148,7 @@ func WaldAllDirs(path string, walkFn filepath.WalkFunc) error {
 	})
 }
 
-// 遍历并根据筛选器获取全部路径
+// 遍历并根据筛选器获取全部路径(递归)
 // 当filter=nil时，默认为命中
 // 路径已进行FormatPath处理
 func GetPathsAll(dir string, filter PathFilter) (paths []string, err error) {
@@ -154,19 +194,37 @@ func GetPathsInDir(dir string, filter PathFilter) (paths []string, err error) {
 
 // 合并路径
 // 不检测有效性
-func Combine(dir string, add string) string {
-	dir = FormatPath(dir)
+func Combine(dir string, add string, subs ...string) string {
+	path := combine(dir, add)
+	for _, sub := range subs {
+		path = combine(path, sub)
+	}
+	return path
+}
+
+func combine(dir string, add string) string {
+	if "" == dir && "" == add {
+		return ""
+	}
+	if "" != dir {
+		dir = FormatPath(dir)
+	}
+	if "" != add {
+		add = FormatPath(add)
+	}
 	if "" == add {
 		return dir
 	}
-	add = FormatPath(add)
-	if IsPathSeparatorStr(dir) && IsPathSeparatorStr(add) {
-		return PathSeparatorStr
+	if "" == dir {
+		return add
 	}
-	if IsPathSeparator(add[0]) {
+	if IsUnixSeparatorStr(dir) && IsUnixSeparatorStr(add) {
+		return UnixSeparatorStr
+	}
+	if IsUnixSeparator(add[0]) {
 		return dir + add
 	}
-	return dir + PathSeparatorStr + add
+	return dir + UnixSeparatorStr + add
 }
 
 // 取不包含扩展名的部分的文件名
@@ -226,15 +284,15 @@ func SplitFileName(path string) (shortName string, dotExt string, ext string) {
 // 返回的目录格式经过FormatPath处理
 func Split(path string) (formattedDir string, fileName string) {
 	path = FormatPath(path)
-	if IsPathSeparatorStr(path) {
-		return PathSeparatorStr, ""
+	if IsUnixSeparatorStr(path) {
+		return UnixSeparatorStr, ""
 	}
-	dot := strings.LastIndexByte(path, PathSeparator)
+	dot := strings.LastIndexByte(path, UnixSeparator)
 	if -1 == dot { //只有文件名
 		return "", path
 	}
 	if 0 == dot { //根目录
-		return PathSeparatorStr, path[1:]
+		return UnixSeparatorStr, path[1:]
 	}
 	formattedDir, fileName = path[:dot], path[dot+1:]
 	return
@@ -249,7 +307,7 @@ func GetUpDir(dir string) (upDir string, err error) {
 	if "" == up {
 		return up, &os.PathError{Op: "GetUpDir", Path: dir, Err: ErrNoUpperDir}
 	}
-	if IsPathSeparatorStr(up) && "" == cur {
+	if IsUnixSeparatorStr(up) && "" == cur {
 		return upDir, &os.PathError{Op: "GetUpDir", Path: dir, Err: ErrRootPath}
 	}
 	return up, nil
@@ -257,29 +315,68 @@ func GetUpDir(dir string) (upDir string, err error) {
 
 //Format ------------------------------------
 
-// 标准化路径
+// 标准化路径(转为Linux路径)
 // 转换为"/"形式路径
 // 如果结果路径为目录，并以"/"结尾，清除"/"
 // 不检测有效性
 func FormatPath(path string) string {
-	path = strings.Replace(path, `\`, PathSeparatorStr, -1)
-	var ln = len(path)
-	if IsPathSeparator(path[ln-1]) && ln > 1 {
-		return path[:ln-1]
+	return ToUnixPath(path)
+}
+
+// 格式化为Linux路径
+// 如果结果路径为目录，并以"/"结尾，清除"/"
+// 不检测有效性
+func ToUnixPath(p string) string {
+	p = strings.Replace(p, WindowsSeparatorStr, UnixSeparatorStr, -1)
+	var ln = len(p)
+	if IsUnixSeparator(p[ln-1]) && ln > 1 {
+		return p[:ln-1]
 	}
-	return path
+	return p
+}
+
+// 格式化为Windows路径
+// 如果结果路径为目录，并以"/"结尾，清除"/"
+// 不检测有效性
+func ToWindowsPath(p string) string {
+	p = strings.Replace(p, UnixSeparatorStr, WindowsSeparatorStr, -1)
+	var ln = len(p)
+	if IsWindowsSeparator(p[ln-1]) && ln > 1 {
+		return p[:ln-1]
+	}
+	return p
 }
 
 //Basic ------------------------------------
 
-func IsPathSeparator(c uint8) bool {
-	return PathSeparator == c
+func IsUnixSeparator(c uint8) bool {
+	return UnixSeparator == c
 }
 
-func IsPathSeparatorStr(str string) bool {
-	return PathSeparatorStr == str
+func IsUnixSeparatorStr(str string) bool {
+	return UnixSeparatorStr == str
+}
+
+func IsWindowsSeparator(c uint8) bool {
+	return WindowsSeparator == c
+}
+
+func IsWindowsSeparatorStr(str string) bool {
+	return WindowsSeparatorStr == str
 }
 
 func IsExtSeparator(c uint8) bool {
 	return ExtSeparator == c
+}
+
+func IsExtSeparatorStr(str string) bool {
+	return ExtSeparatorStr == str
+}
+
+func IsListSeparator(c uint8) bool {
+	return PathListSeparator == c
+}
+
+func IsListSeparatorStr(str string) bool {
+	return PathListSeparatorStr == str
 }

@@ -112,15 +112,15 @@ func (resp *SockResponse) makePackMessage(data interface{}) []byte {
 	resp.BuffToBlock.WriteData([]byte(resp.CId))
 	switch t := data.(type) {
 	case [][]byte:
-		for index, _ := range t {
+		for index := range t {
 			resp.BuffToBlock.WriteData(resp.ParamHandler.HandleResponseParam(t[index]))
 		}
 	case []string:
-		for index, _ := range t {
+		for index := range t {
 			resp.BuffToBlock.WriteData(resp.ParamHandler.HandleResponseParam(t[index]))
 		}
 	case []interface{}:
-		for index, _ := range t {
+		for index := range t {
 			resp.BuffToBlock.WriteData(resp.ParamHandler.HandleResponseParam(t[index]))
 		}
 	}

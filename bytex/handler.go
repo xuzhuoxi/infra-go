@@ -35,7 +35,7 @@ var (
 	ErrBigUnblock    = errors.New("BigUnblock Error! ")
 )
 
-var t2handler []BytesHandler = make([]BytesHandler, 128, 128)
+var t2handler = make([]BytesHandler, 128, 128)
 
 // 字节数组处理器
 type IBytesProcessor interface {
@@ -77,7 +77,7 @@ func (p *BytesProcessor) Handle(in []byte) (out []byte, errIdx int, err error) {
 		return
 	}
 	tmp := out
-	for idx, _ := range p.handlers {
+	for idx := range p.handlers {
 		tmp, err = p.handlers[idx](tmp)
 		if nil != err {
 			return nil, idx, err

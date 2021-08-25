@@ -16,7 +16,7 @@ import (
 
 func TestPtr(t *testing.T) {
 	var data interface{} = false
-	var data2 *interface{} = &data
+	var data2 = &data
 	fmt.Println("data:", data, *data2)
 }
 func TestBuff(t *testing.T) {
@@ -45,7 +45,7 @@ func TestType(t *testing.T) {
 		}
 	}
 	var data interface{} = true
-	var pdata *interface{} = &data
+	var pdata = &data
 	catchType(data)
 	catchType(pdata)
 	fmt.Println("无敌分界线——————————————")
