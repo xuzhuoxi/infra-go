@@ -35,7 +35,7 @@ func CopyAuto(srcFile string, dstFile string, autoPerm os.FileMode) (written int
 		return 0, err
 	}
 	dstFile = FormatPath(dstFile)
-	err = CompletePath(dstFile, autoPerm)
+	err = CompleteParentPath(dstFile, autoPerm)
 	if nil != err {
 		return 0, err
 	}
@@ -82,7 +82,7 @@ func CopyModAuto(srcFile string, dstFile string, filePerm os.FileMode, autoPerm 
 		return 0, err
 	}
 	dstFile = FormatPath(dstFile)
-	err = CompletePath(dstFile, autoPerm)
+	err = CompleteParentPath(dstFile, autoPerm)
 	if nil != err {
 		return 0, err
 	}

@@ -73,10 +73,9 @@ func IsEmptyFolder(path string) bool {
 	return IsEmptyDir(path)
 }
 
-// 根据文件路径补全缺失目录路径
-// filePath必须为文件路径
+// 根据文件路径补全缺失父目录路径
 // filePath必须绝对路径
-func CompletePath(filePathStr string, perm os.FileMode) error {
+func CompleteParentPath(filePathStr string, perm os.FileMode) error {
 	dstUpDir, err := GetUpDir(filePathStr)
 	if nil != err {
 		return err
