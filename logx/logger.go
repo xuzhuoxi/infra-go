@@ -106,8 +106,11 @@ type ILogger interface {
 	//移除配置
 	RemoveConfig(t LogType)
 
+	// 普通记录，忽略前缀
 	Print(v ...interface{})
+	// 普通记录，忽略前缀
 	Printf(format string, v ...interface{})
+	// 普通记录，忽略前缀
 	Println(v ...interface{})
 
 	Log(level LogLevel, v ...interface{})
