@@ -30,7 +30,7 @@ type EventData struct {
 
 /**
  * 是否设置为停止
- * @returns {boolean}
+ * @returns {bool}
  */
 func (ed *EventData) Stopped() bool {
 	return ed.stopped
