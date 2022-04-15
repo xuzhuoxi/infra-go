@@ -21,6 +21,17 @@ const (
 	WindowsSeparatorStr = "\\" // Windows路径级分隔符
 )
 
+// 检查路径是否为相对路径格式
+func IsRelativeFormat(path string) bool {
+	if strings.Contains(path, ":") {
+		return false
+	}
+	if strings.Index(path, "/") == 0 || strings.Index(path, `\\`) == 0 {
+		return false
+	}
+	return true
+}
+
 //检查路径是否存在
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
