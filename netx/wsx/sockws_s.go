@@ -1,7 +1,7 @@
 package wsx
 
 import (
-	"github.com/pkg/errors"
+	"errors"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/lang"
