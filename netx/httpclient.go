@@ -3,7 +3,6 @@ package netx
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -60,7 +59,7 @@ func HttpPostForm(url string, data url.Values, cb ReqCallBack) {
 //}
 
 func handleResponse(resp *http.Response, cb ReqCallBack) {
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
 		return

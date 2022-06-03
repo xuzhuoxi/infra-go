@@ -3,7 +3,6 @@ package filex
 import (
 	"bufio"
 	"io"
-	"io/ioutil"
 	"os"
 )
 
@@ -132,13 +131,13 @@ func copy(srcFile string, dstFile string, srcStat os.FileInfo, perm os.FileMode)
 // 使用ioutil包中的API进行文件复制
 // 不建议使用于大文件
 func copy1(srcFile string, dstFile string, perm os.FileMode) (written int64, err error) {
-	srcBytes, err := ioutil.ReadFile(srcFile)
+	srcBytes, err := os.ReadFile(srcFile)
 	if err != nil {
 		return 0, err
 	}
 
 	//打开dstFileName
-	err = ioutil.WriteFile(dstFile, srcBytes, perm)
+	err = os.WriteFile(dstFile, srcBytes, perm)
 	if err != nil {
 		return 0, err
 	}

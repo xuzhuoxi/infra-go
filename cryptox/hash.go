@@ -11,7 +11,7 @@ import (
 	"golang.org/x/crypto/blake2s"
 	"golang.org/x/crypto/ripemd160"
 	"golang.org/x/crypto/sha3"
-	"io/ioutil"
+	"os"
 )
 
 //
@@ -49,7 +49,7 @@ func Md5String(data string) string {
 	return Md5([]byte(data))
 }
 func Md5File(filePath string) string {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if nil != err {
 		return ""
 	}
@@ -63,7 +63,7 @@ func Sha1String(data string) string {
 	return Sha1([]byte(data))
 }
 func Sha1File(filePath string) string {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if nil != err {
 		return ""
 	}
@@ -93,7 +93,7 @@ func HashString2Hex(hash crypto.Hash, data string) string {
 	return Hash2Hex(hash, []byte(data))
 }
 func HashFile(hash crypto.Hash, filePath string) []byte {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if nil != err {
 		return nil
 	}
@@ -101,7 +101,7 @@ func HashFile(hash crypto.Hash, filePath string) []byte {
 }
 
 func HashFile2Hex(hash crypto.Hash, filePath string) string {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if nil != err {
 		return ""
 	}

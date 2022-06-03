@@ -9,7 +9,7 @@ import (
 	"crypto"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -20,8 +20,8 @@ type rsaTest struct {
 }
 
 func TestRsa(t *testing.T) {
-	privateKey, _ := ioutil.ReadFile("D:/log/rsa/key/private.pem")
-	publicKey, _ := ioutil.ReadFile("D:/log/rsa/key/public.pem")
+	privateKey, _ := os.ReadFile("D:/log/rsa/key/private.pem")
+	publicKey, _ := os.ReadFile("D:/log/rsa/key/public.pem")
 	fmt.Println(privateKey)
 	fmt.Println(publicKey)
 	private, _ := NewRsaPrivateCipher(privateKey, false)
@@ -35,8 +35,8 @@ func TestRsa(t *testing.T) {
 }
 
 func TestRsaLong(t *testing.T) {
-	privateKey, _ := ioutil.ReadFile("D:/log/rsa/key/private.pem")
-	publicKey, _ := ioutil.ReadFile("D:/log/rsa/key/public.pem")
+	privateKey, _ := os.ReadFile("D:/log/rsa/key/private.pem")
+	publicKey, _ := os.ReadFile("D:/log/rsa/key/public.pem")
 	fmt.Println(privateKey)
 	fmt.Println(publicKey)
 	private, _ := NewRsaPrivateCipher(privateKey, false)
@@ -51,8 +51,8 @@ func TestRsaLong(t *testing.T) {
 }
 
 func TestSign(t *testing.T) {
-	privateKey, _ := ioutil.ReadFile("D:/log/rsa/key/private.pem")
-	publicKey, _ := ioutil.ReadFile("D:/log/rsa/key/public.pem")
+	privateKey, _ := os.ReadFile("D:/log/rsa/key/private.pem")
+	publicKey, _ := os.ReadFile("D:/log/rsa/key/public.pem")
 	private, _ := NewRsaPrivateCipher(privateKey, false)
 	public, _ := NewRsaPublicCipher(publicKey)
 	origData := []byte("abcda")

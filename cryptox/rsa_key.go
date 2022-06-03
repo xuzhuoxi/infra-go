@@ -12,7 +12,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"golang.org/x/crypto/ssh"
-	"io/ioutil"
 	"os"
 )
 
@@ -179,7 +178,7 @@ func GenSSHKeyFile(bits int, privateFilePath, publicFilePath string) error {
 	if nil != err {
 		return err
 	}
-	ioutil.WriteFile(privateFilePath, privateStr, os.ModePerm)
-	ioutil.WriteFile(publicFilePath, publicStr, os.ModePerm)
+	os.WriteFile(privateFilePath, privateStr, os.ModePerm)
+	os.WriteFile(publicFilePath, publicStr, os.ModePerm)
 	return nil
 }

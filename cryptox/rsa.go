@@ -12,7 +12,7 @@ import (
 	"crypto/rsa"
 	"errors"
 	"github.com/xuzhuoxi/infra-go/filex"
-	"io/ioutil"
+	"os"
 )
 
 type IRSAPublicCipher interface {
@@ -145,7 +145,7 @@ func LoadRsaPublicCipher(path string) (IRSAPublicCipher, error) {
 	if !filex.IsExist(path) {
 		return nil, errPath
 	}
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if nil != err {
 		return nil, err
 	}
@@ -156,7 +156,7 @@ func LoadRsaPrivateCipher(path string, pkcs8 bool) (IRSAPrivateCipher, error) {
 	if !filex.IsExist(path) {
 		return nil, errPath
 	}
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if nil != err {
 		return nil, err
 	}
