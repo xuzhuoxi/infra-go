@@ -6,14 +6,15 @@
 package pngx
 
 import (
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
+	"image"
 	"image/png"
 	"io"
-	"image"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func init() {
 	formatx.RegisterFormat(string(formatx.PNG), EncodePNG, DecodePNG)
+	formatx.RegisterFormatExt(string(formatx.PNG), "png")
 }
 
 func EncodePNG(w io.Writer, m image.Image, options interface{}) error {

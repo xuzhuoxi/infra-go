@@ -20,7 +20,10 @@ type formatDefined struct {
 	decode ImageDecodeFunc
 }
 
-var formats = make([]formatDefined, 0, 128)
+var (
+	formats    = make([]formatDefined, 0, 128)
+	format2ext = make(map[string]string)
+)
 
 func CheckFormatRegistered(format string) bool {
 	format = strings.ToLower(format)
@@ -42,4 +45,16 @@ func getFormat(name string) (fm formatDefined, ok bool) {
 		}
 	}
 	return formatDefined{}, false
+}
+
+func RegisterFormatExt(formatName string, extName string) {
+	format2ext[formatName] = extName
+}
+
+func GetExtName(formatName string) string {
+	formatName = strings.ToLower(formatName)
+	if rs, ok := format2ext[formatName]; ok {
+		return rs
+	}
+	return formatName
 }

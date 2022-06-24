@@ -6,10 +6,10 @@
 package jpegx
 
 import (
-	"io"
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image"
 	"image/jpeg"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
+	"io"
 )
 
 func init() {
@@ -19,6 +19,9 @@ func init() {
 	formatx.RegisterFormat(string(formatx.JPEG), EncodeJPEG, DecodeJPEG)
 	formatx.RegisterFormat(string(formatx.JPG), EncodeJPEG, DecodeJPEG)
 	formatx.RegisterFormat(string(formatx.JPS), EncodeJPEG, DecodeJPEG)
+	formatx.RegisterFormatExt(string(formatx.JPEG), "jpg")
+	formatx.RegisterFormatExt(string(formatx.JPG), "jpg")
+	formatx.RegisterFormatExt(string(formatx.JPS), "jps")
 }
 
 func EncodeJPEG(w io.Writer, m image.Image, options interface{}) error {

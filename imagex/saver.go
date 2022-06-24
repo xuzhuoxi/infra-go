@@ -14,7 +14,10 @@ import (
 
 func SaveImage(img image.Image, fullPath string, format formatx.ImageFormat, options interface{}) error {
 	os.Open(fullPath)
-	file, _ := os.Create(fullPath)
+	file, err := os.Create(fullPath)
+	if nil != err {
+		return err
+	}
 	defer file.Close()
 	if formatx.Auto == format {
 		extF := formatx.ImageFormat(filex.GetExtWithoutDot(fullPath))

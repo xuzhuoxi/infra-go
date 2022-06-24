@@ -19,6 +19,7 @@ const (
 	JPEG             = "jpeg"
 	JPG              = "jpg"
 	JPS              = "jps"
+	BMP              = "bmp"
 )
 
 func (f ImageFormat) Encode(w io.Writer, m image.Image, options interface{}) error {
