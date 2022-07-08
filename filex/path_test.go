@@ -7,6 +7,32 @@ import (
 	"testing"
 )
 
+type absEle struct {
+	Path  string
+	IsAbs bool
+}
+
+var absEles = []absEle{
+	absEle{Path: `c:/website/index.htm`, IsAbs: true},
+	absEle{Path: `c:/website/img/photo.jpg`, IsAbs: true},
+	absEle{Path: `C:\windows\system32\cmd.exe`, IsAbs: true},
+	absEle{Path: `system32\cmd.exe`, IsAbs: false},
+	absEle{Path: `..\windows\system32\cmd.exe`, IsAbs: false},
+	absEle{Path: `..\..\windows\system32\cmd.exe`, IsAbs: false},
+	absEle{Path: `/home/user1/abc.txt`, IsAbs: true},
+	absEle{Path: `home/user1/abc.txt`, IsAbs: false},
+	absEle{Path: `./home/user1/abc.txt`, IsAbs: false},
+	absEle{Path: `http://localhost/index.html`, IsAbs: true},
+	absEle{Path: `\\192.168.2.20`, IsAbs: true},
+	absEle{Path: `ftp://test:test@192.168.0.1:21/profile`, IsAbs: true},
+}
+
+func TestAbs(t *testing.T) {
+	for _, e := range absEles {
+		fmt.Println(e.Path, e.IsAbs, IsAbsFormat(e.Path))
+	}
+}
+
 func TestFormatPath(t *testing.T) {
 	paths := []string{"/", "/a", "/a\\", "/a/b", "/a\\b/"}
 	for index, path := range paths {

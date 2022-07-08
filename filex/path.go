@@ -23,13 +23,28 @@ const (
 
 // 检查路径是否为相对路径格式
 func IsRelativeFormat(path string) bool {
+	return !IsAbsFormat(path)
+}
+
+// 检查路径是否为绝对路径格式
+func IsAbsFormat(path string) bool {
 	if strings.Contains(path, ":") {
-		return false
+		return true
 	}
-	if strings.Index(path, "/") == 0 || strings.Index(path, `\\`) == 0 {
-		return false
+	if strings.HasPrefix(path, "/") || strings.HasPrefix(path, `\\`) {
+		return true
 	}
-	return true
+	return IsUnixAbs(path) || IsWinAbs(path)
+}
+
+// 检查路径是否为Unix绝对路径格式
+func IsUnixAbs(path string) bool {
+	return isUnixAbs(path)
+}
+
+// 检查路径是否为Windows绝对路径格式
+func IsWinAbs(path string) bool {
+	return isWinAbs(path)
 }
 
 //检查路径是否存在
