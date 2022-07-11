@@ -150,7 +150,7 @@ func WalkAll(path string, walkFn filepath.WalkFunc) error {
 // 遍历文件,包含自身与子目录文件
 // 返回的path已使用FormatPath处理
 // 注意：在Walk过程中 不可以 对dir目录(包括子目录)中的文件进行增删
-func WaldAllFiles(path string, walkFn filepath.WalkFunc) error {
+func WalkAllFiles(path string, walkFn filepath.WalkFunc) error {
 	path = FormatPath(path)
 	return WalkAll(path, func(eachPath string, info os.FileInfo, err error) error {
 		if info.IsDir() {
@@ -163,7 +163,7 @@ func WaldAllFiles(path string, walkFn filepath.WalkFunc) error {
 // 遍历文件夹,包含自身与子目录
 // 返回的path已使用FormatPath处理
 // 注意：在Walk过程中 不可以 对dir目录(包括子目录)中的文件进行增删
-func WaldAllDirs(path string, walkFn filepath.WalkFunc) error {
+func WalkAllDirs(path string, walkFn filepath.WalkFunc) error {
 	path = FormatPath(path)
 	return WalkAll(path, func(eachPath string, info os.FileInfo, err error) error {
 		if !info.IsDir() {

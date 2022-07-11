@@ -10,8 +10,8 @@ import (
 // 旧路径无效：忽略
 // 新路径无效：忽略
 // 新路径已存在：覆盖
-func Move(oldPath string, newPath string) error {
-	return move(FormatPath(oldPath), FormatPath(newPath))
+func Move(srcPath string, dstPath string) error {
+	return move(FormatPath(srcPath), FormatPath(dstPath))
 }
 
 // 移动文件或目录
@@ -20,8 +20,8 @@ func Move(oldPath string, newPath string) error {
 // 旧路径无效：忽略
 // 新路径无效：补全
 // 新路径已存在：覆盖
-func MoveAuto(oldPath string, newPath string, autoPerm os.FileMode) error {
-	return moveWithAutoDir(FormatPath(oldPath), FormatPath(newPath), autoPerm)
+func MoveAuto(srcPath string, dstPath string, autoPerm os.FileMode) error {
+	return moveFileAuto(FormatPath(srcPath), FormatPath(dstPath), autoPerm)
 }
 
 // 移动文件或目录到指定目录
@@ -30,8 +30,8 @@ func MoveAuto(oldPath string, newPath string, autoPerm os.FileMode) error {
 // 旧路径无效：忽略
 // 目标路径无效：忽略
 // 目标已存在：覆盖
-func MoveTo(oldPath string, dstDir string) error {
-	return moveTo(oldPath, dstDir)
+func MoveTo(srcPath string, dstDir string) error {
+	return moveTo(srcPath, dstDir)
 }
 
 // 移动文件或目录
@@ -40,9 +40,8 @@ func MoveTo(oldPath string, dstDir string) error {
 // 旧路径无效：忽略
 // 目标路径为文件：忽略
 // 目标路径无效：自动补全
-func MoveToAuto(oldPath string, dstDir string, autoPerm os.FileMode) error {
-	return moveToWithAutoDir(oldPath, dstDir, autoPerm)
-
+func MoveToAuto(srcPath string, dstDir string, autoPerm os.FileMode) error {
+	return moveToDirAuto(srcPath, dstDir, autoPerm)
 }
 
 //
@@ -57,32 +56,32 @@ func MoveToAuto(oldPath string, dstDir string, autoPerm os.FileMode) error {
 // -------------
 
 // 移动文件或目录
-func move(oldPath string, newPath string) error {
-	return os.Rename(oldPath, newPath)
+func move(srcPath string, dstPath string) error {
+	return os.Rename(srcPath, dstPath)
 }
 
 // 移动文件或目录到目标目录
-func moveTo(oldPath string, dstDir string) error {
-	_, fileName := Split(oldPath)
-	return move(oldPath, Combine(dstDir, fileName))
+func moveTo(srcPath string, dstDir string) error {
+	_, fileName := Split(srcPath)
+	return move(srcPath, Combine(dstDir, fileName))
 }
 
 // 移动文件或目录
 // 自动补全目标路径
-func moveWithAutoDir(oldPath string, newPath string, autoPerm os.FileMode) error {
-	var dir, _ = Split(newPath)
+func moveFileAuto(srcPath string, dstPath string, autoPerm os.FileMode) error {
+	var dir, _ = Split(dstPath)
 	if !IsExist(dir) {
 		err := os.MkdirAll(dir, autoPerm)
 		if nil != err {
 			return err
 		}
 	}
-	return move(oldPath, newPath)
+	return move(srcPath, dstPath)
 }
 
 // 移动文件或目录
 // 自动补全目标路径
-func moveToWithAutoDir(oldPath string, dstDir string, autoPerm os.FileMode) error {
+func moveToDirAuto(srcPath string, dstDir string, autoPerm os.FileMode) error {
 	dstDir = FormatPath(dstDir)
 	if !IsExist(dstDir) {
 		err := os.MkdirAll(dstDir, autoPerm)
@@ -90,5 +89,5 @@ func moveToWithAutoDir(oldPath string, dstDir string, autoPerm os.FileMode) erro
 			return err
 		}
 	}
-	return moveTo(oldPath, dstDir)
+	return moveTo(srcPath, dstDir)
 }
