@@ -82,43 +82,48 @@ func ArchiveToZip(filePath string, archPath string, newHeaderName string) error 
 // 追加目录到zip文件中
 // 使用目录名作为HeaderName
 // 保持目录内容结构不变
-func AppendDirToZipRoot(filePath string, zip *zip.Writer) error {
+func AppendDirToZipRoot(filePath string, zipWriter *zip.Writer) error {
 	_, newHeaderName := filex.Split(filePath)
-	return appendDirToZip(filePath, newHeaderName, zip)
+	return appendDirToZip(filePath, newHeaderName, zipWriter)
 }
 
 // 追加目录到zip文件中
 // 为目录指定新的HeaderName
 // 保持目录内容结构不变
-func AppendDirToZip(filePath string, newHeaderName string, zip *zip.Writer) error {
-	return appendDirToZip(filePath, newHeaderName, zip)
+func AppendDirToZip(filePath string, newHeaderName string, zipWriter *zip.Writer) error {
+	return appendDirToZip(filePath, newHeaderName, zipWriter)
 }
 
 // 追加目录下列表zip文件中
 // 不使用目录HeaderName
 // 保持目录内容结构不变
-func AppendChildrenToZipRoot(filePath string, zip *zip.Writer) error {
-	return appendChildrenToZip(filePath, "", zip)
+func AppendChildrenToZipRoot(filePath string, zipWriter *zip.Writer) error {
+	return appendChildrenToZip(filePath, "", zipWriter)
 }
 
 // 追加目录下列表zip文件中
 // 为目录指定新的HeaderName
 // 保持目录内容结构不变
-func AppendChildrenToZip(dirPath string, dirHeaderName string, zip *zip.Writer) error {
-	return appendChildrenToZip(dirPath, dirHeaderName, zip)
+func AppendChildrenToZip(dirPath string, dirHeaderName string, zipWriter *zip.Writer) error {
+	return appendChildrenToZip(dirPath, dirHeaderName, zipWriter)
 }
 
 // 追加文件到zip文件中
 // 使用文件名作为HeaderName
-func AppendFileToZipRoot(filePath string, zip *zip.Writer) error {
+func AppendFileToZipRoot(filePath string, zipWriter *zip.Writer) error {
 	_, newHeaderName := filex.Split(filePath)
-	return appendFileToZip(filePath, newHeaderName, zip)
+	return appendFileToZip(filePath, newHeaderName, zipWriter)
 }
 
 // 追加文件到zip文件中
 // 为文件指定新的HeaderName
-func AppendFileToZip(filePath string, newHeaderName string, zip *zip.Writer) error {
-	return appendFileToZip(filePath, newHeaderName, zip)
+func AppendFileToZip(filePath string, newHeaderName string, zipWriter *zip.Writer) error {
+	return appendFileToZip(filePath, newHeaderName, zipWriter)
+}
+
+// 把目录写入到zip, 并指定目录的headerName
+func appendDirToZip(dirPath string, newHeaderName string, zipWriter *zip.Writer) error {
+	return appendChildrenToZip(dirPath, newHeaderName, zipWriter)
 }
 
 // 把目录的内容写入到zip, 并指定目标目录的headerName为dirHeaderName
@@ -141,23 +146,11 @@ func appendChildrenToZip(dirPath string, dirHeaderName string, zipWriter *zip.Wr
 	return nil
 }
 
-// 把目录写入到zip, 并指定目录的headerName
-func appendDirToZip(dirPath string, newHeaderName string, zipWriter *zip.Writer) error {
-	return appendChildrenToZip(dirPath, newHeaderName, zipWriter)
-}
-
 // 把文件写入到zip中, 并指定headerName
 func appendFileToZip(filePath string, newHeaderName string, zipWriter *zip.Writer) error {
 	fileInfo, err := os.Stat(filePath)
 	if nil != err {
 		return errors.New(fmt.Sprintf("appendFileToZip[file is not exist][%s]", err))
-	}
-
-	hdr, _ := zip.FileInfoHeader(fileInfo)
-	hdr.Name = newHeaderName
-	subWriter, err := zipWriter.CreateHeader(hdr)
-	if err != nil {
-		return errors.New(fmt.Sprintf("appendFileToZip[CreateHeader][%s]", err))
 	}
 
 	srcFile, err := os.Open(filePath)
@@ -166,6 +159,13 @@ func appendFileToZip(filePath string, newHeaderName string, zipWriter *zip.Write
 	}
 	defer srcFile.Close()
 	reader := bufio.NewReader(srcFile)
+
+	hdr, _ := zip.FileInfoHeader(fileInfo)
+	hdr.Name = newHeaderName
+	subWriter, err := zipWriter.CreateHeader(hdr)
+	if err != nil {
+		return errors.New(fmt.Sprintf("appendFileToZip[CreateHeader][%s]", err))
+	}
 
 	_, err = io.Copy(subWriter, reader)
 	if err != nil {
