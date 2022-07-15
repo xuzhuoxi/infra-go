@@ -4,13 +4,7 @@ import (
 	"crypto"
 	"crypto/md5"
 	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"encoding/hex"
-	"golang.org/x/crypto/blake2b"
-	"golang.org/x/crypto/blake2s"
-	"golang.org/x/crypto/ripemd160"
-	"golang.org/x/crypto/sha3"
 	"os"
 )
 
@@ -85,6 +79,7 @@ func Hash2Hex(hash crypto.Hash, data []byte) string {
 	}
 	return hex.EncodeToString(rs)
 }
+
 func HashString(hash crypto.Hash, data string) []byte {
 	return Hash(hash, []byte(data))
 }
@@ -92,6 +87,7 @@ func HashString(hash crypto.Hash, data string) []byte {
 func HashString2Hex(hash crypto.Hash, data string) string {
 	return Hash2Hex(hash, []byte(data))
 }
+
 func HashFile(hash crypto.Hash, filePath string) []byte {
 	data, err := os.ReadFile(filePath)
 	if nil != err {
@@ -116,64 +112,65 @@ func _sha1(data []byte) []byte {
 	arr := sha1.Sum(data)
 	return arr[:]
 }
-func _sha224(data []byte) []byte {
-	arr := sha256.Sum224(data)
-	return arr[:]
-}
-func _sha256(data []byte) []byte {
-	arr := sha256.Sum256(data)
-	return arr[:]
-}
-func _sha384(data []byte) []byte {
-	arr := sha512.Sum384(data)
-	return arr[:]
-}
-func _sha512(data []byte) []byte {
-	arr := sha512.Sum512(data)
-	return arr[:]
-}
-func _sha512_224(data []byte) []byte {
-	arr := sha512.Sum512_224(data)
-	return arr[:]
-}
-func _sha512_256(data []byte) []byte {
-	arr := sha512.Sum512_256(data)
-	return arr[:]
-}
-func _ripemd160(data []byte) []byte {
-	digest := ripemd160.New()
-	digest.Write(data)
-	return digest.Sum(nil)
-}
-func _sha3_224(data []byte) []byte {
-	arr := sha3.Sum224(data)
-	return arr[:]
-}
-func _sha3_256(data []byte) []byte {
-	arr := sha3.Sum256(data)
-	return arr[:]
-}
-func _sha3_384(data []byte) []byte {
-	arr := sha3.Sum384(data)
-	return arr[:]
-}
-func _sha3_512(data []byte) []byte {
-	arr := sha3.Sum512(data)
-	return arr[:]
-}
-func _blake2s_256(data []byte) []byte {
-	arr := blake2s.Sum256(data)
-	return arr[:]
-}
-func _blake2b_256(data []byte) []byte {
-	arr := blake2b.Sum256(data)
-	return arr[:]
-}
-func _blake2b_384(data []byte) []byte {
-	arr := blake2b.Sum384(data)
-	return arr[:]
-}
-func _blake2b_512(data []byte) []byte {
-	arr := blake2b.Sum512(data)
-	return arr[:]
-}
+
+//func _sha224(data []byte) []byte {
+//	arr := sha256.Sum224(data)
+//	return arr[:]
+//}
+//func _sha256(data []byte) []byte {
+//	arr := sha256.Sum256(data)
+//	return arr[:]
+//}
+//func _sha384(data []byte) []byte {
+//	arr := sha512.Sum384(data)
+//	return arr[:]
+//}
+//func _sha512(data []byte) []byte {
+//	arr := sha512.Sum512(data)
+//	return arr[:]
+//}
+//func _sha512_224(data []byte) []byte {
+//	arr := sha512.Sum512_224(data)
+//	return arr[:]
+//}
+//func _sha512_256(data []byte) []byte {
+//	arr := sha512.Sum512_256(data)
+//	return arr[:]
+//}
+//func _ripemd160(data []byte) []byte {
+//	digest := ripemd160.New()
+//	digest.Write(data)
+//	return digest.Sum(nil)
+//}
+//func _sha3_224(data []byte) []byte {
+//	arr := sha3.Sum224(data)
+//	return arr[:]
+//}
+//func _sha3_256(data []byte) []byte {
+//	arr := sha3.Sum256(data)
+//	return arr[:]
+//}
+//func _sha3_384(data []byte) []byte {
+//	arr := sha3.Sum384(data)
+//	return arr[:]
+//}
+//func _sha3_512(data []byte) []byte {
+//	arr := sha3.Sum512(data)
+//	return arr[:]
+//}
+//func _blake2s_256(data []byte) []byte {
+//	arr := blake2s.Sum256(data)
+//	return arr[:]
+//}
+//func _blake2b_256(data []byte) []byte {
+//	arr := blake2b.Sum256(data)
+//	return arr[:]
+//}
+//func _blake2b_384(data []byte) []byte {
+//	arr := blake2b.Sum384(data)
+//	return arr[:]
+//}
+//func _blake2b_512(data []byte) []byte {
+//	arr := blake2b.Sum512(data)
+//	return arr[:]
+//}
