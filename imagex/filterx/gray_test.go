@@ -16,7 +16,7 @@ func TestGrayRGBAImage(t *testing.T) {
 		if index >= len(targets) {
 			return
 		}
-		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
+		img, _, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
 		if nil != err {
 			fmt.Println(err)
 			continue
@@ -39,7 +39,7 @@ func TestGrayRGBImage(t *testing.T) {
 	sources := RGBPaths
 	targets := GrayPaths
 	for index, source := range sources {
-		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.PNG)
+		img, _, err := imagex.LoadImage(RunningDir+"/"+source, formatx.PNG)
 		if nil != err {
 			fmt.Println(err)
 			continue

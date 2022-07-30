@@ -15,7 +15,7 @@ func TestErodeCVT(t *testing.T) {
 		if index >= len(targets) {
 			return
 		}
-		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
+		img, _, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
 		if nil != err {
 			fmt.Println(err)
 			continue

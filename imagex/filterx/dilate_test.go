@@ -16,7 +16,7 @@ func TestDilateCVT(t *testing.T) {
 		if index >= len(targets) {
 			return
 		}
-		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
+		img, _, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
 		if nil != err {
 			fmt.Println(err)
 			continue
@@ -38,7 +38,7 @@ func TestDilateGray(t *testing.T) {
 	sources := GrayPaths
 	targets := DilatePaths
 	for index, source := range sources {
-		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.PNG)
+		img, _, err := imagex.LoadImage(RunningDir+"/"+source, formatx.PNG)
 		if nil != err {
 			fmt.Println(err)
 			continue

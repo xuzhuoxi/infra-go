@@ -8,10 +8,6 @@ import (
 	"testing"
 )
 
-type _RGB struct {
-	R, G, B int
-}
-
 func TestPoint(t *testing.T) {
 	var pix = make([]_RGB, 2)
 	var pix2 = make([]_RGB, 2)
@@ -35,7 +31,7 @@ func TestBlurMatrix(t *testing.T) {
 	filter := &Gauss5
 	//filter, _ := CreateMotionBlurFilter(8, imagex.Vertical)
 	for index, source := range sources {
-		img, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
+		img, _, err := imagex.LoadImage(RunningDir+"/"+source, formatx.Auto)
 		if nil != err {
 			fmt.Println(err)
 			continue
