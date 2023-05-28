@@ -1,6 +1,7 @@
 package logx
 
 import (
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/filex"
 	"log"
 	"math"
@@ -9,6 +10,11 @@ import (
 	"sync"
 	"time"
 )
+
+type logFormats struct {
+	prefix string // 显示前缀
+	format string // 显示颜色
+}
 
 type logInfo struct {
 	level       LogLevel
@@ -27,6 +33,22 @@ type logger struct {
 
 	mu      sync.RWMutex
 	infoMap map[LogType]*logInfo
+}
+
+var (
+	defaultLogger = NewLogger()
+	levelFormats  = make(map[LogLevel]logFormats)
+	defaultFormat = "\033[0m"
+)
+
+func init() {
+	defaultLogger.SetConfig(LogConfig{Type: TypeConsole, Level: LevelAll})
+	levelFormats[LevelTrace] = logFormats{prefix: "[Trace] ", format: "\033[0m"}  // Default
+	levelFormats[LevelDebug] = logFormats{prefix: "[Debug] ", format: "\033[95m"} // FG: Bright Cyan
+	levelFormats[LevelInfo] = logFormats{prefix: "[Info] ", format: "\033[94m"}   // FG: Green
+	levelFormats[LevelWarn] = logFormats{prefix: "[Warn] ", format: "\033[93m"}   // FG: Bright Yellow
+	levelFormats[LevelError] = logFormats{prefix: "[Error] ", format: "\033[91m"} // FG: Bright Red
+	levelFormats[LevelFatal] = logFormats{prefix: "[Fatal] ", format: "\033[31m"} // FG: Red
 }
 
 func (l *logger) SetPrefix(prefix string) {
@@ -178,12 +200,17 @@ func (l *logger) Log(level LogLevel, v ...interface{}) {
 	}
 	checkFile(l.infoMap)
 	prefix := getLevelPrefix(level, l.prefix)
+	logged := false
 	for _, info := range l.infoMap {
 		if level < info.level {
 			continue
 		}
+		logged = true
 		info.logger.SetPrefix(prefix)
-		info.logger.Print(v...)
+		info.logger.Println(v...)
+	}
+	if logged {
+		fmt.Printf(defaultFormat)
 	}
 }
 
@@ -195,12 +222,17 @@ func (l *logger) Logf(level LogLevel, format string, v ...interface{}) {
 	}
 	checkFile(l.infoMap)
 	prefix := getLevelPrefix(level, l.prefix)
+	logged := false
 	for _, info := range l.infoMap {
 		if level < info.level {
 			continue
 		}
+		logged = true
 		info.logger.SetPrefix(prefix)
 		info.logger.Printf(format, v...)
+	}
+	if logged {
+		fmt.Printf(defaultFormat)
 	}
 }
 
@@ -212,12 +244,17 @@ func (l *logger) Logln(level LogLevel, v ...interface{}) {
 	}
 	checkFile(l.infoMap)
 	prefix := getLevelPrefix(level, l.prefix)
+	logged := false
 	for _, info := range l.infoMap {
 		if level < info.level {
 			continue
 		}
+		logged = true
 		info.logger.SetPrefix(prefix)
 		info.logger.Println(v...)
+	}
+	if logged {
+		fmt.Printf(defaultFormat)
 	}
 }
 
@@ -297,12 +334,12 @@ func genLogger(flag int) *log.Logger {
 	return log.New(os.Stderr, "", flag)
 }
 
-func getLevelPrefix(level LogLevel, prefix string) string {
-	rs, ok := level2prefix[level]
+func getLevelPrefix(level LogLevel, prefix string) (newPrefix string) {
+	rs, ok := levelFormats[level]
 	if ok {
-		return rs + prefix
+		return fmt.Sprintf("%s%s%s", rs.format, rs.prefix, prefix)
 	}
-	return "" + prefix
+	return prefix
 }
 
 func checkFile(infoMap map[LogType]*logInfo) {

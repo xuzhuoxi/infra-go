@@ -1,6 +1,7 @@
 package logx
 
 import (
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/mathx"
 	"testing"
 )
@@ -17,5 +18,13 @@ func TestLogger(t *testing.T) {
 
 	for i := 0; i < 300; i++ {
 		l.Traceln("哈哈", "1111111111111111111111")
+	}
+}
+
+func TestLoggerLevelFormat(t *testing.T) {
+	for _, val := range levelFormats {
+		fmt.Printf(val.format)
+		fmt.Println(val.prefix)
+		fmt.Printf(defaultFormat)
 	}
 }
