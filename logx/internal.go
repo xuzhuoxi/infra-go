@@ -36,9 +36,10 @@ type logger struct {
 }
 
 var (
-	defaultLogger = NewLogger()
-	levelFormats  = make(map[LogLevel]logFormats)
-	defaultFormat = "\033[0m"
+	defaultLogger     = NewLogger()
+	levelFormats      = make(map[LogLevel]logFormats)
+	defaultFormat     = "\033[0m"
+	enableColorFormat = false
 )
 
 func init() {
@@ -209,7 +210,7 @@ func (l *logger) Log(level LogLevel, v ...interface{}) {
 		info.logger.SetPrefix(prefix)
 		info.logger.Println(v...)
 	}
-	if logged {
+	if logged && enableColorFormat {
 		fmt.Printf(defaultFormat)
 	}
 }
@@ -231,7 +232,7 @@ func (l *logger) Logf(level LogLevel, format string, v ...interface{}) {
 		info.logger.SetPrefix(prefix)
 		info.logger.Printf(format, v...)
 	}
-	if logged {
+	if logged && enableColorFormat {
 		fmt.Printf(defaultFormat)
 	}
 }
@@ -253,7 +254,7 @@ func (l *logger) Logln(level LogLevel, v ...interface{}) {
 		info.logger.SetPrefix(prefix)
 		info.logger.Println(v...)
 	}
-	if logged {
+	if logged && enableColorFormat {
 		fmt.Printf(defaultFormat)
 	}
 }
@@ -337,7 +338,11 @@ func genLogger(flag int) *log.Logger {
 func getLevelPrefix(level LogLevel, prefix string) (newPrefix string) {
 	rs, ok := levelFormats[level]
 	if ok {
-		return fmt.Sprintf("%s%s%s", rs.format, rs.prefix, prefix)
+		if enableColorFormat {
+			return fmt.Sprintf("%s%s%s", rs.format, rs.prefix, prefix)
+		} else {
+			return fmt.Sprintf("%s%s", rs.prefix, prefix)
+		}
 	}
 	return prefix
 }

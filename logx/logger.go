@@ -44,6 +44,10 @@ type LogConfig struct {
 	MaxSize     mathx.SizeUnit
 }
 
+func SetColorFormat(enable bool) {
+	enableColorFormat = enable
+}
+
 func NewLogger() ILogger {
 	instance := &logger{prefix: "", defaultFlag: log.LstdFlags, infoMap: make(map[LogType]*logInfo)}
 	return instance
