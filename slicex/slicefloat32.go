@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeFloat32
+// 合并
 func MergeFloat32(slices ...[]float32) []float32 {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeFloat32(slices ...[]float32) []float32 {
 	return rs
 }
 
-//按位置插入
+// InsertFloat32
+// 按位置插入
 func InsertFloat32(slice []float32, pos int, target ...float32) []float32 {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadFloat32
+// 头插入
 func InsertHeadFloat32(slice []float32, target ...float32) []float32 {
 	return InsertFloat32(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailFloat32
+// 尾插入
 func InsertTailFloat32(slice []float32, target ...float32) []float32 {
 	return InsertFloat32(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueFloat32
+// 按值删除
 func RemoveValueFloat32(slice []float32, target float32) ([]float32, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +68,8 @@ func RemoveValueFloat32(slice []float32, target float32) ([]float32, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueFloat32
+// 按值删除
 func RemoveAllValueFloat32(slice []float32, target float32) ([]float32, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +86,8 @@ func RemoveAllValueFloat32(slice []float32, target float32) ([]float32, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtFloat32
+// 按点删除
 func RemoveAtFloat32(slice []float32, pos int) ([]float32, float32, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +100,27 @@ func RemoveAtFloat32(slice []float32, pos int) ([]float32, float32, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadFloat32
+// 删除头
 func RemoveHeadFloat32(slice []float32) ([]float32, float32, bool) {
 	return RemoveAtFloat32(slice, 0)
 }
 
-//删除尾
+// RemoveTailFloat32
+// 删除尾
 func RemoveTailFloat32(slice []float32) ([]float32, float32, bool) {
 	return RemoveAtFloat32(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromFloat32
+// 删除区间
 func RemoveFromFloat32(slice []float32, startPos int, length int) (result []float32, removed []float32, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeFloat32(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeFloat32
+// 删除区间
 func RemoveRangeFloat32(slice []float32, startPos int, endPos int) (result []float32, removed []float32, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +135,15 @@ func RemoveRangeFloat32(slice []float32, startPos int, endPos int) (result []flo
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsFloat32
+// 包含
 func ContainsFloat32(slice []float32, target float32) bool {
 	_, ok := IndexFloat32(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexFloat32
+// 从头部查找
 func IndexFloat32(slice []float32, target float32) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +156,8 @@ func IndexFloat32(slice []float32, target float32) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexFloat32
+// 从尾部查找
 func LastIndexFloat32(slice []float32, target float32) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +170,8 @@ func LastIndexFloat32(slice []float32, target float32) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseFloat32
+// 倒序
 func ReverseFloat32(slice []float32) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +182,8 @@ func ReverseFloat32(slice []float32) {
 	}
 }
 
-//比较
+// EqualFloat32
+// 比较
 func EqualFloat32(a, b []float32) bool {
 	if len(a) != len(b) {
 		return false
@@ -180,6 +196,7 @@ func EqualFloat32(a, b []float32) bool {
 	return true
 }
 
+// SumFloat32
 // 求和
 func SumFloat32(slice []float32) float32 {
 	rs := float32(0)

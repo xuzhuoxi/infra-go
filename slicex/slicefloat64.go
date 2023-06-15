@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeFloat64
+// 合并
 func MergeFloat64(slices ...[]float64) []float64 {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeFloat64(slices ...[]float64) []float64 {
 	return rs
 }
 
-//按位置插入
+// InsertFloat64
+// 按位置插入
 func InsertFloat64(slice []float64, pos int, target ...float64) []float64 {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadFloat64
+// 头插入
 func InsertHeadFloat64(slice []float64, target ...float64) []float64 {
 	return InsertFloat64(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailFloat64
+// 尾插入
 func InsertTailFloat64(slice []float64, target ...float64) []float64 {
 	return InsertFloat64(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueFloat64
+// 按值删除
 func RemoveValueFloat64(slice []float64, target float64) ([]float64, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +68,8 @@ func RemoveValueFloat64(slice []float64, target float64) ([]float64, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueFloat64
+// 按值删除
 func RemoveAllValueFloat64(slice []float64, target float64) ([]float64, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +86,8 @@ func RemoveAllValueFloat64(slice []float64, target float64) ([]float64, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtFloat64
+// 按点删除
 func RemoveAtFloat64(slice []float64, pos int) ([]float64, float64, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +100,27 @@ func RemoveAtFloat64(slice []float64, pos int) ([]float64, float64, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadFloat64
+// 删除头
 func RemoveHeadFloat64(slice []float64) ([]float64, float64, bool) {
 	return RemoveAtFloat64(slice, 0)
 }
 
-//删除尾
+// RemoveTailFloat64
+// 删除尾
 func RemoveTailFloat64(slice []float64) ([]float64, float64, bool) {
 	return RemoveAtFloat64(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromFloat64
+// 删除区间
 func RemoveFromFloat64(slice []float64, startPos int, length int) (result []float64, removed []float64, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeFloat64(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeFloat64
+// 删除区间
 func RemoveRangeFloat64(slice []float64, startPos int, endPos int) (result []float64, removed []float64, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +135,15 @@ func RemoveRangeFloat64(slice []float64, startPos int, endPos int) (result []flo
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsFloat64
+// 包含
 func ContainsFloat64(slice []float64, target float64) bool {
 	_, ok := IndexFloat64(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexFloat64
+// 从头部查找
 func IndexFloat64(slice []float64, target float64) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +156,8 @@ func IndexFloat64(slice []float64, target float64) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexFloat64
+// 从尾部查找
 func LastIndexFloat64(slice []float64, target float64) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +170,8 @@ func LastIndexFloat64(slice []float64, target float64) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseFloat64
+// 倒序
 func ReverseFloat64(slice []float64) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +182,8 @@ func ReverseFloat64(slice []float64) {
 	}
 }
 
-//比较
+// EqualFloat64
+// 比较
 func EqualFloat64(a, b []float64) bool {
 	if len(a) != len(b) {
 		return false
@@ -180,6 +196,7 @@ func EqualFloat64(a, b []float64) bool {
 	return true
 }
 
+// SumFloat64
 // 求和
 func SumFloat64(slice []float64) float64 {
 	rs := float64(0)

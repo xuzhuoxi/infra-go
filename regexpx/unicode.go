@@ -1,6 +1,6 @@
 package regexpx
 
-//Unicode普通类
+// Unicode普通类
 const (
 	U_C  = `[\p{C}]`  //-其他-(other)
 	U_Cc = `[\p{Cc}]` //控制字符(control)

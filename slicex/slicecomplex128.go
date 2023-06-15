@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeComplex128
+// 合并
 func MergeComplex128(slices ...[]complex128) []complex128 {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeComplex128(slices ...[]complex128) []complex128 {
 	return rs
 }
 
-//按位置插入
+// InsertComplex128
+// 按位置插入
 func InsertComplex128(slice []complex128, pos int, target ...complex128) []complex128 {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,19 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadComplex128  头插入
 func InsertHeadComplex128(slice []complex128, target ...complex128) []complex128 {
 	return InsertComplex128(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailComplex128
+// 尾插入
 func InsertTailComplex128(slice []complex128, target ...complex128) []complex128 {
 	return InsertComplex128(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueComplex128
+// 按值删除
 func RemoveValueComplex128(slice []complex128, target complex128) ([]complex128, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +67,8 @@ func RemoveValueComplex128(slice []complex128, target complex128) ([]complex128,
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueComplex128
+// 按值删除
 func RemoveAllValueComplex128(slice []complex128, target complex128) ([]complex128, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +85,8 @@ func RemoveAllValueComplex128(slice []complex128, target complex128) ([]complex1
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtComplex128
+// 按点删除
 func RemoveAtComplex128(slice []complex128, pos int) ([]complex128, complex128, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +99,27 @@ func RemoveAtComplex128(slice []complex128, pos int) ([]complex128, complex128, 
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadComplex128
+// 删除头
 func RemoveHeadComplex128(slice []complex128) ([]complex128, complex128, bool) {
 	return RemoveAtComplex128(slice, 0)
 }
 
-//删除尾
+// RemoveTailComplex128
+// 删除尾
 func RemoveTailComplex128(slice []complex128) ([]complex128, complex128, bool) {
 	return RemoveAtComplex128(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromComplex128
+// 删除区间
 func RemoveFromComplex128(slice []complex128, startPos int, length int) (result []complex128, removed []complex128, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeComplex128(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeComplex128
+// 删除区间
 func RemoveRangeComplex128(slice []complex128, startPos int, endPos int) (result []complex128, removed []complex128, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +134,15 @@ func RemoveRangeComplex128(slice []complex128, startPos int, endPos int) (result
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsComplex128
+// 包含
 func ContainsComplex128(slice []complex128, target complex128) bool {
 	_, ok := IndexComplex128(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexComplex128
+// 从头部查找
 func IndexComplex128(slice []complex128, target complex128) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +155,8 @@ func IndexComplex128(slice []complex128, target complex128) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexComplex128
+// 从尾部查找
 func LastIndexComplex128(slice []complex128, target complex128) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +169,8 @@ func LastIndexComplex128(slice []complex128, target complex128) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseComplex128
+// 倒序
 func ReverseComplex128(slice []complex128) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +181,8 @@ func ReverseComplex128(slice []complex128) {
 	}
 }
 
-//比较
+// EqualComplex128
+// 比较
 func EqualComplex128(a, b []complex128) bool {
 	if len(a) != len(b) {
 		return false

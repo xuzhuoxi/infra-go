@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeUint64
+// 合并
 func MergeUint64(slices ...[]uint64) []uint64 {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeUint64(slices ...[]uint64) []uint64 {
 	return rs
 }
 
-//按位置插入
+// InsertUint64
+// 按位置插入
 func InsertUint64(slice []uint64, pos int, target ...uint64) []uint64 {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadUint64
+// 头插入
 func InsertHeadUint64(slice []uint64, target ...uint64) []uint64 {
 	return InsertUint64(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailUint64
+// 尾插入
 func InsertTailUint64(slice []uint64, target ...uint64) []uint64 {
 	return InsertUint64(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueUint64
+// 按值删除
 func RemoveValueUint64(slice []uint64, target uint64) ([]uint64, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +68,8 @@ func RemoveValueUint64(slice []uint64, target uint64) ([]uint64, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueUint64
+// 按值删除
 func RemoveAllValueUint64(slice []uint64, target uint64) ([]uint64, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +86,8 @@ func RemoveAllValueUint64(slice []uint64, target uint64) ([]uint64, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtUint64
+// 按点删除
 func RemoveAtUint64(slice []uint64, pos int) ([]uint64, uint64, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +100,27 @@ func RemoveAtUint64(slice []uint64, pos int) ([]uint64, uint64, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadUint64
+// 删除头
 func RemoveHeadUint64(slice []uint64) ([]uint64, uint64, bool) {
 	return RemoveAtUint64(slice, 0)
 }
 
-//删除尾
+// RemoveTailUint64
+// 删除尾
 func RemoveTailUint64(slice []uint64) ([]uint64, uint64, bool) {
 	return RemoveAtUint64(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromUint64
+// 删除区间
 func RemoveFromUint64(slice []uint64, startPos int, length int) (result []uint64, removed []uint64, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeUint64(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeUint64
+// 删除区间
 func RemoveRangeUint64(slice []uint64, startPos int, endPos int) (result []uint64, removed []uint64, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +135,15 @@ func RemoveRangeUint64(slice []uint64, startPos int, endPos int) (result []uint6
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsUint64
+// 包含
 func ContainsUint64(slice []uint64, target uint64) bool {
 	_, ok := IndexUint64(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexUint64
+// 从头部查找
 func IndexUint64(slice []uint64, target uint64) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +156,8 @@ func IndexUint64(slice []uint64, target uint64) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexUint64
+// 从尾部查找
 func LastIndexUint64(slice []uint64, target uint64) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +170,8 @@ func LastIndexUint64(slice []uint64, target uint64) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseUint64
+// 倒序
 func ReverseUint64(slice []uint64) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +182,8 @@ func ReverseUint64(slice []uint64) {
 	}
 }
 
-//比较
+// EqualUint64
+// 比较
 func EqualUint64(a, b []uint64) bool {
 	if len(a) != len(b) {
 		return false
@@ -208,6 +224,7 @@ func Uint64ToUint(source []uint64) []uint {
 	return rs
 }
 
+// SumUint64
 // 求和
 func SumUint64(slice []uint64) uint64 {
 	rs := uint64(0)

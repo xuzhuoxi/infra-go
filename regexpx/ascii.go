@@ -1,6 +1,6 @@
 package regexpx
 
-//ASCII类
+// ASCII类
 const (
 	ASC_alnum  = `[[:alnum:]]`  // 字母数字 (相当于 [0-9A-Za-z])
 	ASC_alpha  = `[[:alpha:]]`  // 字母 (相当于 [A-Za-z])

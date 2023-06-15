@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeInt16
+// 合并
 func MergeInt16(slices ...[]int16) []int16 {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeInt16(slices ...[]int16) []int16 {
 	return rs
 }
 
-//按位置插入
+// InsertInt16
+// 按位置插入
 func InsertInt16(slice []int16, pos int, target ...int16) []int16 {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadInt16
+// 头插入
 func InsertHeadInt16(slice []int16, target ...int16) []int16 {
 	return InsertInt16(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailInt16
+// 尾插入
 func InsertTailInt16(slice []int16, target ...int16) []int16 {
 	return InsertInt16(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueInt16
+// 按值删除
 func RemoveValueInt16(slice []int16, target int16) ([]int16, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +68,8 @@ func RemoveValueInt16(slice []int16, target int16) ([]int16, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueInt16
+// 按值删除
 func RemoveAllValueInt16(slice []int16, target int16) ([]int16, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +86,8 @@ func RemoveAllValueInt16(slice []int16, target int16) ([]int16, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtInt16
+// 按点删除
 func RemoveAtInt16(slice []int16, pos int) ([]int16, int16, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +100,27 @@ func RemoveAtInt16(slice []int16, pos int) ([]int16, int16, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadInt16
+// 删除头
 func RemoveHeadInt16(slice []int16) ([]int16, int16, bool) {
 	return RemoveAtInt16(slice, 0)
 }
 
-//删除尾
+// RemoveTailInt1
+// 删除尾
 func RemoveTailInt1(slice []int16) ([]int16, int16, bool) {
 	return RemoveAtInt16(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromInt16
+// 删除区间
 func RemoveFromInt16(slice []int16, startPos int, length int) (result []int16, removed []int16, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeInt16(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeInt16
+// 删除区间
 func RemoveRangeInt16(slice []int16, startPos int, endPos int) (result []int16, removed []int16, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +135,15 @@ func RemoveRangeInt16(slice []int16, startPos int, endPos int) (result []int16, 
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsInt16
+// 包含
 func ContainsInt16(slice []int16, target int16) bool {
 	_, ok := IndexInt16(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexInt16
+// 从头部查找
 func IndexInt16(slice []int16, target int16) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +156,8 @@ func IndexInt16(slice []int16, target int16) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexInt16
+// 从尾部查找
 func LastIndexInt16(slice []int16, target int16) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +170,8 @@ func LastIndexInt16(slice []int16, target int16) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseInt16
+// 倒序
 func ReverseInt16(slice []int16) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +182,8 @@ func ReverseInt16(slice []int16) {
 	}
 }
 
-//比较
+// EqualInt16
+// 比较
 func EqualInt16(a, b []int16) bool {
 	if len(a) != len(b) {
 		return false
@@ -180,6 +196,7 @@ func EqualInt16(a, b []int16) bool {
 	return true
 }
 
+// SumInt16
 // 求和
 func SumInt16(slice []int16) int16 {
 	rs := int16(0)

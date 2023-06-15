@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeInt32
+// 合并
 func MergeInt32(slices ...[]int32) []int32 {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeInt32(slices ...[]int32) []int32 {
 	return rs
 }
 
-//按位置插入
+// InsertInt32
+// 按位置插入
 func InsertInt32(slice []int32, pos int, target ...int32) []int32 {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadInt32
+// 头插入
 func InsertHeadInt32(slice []int32, target ...int32) []int32 {
 	return InsertInt32(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailInt32
+// 尾插入
 func InsertTailInt32(slice []int32, target ...int32) []int32 {
 	return InsertInt32(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueInt32
+// 按值删除
 func RemoveValueInt32(slice []int32, target int32) ([]int32, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +68,8 @@ func RemoveValueInt32(slice []int32, target int32) ([]int32, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueInt32
+// 按值删除
 func RemoveAllValueInt32(slice []int32, target int32) ([]int32, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +86,8 @@ func RemoveAllValueInt32(slice []int32, target int32) ([]int32, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtInt32
+// 按点删除
 func RemoveAtInt32(slice []int32, pos int) ([]int32, int32, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +100,27 @@ func RemoveAtInt32(slice []int32, pos int) ([]int32, int32, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadInt32
+// 删除头
 func RemoveHeadInt32(slice []int32) ([]int32, int32, bool) {
 	return RemoveAtInt32(slice, 0)
 }
 
-//删除尾
+// RemoveTailInt32
+// 删除尾
 func RemoveTailInt32(slice []int32) ([]int32, int32, bool) {
 	return RemoveAtInt32(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromInt32
+// 删除区间
 func RemoveFromInt32(slice []int32, startPos int, length int) (result []int32, removed []int32, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeInt32(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeInt32
+// 删除区间
 func RemoveRangeInt32(slice []int32, startPos int, endPos int) (result []int32, removed []int32, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +135,15 @@ func RemoveRangeInt32(slice []int32, startPos int, endPos int) (result []int32, 
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsInt32
+// 包含
 func ContainsInt32(slice []int32, target int32) bool {
 	_, ok := IndexInt32(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexInt32
+// 从头部查找
 func IndexInt32(slice []int32, target int32) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +156,8 @@ func IndexInt32(slice []int32, target int32) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexInt32
+// 从尾部查找
 func LastIndexInt32(slice []int32, target int32) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +170,8 @@ func LastIndexInt32(slice []int32, target int32) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseInt32
+// 倒序
 func ReverseInt32(slice []int32) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +182,8 @@ func ReverseInt32(slice []int32) {
 	}
 }
 
-//比较
+// EqualInt32
+// 比较
 func EqualInt32(a, b []int32) bool {
 	if len(a) != len(b) {
 		return false
@@ -180,6 +196,7 @@ func EqualInt32(a, b []int32) bool {
 	return true
 }
 
+// SumInt32
 // 求和
 func SumInt32(slice []int32) int32 {
 	rs := int32(0)

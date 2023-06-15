@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeUint
+// 合并
 func MergeUint(slices ...[]uint) []uint {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeUint(slices ...[]uint) []uint {
 	return rs
 }
 
-//按位置插入
+// InsertUint
+// 按位置插入
 func InsertUint(slice []uint, pos int, target ...uint) []uint {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadUint
+// 头插入
 func InsertHeadUint(slice []uint, target ...uint) []uint {
 	return InsertUint(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailUint
+// 尾插入
 func InsertTailUint(slice []uint, target ...uint) []uint {
 	return InsertUint(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueUint
+// 按值删除
 func RemoveValueUint(slice []uint, target uint) ([]uint, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +68,8 @@ func RemoveValueUint(slice []uint, target uint) ([]uint, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueUint
+// 按值删除
 func RemoveAllValueUint(slice []uint, target uint) ([]uint, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +86,8 @@ func RemoveAllValueUint(slice []uint, target uint) ([]uint, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtUint
+// 按点删除
 func RemoveAtUint(slice []uint, pos int) ([]uint, uint, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +100,27 @@ func RemoveAtUint(slice []uint, pos int) ([]uint, uint, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadUint
+// 删除头
 func RemoveHeadUint(slice []uint) ([]uint, uint, bool) {
 	return RemoveAtUint(slice, 0)
 }
 
-//删除尾
+// RemoveTailUint
+// 删除尾
 func RemoveTailUint(slice []uint) ([]uint, uint, bool) {
 	return RemoveAtUint(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromUint
+// 删除区间
 func RemoveFromUint(slice []uint, startPos int, length int) (result []uint, removed []uint, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeUint(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeUint
+// 删除区间
 func RemoveRangeUint(slice []uint, startPos int, endPos int) (result []uint, removed []uint, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +135,15 @@ func RemoveRangeUint(slice []uint, startPos int, endPos int) (result []uint, rem
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsUint
+// 包含
 func ContainsUint(slice []uint, target uint) bool {
 	_, ok := IndexUint(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexUint
+// 从头部查找
 func IndexUint(slice []uint, target uint) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +156,8 @@ func IndexUint(slice []uint, target uint) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexUint
+// 从尾部查找
 func LastIndexUint(slice []uint, target uint) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +170,8 @@ func LastIndexUint(slice []uint, target uint) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseUint
+// 倒序
 func ReverseUint(slice []uint) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +182,8 @@ func ReverseUint(slice []uint) {
 	}
 }
 
-//比较
+// EqualUint
+// 比较
 func EqualUint(a, b []uint) bool {
 	if len(a) != len(b) {
 		return false
@@ -180,6 +196,7 @@ func EqualUint(a, b []uint) bool {
 	return true
 }
 
+// SumUint
 // 求和
 func SumUint(slice []uint) uint {
 	rs := uint(0)

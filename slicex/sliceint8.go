@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeInt8
+// 合并
 func MergeInt8(slices ...[]int8) []int8 {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeInt8(slices ...[]int8) []int8 {
 	return rs
 }
 
-//按位置插入
+// InsertInt8
+// 按位置插入
 func InsertInt8(slice []int8, pos int, target ...int8) []int8 {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadInt8
+// 头插入
 func InsertHeadInt8(slice []int8, target ...int8) []int8 {
 	return InsertInt8(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailInt8
+// 尾插入
 func InsertTailInt8(slice []int8, target ...int8) []int8 {
 	return InsertInt8(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueInt8
+// 按值删除
 func RemoveValueInt8(slice []int8, target int8) ([]int8, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +68,8 @@ func RemoveValueInt8(slice []int8, target int8) ([]int8, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueInt8
+// 按值删除
 func RemoveAllValueInt8(slice []int8, target int8) ([]int8, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +86,8 @@ func RemoveAllValueInt8(slice []int8, target int8) ([]int8, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtInt8
+// 按点删除
 func RemoveAtInt8(slice []int8, pos int) ([]int8, int8, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +100,27 @@ func RemoveAtInt8(slice []int8, pos int) ([]int8, int8, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadInt8
+// 删除头
 func RemoveHeadInt8(slice []int8) ([]int8, int8, bool) {
 	return RemoveAtInt8(slice, 0)
 }
 
-//删除尾
+// RemoveTailInt8
+// 删除尾
 func RemoveTailInt8(slice []int8) ([]int8, int8, bool) {
 	return RemoveAtInt8(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromInt8
+// 删除区间
 func RemoveFromInt8(slice []int8, startPos int, length int) (result []int8, removed []int8, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeInt8(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeInt8
+// 删除区间
 func RemoveRangeInt8(slice []int8, startPos int, endPos int) (result []int8, removed []int8, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +135,15 @@ func RemoveRangeInt8(slice []int8, startPos int, endPos int) (result []int8, rem
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsInt8
+// 包含
 func ContainsInt8(slice []int8, target int8) bool {
 	_, ok := IndexInt8(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexInt8
+// 从头部查找
 func IndexInt8(slice []int8, target int8) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +156,8 @@ func IndexInt8(slice []int8, target int8) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexInt8
+// 从尾部查找
 func LastIndexInt8(slice []int8, target int8) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +170,8 @@ func LastIndexInt8(slice []int8, target int8) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseInt8
+// 倒序
 func ReverseInt8(slice []int8) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +182,8 @@ func ReverseInt8(slice []int8) {
 	}
 }
 
-//比较
+// EqualInt8
+// 比较
 func EqualInt8(a, b []int8) bool {
 	if len(a) != len(b) {
 		return false
@@ -180,6 +196,7 @@ func EqualInt8(a, b []int8) bool {
 	return true
 }
 
+// SumInt8
 // 求和
 func SumInt8(slice []int8) int8 {
 	rs := int8(0)

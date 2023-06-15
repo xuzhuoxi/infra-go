@@ -1,88 +1,90 @@
 package regexpx
 
-//参考：http://en.wikipedia.org/wiki/Regular_expression
-//POSIX正则表达式分为Basic Regular Expressions 和 Extended Regular Expressions。
-//ERE增加支持?,+和|，去除了通配符()和{}。而且POSIX正则表达式的标准语法经常坚持使用附加的语法来支持特殊应用。虽然POSIX.2没有实现一些具体的细节，BRE和ERE提供被很多工具使用的标准。
-//BRE要求通配符()和{}写成和\{\}，ERE中无需这样。
+// 参考：http://en.wikipedia.org/wiki/Regular_expression
+// POSIX正则表达式分为Basic Regular Expressions 和 Extended Regular Expressions。
+// ERE增加支持?,+和|，去除了通配符()和{}。而且POSIX正则表达式的标准语法经常坚持使用附加的语法来支持特殊应用。虽然POSIX.2没有实现一些具体的细节，BRE和ERE提供被很多工具使用的标准。
+// BRE要求通配符()和{}写成和\{\}，ERE中无需这样。
 
 //数字相关
 const (
-	// 零
+	// Zero 零
 	Zero = `^0$`
-	// 数字
+	// Digital 数字
 	Digital = `^[0-9]$`
 
-	// 正整数
+	// PInt 正整数
 	PInt = `^[1-9]\d*$`
-	// 负整数
+	// NInt 负整数
 	NInt = `^-[1-9]\d*$`
-	// 非负整数（正整数 + 0）
+	// NNInt 非负整数（正整数 + 0）
 	NNInt = `^[1-9]\d*|0$`
-	// 非正整数（负整数 + 0）
+	// NPInt 非正整数（负整数 + 0）
 	NPInt = `^-[1-9]\d*|0$`
-	// 整数
+	// Int 整数
 	Int = `^-?[1-9]\d*|0$`
 
-	// 正浮点数
+	// PFloat 正浮点数
 	PFloat = `^[1-9]\d*.\d*|0.\d*[1-9]\d*$`
-	// 负浮点数
+	// NFloat 负浮点数
 	NFloat = `^-([1-9]\d*.\d*|0.\d*[1-9]\d*)$`
-	// 非负浮点数（正浮点数 + 0）
+	// NNFloat 非负浮点数（正浮点数 + 0）
 	NNFloat = `^[1-9]\d*.\d*|0.\d*[1-9]\d*|0?.0+|0$`
-	// 非正浮点数（负浮点数 + 0）
+	// NPFloat 非正浮点数（负浮点数 + 0）
 	NPFloat = `^(-([1-9]\d*.\d*|0.\d*[1-9]\d*))|0?.0+|0$`
-	// 浮点数
+	// Float 浮点数
 	Float = `^-?([1-9]\d*.d*|0.\d*[1-9]\d*|0?.0+|0)$`
 )
 
-//常用
+// 常用
 const (
-	//小写字母
+	// LowerLetter 小写字母
 	LowerLetter = `[a-z]`
-	//小写字母
+	// UpperLetter 小写字母
 	UpperLetter = `[A-Z]`
-	//字母
+	// Letter 字母
 	Letter = `[a-zA-Z]`
-	//空白
+	// Space 空白
 	Space = `[\t\n\f\r]`
-	//单词字符
+	// Work 单词字符
 	Work = `[0-9A-Za-z_]`
 
-	//中文字符 [u4e00-u9fa5]
+	// Chinese 中文字符 [u4e00-u9fa5]
 	Chinese = `[\p{Han}]`
-	//双字节字符
-	//包括汉字在内
+	// DoubleChar
+	// 双字节字符
+	// 包括汉字在内
 	DoubleChar = `[^x00-xff]`
-	//空白行
+	// EmptyLine 空白行
 	EmptyLine = `ns*r`
-	//HTML标记
-	//上面这个也仅仅能匹配部分，对于复杂的嵌套标记依旧无能为力
+	// HTML
+	// HTML标记
+	// 上面这个也仅仅能匹配部分，对于复杂的嵌套标记依旧无能为力
 	HTML = `<(S*?)[^>]*>.*?|<.*? /> `
-	//首尾空白字符
+	// EmptyHeadTail 首尾空白字符
 	EmptyHeadTail = `^\s*|\s*$ `
-	//Email地址
+	// EMail Email地址
 	EMail = `w[-w.+]*@([A-Za-z0-9][-A-Za-z0-9]+.)+[A-Za-z]{2, 14}`
-	//Email地址
+	// EMail2 Email地址
 	EMail2 = `w+([-+.]w+)*@w+([-.]w+)*.w+([-.]w+)*`
-	//网址URL
+	// URL 网址URL
 	URL = `^((https|http|ftp|rtsp|mms)?://)[^s]+`
-	//网址URL
+	// URL2 网址URL
 	URL2 = `[a-zA-z]+://[^s]*`
-	//帐号 字母开头，允许5-16字节，允许字母数字下划线
+	// Account 帐号 字母开头，允许5-16字节，允许字母数字下划线
 	Account = `^[a-zA-Z][a-zA-Z0-9_]{4,15}$`
-	//昵称 字母开头，允许5-16字节，允许字母数字下划线
+	// Nickname 昵称 字母开头，允许5-16字节，允许字母数字下划线
 	Nickname = `[A-Za-z0-9_\-\u4e00-\u9fa5]+`
-	//国内电话号码 匹配形式如 0511-4405222 或 021-87888822
+	// ChinaPhone1 国内电话号码 匹配形式如 0511-4405222 或 021-87888822
 	ChinaPhone1 = `\d{3}-\d{8}|\d{4}-\d{7}`
-	//国内电话号码
+	// ChinaPhone2 国内电话号码
 	ChinaPhone2 = `[0-9-()（）]{7,18}`
-	//腾讯QQ号
+	// QQ 腾讯QQ号
 	QQ = `[1-9]([0-9]{5,11})`
-	//中国邮政编码 中国邮政编码为6位数字
+	// ZipCode 中国邮政编码 中国邮政编码为6位数字
 	ZipCode = `[1-9]\d{5}(?!\d)`
-	//身份证 中国的身份证为15位或18位
+	// ChinaIDCard 身份证 中国的身份证为15位或18位
 	ChinaIDCard = `\d{17}[\d|x]|\d{15}`
-	//ip地址
+	// IPAddress ip地址
 	IPAddress = `(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)`
 
 	//-------------------------------------

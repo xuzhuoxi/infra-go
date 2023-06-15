@@ -4,7 +4,8 @@ import (
 	"bytes"
 )
 
-//合并
+// MergeUint8
+// 合并
 func MergeUint8(slices ...[]uint8) []uint8 {
 	ln := len(slices)
 	index := 0
@@ -22,7 +23,8 @@ func MergeUint8(slices ...[]uint8) []uint8 {
 	return rs
 }
 
-//按位置插入
+// InsertUint8
+// 按位置插入
 func InsertUint8(slice []uint8, pos int, target ...uint8) []uint8 {
 	ln := len(slice)
 	if pos < 0 {
@@ -41,17 +43,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadUint8
+// 头插入
 func InsertHeadUint8(slice []uint8, target ...uint8) []uint8 {
 	return InsertUint8(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailUint8
+// 尾插入
 func InsertTailUint8(slice []uint8, target ...uint8) []uint8 {
 	return InsertUint8(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueUint8
+// 按值删除
 func RemoveValueUint8(slice []uint8, target uint8) ([]uint8, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -67,7 +72,8 @@ func RemoveValueUint8(slice []uint8, target uint8) ([]uint8, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueUint8
+// 按值删除
 func RemoveAllValueUint8(slice []uint8, target uint8) ([]uint8, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -84,7 +90,8 @@ func RemoveAllValueUint8(slice []uint8, target uint8) ([]uint8, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtUint8
+// 按点删除
 func RemoveAtUint8(slice []uint8, pos int) ([]uint8, uint8, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -97,23 +104,27 @@ func RemoveAtUint8(slice []uint8, pos int) ([]uint8, uint8, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadUint8
+// 删除头
 func RemoveHeadUint8(slice []uint8) ([]uint8, uint8, bool) {
 	return RemoveAtUint8(slice, 0)
 }
 
-//删除尾
+// RemoveTailUint8
+// 删除尾
 func RemoveTailUint8(slice []uint8) ([]uint8, uint8, bool) {
 	return RemoveAtUint8(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromUint8
+// 删除区间
 func RemoveFromUint8(slice []uint8, startPos int, length int) (result []uint8, removed []uint8, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeUint8(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeUint8
+// 删除区间
 func RemoveRangeUint8(slice []uint8, startPos int, endPos int) (result []uint8, removed []uint8, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -128,13 +139,15 @@ func RemoveRangeUint8(slice []uint8, startPos int, endPos int) (result []uint8, 
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsUint8
+// 包含
 func ContainsUint8(slice []uint8, target uint8) bool {
 	_, ok := IndexUint8(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexUint8
+// 从头部查找
 func IndexUint8(slice []uint8, target uint8) (int, bool) {
 	//if nil == slice || len(slice) == 0 {
 	//	return -1, false
@@ -149,7 +162,8 @@ func IndexUint8(slice []uint8, target uint8) (int, bool) {
 	return index, index != -1
 }
 
-//从尾部查找
+// LastIndexUint8
+// 从尾部查找
 func LastIndexUint8(slice []uint8, target uint8) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -162,7 +176,8 @@ func LastIndexUint8(slice []uint8, target uint8) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseUint8
+// 倒序
 func ReverseUint8(slice []uint8) {
 	ln := len(slice)
 	if 0 == ln {
@@ -190,11 +205,13 @@ func CopyByte(slice []byte) []uint8 {
 	return CopyUint8(slice)
 }
 
-//比较
+// EqualUint8
+// 比较
 func EqualUint8(a, b []uint8) bool {
 	return bytes.Equal(a, b)
 }
 
+// SumUint8
 // 求和
 func SumUint8(slice []uint8) uint8 {
 	rs := uint8(0)

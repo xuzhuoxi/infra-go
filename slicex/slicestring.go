@@ -1,6 +1,7 @@
 package slicex
 
-//合并
+// MergeString
+// 合并
 func MergeString(slices ...[]string) []string {
 	ln := len(slices)
 	index := 0
@@ -18,7 +19,8 @@ func MergeString(slices ...[]string) []string {
 	return rs
 }
 
-//按位置插入
+// InsertString
+// 按位置插入
 func InsertString(slice []string, pos int, target ...string) []string {
 	ln := len(slice)
 	if pos < 0 {
@@ -37,17 +39,20 @@ Start:
 	return rs
 }
 
-//头插入
+// InsertHeadString
+// 头插入
 func InsertHeadString(slice []string, target ...string) []string {
 	return InsertString(slice, 0, target...)
 }
 
-//尾插入
+// InsertTailString
+// 尾插入
 func InsertTailString(slice []string, target ...string) []string {
 	return InsertString(slice, len(slice), target...)
 }
 
-//按值删除
+// RemoveValueString
+// 按值删除
 func RemoveValueString(slice []string, target string) ([]string, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -63,7 +68,8 @@ func RemoveValueString(slice []string, target string) ([]string, bool) {
 	return nil, false
 }
 
-//按值删除
+// RemoveAllValueString
+// 按值删除
 func RemoveAllValueString(slice []string, target string) ([]string, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -80,7 +86,8 @@ func RemoveAllValueString(slice []string, target string) ([]string, bool) {
 	return cp[:index], true
 }
 
-//按点删除
+// RemoveAtString
+// 按点删除
 func RemoveAtString(slice []string, pos int) ([]string, string, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -93,23 +100,27 @@ func RemoveAtString(slice []string, pos int) ([]string, string, bool) {
 	return rs, obj, true
 }
 
-//删除头
+// RemoveHeadString
+// 删除头
 func RemoveHeadString(slice []string) ([]string, string, bool) {
 	return RemoveAtString(slice, 0)
 }
 
-//删除尾
+// RemoveTailString
+// 删除尾
 func RemoveTailString(slice []string) ([]string, string, bool) {
 	return RemoveAtString(slice, len(slice)-1)
 }
 
-//删除区间
+// RemoveFromString
+// 删除区间
 func RemoveFromString(slice []string, startPos int, length int) (result []string, removed []string, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeString(slice, startPos, endPos)
 }
 
-//删除区间
+// RemoveRangeString
+// 删除区间
 func RemoveRangeString(slice []string, startPos int, endPos int) (result []string, removed []string, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -124,13 +135,15 @@ func RemoveRangeString(slice []string, startPos int, endPos int) (result []strin
 	return rs, slice[startPos:endPos], true
 }
 
-//包含
+// ContainsString
+// 包含
 func ContainsString(slice []string, target string) bool {
 	_, ok := IndexString(slice, target)
 	return ok
 }
 
-//从头部查找
+// IndexString
+// 从头部查找
 func IndexString(slice []string, target string) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -143,7 +156,8 @@ func IndexString(slice []string, target string) (int, bool) {
 	return -1, false
 }
 
-//从尾部查找
+// LastIndexString
+// 从尾部查找
 func LastIndexString(slice []string, target string) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,7 +170,8 @@ func LastIndexString(slice []string, target string) (int, bool) {
 	return -1, false
 }
 
-//倒序
+// ReverseString
+// 倒序
 func ReverseString(slice []string) {
 	ln := len(slice)
 	if 0 == ln {
@@ -167,7 +182,8 @@ func ReverseString(slice []string) {
 	}
 }
 
-//克隆
+// CopyString
+// 克隆
 func CopyString(slice []string) []string {
 	if nil == slice {
 		return nil
@@ -181,7 +197,8 @@ func CopyString(slice []string) []string {
 	return rs
 }
 
-//比较
+// EqualString
+// 比较
 func EqualString(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
@@ -194,6 +211,7 @@ func EqualString(a, b []string) bool {
 	return true
 }
 
+// ClearDuplicateString
 // 清除重复值
 func ClearDuplicateString(slice []string) {
 	if nil == slice || len(slice) < 2 {

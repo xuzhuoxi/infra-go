@@ -1,6 +1,6 @@
 package regexpx
 
-//Perl类
+// Perl类
 const (
 	P_d = `\d` //数字 (相当于 [0-9])
 	P_D = `\D` //非数字 (相当于 [^0-9])
