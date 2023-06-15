@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-27.
-//@author xuzhuoxi
+// Package pngx
+// Created by xuzhuoxi
+// on 2019-04-27.
+// @author xuzhuoxi
 //
 package pngx
 

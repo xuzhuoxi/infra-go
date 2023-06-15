@@ -1,3 +1,4 @@
+// Package filterx
 // 模糊
 package filterx
 
@@ -17,6 +18,7 @@ func (rgb _RGB) Pixel() int {
 	return (rgb.R&0x0000ff)<<16 | (rgb.R&0x0000ff)<<8 | rgb.R&0x0000ff
 }
 
+// FastBlur64
 // 模糊
 func FastBlur64(srcImg image.Image, dstImg draw.Image, radius int) error {
 	if nil == srcImg {

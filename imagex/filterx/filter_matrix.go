@@ -10,6 +10,7 @@ import (
 	"image/draw"
 )
 
+// FilterMatrix
 // 滤波器
 type FilterMatrix struct {
 	// 滤波器卷积核
@@ -24,12 +25,14 @@ type FilterMatrix struct {
 	ResultOffset int
 }
 
-//是否为倍率滤波器
+// IsScaleMatrix
+// 是否为倍率滤波器
 func (fm FilterMatrix) IsScaleMatrix() bool {
 	return fm.KernelScale != 0 && fm.KernelScale != 1
 }
 
-//运算结果是否可能超出像素范围(非安全像素值)
+// IsPixelUnsafe
+// 运算结果是否可能超出像素范围(非安全像素值)
 func (fm FilterMatrix) IsPixelUnsafe() bool {
 	if fm.ResultOffset != 0 {
 		return true
@@ -42,6 +45,7 @@ func (fm FilterMatrix) IsPixelUnsafe() bool {
 	return false
 }
 
+// FlipUD
 // 上下翻转
 func (fm FilterMatrix) FlipUD() FilterMatrix {
 	rs := fm
@@ -50,6 +54,7 @@ func (fm FilterMatrix) FlipUD() FilterMatrix {
 	return rs
 }
 
+// FlipLR
 // 左右翻转
 func (fm FilterMatrix) FlipLR() FilterMatrix {
 	rs := fm
@@ -58,7 +63,8 @@ func (fm FilterMatrix) FlipLR() FilterMatrix {
 	return rs
 }
 
-//顺时针旋转90度
+// Rotate
+// 顺时针旋转90度
 func (fm FilterMatrix) Rotate(clockwise bool, count90 int) FilterMatrix {
 	rs := fm
 	rs.Kernel = fm.Kernel.Rotate(clockwise, count90)
@@ -66,6 +72,7 @@ func (fm FilterMatrix) Rotate(clockwise bool, count90 int) FilterMatrix {
 	return rs
 }
 
+// CheckValidity
 // 滤波模板有效性
 func (fm FilterMatrix) CheckValidity() error {
 	if fm.KernelRadius < 1 {
@@ -84,7 +91,8 @@ func (fm FilterMatrix) CheckValidity() error {
 	return nil
 }
 
-//使用滤波器
+// FilterImageWithMatrix
+// 使用滤波器
 func FilterImageWithMatrix(srcImg image.Image, dstImg draw.Image, m FilterMatrix) error {
 	if nil == srcImg || nil == dstImg {
 		return errors.New("SrcImg or dstImg is nil! ")

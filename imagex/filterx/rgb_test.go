@@ -22,7 +22,7 @@ func TestImage2NRGBA(t *testing.T) {
 		}
 		fmt.Println("读取的图像内存类型：", reflect.ValueOf(img).Type())
 		dstImg := imagex.CopyImageStruct(img)
-		err = NrgbaAtWhite(img, dstImg)
+		err = NRGBAAtWhite(img, dstImg)
 		if nil != err {
 			fmt.Println(err)
 			continue

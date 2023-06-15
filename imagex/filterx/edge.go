@@ -1,3 +1,4 @@
+// Package filterx
 // 边缘化
 package filterx
 
@@ -10,28 +11,28 @@ import (
 
 // 边缘滤波器
 var (
-	//5x5 左右边缘滤波器
+	// Edge5LR 5x5 左右边缘滤波器
 	Edge5LR = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, 0, -1}, {-1, 0, -1}, {0, 0, 4}, {1, 0, -1}, {2, 0, -1}}}
-	//5x5 上下边缘滤波器
+	// Edge5UD 5x5 上下边缘滤波器
 	Edge5UD = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{0, -2, -1}, {0, -1, -1}, {0, 0, 4}, {0, 1, -1}, {0, 2, -1}}}
-	//5x5 左上右下边缘滤波器
+	// Edge5LuRd 5x5 左上右下边缘滤波器
 	Edge5LuRd = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, -2, -1}, {-1, -1, -1}, {0, 0, 4}, {1, 1, -1}, {1, 2, -1}}}
-	//5x5 左下右上边缘滤波器
+	// Edge5LdRu 5x5 左下右上边缘滤波器
 	Edge5LdRu = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-2, 2, -1}, {-1, 1, -1}, {0, 0, 4}, {1, -1, -1}, {2, -2, -1}}}
 
-	//3x3 Laplace拉普拉斯4邻滤波器
+	// Edge3Laplace4 3x3 Laplace拉普拉斯4邻滤波器
 	Edge3Laplace4 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{0, -1, -1}, {-1, +0, -1}, {0, +0, +4}, {1, +0, -1}, {0, +1, -1}}}
-	//5x5 Laplace拉普拉斯8邻滤波器
+	// Edge3Laplace8 5x5 Laplace拉普拉斯8邻滤波器
 	Edge3Laplace8 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0,
 		Kernel: []KernelVector{
 			{-1, -1, -1}, {0, -1, -1}, {1, -1, -1},
@@ -39,6 +40,7 @@ var (
 			{-1, +1, -1}, {0, +1, -1}, {1, +1, -1}}}
 )
 
+// CreateEdgeFilter
 // 创建边缘检测滤波器
 // radius：		卷积核半径
 // direction: 	运动方向
@@ -67,11 +69,13 @@ func CreateEdgeFilter(radius int, direction imagex.PixelDirection, diff uint) (f
 	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: 0, Kernel: kernel}, nil
 }
 
+// CreateEdgeLaplace4Filter
 // 创建拉普拉斯4邻边缘检测滤波器
 func CreateEdgeLaplace4Filter(radius int) (filter FilterMatrix, err error) {
 	return CreateEdgeFilter(radius, imagex.Horizontal|imagex.Vertical, 0)
 }
 
+// CreateEdgeLaplace8Filter
 // 创建拉普拉斯8邻边缘检测滤波器
 func CreateEdgeLaplace8Filter(radius int) (filter FilterMatrix, err error) {
 	return CreateEdgeFilter(radius, imagex.AllDirection, 0)
@@ -79,31 +83,37 @@ func CreateEdgeLaplace8Filter(radius int) (filter FilterMatrix, err error) {
 
 //-----------------------------------------------
 
+// EdgeWithLR
 // 使用左右边缘滤波器处理图像
 func EdgeWithLR(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Edge5LR)
 }
 
+// EdgeWithUD
 // 使用上下边缘滤波器处理图像
 func EdgeWithUD(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Edge5UD)
 }
 
+// EdgeWithLuRd
 // 使用左上右下边缘滤波器处理图像
 func EdgeWithLuRd(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Edge5LuRd)
 }
 
+// EdgeWithLdRu
 // 使用左下右上边缘滤波器处理图像
 func EdgeWithLdRu(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Edge5LdRu)
 }
 
+// EdgeWithLaplace4
 // 使用全方向边缘滤波器处理图像
 func EdgeWithLaplace4(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Edge3Laplace4)
 }
 
+// EdgeWithLaplace8
 // 使用全方向边缘滤波器处理图像
 func EdgeWithLaplace8(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Edge3Laplace8)
@@ -111,6 +121,7 @@ func EdgeWithLaplace8(srcImg image.Image, dstImg draw.Image) error {
 
 //------------------------------------------------
 
+// EdgeCustom
 // 使用自定义边缘滤波器处理图像
 func EdgeCustom(srcImg image.Image, dstImg draw.Image, radius int, direction imagex.PixelDirection, diff uint) error {
 	filter, err := CreateEdgeFilter(radius, direction, diff)
@@ -120,6 +131,7 @@ func EdgeCustom(srcImg image.Image, dstImg draw.Image, radius int, direction ima
 	return FilterImageWithMatrix(srcImg, dstImg, filter)
 }
 
+// EdgeWithCustomLaplace4
 // 使用自定义拉普拉斯4邻边缘滤波器处理图像
 func EdgeWithCustomLaplace4(srcImg image.Image, dstImg draw.Image, radius int) error {
 	filter, err := CreateEdgeLaplace4Filter(radius)
@@ -129,6 +141,7 @@ func EdgeWithCustomLaplace4(srcImg image.Image, dstImg draw.Image, radius int) e
 	return FilterImageWithMatrix(srcImg, dstImg, filter)
 }
 
+// EdgeWithCustomLaplace8
 // 使用自定义拉普拉斯8邻边缘滤波器处理图像
 func EdgeWithCustomLaplace8(srcImg image.Image, dstImg draw.Image, radius int) error {
 	filter, err := CreateEdgeLaplace8Filter(radius)

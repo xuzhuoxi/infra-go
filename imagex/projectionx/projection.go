@@ -1,3 +1,4 @@
+// Package projectionx
 // 投影： 按水平或垂直方向统计色素有效性
 package projectionx
 
@@ -6,19 +7,19 @@ import (
 	"image/color"
 )
 
-// 投影模式
+// ProjectDirection 投影模式
 type ProjectDirection int32
 
 const (
-	// 无效
+	// ModeNone 无效
 	ModeNone ProjectDirection = iota
-	// 垂直模式
+	// ModeVertical 垂直模式
 	ModeVertical
-	// 水平模式
+	// ModeHorizontal 水平模式
 	ModeHorizontal
 )
 
-// 投影结果
+// Result 投影结果
 type Result struct {
 	// 数据
 	Data []uint32
@@ -40,9 +41,11 @@ func (r *Result) Length() int {
 	return len(r.Data)
 }
 
+// ValidFunc
 // 投影有效性函数
 type ValidFunc func(color color.Color) bool
 
+// ProjectHorizontal
 // 水平投影
 func ProjectHorizontal(src image.Image, validFunc ValidFunc) *Result {
 	size := src.Bounds().Size()
@@ -59,6 +62,7 @@ func ProjectHorizontal(src image.Image, validFunc ValidFunc) *Result {
 	return &Result{Data: rs, Mode: ModeHorizontal}
 }
 
+// ProjectVertical
 // 垂直投影
 func ProjectVertical(src image.Image, validFunc ValidFunc) *Result {
 	size := src.Bounds().Size()
@@ -75,6 +79,7 @@ func ProjectVertical(src image.Image, validFunc ValidFunc) *Result {
 	return &Result{Data: rs, Mode: ModeVertical}
 }
 
+// Project
 // 投影
 func Project(src image.Image, validFunc ValidFunc, direction ProjectDirection) *Result {
 	switch direction {
@@ -87,6 +92,7 @@ func Project(src image.Image, validFunc ValidFunc, direction ProjectDirection) *
 	}
 }
 
+// Project2D
 // 二维投影
 func Project2D(src image.Image, validFunc ValidFunc) (v *Result, h *Result) {
 	v = ProjectVertical(src, validFunc)

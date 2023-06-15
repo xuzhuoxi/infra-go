@@ -2,6 +2,7 @@ package filterx
 
 import "sort"
 
+// KernelVector
 // 滤波器向量单元
 type KernelVector struct {
 	//向量X
@@ -39,7 +40,8 @@ func (fk FilterKernel) Clone() FilterKernel {
 	return kernel
 }
 
-//上下翻转自身
+// FlipUDSelf
+// 上下翻转自身
 func (fk FilterKernel) FlipUDSelf() {
 	for index := range fk {
 		if 0 == fk[index].Y {
@@ -49,14 +51,16 @@ func (fk FilterKernel) FlipUDSelf() {
 	}
 }
 
-//上下翻转
+// FlipUD
+// 上下翻转
 func (fk FilterKernel) FlipUD() FilterKernel {
 	rs := fk.Clone()
 	rs.FlipUDSelf()
 	return rs
 }
 
-//左右翻转自身
+// FlipLRSelf
+// 左右翻转自身
 func (fk FilterKernel) FlipLRSelf() {
 	for index := range fk {
 		if 0 == fk[index].X {
@@ -66,13 +70,15 @@ func (fk FilterKernel) FlipLRSelf() {
 	}
 }
 
-//左右翻转
+// FlipLR
+// 左右翻转
 func (fk FilterKernel) FlipLR() FilterKernel {
 	rs := fk.Clone()
 	rs.FlipLRSelf()
 	return rs
 }
 
+// Rotate90Self
 // 旋转90度
 // clockwise ;是否为顺时针
 func (fk FilterKernel) Rotate90Self(clockwise bool) {
@@ -87,7 +93,8 @@ func (fk FilterKernel) Rotate90Self(clockwise bool) {
 	}
 }
 
-//旋转90度
+// Rotate90
+// 旋转90度
 // clockwise ;是否为顺时针
 func (fk FilterKernel) Rotate90(clockwise bool) FilterKernel {
 	rs := fk.Clone()
@@ -95,7 +102,8 @@ func (fk FilterKernel) Rotate90(clockwise bool) FilterKernel {
 	return rs
 }
 
-//旋转
+// RotateSelf
+// 旋转
 func (fk FilterKernel) RotateSelf(clockwise bool, count90 int) {
 	c := count90
 	for c < 0 {
@@ -108,14 +116,16 @@ func (fk FilterKernel) RotateSelf(clockwise bool, count90 int) {
 	}
 }
 
-//旋转
+// Rotate
+// 旋转
 func (fk FilterKernel) Rotate(clockwise bool, count90 int) FilterKernel {
 	rs := fk.Clone()
 	rs.RotateSelf(clockwise, count90)
 	return rs
 }
 
-//核排序
+// Sorted
+// 核排序
 func (fk FilterKernel) Sorted() {
 	sort.Sort(fk)
 }

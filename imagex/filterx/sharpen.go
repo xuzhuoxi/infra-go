@@ -1,3 +1,4 @@
+// Package filterx
 // 锐化
 package filterx
 
@@ -10,23 +11,27 @@ import (
 
 // 锐化滤波器
 var (
-	//3x3 简单锐化滤波器(拉普拉斯4邻滤波器)
+	// Sharpen3Laplace4
+	// 3x3 简单锐化滤波器(拉普拉斯4邻滤波器)
 	Sharpen3Laplace4 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 1,
 		Kernel: []KernelVector{
 			{0, -1, -1}, {-1, +0, -1}, {0, +0, +5}, {1, +0, -1}, {0, +1, -1}}}
-	//3x3 锐化滤波器(拉普拉斯8邻滤波器)
+	// Sharpen3Laplace8
+	// 3x3 锐化滤波器(拉普拉斯8邻滤波器)
 	Sharpen3Laplace8 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 1,
 		Kernel: []KernelVector{
 			{-1, -1, -1}, {0, -1, -1}, {1, -1, -1},
 			{-1, +0, -1}, {0, +0, +9}, {1, +0, -1},
 			{-1, +1, -1}, {0, +1, -1}, {1, +1, -1}}}
-	//3x3 全方向锐化滤波器(强调边缘)
+	// SharpenStrengthen3All
+	// 3x3 全方向锐化滤波器(强调边缘)
 	SharpenStrengthen3All = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 1,
 		Kernel: []KernelVector{
 			{-1, -1, +1}, {0, -1, +1}, {1, -1, +1},
 			{-1, +0, +1}, {0, +0, -7}, {1, +0, +1},
 			{-1, +1, +1}, {0, +1, +1}, {1, +1, +1}}}
-	//5x5 全方向锐化滤波器
+	// Sharpen5All
+	// 5x5 全方向锐化滤波器
 	Sharpen5All = FilterMatrix{KernelRadius: 2, KernelSize: 5, KernelScale: 1,
 		Kernel: []KernelVector{ // 中间改为1，原来是8过不了检验
 			{-2, -2, -1}, {-1, -2, -1}, {0, -2, -1}, {1, -2, -1}, {2, -2, -1},
@@ -38,6 +43,7 @@ var (
 
 //----------------------------------------
 
+// CreateSharpenFilter
 // 创建边锐化滤波器
 // radius：		卷积核半径
 // direction: 	运动方向
@@ -66,11 +72,13 @@ func CreateSharpenFilter(radius int, direction imagex.PixelDirection, diff uint)
 	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: 0, Kernel: kernel}, nil
 }
 
+// CreateSharpenLaplace4Filter
 // 创建拉普拉斯4邻锐化滤波器
 func CreateSharpenLaplace4Filter(radius int) (filter FilterMatrix, err error) {
 	return CreateSharpenFilter(radius, imagex.Horizontal|imagex.Vertical, 0)
 }
 
+// CreateSharpenLaplace8Filter
 // 创建拉普拉斯8邻锐化滤波器
 func CreateSharpenLaplace8Filter(radius int) (filter FilterMatrix, err error) {
 	return CreateSharpenFilter(radius, imagex.AllDirection, 0)
@@ -78,21 +86,25 @@ func CreateSharpenLaplace8Filter(radius int) (filter FilterMatrix, err error) {
 
 //-----------------------------------------------
 
+// SharpenWithLaplace4
 // 使用拉普拉斯4邻锐化滤波器处理图像
 func SharpenWithLaplace4(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Sharpen3Laplace4)
 }
 
+// SharpenWithLaplace8
 // 使用拉普拉斯4邻锐化滤波器处理图像
 func SharpenWithLaplace8(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Sharpen3Laplace8)
 }
 
+// SharpenWithStrengthen3
 // 使用强调边缘滤波器处理图像
 func SharpenWithStrengthen3(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, SharpenStrengthen3All)
 }
 
+// SharpenWithSharpen5All
 // 使用强调边缘滤波器处理图像
 func SharpenWithSharpen5All(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Sharpen5All)
@@ -100,6 +112,7 @@ func SharpenWithSharpen5All(srcImg image.Image, dstImg draw.Image) error {
 
 //-----------------------------------------------
 
+// SharpenWithCustomLaplace
 // 使用定制的拉普拉斯锐化滤波器处理图像
 func SharpenWithCustomLaplace(srcImg image.Image, dstImg draw.Image, radius int, direction imagex.PixelDirection) error {
 	filter, err := CreateSharpenFilter(radius, direction, 0)

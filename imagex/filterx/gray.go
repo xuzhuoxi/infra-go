@@ -8,18 +8,21 @@ import (
 	"image/color"
 )
 
+// GrayDefaultFromNRGBA
 // 转制NRGBA图像为Gray16灰度图
 // 使用默认灰度计算算法
 func GrayDefaultFromNRGBA(src image.Image) (resultImage image.Image, err error) {
 	return GrayFromNRGBA(src, graphicx.DefaultAlgMode)
 }
 
+// GrayDefaultFromRGBA
 // 转制RGBA图像为Gray16灰度图
 // 使用默认灰度计算算法
 func GrayDefaultFromRGBA(src image.Image, backgroundColor color.Color) (resultImage image.Image, err error) {
 	return GrayFromRGBA(src, backgroundColor, graphicx.DefaultAlgMode)
 }
 
+// GrayFromNRGBA
 // 转制NRGBA图像为Gray16灰度图
 func GrayFromNRGBA(rgbImg image.Image, algMode graphicx.GrayAlgMode) (resultImage image.Image, err error) {
 	if nil == rgbImg {
@@ -39,6 +42,7 @@ func GrayFromNRGBA(rgbImg image.Image, algMode graphicx.GrayAlgMode) (resultImag
 	return grayImg, nil
 }
 
+// GrayFromRGBA
 // 转制RGBA图像为Gray16灰度图
 func GrayFromRGBA(rgbaImg image.Image, background color.Color, algMode graphicx.GrayAlgMode) (resultImage image.Image, err error) {
 	if nil == rgbaImg {
@@ -46,7 +50,7 @@ func GrayFromRGBA(rgbaImg image.Image, background color.Color, algMode graphicx.
 	}
 	rgbaRect := rgbaImg.Bounds()
 	copyImg := imagex.NewNRGBA64(rgbaRect, nil)
-	NrgbaAt(rgbaImg, copyImg, background)
+	NRGBAAt(rgbaImg, copyImg, background)
 	return GrayFromNRGBA(copyImg, algMode)
 }
 

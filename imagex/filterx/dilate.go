@@ -1,3 +1,4 @@
+// Package filterx
 // 膨胀
 package filterx
 
@@ -9,6 +10,7 @@ import (
 	"image/draw"
 )
 
+// DilateCVT
 // 膨胀二值图
 // 只要不是纯白，都会发生膨胀
 // directions为允许膨胀的方向
@@ -16,6 +18,7 @@ func DilateCVT(cvtSrcImg image.Image, cvtDstImg draw.Image, directions imagex.Pi
 	return DilateGray(cvtSrcImg, cvtDstImg, directions, 254)
 }
 
+// DilateGray
 // 膨胀灰度图像(用于普通灰度图意义不太，二值图的效果不错)
 // 阈值threshold, 只有<=threshold的像素点才会向外发生膨胀
 // 阈值threshold范围[0,65535]

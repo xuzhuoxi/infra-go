@@ -1,4 +1,5 @@
-//RGBA转RGB
+// Package filterx
+// RGBA转RGB
 package filterx
 
 import (
@@ -12,23 +13,27 @@ import (
 	"math"
 )
 
-//以绿色(Green)作底转换RGBA图像为RGB图像(去Alpha通道)
-func NrgbaAtGreen(rgbaImg image.Image, nrgbaImg draw.Image) error {
-	return NrgbaAt(rgbaImg, nrgbaImg, colornames.Green)
+// NRGBAAtGreen
+// 以绿色(Green)作底转换RGBA图像为RGB图像(去Alpha通道)
+func NRGBAAtGreen(rgbaImg image.Image, nrgbaImg draw.Image) error {
+	return NRGBAAt(rgbaImg, nrgbaImg, colornames.Green)
 }
 
-//以黑色(Black)作底转换RGBA图像为RGB图像(去Alpha通道)
-func NrgbaAtBlack(rgbaImg image.Image, nrgbaImg draw.Image) error {
-	return NrgbaAt(rgbaImg, nrgbaImg, color.Black)
+// NRGBAAtBlack
+// 以黑色(Black)作底转换RGBA图像为RGB图像(去Alpha通道)
+func NRGBAAtBlack(rgbaImg image.Image, nrgbaImg draw.Image) error {
+	return NRGBAAt(rgbaImg, nrgbaImg, color.Black)
 }
 
-//以白色(White)作底转换RGBA图像为RGB图像(去Alpha通道)
-func NrgbaAtWhite(rgbaImg image.Image, nrgbaImg draw.Image) error {
-	return NrgbaAt(rgbaImg, nrgbaImg, color.White)
+// NRGBAAtWhite
+// 以白色(White)作底转换RGBA图像为RGB图像(去Alpha通道)
+func NRGBAAtWhite(rgbaImg image.Image, nrgbaImg draw.Image) error {
+	return NRGBAAt(rgbaImg, nrgbaImg, color.White)
 }
 
-//以某个背景色作底转换RGBA图像为NRGBA图像(去Alpha通道)
-func NrgbaAt(rgbaImg image.Image, nrgbaImg draw.Image, backgroundColor color.Color) error {
+// NRGBAAt
+// 以某个背景色作底转换RGBA图像为NRGBA图像(去Alpha通道)
+func NRGBAAt(rgbaImg image.Image, nrgbaImg draw.Image, backgroundColor color.Color) error {
 	if nil == rgbaImg {
 		return errors.New("SrcImg is nil! ")
 	}

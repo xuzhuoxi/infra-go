@@ -1,4 +1,5 @@
-//浮雕
+// Package filterx
+// 浮雕
 package filterx
 
 import (
@@ -8,7 +9,7 @@ import (
 
 type EmbossDirection int
 
-//以下顺序不能乱
+// 以下顺序不能乱
 const (
 	Lu2Rd EmbossDirection = iota
 	Ru2Ld
@@ -23,18 +24,18 @@ const (
 
 // 浮雕滤波器
 var (
-	//3x3 (左上->右下)浮雕滤波器
+	// Emboss3Lu2Rd 3x3 (左上->右下)浮雕滤波器
 	Emboss3Lu2Rd = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0, ResultOffset: 32768,
 		Kernel: []KernelVector{
 			{-1, -1, -1}, {-0, -1, -1},
 			{-1, -0, -1}, {+1, +0, +1},
 			{+0, +1, +1}, {+1, +1, +1}}}
-	//3x3 (上->下)浮雕滤波器
+	// Emboss3U2D 3x3 (上->下)浮雕滤波器
 	Emboss3U2D = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0, ResultOffset: 32768,
 		Kernel: []KernelVector{
 			{-1, -1, -1}, {0, -1, -1}, {+1, -1, -1},
 			{-1, +1, +1}, {0, +1, +1}, {+1, +1, +1}}}
-	//5x5 (左上->右下)浮雕滤波器
+	// Emboss5Lu2Rd 5x5 (左上->右下)浮雕滤波器
 	Emboss5Lu2Rd = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0, ResultOffset: 32768,
 		Kernel: []KernelVector{
 			{-2, -2, -1}, {-1, -2, -1}, {+0, -2, -1}, {+1, -2, -1},
@@ -42,14 +43,14 @@ var (
 			{-2, -0, -1}, {-1, -0, -1}, {+1, -0, +1}, {+2, -0, +1},
 			{-2, +1, -1}, {+0, +1, +1}, {+1, +1, +1}, {+2, +1, +1},
 			{-1, +2, +1}, {+0, +2, +1}, {+1, +2, +1}, {+2, +2, +1}}}
-	//5x5 (上->下)浮雕滤波器
+	// Emboss5U2D 5x5 (上->下)浮雕滤波器
 	Emboss5U2D = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0, ResultOffset: 32768,
 		Kernel: []KernelVector{
 			{-2, -2, -1}, {-1, -2, -1}, {0, -2, -1}, {+1, -2, -1}, {+2, -2, -1},
 			{-2, -1, -1}, {-1, -1, -1}, {0, -1, -1}, {+1, -0, -1}, {+2, -1, -1},
 			{-2, +1, +1}, {-1, +1, +1}, {0, +1, +1}, {+1, +1, +1}, {+2, +1, +1},
 			{-2, +2, +1}, {-1, +2, +1}, {0, +2, +1}, {+1, +2, +1}, {+2, +2, +1}}}
-	//3x3 非对称浮雕滤波器
+	// Emboss3Asymmetrical 3x3 非对称浮雕滤波器
 	Emboss3Asymmetrical = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 0, ResultOffset: 32768,
 		Kernel: []KernelVector{
 			{-1, -1, 2}, {+0, +0, -1}, {+1, +1, -1}}}
@@ -57,6 +58,7 @@ var (
 
 //---------------------------------------
 
+// CreateEmbossFilterSymmetry
 // 创建对称浮雕滤波器
 func CreateEmbossFilterSymmetry(radius int, direction EmbossDirection, offset int) (filter FilterMatrix, err error) {
 	if radius < 1 {
@@ -76,6 +78,7 @@ func CreateEmbossFilterSymmetry(radius int, direction EmbossDirection, offset in
 	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: 0, ResultOffset: offset, Kernel: kernel}, nil
 }
 
+// CreateAsymmetricalEmbossFilter
 // 创建对称浮雕滤波器
 func CreateAsymmetricalEmbossFilter(radius int, value int, offset int, angle int) (filter FilterMatrix, err error) {
 	return

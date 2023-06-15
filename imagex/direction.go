@@ -4,7 +4,7 @@ import "errors"
 
 type PixelDirection int
 
-// 包含方向
+// IncludeDirection 包含方向
 func (d PixelDirection) IncludeDirection(direction PixelDirection) bool {
 	return d&direction > 0
 }
@@ -23,12 +23,12 @@ func (d PixelDirection) Name() string {
 	return "Multi"
 }
 
-// 无方向
+// IsNone 无方向
 func (d PixelDirection) IsNone() bool {
 	return 0 == d
 }
 
-// 多方向
+// IsMulti 多方向
 func (d PixelDirection) IsMulti() bool {
 	if d.IsNone() {
 		return false
@@ -39,7 +39,7 @@ func (d PixelDirection) IsMulti() bool {
 	return false
 }
 
-// 单方向
+// IsSingle 单方向
 func (d PixelDirection) IsSingle() bool {
 	if d.IsNone() {
 		return false
@@ -47,7 +47,7 @@ func (d PixelDirection) IsSingle() bool {
 	return len(DecomposeDirection(d)) == 1
 }
 
-// 取反方向
+// ReverseDirection 取反方向
 func (d PixelDirection) ReverseDirection() PixelDirection {
 	var rs PixelDirection
 	halfLn := len(dirs) / 2
@@ -66,7 +66,7 @@ func (d PixelDirection) ReverseDirection() PixelDirection {
 	return rs
 }
 
-//方向偏移量
+// PixelDirectionAdd 方向偏移量
 type PixelDirectionAdd struct{ X, Y int }
 
 const (
@@ -81,13 +81,13 @@ const (
 )
 
 const (
-	//水平方向，包含Left,Right
+	// Horizontal 水平方向，包含Left,Right
 	Horizontal = Left | Right
-	//垂直方向，包含Up,down
+	// Vertical 垂直方向，包含Up,down
 	Vertical = Up | Down
-	//斜方向，包含LeftDown,LeftUp,RightDown,RightUp
+	// Oblique 斜方向，包含LeftDown,LeftUp,RightDown,RightUp
 	Oblique = LeftDown | LeftUp | RightDown | RightUp
-	//全部八个方向
+	// AllDirection 全部八个方向
 	AllDirection = Horizontal | Vertical | Oblique
 )
 
@@ -130,7 +130,8 @@ func init() {
 	dirNameMap[LeftDown] = "LeftDown"
 }
 
-//取方向坐标增加值
+// GetPixelDirectionAdd
+// 取方向坐标增加值
 func GetPixelDirectionAdd(direction PixelDirection) (PixelDirectionAdd, error) {
 	rs, ok := dirMap[direction]
 	if ok {
@@ -140,7 +141,8 @@ func GetPixelDirectionAdd(direction PixelDirection) (PixelDirectionAdd, error) {
 	}
 }
 
-//取多方向坐标增加值
+// GetPixelDirectionAdds
+// 取多方向坐标增加值
 func GetPixelDirectionAdds(directions PixelDirection) []PixelDirectionAdd {
 	if directions <= 0 {
 		return nil
@@ -154,7 +156,8 @@ func GetPixelDirectionAdds(directions PixelDirection) []PixelDirectionAdd {
 	return rs
 }
 
-//分解方向
+// DecomposeDirection
+// 分解方向
 func DecomposeDirection(directions PixelDirection) []PixelDirection {
 	if directions <= 0 {
 		return nil

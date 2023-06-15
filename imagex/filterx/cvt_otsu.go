@@ -7,18 +7,21 @@ import (
 	"image/draw"
 )
 
+// CVTWithOTSU
 // OTSU二值化算法(大津法)
 func CVTWithOTSU(srcImg image.Image, dstImg draw.Image) error {
 	threshold := GetOtsuThreshold(srcImg)
 	return CVTGray(srcImg, dstImg, threshold)
 }
 
+// CVTWithOTSU64
 // OTSU二值化算法(大津法)
 func CVTWithOTSU64(srcImg image.Image, dstImg draw.Image) error {
 	threshold := GetOtsuThreshold64(srcImg)
 	return CVTGray(srcImg, dstImg, threshold)
 }
 
+// GetOtsuThreshold
 // 计算灰度图的OTSU算法的阈值
 // 64位像素强制转为32位像素参与计算
 // 结果返回64位图像级阈值
@@ -39,6 +42,7 @@ func GetOtsuThreshold(grayImg image.Image) (threshold uint32) {
 	return
 }
 
+// GetOtsuThreshold64
 // 计算灰度图的OTSU算法的阈值
 // 结果返回64位图像级阈值
 // threshold [0， 65535]

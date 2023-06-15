@@ -11,6 +11,7 @@ import (
 	"image/draw"
 )
 
+// FastBlur_Java
 // FastBlur.java
 func FastBlur_Java(srcImg image.Image, dstImg draw.Image, radius int) error {
 	// Stack Blur v1.0 from
@@ -329,6 +330,7 @@ func FastBlur(srcImg image.Image, dstImg draw.Image, radius int) error {
 	return nil
 }
 
+// FastBlurARGB8888
 // 堆模糊(快速模糊)
 // https://www.cnblogs.com/Darksun/p/4681476.html
 // FastBlurDemo.zip

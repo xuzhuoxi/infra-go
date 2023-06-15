@@ -7,6 +7,7 @@ import (
 	"image/draw"
 )
 
+// CVTGrayImageWithKittle
 // Kittle二值化算法(灰度拉伸)
 func CVTGrayImageWithKittle(srcImg image.Image, dstImg draw.Image) error {
 	threshold := GetKittleThresholdAtGreen(srcImg)
@@ -15,6 +16,7 @@ func CVTGrayImageWithKittle(srcImg image.Image, dstImg draw.Image) error {
 
 //---------------------------------------------
 
+// GetKittleThresholdAtGreen
 // 计算Kittler算法的阈值
 // 64位图像阈值
 // threshold [0， 65535]

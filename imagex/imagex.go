@@ -11,7 +11,8 @@ import (
 	"math"
 )
 
-//图像字符串化
+// SprintImage
+// 图像字符串化
 func SprintImage(img image.Image) string {
 	bs := bytes.NewBufferString("")
 	rect := img.Bounds()
@@ -24,13 +25,14 @@ func SprintImage(img image.Image) string {
 	return bs.String()
 }
 
-// 新建灰度图像
+// NewGray 新建灰度图像
 func NewGray(rect image.Rectangle, grayY uint8) *image.Gray {
 	rs := image.NewGray(rect)
 	FillImage(rs, &color.Gray{Y: grayY})
 	return rs
 }
 
+// NewGray16
 // 新建灰度图像
 func NewGray16(rect image.Rectangle, grayY uint16) *image.Gray16 {
 	rs := image.NewGray16(rect)
@@ -38,6 +40,7 @@ func NewGray16(rect image.Rectangle, grayY uint16) *image.Gray16 {
 	return rs
 }
 
+// NewRGBA
 // 新建RGBA图像
 func NewRGBA(rect image.Rectangle, defaultColor color.Color) *image.RGBA {
 	rs := image.NewRGBA(rect)
@@ -47,6 +50,7 @@ func NewRGBA(rect image.Rectangle, defaultColor color.Color) *image.RGBA {
 	return rs
 }
 
+// NewNRGBA
 // 新建NRGBA图像
 func NewNRGBA(rect image.Rectangle, defaultColor color.Color) *image.NRGBA {
 	rs := image.NewNRGBA(rect)
@@ -56,6 +60,7 @@ func NewNRGBA(rect image.Rectangle, defaultColor color.Color) *image.NRGBA {
 	return rs
 }
 
+// NewRGBA64
 // 新建RGBA64图像
 func NewRGBA64(rect image.Rectangle, cdefaultColor color.Color) *image.RGBA64 {
 	rs := image.NewRGBA64(rect)
@@ -65,6 +70,7 @@ func NewRGBA64(rect image.Rectangle, cdefaultColor color.Color) *image.RGBA64 {
 	return rs
 }
 
+// NewNRGBA64
 // 新建RGBA64图像
 func NewNRGBA64(rect image.Rectangle, defaultColor color.Color) *image.NRGBA64 {
 	rs := image.NewNRGBA64(rect)
@@ -74,7 +80,8 @@ func NewNRGBA64(rect image.Rectangle, defaultColor color.Color) *image.NRGBA64 {
 	return rs
 }
 
-//使用颜色填充图像
+// FillImage
+// 使用颜色填充图像
 func FillImage(img draw.Image, color color.Color) {
 	rect := img.Bounds()
 	setColor := img.ColorModel().Convert(color)
@@ -85,7 +92,8 @@ func FillImage(img draw.Image, color color.Color) {
 	}
 }
 
-//使用颜色填充图像部分区域
+// FillImageAt
+// 使用颜色填充图像部分区域
 func FillImageAt(img draw.Image, color color.Color, rect image.Rectangle) {
 	rect2 := img.Bounds()
 	minX := mathx.MaxInt(rect.Min.X, rect2.Min.X)
@@ -99,6 +107,7 @@ func FillImageAt(img draw.Image, color color.Color, rect image.Rectangle) {
 	}
 }
 
+// BlendSourceNormal
 // 增加背景色
 // 背景色的透明通道会被忽略
 // R = S*(1-Da) + D*Da [0,1]

@@ -1,3 +1,4 @@
+// Package filterx
 // 二值化
 package filterx
 
@@ -9,6 +10,7 @@ import (
 	"image/draw"
 )
 
+// CVTGray
 // 二值化灰度图
 // threshold [0， 65535]
 func CVTGray(graySrcImg image.Image, grayDstImg draw.Image, threshold uint32) error {

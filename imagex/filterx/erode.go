@@ -1,3 +1,4 @@
+// Package filterx
 // 腐蚀
 package filterx
 
@@ -11,11 +12,12 @@ import (
 	"image/draw"
 )
 
-// 腐蚀二值图
+// ErodeCVT 腐蚀二值图
 func ErodeCVT(cvtSrcImg image.Image, cvtDstImg draw.Image, directions imagex.PixelDirection) error {
 	return ErodeGray(cvtSrcImg, cvtDstImg, directions, 65535, 0)
 }
 
+// ErodeGray
 // 腐蚀灰度图像
 // 腐蚀阈值erodeThreshold (0,65535]
 // 		>=erodeThreshold像素的点才具有腐蚀性

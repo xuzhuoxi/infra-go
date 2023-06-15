@@ -6,7 +6,8 @@ import (
 	"image/draw"
 )
 
-//复制图像
+// CopyImage
+// 复制图像
 func CopyImage(srcImg image.Image) draw.Image {
 	copyImg := CopyImageStruct(srcImg)
 	if nil == copyImg {
@@ -16,7 +17,8 @@ func CopyImage(srcImg image.Image) draw.Image {
 	return copyImg
 }
 
-//复制图像
+// XCopyImage
+// 复制图像
 func XCopyImage(srcImg image.Image) draw.Image {
 	copyImg := CopyImageStruct(srcImg)
 	if nil == copyImg {
@@ -26,7 +28,8 @@ func XCopyImage(srcImg image.Image) draw.Image {
 	return copyImg
 }
 
-//把源图像复制到目标图像
+// CopyImageTo
+// 把源图像复制到目标图像
 func CopyImageTo(srcImg image.Image, dstImg draw.Image) {
 	srcRect := srcImg.Bounds()
 	dstRect := dstImg.Bounds()
@@ -41,12 +44,14 @@ func CopyImageTo(srcImg image.Image, dstImg draw.Image) {
 	}
 }
 
-//把源图像复制到目标图像
+// XCopyImageTo
+// 把源图像复制到目标图像
 func XCopyImageTo(srcImg image.Image, dstImg draw.Image) {
 	draw.Draw(dstImg, srcImg.Bounds(), srcImg, image.Pt(0, 0), draw.Over)
 }
 
-//复制图像
+// CopyImageStruct
+// 复制图像
 func CopyImageStruct(srcImg image.Image) draw.Image {
 	rect := srcImg.Bounds()
 	var clone draw.Image

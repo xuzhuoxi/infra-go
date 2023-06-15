@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-31.
-//@author xuzhuoxi
+// Package formatx
+// Created by xuzhuoxi
+// on 2019-05-31.
+// @author xuzhuoxi
 //
 package formatx
 

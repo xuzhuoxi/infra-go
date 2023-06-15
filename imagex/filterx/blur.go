@@ -1,3 +1,4 @@
+// Package filterx
 // 模糊
 package filterx
 
@@ -12,18 +13,21 @@ import (
 
 // 均值模糊滤波器
 var (
-	//3x3 4邻域均值滤波器
+	// BoxFourNear3
+	// 3x3 4邻域均值滤波器
 	BoxFourNear3 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 4,
 		Kernel: []KernelVector{
 			{0, -1, 1}, {-1, 0, 1},
 			{1, +0, 1}, {+0, 1, 1}, {0, 0, 1}}}
-	//3x3 8邻域均值滤波器
+	// BoxEightNear3
+	// 3x3 8邻域均值滤波器
 	BoxEightNear3 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 8,
 		Kernel: []KernelVector{
 			{-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
 			{-1, +0, 1}, {1, +0, 1},
 			{-1, +1, 1}, {0, +1, 1}, {1, +1, 1}}}
-	//3x3 均值滤波器
+	// BoxAverage3
+	// 3x3 均值滤波器
 	BoxAverage3 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 9,
 		Kernel: []KernelVector{
 			{-1, -1, 1}, {0, -1, 1}, {1, -1, 1},
@@ -31,15 +35,17 @@ var (
 			{-1, +1, 1}, {0, +1, 1}, {1, +1, 1}}}
 )
 
-//高斯模糊滤波器
+// 高斯模糊滤波器
 var (
-	//3x3 高斯滤波器
+	// Gauss3
+	// 3x3 高斯滤波器
 	Gauss3 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 16,
 		Kernel: []KernelVector{
 			{-1, -1, 1}, {0, -1, 2}, {1, -1, 1},
 			{-1, +0, 2}, {0, +0, 4}, {1, +0, 2},
 			{-1, +1, 1}, {0, +1, 2}, {1, +1, 1}}}
-	//5x5 高斯滤波器
+	// Gauss5
+	// 5x5 高斯滤波器
 	Gauss5 = FilterMatrix{KernelRadius: 2, KernelSize: 5, KernelScale: 273,
 		Kernel: []KernelVector{
 			{-2, -2, 1}, {-1, -2, 4}, {0, -2, 7}, {1, -2, 4}, {2, -2, 1},
@@ -51,19 +57,23 @@ var (
 
 // 运动模糊滤波器
 var (
-	//3x3水平运动滤波器
+	// Motion3Horizontal
+	// 3x3水平运动滤波器
 	Motion3Horizontal = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 3,
 		Kernel: []KernelVector{
 			{-1, 0, 1}, {0, 0, 1}, {1, 0, 1}}}
-	//3x3垂直运动滤波器
+	// Motion3Vertical
+	// 3x3垂直运动滤波器
 	Motion3Vertical = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 3,
 		Kernel: []KernelVector{
 			{0, -1, 1}, {0, 0, 1}, {0, 1, 1}}}
-	//3x3 45度运动滤波器(左上右下)
+	// Motion3Oblique45
+	// 3x3 45度运动滤波器(左上右下)
 	Motion3Oblique45 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 3,
 		Kernel: []KernelVector{
 			{1, -1, 1}, {0, +0, 1}, {-1, +1, 1}}}
-	//3x3 135度运动滤波器(左下右上)
+	// Motion3Oblique135
+	// 3x3 135度运动滤波器(左下右上)
 	Motion3Oblique135 = FilterMatrix{KernelRadius: 1, KernelSize: 3, KernelScale: 3,
 		Kernel: []KernelVector{
 			{-1, -1, 1}, {0, 0, 1}, {1, 1, 1}}}
@@ -71,6 +81,7 @@ var (
 
 //-------------------------------------------
 
+// CreateBoxFourNearBlurFilter
 // 创建自定义4邻均值模糊滤波器
 // radius 半径
 // includeCenter 包含中心
@@ -98,6 +109,7 @@ func CreateBoxFourNearBlurFilter(radius int, includeCenter bool) (filter FilterM
 	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: ln, Kernel: kernel}, nil
 }
 
+// CreateBoxEightNearBlurFilter
 // 创建自定义8邻均值模糊滤波器
 // radius 半径
 // includeCenter 包含中心
@@ -122,6 +134,7 @@ func CreateBoxEightNearBlurFilter(radius int, includeCenter bool) (filter Filter
 	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: ln, Kernel: kernel}, nil
 }
 
+// CreateGaussBlurFilter
 // 创建高斯模糊滤波器
 // radius：	卷积核半径 [1，3]
 // sigma:	标准差
@@ -146,6 +159,7 @@ func CreateGaussBlurFilter(radius int, sigma float64) (filter FilterMatrix, err 
 	return FilterMatrix{KernelRadius: radius, KernelSize: kSize, KernelScale: scale, Kernel: kernel}, nil
 }
 
+// CreateMotionBlurFilter
 // 创建运动模糊滤波器
 // radius：		卷积核半径
 // direction: 	运动方向
@@ -171,21 +185,25 @@ func CreateMotionBlurFilter(radius int, direction imagex.PixelDirection) (filter
 
 //------------------------------------------------------
 
+// BlurWithForeNear3
 // 4邻域均值模糊
 func BlurWithForeNear3(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, BoxFourNear3)
 }
 
+// BlurWithEightNear3
 // 8邻域均值模糊
 func BlurWithEightNear3(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, BoxEightNear3)
 }
 
+// BlurWithAverage3
 // 均值模糊
 func BlurWithAverage3(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, BoxAverage3)
 }
 
+// BlurWithBoxFour
 // 自定义4邻均值模糊
 func BlurWithBoxFour(srcImg image.Image, dstImg draw.Image, radius int, includeCenter bool) error {
 	filter, err := CreateBoxFourNearBlurFilter(radius, includeCenter)
@@ -195,6 +213,7 @@ func BlurWithBoxFour(srcImg image.Image, dstImg draw.Image, radius int, includeC
 	return FilterImageWithMatrix(srcImg, dstImg, filter)
 }
 
+// BlurWithBoxEight
 // 自定义8邻均值模糊
 func BlurWithBoxEight(srcImg image.Image, dstImg draw.Image, radius int, includeCenter bool) error {
 	filter, err := CreateBoxEightNearBlurFilter(radius, includeCenter)
@@ -206,16 +225,19 @@ func BlurWithBoxEight(srcImg image.Image, dstImg draw.Image, radius int, include
 
 //------------------------------------------------------------------
 
+// BlurWithGauss3
 // 高斯3x3模糊
 func BlurWithGauss3(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Gauss3)
 }
 
+// BlurWithGauss5
 // 高斯5x5模糊
 func BlurWithGauss5(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Gauss5)
 }
 
+// BlurWithGauss
 // 自定义高斯模糊
 func BlurWithGauss(srcImg image.Image, dstImg draw.Image, radius int, sigma float64) error {
 	filter, err := CreateGaussBlurFilter(radius, sigma)
@@ -227,26 +249,31 @@ func BlurWithGauss(srcImg image.Image, dstImg draw.Image, radius int, sigma floa
 
 //------------------------------------------------------------------
 
+// BlurWithMotion3Horizontal
 // 水平运动模糊
 func BlurWithMotion3Horizontal(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Motion3Horizontal)
 }
 
+// BlurWithMotion3Vertical
 // 垂直运动模糊
 func BlurWithMotion3Vertical(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Motion3Vertical)
 }
 
+// BlurWithMotion3Oblique45
 // 斜45角运动模糊
 func BlurWithMotion3Oblique45(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Motion3Oblique45)
 }
 
+// BlurWithMotion3Oblique135
 // 斜135角运动模糊
 func BlurWithMotion3Oblique135(srcImg image.Image, dstImg draw.Image) error {
 	return FilterImageWithMatrix(srcImg, dstImg, Motion3Oblique135)
 }
 
+// BlurWithMotion
 // 自定义运动模糊
 func BlurWithMotion(srcImg image.Image, dstImg draw.Image, radius int, direction imagex.PixelDirection) error {
 	filter, err := CreateMotionBlurFilter(radius, direction)
