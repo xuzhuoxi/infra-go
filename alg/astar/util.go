@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-03.
-//@author xuzhuoxi
+// Package astar
+// Created by xuzhuoxi
+// on 2019-04-03.
+// @author xuzhuoxi
 //
 package astar
 
@@ -9,7 +9,7 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// 清除拐点
+// ClearInflection 清除拐点
 func ClearInflection(path []Position) []Position {
 	ln := len(path)
 	if ln <= 2 {
@@ -23,16 +23,17 @@ func ClearInflection(path []Position) []Position {
 	return path
 }
 
-// 判断三点是否一线
+// IsInLine 判断三点是否一线
 func IsInLine(first, second, third Position) bool {
 	return (second.Y-first.Y)*(third.X-first.X) == (third.Y-first.Y)*(second.X-first.X)
 }
 
-// 判断是为同一点
+// IsSamePosition 判断是为同一点
 func IsSamePosition(pos1, pos2 Position) bool {
 	return pos1.EqualTo(pos2)
 }
 
+// IsInStandardLine
 // 是否标准线向
 // includeOblique:包含斜向
 func IsInStandardLine(pos1, pos2 Position, includeOblique bool) bool {
@@ -58,6 +59,7 @@ func IsInStandardLine(pos1, pos2 Position, includeOblique bool) bool {
 	return (lx == ly && lz == 0) || (lx == lz && ly == 0) || (ly == lz && lx == 0) || (lx == ly && ly == lz)
 }
 
+// GetDirection
 // 判断方向,前提是两点为线向
 // 采用笛卡尔坐标系
 func GetDirection(sourcePos, targetPos Position) Direction {

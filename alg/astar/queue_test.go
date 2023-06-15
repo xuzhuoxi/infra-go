@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-05.
-//@author xuzhuoxi
+// Package astar
+// Created by xuzhuoxi
+// on 2019-04-05.
+// @author xuzhuoxi
 //
 package astar
 

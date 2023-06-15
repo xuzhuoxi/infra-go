@@ -1,38 +1,40 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-05.
-//@author xuzhuoxi
+// Package astar
+// Created by xuzhuoxi
+// on 2019-04-05.
+// @author xuzhuoxi
 //
 package astar
 
 type IGridMap interface {
-	// 初始化地图大小
+	// InitGridMap 初始化地图大小
 	InitGridMap(dataSize, gridSize Size)
-	// 格式大小
+	// GetGridSize 格式大小
 	GetGridSize() Size
-	// 地图数据大小
+	// GetDataSize 地图数据大小
 	GetDataSize() Size
-	// 地图像素大小
+	// GetPixelSize 地图像素大小
 	GetPixelSize() Size
-	// AStart算法
+	// GetAStartAlg AStart算法
 	GetAStartAlg() IAStarAlg
 
-	// 格式数据值
+	// GetDataValue 格式数据值
 	GetDataValue(pos Position) int
-	// 判断路径是否通路
+	// CheckPath 判断路径是否通路
 	CheckPath(path []Position) bool
-	// 判断是否两点直通
+	// CanLineTo 判断是否两点直通
 	CanLineTo(startPos, endPos Position) bool
 
-	// 设置允许寻路的方向
+	// SetAllowedDirections 设置允许寻路的方向
 	SetAllowedDirections(direction ...Direction)
-	// 设置地图数据
+	// SetMapData 设置地图数据
 	SetMapData(data interface{}) error
-	// 设置自定义估值函数
+	// SetSearchHn 设置自定义估值函数
 	SetSearchHn(hn FuncHn)
+	// SearchPath
 	// 检索路径
 	// 默认清除拐点
 	SearchPath(startPos, endPos Position) (path []Position, ok bool)
+	// SearchPathWithInflection
 	// 检索路径
 	// 保留拐点
 	SearchPathWithInflection(startPos, endPos Position) (path []Position, ok bool)
@@ -100,7 +102,7 @@ func (m *GridMap) CheckPath(path []Position) bool {
 	return true
 }
 
-// 判断是否两点直通
+// CanLineTo 判断是否两点直通
 func (m *GridMap) CanLineTo(startPos, endPos Position) bool {
 	return m.canLineTo(startPos, endPos)
 }

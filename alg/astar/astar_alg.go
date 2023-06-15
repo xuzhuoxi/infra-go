@@ -1,8 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-03.
-//@author xuzhuoxi
-//
+// Package astar
+// Created by xuzhuoxi
+// on 2019-04-03.
+// @author xuzhuoxi
 package astar
 
 import (
@@ -16,18 +15,22 @@ const (
 	MAX_MASK = 2000000000
 )
 
+// FuncHn
 // 估值函数Hn
 // 下一点到终点的估算代价
 type FuncHn func(cx, cy, cz, ex, ey, ez int) int
 
+// DefaultFuncHn
 // 默认估值函数
 func DefaultFuncHn(cx, cy, cz, ex, ey, ez int) int {
 	return mathx.AbsInt(cx-ex) + mathx.AbsInt(cy-ey) + mathx.AbsInt(cz-ez)
 }
 
 type IAStarAlg interface {
+	// SetAllowedDirections
 	// 设置禁止检索的方向(可用于特殊地图)
 	SetAllowedDirections(direction []Direction)
+	// SetCustomFuncHn
 	// 设置自定义的估值函数
 	SetCustomFuncHn(hn FuncHn)
 
@@ -41,11 +44,11 @@ type IAStarAlg interface {
 	SetData2D(data [][]int) (sourceData [][][]int, err error)
 	// 设置地图数据
 	SetData3D(data [][][]int) (sourceData [][][]int, err error)
-	// 寻路
+	// Search2D 寻路
 	// sx:StartX; sy:StartY
 	// ex:EndX; ey:EndY
 	Search2D(sx, sy, ex, ey int) (path []Position, ok bool)
-	// 寻路
+	// Search 寻路
 	// sx:StartX; sy:StartY; sz:StartZ
 	// ex:EndX; ey:EndY; ez:EndZ
 	Search(sx, sy, sz, ex, ey, ez int) (path []Position, ok bool)

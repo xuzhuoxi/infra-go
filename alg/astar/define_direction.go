@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-05.
-//@author xuzhuoxi
+// Package astar
+// Created by xuzhuoxi
+// on 2019-04-05.
+// @author xuzhuoxi
 //
 package astar
 
@@ -68,25 +68,25 @@ var (
 
 //-------------------------------------------------------
 
-// 方向矢量
+// DirectionVector 方向矢量
 type DirectionVector [4]int
 
-// 坐标X方向增量
+// X 坐标X方向增量
 func (v DirectionVector) X() int {
 	return v[0]
 }
 
-// 坐标Y方向增量
+// Y 坐标Y方向增量
 func (v DirectionVector) Y() int {
 	return v[1]
 }
 
-// 坐标Z方向增量
+// Z 坐标Z方向增量
 func (v DirectionVector) Z() int {
 	return v[2]
 }
 
-// 代价值
+// V 代价值
 func (v DirectionVector) V() int {
 	return v[3]
 }
@@ -140,7 +140,7 @@ var vectors = []DirectionVector{
 	Vector_X0_Y0_Z1, Vector_X0_Y1_Z1, Vector_X1_Y1_Z1, Vector_X1_Y0_Z1, Vector_X1_Y__Z1, Vector_X0_Y__Z1, Vector_X__Y__Z1, Vector_X__Y0_Z1, Vector_X__Y1_Z1,
 	Vector_X0_Y0_Z_, Vector_X0_Y1_Z_, Vector_X1_Y1_Z_, Vector_X1_Y0_Z_, Vector_X1_Y__Z_, Vector_X0_Y__Z_, Vector_X__Y__Z_, Vector_X__Y0_Z_, Vector_X__Y1_Z_}
 
-// 取方向对应的矢量定义
+// GetDirVector 取方向对应的矢量定义
 func GetDirVector(dir Direction) DirectionVector {
 	return vectors[dir]
 }
