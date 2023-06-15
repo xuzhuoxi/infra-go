@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-26.
-//@author xuzhuoxi
+// Package protox
+// Created by xuzhuoxi
+// on 2019-02-26.
+// @author xuzhuoxi
 //
 package protox
 
@@ -11,18 +11,24 @@ import (
 
 type IProtocolExtensionContainer interface {
 	extendx.IExtensionContainer
+	// InitExtensions
 	// 初始化全部Extension
 	InitExtensions() []error
+	// DestroyExtensions
 	// 销毁全部Extension
 	DestroyExtensions() []error
 
+	// SaveExtensions
 	// 保存
 	SaveExtensions() []error
+	// SaveExtension
 	// 保存指定
 	SaveExtension(name string) error
 
+	// EnableExtensions
 	// 设置启用全部Extension
 	EnableExtensions(enable bool) []error
+	// EnableExtension
 	// 设置启用Extension
 	EnableExtension(name string, enable bool) error
 }

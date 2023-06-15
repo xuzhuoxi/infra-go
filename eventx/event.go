@@ -2,13 +2,15 @@ package eventx
 
 import "reflect"
 
-//监听事件的回调
+// EventCall
+// 监听事件的回调
 type EventCall func(evd *EventData)
 
 func (c EventCall) Equal(c1 EventCall) bool {
 	return &c == &c1 || reflect.ValueOf(c).Pointer() == reflect.ValueOf(c1).Pointer()
 }
 
+// EventData
 // 事件数据
 // @author xuzhuoxi
 // Created  on 2019/01/08.
@@ -28,60 +30,53 @@ type EventData struct {
 	stopped bool
 }
 
-/**
- * 是否设置为停止
- * @returns {bool}
- */
+// Stopped
+// 是否设置为停止
+// @returns {bool}
 func (ed *EventData) Stopped() bool {
 	return ed.stopped
 }
 
-/**
- * 防止对事件流中当前节点中和所有后续节点中的事件侦听器进行处理
- */
+// StopImmediatePropagation
+// 防止对事件流中当前节点中和所有后续节点中的事件侦听器进行处理
 func (ed *EventData) StopImmediatePropagation() {
 	ed.stopped = true
 }
 
+// NewEventDispatcher
 // 创建一个EventDispatcher
 func NewEventDispatcher() *EventDispatcher {
 	return &EventDispatcher{}
 }
 
 type IEventDispatcher interface {
-	/**
-	* 添加事件
-	* @param eventType 事件类型
-	* @param func 监听函数
-	 */
+	// AddEventListener
+	// 添加事件
+	// @param eventType 事件类型
+	// @param func 监听函数
 	AddEventListener(eventType string, call EventCall)
-	/**
-	 * 添加单次执行事件
-	 * @param eventType
-	 * @param func
-	 */
+	// OnceEventListener
+	// 添加单次执行事件
+	// @param eventType
+	// @param func
 	OnceEventListener(eventType string, call EventCall)
-	/**
-	 * 删除事件
-	 * @param eventType 事件类型
-	 * @param func 监听函数
-	 */
+	// RemoveEventListener
+	// 删除事件
+	// @param eventType 事件类型
+	// @param func 监听函数
 	RemoveEventListener(eventType string, call EventCall)
-	/**
-	 * 删除一类事件
-	 * @param eventType 事件类型
-	 */
+	// RemoveEventListenerByType
+	// 删除一类事件
+	// @param eventType 事件类型
 	RemoveEventListenerByType(eventType string)
-	/**
-	 * 清除全部事件
-	 */
+	// RemoveEventListeners
+	// 清除全部事件
 	RemoveEventListeners()
-	/**
-	 * 触发某一类型的事件  并传递数据
-	 * @param eventType 事件类型
-	 * @param currentTarget 当前对象
-	 * @param data 事件的数据(可为null)
-	 */
+	// DispatchEvent
+	// 触发某一类型的事件  并传递数据
+	// @param eventType 事件类型
+	// @param currentTarget 当前对象
+	// @param data 事件的数据(可为null)
 	DispatchEvent(eventType string, currentTarget interface{}, data interface{})
 }
 

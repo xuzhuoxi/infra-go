@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-19.
-//@author xuzhuoxi
+// Package protox
+// Created by xuzhuoxi
+// on 2019-05-19.
+// @author xuzhuoxi
 //
 package protox
 
@@ -14,23 +14,25 @@ var (
 	DefaultResponsePool = NewPoolExtensionResponse()
 )
 
+// IPoolExtensionRequest
 // 请求参数集的对象池接口
 type IPoolExtensionRequest interface {
-	// 注册创建方法
+	// Register 注册创建方法
 	Register(newFunc func() IExtensionRequest)
-	// 获取一个实例
+	// GetInstance 获取一个实例
 	GetInstance() IExtensionRequest
-	// 回收一个实例
+	// Recycle 回收一个实例
 	Recycle(instance IExtensionRequest) bool
 }
 
-//响应参数集的对象池接口
+// IPoolExtensionResponse
+// 响应参数集的对象池接口
 type IPoolExtensionResponse interface {
-	// 注册创建方法
+	// Register 注册创建方法
 	Register(newFunc func() IExtensionResponse)
-	// 获取一个实例
+	// GetInstance 获取一个实例
 	GetInstance() IExtensionResponse
-	// 回收一个实例
+	// Recycle 回收一个实例
 	Recycle(instance IExtensionResponse) bool
 }
 

@@ -38,17 +38,20 @@ func (d *_EventDelegate) Handle(data *EventData) {
 	}
 }
 
-//添加监听函数
+// AddListener
+// 添加监听函数
 func (d *_EventDelegate) AddListener(call EventCall) {
 	d.calls = append(d.calls, &_CallInfo{Once: false, Call: call})
 }
 
-//添加单次监听函数
+// OnceListener
+// 添加单次监听函数
 func (d *_EventDelegate) OnceListener(call EventCall) {
 	d.calls = append(d.calls, &_CallInfo{Once: true, Call: call})
 }
 
-//删除监听函数
+// RemoveListener
+// 删除监听函数
 func (d *_EventDelegate) RemoveListener(call EventCall) {
 	for index := len(d.calls) - 1; index >= 0; index-- {
 		if d.calls[index].Call.Equal(call) {
@@ -57,7 +60,8 @@ func (d *_EventDelegate) RemoveListener(call EventCall) {
 	}
 }
 
-//删除全部监听函数
+// RemoveListeners
+// 删除全部监听函数
 func (d *_EventDelegate) RemoveListeners() {
 	d.calls = nil
 }

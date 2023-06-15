@@ -1,32 +1,42 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-17.
-//@author xuzhuoxi
+// Package extendx
+// Created by xuzhuoxi
+// on 2019-02-17.
+// @author xuzhuoxi
 //
 package extendx
 
 import "errors"
 
 type IExtensionContainer interface {
-	//增加Extension
+	// AppendExtension
+	// 增加Extension
 	AppendExtension(extension IExtension)
-	//检查
+	// CheckExtension
+	// 检查
 	CheckExtension(name string) bool
-	//取Extension
+	// GetExtension
+	// 取Extension
 	GetExtension(name string) IExtension
-	//Extension数量
+	// Len
+	// Extension数量
 	Len() int
-	//列表
+	// Extensions
+	// 列表
 	Extensions() []IExtension
-	//反向列表
+	// ExtensionsReversed
+	// 反向列表
 	ExtensionsReversed() []IExtension
-	//按列表处理
+	// Range
+	// 按列表处理
 	Range(handler func(index int, extension IExtension))
-	//按反向列表处理
+	// RangeReverse
+	// 按反向列表处理
 	RangeReverse(handler func(index int, extension IExtension))
-	//对指定Extension执行处理
+	// HandleAt
+	// 对指定Extension执行处理
 	HandleAt(index int, handler func(index int, extension IExtension)) error
-	//对指定Extension执行处理
+	// HandleAtName
+	// 对指定Extension执行处理
 	HandleAtName(name string, handler func(name string, extension IExtension)) error
 }
 

@@ -8,10 +8,11 @@ type IProtoMessageParser interface {
 type defaultProtoMessageParse struct {
 }
 
-//block0 : eName utf8
-//block1 : pid	utf8
-//block2 : uid	utf8
-//[n]其它信息
+// ParseMessage
+// block0 : eName utf8
+// block1 : pid	utf8
+// block2 : uid	utf8
+// [n]其它信息
 func (m *defaultProtoMessageParse) ParseMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte) {
 	index := 0
 	buffToData := bytex.DefaultPoolBuffToData.GetInstance()

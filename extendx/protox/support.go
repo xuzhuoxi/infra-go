@@ -1,10 +1,11 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-26.
-//@author xuzhuoxi
+// Package protox
+// Created by xuzhuoxi
+// on 2019-02-26.
+// @author xuzhuoxi
 //
 package protox
 
+// ExtensionProtoInfo
 // 协议定义
 type ExtensionProtoInfo struct {
 	ProtoId          string

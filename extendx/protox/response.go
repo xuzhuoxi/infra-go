@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-22.
-//@author xuzhuoxi
+// Package protox
+// Created by xuzhuoxi
+// on 2019-03-22.
+// @author xuzhuoxi
 //
 package protox
 
@@ -10,35 +10,43 @@ import (
 	"github.com/xuzhuoxi/infra-go/netx"
 )
 
+// IExtensionResponse
 // 响应对象参数集合接口
 type IExtensionResponse interface {
 	IExtensionHeader
 	netx.IAddressProxySetter
 	netx.ISockSenderSetter
+	// SetParamInfo
 	// 设置参数类型与处理器
 	SetParamInfo(paramType ExtensionParamType, paramHandler IProtocolParamsHandler)
 }
 
 type IExtensionBinaryResponse interface {
 	IExtensionResponse
+	// SendBinaryResponse
 	// 响应客户端(二进制参数)
 	SendBinaryResponse(data ...[]byte)
+	// SendBinaryResponseToClient
 	// 响应指定客户端(二进制参数)
 	SendBinaryResponseToClient(clientId string, data ...[]byte)
 }
 
 type IExtensionJsonResponse interface {
 	IExtensionResponse
+	// SendJsonResponse
 	// 响应客户端(Json字符串参数)
 	SendJsonResponse(data ...string)
+	// SendJsonResponseToClient
 	// 响应指定客户端(Json字符串参数)
 	SendJsonResponseToClient(clientId string, data ...string)
 }
 
 type IExtensionObjectResponse interface {
 	IExtensionResponse
+	// SendObjectResponse
 	// 响应客户端(具体结构体参数)
 	SendObjectResponse(data ...interface{})
+	// SendObjectResponseToClient
 	// 响应指定客户端(具体结构体参数)
 	SendObjectResponseToClient(clientId string, data ...interface{})
 }

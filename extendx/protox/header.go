@@ -1,20 +1,26 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-20.
-//@author xuzhuoxi
+// Package protox
+// Created by xuzhuoxi
+// on 2019-05-20.
+// @author xuzhuoxi
 //
 package protox
 
+// IExtensionHeader
 // Extension参数头接口
 type IExtensionHeader interface {
+	// ExtensionName
 	// 请求Extension名称
 	ExtensionName() string
+	// ProtoId
 	// 请求Extension中对应的协议标识
 	ProtoId() string
+	// ClientId
 	// 客户端标识
 	ClientId() string
+	// ClientAddress
 	// 客户端地址
 	ClientAddress() string
+	// SetHeader
 	// 设置参数头信息
 	SetHeader(extensionName string, protoId string, clientId string, clientAddress string)
 }

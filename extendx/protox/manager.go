@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-18.
-//@author xuzhuoxi
+// Package protox
+// Created by xuzhuoxi
+// on 2019-05-18.
+// @author xuzhuoxi
 //
 package protox
 
@@ -13,38 +13,50 @@ import (
 	"sync"
 )
 
+// IExtensionManager
 // Extension管理接口
 type IExtensionManager interface {
 	logx.ILoggerSetter
 	netx.IAddressProxySetter
 
+	// InitManager
 	// 初始化
 	// handlerContainer: 解包处理
 	// extensionContainer： 服务扩展
 	// sockSender: 消息发送器
 	InitManager(handlerContainer netx.IPackHandlerContainer, extensionContainer IProtocolExtensionContainer, sockSender netx.ISockSender)
 
+	// StartManager
 	// 开始运行
 	StartManager()
+	// StopManager
 	// 停止运行
 	StopManager()
 
+	// SaveExtension
 	// 保存指定Extension的临时数据
 	SaveExtension(name string)
+	// SaveExtensions
 	// 保存全部Extension的临时数据
 	SaveExtensions()
 
+	// EnableExtension
 	// 启用指定Extension的临时数据
 	EnableExtension(name string)
+	// EnableExtensions
 	// 启用全部Extension的临时数据
 	EnableExtensions()
+	// DisableExtension
 	// 禁用指定Extension的临时数据
 	DisableExtension(name string)
+	// DisableExtensions
 	// 禁用全部Extension的临时数据
 	DisableExtensions()
 
+	// OnMessageUnpack
 	// 消息处理入口，这里是并发方法
 	OnMessageUnpack(msgData []byte, senderAddress string, other interface{}) bool
+	// DoRequest
 	// 消息处理入口，这里是并发方法
 	DoRequest(extension IProtocolExtension, req IExtensionRequest, resp IExtensionResponse)
 }
@@ -142,6 +154,7 @@ func (m *ExtensionManager) DisableExtensions() {
 
 //---------------------------------
 
+// OnMessageUnpack
 // 消息处理入口，这里是并发方法
 // 并发注意:本方法是否并发，取决于SockServer的并发性
 // 在netx中，TCP,Quic,WebSocket为并发响应，UDP为非并发响应
@@ -165,10 +178,11 @@ func (m *ExtensionManager) OnMessageUnpack(msgData []byte, senderAddress string,
 	return true
 }
 
-//block0 : eName utf8
-//block1 : pid	utf8
-//block2 : uid	utf8
-//[n]其它信息
+// ParseMessage
+// block0 : eName utf8
+// block1 : pid	utf8
+// block2 : uid	utf8
+// [n]其它信息
 func (m *ExtensionManager) ParseMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte) {
 	if nil != m.FuncParseMessage {
 		return m.FuncParseMessage(msgBytes)
@@ -217,6 +231,7 @@ func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProto
 	return extension, true
 }
 
+// GenParams
 // 构造响应参数
 func (m *ExtensionManager) GenParams(extension IProtocolExtension, senderAddress string, name string, pid string, uid string, data [][]byte) (resp IExtensionResponse, req IExtensionRequest) {
 	t, h := extension.GetParamInfo(pid)
