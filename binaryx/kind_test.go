@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-18.
-//@author xuzhuoxi
+// Package binaryx
+// Created by xuzhuoxi
+// on 2019-03-18.
+// @author xuzhuoxi
 //
 package binaryx
 

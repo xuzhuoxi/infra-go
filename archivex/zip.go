@@ -1,3 +1,4 @@
+// Package archivex
 // Create on 2022/7/12
 // @author xuzhuoxi
 package archivex
@@ -12,11 +13,13 @@ import (
 	"os"
 )
 
+// ArchiveMultiToZipRoot
 // 把多个路径同时归档, 归档目录为根目录
 func ArchiveMultiToZipRoot(filePaths []string, archPath string) error {
 	return ArchiveMultiToZip(filePaths, archPath, "")
 }
 
+// ArchiveMultiToZip
 // 把多个路径同时归档, 并指定归档目录
 func ArchiveMultiToZip(filePaths []string, archPath string, dirHeaderName string) error {
 	if len(filePaths) == 0 {
@@ -48,17 +51,20 @@ func ArchiveMultiToZip(filePaths []string, archPath string, dirHeaderName string
 	return nil
 }
 
+// ArchiveChildrenToZip
 // 把目录内容进行归档
 func ArchiveChildrenToZip(dirPath string, archPath string) error {
 	return ArchiveToZip(dirPath, archPath, "")
 }
 
+// ArchiveToZipDefault
 // 把文件或目录归档，使用原文件名或目录名代为HeaderName
 func ArchiveToZipDefault(filePath string, archPath string) error {
 	_, headerName := filex.Split(filePath)
 	return ArchiveToZip(filePath, archPath, headerName)
 }
 
+// ArchiveToZip
 // 把文件或目录归档，并指定新的HeaderName
 // 可用于定制目录结构
 func ArchiveToZip(filePath string, archPath string, newHeaderName string) error {
@@ -79,6 +85,7 @@ func ArchiveToZip(filePath string, archPath string, newHeaderName string) error 
 	}
 }
 
+// AppendDirToZipRoot
 // 追加目录到zip文件中
 // 使用目录名作为HeaderName
 // 保持目录内容结构不变
@@ -87,6 +94,7 @@ func AppendDirToZipRoot(filePath string, zipWriter *zip.Writer) error {
 	return appendDirToZip(filePath, newHeaderName, zipWriter)
 }
 
+// AppendDirToZip
 // 追加目录到zip文件中
 // 为目录指定新的HeaderName
 // 保持目录内容结构不变
@@ -94,6 +102,7 @@ func AppendDirToZip(filePath string, newHeaderName string, zipWriter *zip.Writer
 	return appendDirToZip(filePath, newHeaderName, zipWriter)
 }
 
+// AppendChildrenToZipRoot
 // 追加目录下列表zip文件中
 // 不使用目录HeaderName
 // 保持目录内容结构不变
@@ -101,6 +110,7 @@ func AppendChildrenToZipRoot(filePath string, zipWriter *zip.Writer) error {
 	return appendChildrenToZip(filePath, "", zipWriter)
 }
 
+// AppendChildrenToZip
 // 追加目录下列表zip文件中
 // 为目录指定新的HeaderName
 // 保持目录内容结构不变
@@ -108,6 +118,7 @@ func AppendChildrenToZip(dirPath string, dirHeaderName string, zipWriter *zip.Wr
 	return appendChildrenToZip(dirPath, dirHeaderName, zipWriter)
 }
 
+// AppendFileToZipRoot
 // 追加文件到zip文件中
 // 使用文件名作为HeaderName
 func AppendFileToZipRoot(filePath string, zipWriter *zip.Writer) error {
@@ -115,6 +126,7 @@ func AppendFileToZipRoot(filePath string, zipWriter *zip.Writer) error {
 	return appendFileToZip(filePath, newHeaderName, zipWriter)
 }
 
+// AppendFileToZip
 // 追加文件到zip文件中
 // 为文件指定新的HeaderName
 func AppendFileToZip(filePath string, newHeaderName string, zipWriter *zip.Writer) error {

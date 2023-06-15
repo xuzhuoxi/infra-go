@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-19.
-//@author xuzhuoxi
+// Package binaryx
+// Created by xuzhuoxi
+// on 2019-03-19.
+// @author xuzhuoxi
 //
 package binaryx
 
@@ -18,6 +18,7 @@ func SetLangBit(bit64 bool) {
 	bit32 = !bit64
 }
 
+// ReadBool
 // 从一个Reader中读取一个bool数据
 // r: Reader
 // order: 大小端设定
@@ -27,6 +28,7 @@ func ReadBool(r io.Reader, order binary.ByteOrder) (bool, error) {
 	return rs, err
 }
 
+// ReadSliceBool
 // 从一个Reader中读取一组bool数据
 // r: Reader
 // order: 大小端设定
@@ -37,6 +39,7 @@ func ReadSliceBool(r io.Reader, order binary.ByteOrder, ln int) ([]bool, error) 
 	return rs, err
 }
 
+// ReadInt
 // 从一个Reader中读取一个Int数据, 32位则读取int32,64位则读取int64
 // r: Reader
 // order: 大小端设定
@@ -50,6 +53,7 @@ func ReadInt(r io.Reader, order binary.ByteOrder) (int, error) {
 	}
 }
 
+// ReadSliceInt
 // 从一个Reader中读取一组Int数据, 32位则读取int32,64位则读取int64
 // r: Reader
 // order: 大小端设定
@@ -71,7 +75,8 @@ func ReadSliceInt(r io.Reader, order binary.ByteOrder, ln int) ([]int, error) {
 	}
 }
 
-// 从一个Reader中读取一个Int8数据
+// ReadInt8
+//从一个Reader中读取一个Int8数据
 // r: Reader
 // order: 大小端设定
 func ReadInt8(r io.Reader, order binary.ByteOrder) (int8, error) {
@@ -80,6 +85,7 @@ func ReadInt8(r io.Reader, order binary.ByteOrder) (int8, error) {
 	return rs, err
 }
 
+// ReadSliceInt8
 // 从一个Reader中读取一组Int8数据
 // r: Reader
 // order: 大小端设定
@@ -90,7 +96,8 @@ func ReadSliceInt8(r io.Reader, order binary.ByteOrder, ln int) ([]int8, error) 
 	return rs, err
 }
 
-// 从一个Reader中读取一个Int16数据
+// ReadInt16
+//从一个Reader中读取一个Int16数据
 // r: Reader
 // order: 大小端设定
 func ReadInt16(r io.Reader, order binary.ByteOrder) (int16, error) {
@@ -99,6 +106,7 @@ func ReadInt16(r io.Reader, order binary.ByteOrder) (int16, error) {
 	return rs, err
 }
 
+// ReadSliceInt16
 // 从一个Reader中读取一组Int16数据
 // r: Reader
 // order: 大小端设定
@@ -109,6 +117,7 @@ func ReadSliceInt16(r io.Reader, order binary.ByteOrder, ln int) ([]int16, error
 	return rs, err
 }
 
+// ReadInt32
 // 从一个Reader中读取一个Int32数据
 // r: Reader
 // order: 大小端设定
@@ -118,6 +127,7 @@ func ReadInt32(r io.Reader, order binary.ByteOrder) (int32, error) {
 	return rs, err
 }
 
+// ReadSliceInt32
 // 从一个Reader中读取一组Int32数据
 // r: Reader
 // order: 大小端设定
@@ -128,6 +138,7 @@ func ReadSliceInt32(r io.Reader, order binary.ByteOrder, ln int) ([]int32, error
 	return rs, err
 }
 
+// ReadInt64
 // 从一个Reader中读取一个Int64数据
 // r: Reader
 // order: 大小端设定
@@ -137,6 +148,7 @@ func ReadInt64(r io.Reader, order binary.ByteOrder) (int64, error) {
 	return rs, err
 }
 
+// ReadSliceInt64
 // 从一个Reader中读取一组Int64数据
 // r: Reader
 // order: 大小端设定
@@ -147,6 +159,7 @@ func ReadSliceInt64(r io.Reader, order binary.ByteOrder, ln int) ([]int64, error
 	return rs, err
 }
 
+// ReadUint
 // 从一个Reader中读取一个Uint数据, 32位则读取unt32,64位则读取unt64
 // r: Reader
 // order: 大小端设定
@@ -160,6 +173,7 @@ func ReadUint(r io.Reader, order binary.ByteOrder) (uint, error) {
 	}
 }
 
+// ReadSliceUint
 // 从一个Reader中读取一组Uint数据, 32位则读取unt32,64位则读取unt64
 // r: Reader
 // order: 大小端设定
@@ -181,6 +195,7 @@ func ReadSliceUint(r io.Reader, order binary.ByteOrder, ln int) ([]uint, error) 
 	}
 }
 
+// ReadUint8
 // 从一个Reader中读取一个Uint8数据
 // r: Reader
 // order: 大小端设定
@@ -190,6 +205,7 @@ func ReadUint8(r io.Reader, order binary.ByteOrder) (uint8, error) {
 	return rs, err
 }
 
+// ReadSliceUint8
 // 从一个Reader中读取一组Uint8数据
 // r: Reader
 // order: 大小端设定
@@ -200,6 +216,7 @@ func ReadSliceUint8(r io.Reader, order binary.ByteOrder, ln int) ([]uint8, error
 	return rs, err
 }
 
+// ReadUint16
 // 从一个Reader中读取一个Uint16数据
 // r: Reader
 // order: 大小端设定
@@ -209,7 +226,8 @@ func ReadUint16(r io.Reader, order binary.ByteOrder) (uint16, error) {
 	return rs, err
 }
 
-// 从一个Reader中读取一组Uint16数据
+// ReadSliceUint16
+//从一个Reader中读取一组Uint16数据
 // r: Reader
 // order: 大小端设定
 // ln: 数据长度
@@ -219,7 +237,8 @@ func ReadSliceUint16(r io.Reader, order binary.ByteOrder, ln int) ([]uint16, err
 	return rs, err
 }
 
-// 从一个Reader中读取一个Uint32数据
+// ReadUint32
+//从一个Reader中读取一个Uint32数据
 // r: Reader
 // order: 大小端设定
 func ReadUint32(r io.Reader, order binary.ByteOrder) (uint32, error) {
@@ -228,6 +247,7 @@ func ReadUint32(r io.Reader, order binary.ByteOrder) (uint32, error) {
 	return rs, err
 }
 
+// ReadSliceUint32
 // 从一个Reader中读取一组Uint32数据
 // r: Reader
 // order: 大小端设定
@@ -238,6 +258,7 @@ func ReadSliceUint32(r io.Reader, order binary.ByteOrder, ln int) ([]uint32, err
 	return rs, err
 }
 
+// ReadUint64
 // 从一个Reader中读取一个Uint64数据
 // r: Reader
 // order: 大小端设定
@@ -247,6 +268,7 @@ func ReadUint64(r io.Reader, order binary.ByteOrder) (uint64, error) {
 	return rs, err
 }
 
+// ReadSliceUint64
 // 从一个Reader中读取一组Uint64数据
 // r: Reader
 // order: 大小端设定
@@ -257,6 +279,7 @@ func ReadSliceUint64(r io.Reader, order binary.ByteOrder, ln int) ([]uint64, err
 	return rs, err
 }
 
+// ReadFloat32
 // 从一个Reader中读取一个Float32数据
 // r: Reader
 // order: 大小端设定
@@ -266,6 +289,7 @@ func ReadFloat32(r io.Reader, order binary.ByteOrder) (float32, error) {
 	return rs, err
 }
 
+// ReadSliceFloat32
 // 从一个Reader中读取一组Float32数据
 // r: Reader
 // order: 大小端设定
@@ -276,6 +300,7 @@ func ReadSliceFloat32(r io.Reader, order binary.ByteOrder, ln int) ([]float32, e
 	return rs, err
 }
 
+// ReadFloat64
 // 从一个Reader中读取一个Float64数据
 // r: Reader
 // order: 大小端设定
@@ -285,6 +310,7 @@ func ReadFloat64(r io.Reader, order binary.ByteOrder) (float64, error) {
 	return rs, err
 }
 
+// ReadSliceFloat64
 // 从一个Reader中读取一组Float64数据
 // r: Reader
 // order: 大小端设定
@@ -295,6 +321,7 @@ func ReadSliceFloat64(r io.Reader, order binary.ByteOrder, ln int) ([]float64, e
 	return rs, err
 }
 
+// ReadComplex64
 // 从一个Reader中读取一个Complex64数据
 // r: Reader
 // order: 大小端设定
@@ -304,6 +331,7 @@ func ReadComplex64(r io.Reader, order binary.ByteOrder) (complex64, error) {
 	return rs, err
 }
 
+// ReadSliceComplex64
 // 从一个Reader中读取一组Complex64数据
 // r: Reader
 // order: 大小端设定
@@ -314,6 +342,7 @@ func ReadSliceComplex64(r io.Reader, order binary.ByteOrder, ln int) ([]complex6
 	return rs, err
 }
 
+// ReadComplex128
 // 从一个Reader中读取一个Complex128数据
 // r: Reader
 // order: 大小端设定
@@ -323,6 +352,7 @@ func ReadComplex128(r io.Reader, order binary.ByteOrder) (complex128, error) {
 	return rs, err
 }
 
+// ReadSliceComplex128
 // 从一个Reader中读取一组Complex128数据
 // r: Reader
 // order: 大小端设定
@@ -333,6 +363,7 @@ func ReadSliceComplex128(r io.Reader, order binary.ByteOrder, ln int) ([]complex
 	return rs, err
 }
 
+// ReadString
 // 从一个Reader中读取一个string数据
 // r: Reader
 // order: 大小端设定
@@ -349,7 +380,8 @@ func ReadString(r io.Reader, order binary.ByteOrder) (string, error) {
 	return string(bs), nil
 }
 
-// 从一个Reader中读取一组string数据
+// ReadSliceString
+//从一个Reader中读取一组string数据
 // r: Reader
 // order: 大小端设定
 // ln: 数据长度
@@ -365,6 +397,7 @@ func ReadSliceString(r io.Reader, order binary.ByteOrder, ln int) ([]string, err
 	return rs, nil
 }
 
+// Read
 // 从Reader中读取数据，
 // 目前data支持的类型为*bool,*int,*int8,*int16,*int32,*int64,*uint,*uint8,*uint16,*uint32,*uint64,*float32,*float64,*complex64,*complex128,*string
 func Read(r io.Reader, order binary.ByteOrder, data interface{}) (err error) {
@@ -413,6 +446,7 @@ func Read(r io.Reader, order binary.ByteOrder, data interface{}) (err error) {
 	return binary.Read(r, order, data)
 }
 
+// ReadSlice
 // 从Reader中读取数据，
 // 目前data支持的类型为*[]bool,*[]int,*[]int8,*[]int16,*[]int32,*[]int64,*[]uint,*[]uint8,*[]uint16,*[]uint32,*[]uint64,*[]float32,*[]float64,*[]complex64,*[]complex128,*[]string
 func ReadSlice(r io.Reader, order binary.ByteOrder, data interface{}, ln int) (err error) {
@@ -461,6 +495,7 @@ func ReadSlice(r io.Reader, order binary.ByteOrder, data interface{}, ln int) (e
 	return binary.Read(r, order, data)
 }
 
+// WriteString
 // 向Writer中写入一个string数据
 // 格式：[长度+数据]
 // 长度格式默认为uint16
@@ -478,6 +513,7 @@ func WriteString(w io.Writer, order binary.ByteOrder, str string) error {
 	return nil
 }
 
+// WriteSliceString
 // 向Writer中写入一组string数据[长度+数据]
 // 格式：长度 + [长度+数据]...
 // 长度格式默认为uint16
@@ -494,6 +530,7 @@ func WriteSliceString(w io.Writer, order binary.ByteOrder, str []string) error {
 	return nil
 }
 
+// Write
 // 向Writer中写入一个数据
 // 目前data支持的类型为bool,int,int8,int16,int32,int64,uint,uint8,uint16,uint32,uint64,float32,float64,complex64,complex128,string及相应指针类型
 // int,uint类型会根据bit32值进行选择为int32,int64,uint32,uint64中一个
@@ -522,6 +559,7 @@ func Write(w io.Writer, order binary.ByteOrder, data interface{}) error {
 	}
 }
 
+// WriteSlice
 // 向Writer中写入一组数据
 // 目前data支持的类型为[]bool,[]int,[]int8,[]int16,[]int32,[]int64,[]uint,[]uint8,[]uint16,[]uint32,[]uint64,[]float32,[]float64,[]complex64,[]complex128,[]string及相应指针类型
 // int,uint类型会根据bit32值进行选择为int32,int64,uint32,uint64中一个
@@ -568,6 +606,7 @@ func WriteSlice(w io.Writer, order binary.ByteOrder, data interface{}) error {
 
 //-------------------------------------
 
+// ReadLen
 // 从Reader中读取一个长度数据
 // 按uint16格式读取，强制转换为int值返回
 // r: Reader
@@ -580,6 +619,7 @@ func ReadLen(r io.Reader, order binary.ByteOrder) (int, error) {
 	return int(ln), nil
 }
 
+// ReadLenTo
 // 从Reader中读取一个长度数据
 // r: Reader
 // order: 大小端设定
@@ -594,7 +634,8 @@ func ReadLenTo(r io.Reader, order binary.ByteOrder, ln interface{}) error {
 	return errors.New("ln type error! ")
 }
 
-// 把长度写入到Writer中
+// WriteLen
+//把长度写入到Writer中
 // w: Writer
 // order: 大小端设定
 // ln: 长度值，按uint16写入
@@ -602,6 +643,7 @@ func WriteLen(w io.Writer, order binary.ByteOrder, ln int) error {
 	return binary.Write(w, order, uint16(ln))
 }
 
+// WriteLenTo
 // 把长度写入到Writer中
 // w: Writer
 // order: 大小端设定

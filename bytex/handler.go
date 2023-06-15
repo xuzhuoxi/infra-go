@@ -5,10 +5,10 @@ import (
 	"errors"
 )
 
-// 字节数组处理类型
+// BytesHandlerType 字节数组处理类型
 type BytesHandlerType int
 
-// 字节数组处理函数
+// BytesHandler 字节数组处理函数
 type BytesHandler func(in []byte) (out []byte, err error)
 
 const (
@@ -37,15 +37,20 @@ var (
 
 var t2handler = make([]BytesHandler, 128, 128)
 
+// IBytesProcessor
 // 字节数组处理器
 type IBytesProcessor interface {
+	// AppendHandler
 	// 追加处理函数
 	AppendHandler(process BytesHandler)
+	// AppendHandlerType
 	// 追加处理类型
 	AppendHandlerType(t BytesHandlerType) error
+	// ClearHandlers
 	// 清除全部处理
 	ClearHandlers()
 
+	// Handle
 	// 数据处理
 	Handle(in []byte) (out []byte, errIdx int, err error)
 }

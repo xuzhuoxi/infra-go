@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-11.
-//@author xuzhuoxi
+// Package bytex
+// Created by xuzhuoxi
+// on 2019-02-11.
+// @author xuzhuoxi
 //
 package bytex
 
@@ -16,48 +16,59 @@ import (
 
 type IBuffByteReader interface {
 	io.Reader
-	//缓冲中全部字节
+	// Bytes
+	// 缓冲中全部字节
 	Bytes() []byte
-	//读取缓冲中全部字节
-	//非数据安全
+	// ReadBytes
+	// 读取缓冲中全部字节
+	// 非数据安全
 	ReadBytes() []byte
-	//读取缓冲中全部字节，并写入到dst中
+	// ReadBytesTo 读取缓冲中全部字节，并写入到dst中
 	ReadBytesTo(dst []byte) (n int, rs []byte)
-	//读取缓冲中全部字节
-	//数据安全
+	// ReadBytesCopy
+	// 读取缓冲中全部字节
+	// 数据安全
 	ReadBytesCopy() []byte
-	//读取一个二进制数据到out
-	//out只支持binary.Write中支持的类型
+	// ReadBinary
+	// 读取一个二进制数据到out
+	// out只支持binary.Write中支持的类型
 	ReadBinary(out interface{})
 }
 
 type IBuffByteWriter interface {
 	io.Writer
-	//把字节写入缓冲
+	// WriteBytes
+	// 把字节写入缓冲
 	WriteBytes(bytes []byte)
-	//把in写入数据
+	// WriteBinary
+	// 把in写入数据
 	WriteBinary(in interface{})
 }
 
 type IBuffDataReader interface {
-	//读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
-	//非数据安全
+	// ReadData
+	// 读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
+	// 非数据安全
 	ReadData() []byte
-	//读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
-	//如果不是nil,把数据写入到dst中，返回dst写入的数据长度
+	// ReadDataTo
+	// 读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
+	// 如果不是nil,把数据写入到dst中，返回dst写入的数据长度
 	ReadDataTo(dst []byte) (n int, rs []byte)
-	//读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
-	//数据安全
+	// ReadDataCopy
+	// 读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
+	// 数据安全
 	ReadDataCopy() []byte
 }
 
 type IBuffDataWriter interface {
-	//把数据包装为一个Block,写入到缓冲中，数据长度为0时不进行处理
+	// WriteData
+	// 把数据包装为一个Block,写入到缓冲中，数据长度为0时不进行处理
 	WriteData(bytes []byte)
 }
 
 type IBuffReset interface {
-	//清空缓冲区
+	// Reset
+	// 清空缓冲区
 	Reset()
 }
 
@@ -150,8 +161,9 @@ func (b *buffDataBlock) Bytes() []byte {
 	return b.buff.Bytes()
 }
 
-//返回：buff缓存中的切片
-//安全：共享数据，非安全，如果要保存使用，请先进行复制
+// ReadBytes
+// 返回：buff缓存中的切片
+// 安全：共享数据，非安全，如果要保存使用，请先进行复制
 func (b *buffDataBlock) ReadBytes() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -170,8 +182,9 @@ func (b *buffDataBlock) ReadBytesTo(dst []byte) (n int, rs []byte) {
 	return
 }
 
-//返回：buff缓存中的切片的克隆
-//触发Reset
+// ReadBytesCopy
+// 返回：buff缓存中的切片的克隆
+// 触发Reset
 func (b *buffDataBlock) ReadBytesCopy() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -223,8 +236,9 @@ func (b *buffDataBlock) Len() int {
 	return b.buff.Len()
 }
 
-//把数据编码为[]byte
-//注意：数据安全性视handler行为而定，如果返回的是共享切片，应该马上处理
+// ReadData
+// 把数据编码为[]byte
+// 注意：数据安全性视handler行为而定，如果返回的是共享切片，应该马上处理
 func (b *buffDataBlock) ReadData() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()

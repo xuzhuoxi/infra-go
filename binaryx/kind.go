@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-18.
-//@author xuzhuoxi
+// Package binaryx
+// Created by xuzhuoxi
+// on 2019-03-18.
+// @author xuzhuoxi
 //
 package binaryx
 
@@ -53,22 +53,26 @@ const (
 	KindSliceString
 )
 
+// IsForbidKind
 // 判断是否为不可用的类型
 func IsForbidKind(kind ValueKind) bool {
 	return kind == KindNone || kind == KindSliceNone
 }
 
+// IsSimpleKind
 // 判断是否为简单类型
 func IsSimpleKind(kind ValueKind) bool {
 	return kind > KindNone && kind < KindSliceNone
 }
 
+// IsSliceKind
 // 判断是否为简单数组类型
 func IsSliceKind(kind ValueKind) bool {
 	return kind > KindSliceNone
 }
 
-//取定义的默认值
+// GetKindValue
+// 取定义的默认值
 func GetKindValue(kind ValueKind, ln int) interface{} {
 	if value := getKindValue(kind, ln); nil != value {
 		return value
@@ -76,13 +80,15 @@ func GetKindValue(kind ValueKind, ln int) interface{} {
 	panic("No ValueKind Define:" + strconv.Itoa(int(kind)))
 }
 
-//检查值是为合法
+// CheckValue
+// 检查值是为合法
 func CheckValue(value interface{}) bool {
 	kind, _ := getValueKind(value)
 	return kind != KindNone
 }
 
-//取值对应的定义
+// GetValueKind
+// 取值对应的定义
 func GetValueKind(value interface{}) (ValueKind, int) {
 	return getValueKind(value)
 }

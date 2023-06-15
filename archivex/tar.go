@@ -1,3 +1,4 @@
+// Package archivex
 // Create on 2022/7/12
 // @author xuzhuoxi
 package archivex
@@ -12,11 +13,13 @@ import (
 	"os"
 )
 
+// ArchiveMultiToTarRoot
 // 把多个路径同时归档, 归档目录为根目录
 func ArchiveMultiToTarRoot(filePaths []string, archPath string) error {
 	return ArchiveMultiToTar(filePaths, archPath, "")
 }
 
+// ArchiveMultiToTar
 // 把多个路径同时归档, 并指定归档目录
 func ArchiveMultiToTar(filePaths []string, archPath string, dirHeaderName string) error {
 	if len(filePaths) == 0 {
@@ -48,17 +51,20 @@ func ArchiveMultiToTar(filePaths []string, archPath string, dirHeaderName string
 	return nil
 }
 
+// ArchiveChildrenToTar
 // 把目录内容进行归档
 func ArchiveChildrenToTar(dirPath string, archPath string) error {
 	return ArchiveToTar(dirPath, archPath, "")
 }
 
+// ArchiveToTarDefault
 // 把文件或目录归档，使用原文件名或目录名代为HeaderName
 func ArchiveToTarDefault(filePath string, archPath string) error {
 	_, headerName := filex.Split(filePath)
 	return ArchiveToTar(filePath, archPath, headerName)
 }
 
+// ArchiveToTar
 // 把文件或目录归档，并指定新的HeaderName
 // 可用于定制目录结构
 func ArchiveToTar(filePath string, archPath string, newHeaderName string) error {
@@ -79,6 +85,7 @@ func ArchiveToTar(filePath string, archPath string, newHeaderName string) error 
 	}
 }
 
+// AppendDirToTarRoot
 // 追加目录到tar文件中
 // 使用目录名作为HeaderName
 // 保持目录内容结构不变
@@ -87,6 +94,7 @@ func AppendDirToTarRoot(filePath string, tarWriter *tar.Writer) error {
 	return appendDirToTar(filePath, newHeaderName, tarWriter)
 }
 
+// AppendDirToTar
 // 追加目录到tar文件中
 // 为目录指定新的HeaderName
 // 保持目录内容结构不变
@@ -94,6 +102,7 @@ func AppendDirToTar(filePath string, newHeaderName string, tarWriter *tar.Writer
 	return appendDirToTar(filePath, newHeaderName, tarWriter)
 }
 
+// AppendChildrenToTarRoot
 // 追加目录下列表tar文件中
 // 不使用目录HeaderName
 // 保持目录内容结构不变
@@ -101,6 +110,7 @@ func AppendChildrenToTarRoot(filePath string, tarWriter *tar.Writer) error {
 	return appendChildrenToTar(filePath, "", tarWriter)
 }
 
+// AppendChildrenToTar
 // 追加目录下列表tar文件中
 // 为目录指定新的HeaderName
 // 保持目录内容结构不变
@@ -108,6 +118,7 @@ func AppendChildrenToTar(dirPath string, dirHeaderName string, tarWriter *tar.Wr
 	return appendChildrenToTar(dirPath, dirHeaderName, tarWriter)
 }
 
+// AppendFileToTarRoot
 // 追加文件到tar文件中
 // 使用文件名作为HeaderName
 func AppendFileToTarRoot(filePath string, tarWriter *tar.Writer) error {
@@ -115,6 +126,7 @@ func AppendFileToTarRoot(filePath string, tarWriter *tar.Writer) error {
 	return appendFileToTar(filePath, newHeaderName, tarWriter)
 }
 
+// AppendFileToTar
 // 追加文件到tar文件中
 // 为文件指定新的HeaderName
 func AppendFileToTar(filePath string, newHeaderName string, tarWriter *tar.Writer) error {

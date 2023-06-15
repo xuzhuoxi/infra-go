@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-12.
-//@author xuzhuoxi
+// Package bytex
+// Created by xuzhuoxi
+// on 2019-02-12.
+// @author xuzhuoxi
 //
 package bytex
 
