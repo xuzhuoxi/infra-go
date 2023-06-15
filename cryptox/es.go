@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-03.
-//@author xuzhuoxi
+// Package cryptox
+// Created by xuzhuoxi
+// on 2019-02-03.
+// @author xuzhuoxi
 //
 package cryptox
 
@@ -11,10 +11,11 @@ import (
 	"crypto/des"
 )
 
-//DES：Data Encrytion Standard（数据加密标准），对应算法是DEA
-//特点：1. 对称加密 2. 同一个SK
-//AES：Advanced Encrytion Standard（高级加密标准），对应算法Rijndael
-//特点：1. 对称加密 2. 一个SK扩展成多个子SK，多轮加密
+// IESCipher
+// DES：Data Encrytion Standard（数据加密标准），对应算法是DEA
+// 特点：1. 对称加密 2. 同一个SK
+// AES：Advanced Encrytion Standard（高级加密标准），对应算法Rijndael
+// 特点：1. 对称加密 2. 一个SK扩展成多个子SK，多轮加密
 type IESCipher interface {
 	Encrypt(origData []byte) ([]byte, error)
 	Decrypt(crypted []byte) ([]byte, error)

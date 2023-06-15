@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-03.
-//@author xuzhuoxi
+// Package cryptox
+// Created by xuzhuoxi
+// on 2019-02-03.
+// @author xuzhuoxi
 //
 package cryptox
 
@@ -18,30 +18,32 @@ import (
 type IRSAPublicCipher interface {
 	PublicKey() *rsa.PublicKey
 	Encrypt(origData []byte) ([]byte, error)
-	//hash支持如下:
-	//crypto.MD5
-	//crypto.SHA1
-	//crypto.SHA224
-	//crypto.SHA256
-	//crypto.SHA384
-	//crypto.SHA512
-	//crypto.MD5SHA1
-	//crypto.RIPEMD160
+	// VerySign
+	// hash支持如下:
+	// crypto.MD5
+	// crypto.SHA1
+	// crypto.SHA224
+	// crypto.SHA256
+	// crypto.SHA384
+	// crypto.SHA512
+	// crypto.MD5SHA1
+	// crypto.RIPEMD160
 	VerySign(origData, signData []byte, hash crypto.Hash) error
 }
 
 type IRSAPrivateCipher interface {
 	PrivateKey() *rsa.PrivateKey
 	Decrypt(crypted []byte) ([]byte, error)
-	//hash支持如下:
-	//crypto.MD5
-	//crypto.SHA1
-	//crypto.SHA224
-	//crypto.SHA256
-	//crypto.SHA384
-	//crypto.SHA512
-	//crypto.MD5SHA1
-	//crypto.RIPEMD160
+	// Sign
+	// hash支持如下:
+	// crypto.MD5
+	// crypto.SHA1
+	// crypto.SHA224
+	// crypto.SHA256
+	// crypto.SHA384
+	// crypto.SHA512
+	// crypto.MD5SHA1
+	// crypto.RIPEMD160
 	Sign(origData []byte, hash crypto.Hash) ([]byte, error)
 }
 
@@ -75,7 +77,8 @@ func (b *rsaBase) PrivateKey() *rsa.PrivateKey {
 	return b.privateKey
 }
 
-//加密
+// Encrypt
+// 加密
 func (b *rsaBase) Encrypt(origData []byte) ([]byte, error) {
 	if len(origData) < b.encryptPartLen {
 		return rsa.EncryptPKCS1v15(rand.Reader, b.publicKey, origData)
@@ -92,7 +95,8 @@ func (b *rsaBase) Encrypt(origData []byte) ([]byte, error) {
 	return buff.Bytes(), nil
 }
 
-//解密
+// Decrypt
+// 解密
 func (b *rsaBase) Decrypt(crypted []byte) ([]byte, error) {
 	if len(crypted) < b.decryptPartLen {
 		return rsa.EncryptPKCS1v15(rand.Reader, b.publicKey, crypted)
@@ -109,14 +113,16 @@ func (b *rsaBase) Decrypt(crypted []byte) ([]byte, error) {
 	return buff.Bytes(), nil
 }
 
-//签名
+// Sign
+// 签名
 func (b *rsaBase) Sign(origData []byte, hash crypto.Hash) ([]byte, error) {
 	hashed := Hash(hash, origData)
 	signature, err := rsa.SignPKCS1v15(rand.Reader, b.privateKey, hash, hashed)
 	return signature, err
 }
 
-//验签
+// VerySign
+// 验签
 func (b *rsaBase) VerySign(origData, signData []byte, hash crypto.Hash) error {
 	hashed := Hash(hash, origData)
 	return rsa.VerifyPKCS1v15(b.publicKey, hash, hashed, signData)

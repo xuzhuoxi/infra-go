@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-04.
-//@author xuzhuoxi
+// Package cryptox
+// Created by xuzhuoxi
+// on 2019-02-04.
+// @author xuzhuoxi
 //
 package cryptox
 
@@ -15,7 +15,7 @@ import (
 	"os"
 )
 
-//解释Key-------------------------------
+// 解释Key-------------------------------
 
 func ParseRSAPublicKey(pemPublicKey []byte) (*rsa.PublicKey, error) {
 	//解密pem格式的公钥
@@ -76,7 +76,8 @@ func RSAPrivatePkcs8ToPkcs1(pkcs8PemFileData []byte) ([]byte, error) {
 
 //生成Key----------------------------
 
-//bits:密钥长度
+// GenRSAKey
+// bits:密钥长度
 func GenRSAKey(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if nil != err {

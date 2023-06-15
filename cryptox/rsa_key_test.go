@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-05.
-//@author xuzhuoxi
+// Package cryptox
+// Created by xuzhuoxi
+// on 2019-02-05.
+// @author xuzhuoxi
 //
 package cryptox
 

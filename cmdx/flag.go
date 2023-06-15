@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-06-07.
-//@author xuzhuoxi
+// Package cmdx
+// Created by xuzhuoxi
+// on 2019-06-07.
+// @author xuzhuoxi
 //
 package cmdx
 
@@ -32,6 +32,7 @@ type FlagSetExtend struct {
 	errorHandling flag.ErrorHandling
 }
 
+// Parse
 // 只有预定义了参数才能使用
 func (fs *FlagSetExtend) Parse(arguments []string) error {
 	if fs.FlagSet.Parsed() {
