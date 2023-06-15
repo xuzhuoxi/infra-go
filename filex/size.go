@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 )
 
+// GetSize
 // 取文件或文件夹大小
 func GetSize(path string) (uint64, error) {
 	fi, err := os.Stat(path)
@@ -18,6 +19,7 @@ func GetSize(path string) (uint64, error) {
 	}
 }
 
+// GetFileSize
 // 取文件大小
 func GetFileSize(filePath string) (uint64, error) {
 	fi, err := os.Stat(filePath)
@@ -30,6 +32,7 @@ func GetFileSize(filePath string) (uint64, error) {
 	return uint64(fi.Size()), nil
 }
 
+// GetFolderSize
 // 取文件夹大小，递归全部文件的大小之和
 func GetFolderSize(dirPath string) (size uint64, err error) {
 	filepath.Walk(dirPath, func(path string, info os.FileInfo, err1 error) error {

@@ -21,12 +21,12 @@ const (
 	WindowsSeparatorStr = "\\" // Windows路径级分隔符
 )
 
-// 检查路径是否为相对路径格式
+// IsRelativeFormat 检查路径是否为相对路径格式
 func IsRelativeFormat(path string) bool {
 	return !IsAbsFormat(path)
 }
 
-// 检查路径是否为绝对路径格式
+// IsAbsFormat 检查路径是否为绝对路径格式
 func IsAbsFormat(path string) bool {
 	if strings.Contains(path, ":") {
 		return true
@@ -37,24 +37,24 @@ func IsAbsFormat(path string) bool {
 	return IsUnixAbs(path) || IsWinAbs(path)
 }
 
-// 检查路径是否为Unix绝对路径格式
+// IsUnixAbs 检查路径是否为Unix绝对路径格式
 func IsUnixAbs(path string) bool {
 	return isUnixAbs(path)
 }
 
-// 检查路径是否为Windows绝对路径格式
+// IsWinAbs 检查路径是否为Windows绝对路径格式
 func IsWinAbs(path string) bool {
 	return isWinAbs(path)
 }
 
-//检查路径是否存在
+// IsExist 检查路径是否存在
 func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil || os.IsExist(err)
 	//return err == nil || errors.Is(err, os.ErrExist)
 }
 
-//是否为文件
+// IsFile 是否为文件
 func IsFile(path string) bool {
 	fi, err := os.Stat(path)
 	if nil != err && !os.IsExist(err) {
@@ -63,7 +63,7 @@ func IsFile(path string) bool {
 	return !fi.IsDir()
 }
 
-//是否为文件夹
+// IsDir 是否为文件夹
 func IsDir(path string) bool {
 	fi, err := os.Stat(path)
 	if nil != err && !os.IsExist(err) {
@@ -72,12 +72,12 @@ func IsDir(path string) bool {
 	return fi.IsDir()
 }
 
-//是否为文件夹
+// IsFolder 是否为文件夹
 func IsFolder(path string) bool {
 	return IsDir(path)
 }
 
-//是否为空文件夹
+// IsEmptyDir 是否为空文件夹
 func IsEmptyDir(path string) bool {
 	fi, err := os.Stat(path)
 	if nil != err && !os.IsExist(err) {
@@ -94,12 +94,12 @@ func IsEmptyDir(path string) bool {
 	return len(list) == 0
 }
 
-//是否为空文件夹
+// IsEmptyFolder 是否为空文件夹
 func IsEmptyFolder(path string) bool {
 	return IsEmptyDir(path)
 }
 
-// 根据文件路径补全缺失父目录路径
+// CompleteParentPath 根据文件路径补全缺失父目录路径
 // filePath必须绝对路径
 func CompleteParentPath(filePathStr string, perm os.FileMode) error {
 	dstUpDir, err := GetUpDir(filePathStr)
@@ -110,13 +110,14 @@ func CompleteParentPath(filePathStr string, perm os.FileMode) error {
 	return CompleteDir(dstUpDir, perm)
 }
 
-// 补全缺失目录路径
+// CompleteDir 补全缺失目录路径
 func CompleteDir(dirPath string, perm os.FileMode) error {
 	return os.MkdirAll(dirPath, perm)
 }
 
 //Folder Func ------------------------------------
 
+// WalkInDir
 // 遍历指定目录
 // 只对dir下一级文件或目录执行walkFn
 // 返回的path已使用FormatPath处理
@@ -137,6 +138,7 @@ func WalkInDir(dir string, walkFn filepath.WalkFunc) error {
 	return nil
 }
 
+// WalkAll
 // 遍历,包含自身与子目录的全部
 // 返回的path已使用FormatPath处理
 // 注意：在Walk过程中 不可以 对dir目录(包括子目录)中的文件进行增删
@@ -147,6 +149,7 @@ func WalkAll(path string, walkFn filepath.WalkFunc) error {
 	})
 }
 
+// WalkAllFiles
 // 遍历文件,包含自身与子目录文件
 // 返回的path已使用FormatPath处理
 // 注意：在Walk过程中 不可以 对dir目录(包括子目录)中的文件进行增删
@@ -160,6 +163,7 @@ func WalkAllFiles(path string, walkFn filepath.WalkFunc) error {
 	})
 }
 
+// WalkAllDirs
 // 遍历文件夹,包含自身与子目录
 // 返回的path已使用FormatPath处理
 // 注意：在Walk过程中 不可以 对dir目录(包括子目录)中的文件进行增删
@@ -173,6 +177,7 @@ func WalkAllDirs(path string, walkFn filepath.WalkFunc) error {
 	})
 }
 
+// GetPathsAll
 // 遍历并根据筛选器获取全部路径(递归)
 // 当filter=nil时，默认为命中
 // 路径已进行FormatPath处理
@@ -189,6 +194,7 @@ func GetPathsAll(dir string, filter PathFilter) (paths []string, err error) {
 	return
 }
 
+// GetPathsInDir
 // 遍历指定目录，并根据筛选器获取全部路径
 // 当filter=nil时，默认为命中
 // 不对子目录内容与当前目录进行筛选
@@ -215,8 +221,9 @@ func GetPathsInDir(dir string, filter PathFilter) (paths []string, err error) {
 	return paths, nil
 }
 
-//File Func ------------------------------------
+//FilePath Func ------------------------------------
 
+// Combine
 // 合并路径
 // 不检测有效性
 func Combine(dir string, add string, subs ...string) string {
@@ -252,6 +259,7 @@ func combine(dir string, add string) string {
 	return dir + UnixSeparatorStr + add
 }
 
+// GetShortName
 // 取不包含扩展名的部分的文件名
 // 不检查存在性
 // 如果目录名字包含".",同样只截取"."前部分
@@ -260,6 +268,7 @@ func GetShortName(path string) string {
 	return shortName
 }
 
+// CheckExt
 // 检查文件名的扩展名, 支持带"."
 func CheckExt(path string, extName string) bool {
 	if "" == extName || "." == extName {
@@ -273,18 +282,21 @@ func CheckExt(path string, extName string) bool {
 	}
 }
 
-//取文件扩展名，不包含"."
+// GetExtWithoutDot
+// 取文件扩展名，不包含"."
 func GetExtWithoutDot(path string) string {
 	_, _, ext := SplitFileName(path)
 	return ext
 }
 
-//取文件扩展名，包含"."
+// GetExtWithDot
+// 取文件扩展名，包含"."
 func GetExtWithDot(path string) string {
 	_, ext, _ := SplitFileName(path)
 	return ext
 }
 
+// SplitFileName
 // 拆分文件名[shortName + dotExt + ext]
 // shortName: 不带扩展名的文件名
 // dotExt: 带“.”的扩展名
@@ -305,6 +317,7 @@ func SplitFileName(path string) (shortName string, dotExt string, ext string) {
 	return
 }
 
+// Split
 // 拆分路为目录+文件， 或父级目录+当前目录
 // 返回的目录格式经过FormatPath处理
 func Split(path string) (formattedDir string, fileName string) {
@@ -323,6 +336,7 @@ func Split(path string) (formattedDir string, fileName string) {
 	return
 }
 
+// GetUpDir
 // 取上级目录，如果没有目录分隔符，返回失败
 // 根目录的上级目录为空，并返回失败
 // dir要求是经过FormatPath处理后的路径格式
@@ -340,6 +354,7 @@ func GetUpDir(dir string) (upDir string, err error) {
 
 //Format ------------------------------------
 
+// FormatPath
 // 标准化路径(转为Linux路径)
 // 转换为"/"形式路径
 // 如果结果路径为目录，并以"/"结尾，清除"/"
@@ -348,6 +363,7 @@ func FormatPath(path string) string {
 	return ToUnixPath(path)
 }
 
+// ToUnixPath
 // 格式化为Linux路径
 // 如果结果路径为目录，并以"/"结尾，清除"/"
 // 不检测有效性
@@ -360,6 +376,7 @@ func ToUnixPath(p string) string {
 	return p
 }
 
+// ToWindowsPath
 // 格式化为Windows路径
 // 如果结果路径为目录，并以"/"结尾，清除"/"
 // 不检测有效性

@@ -11,6 +11,7 @@ const (
 	MiddleFile = 256 * 1024
 )
 
+// Copy
 // 复制文件
 // 根据文件大小选择不同的复制算法
 // 要求目录路径的父目录存在
@@ -24,6 +25,7 @@ func Copy(srcFile string, dstFile string) (written int64, err error) {
 	return copy(srcFile, dstFile, stat, stat.Mode())
 }
 
+// CopyAuto
 // 复制文件
 // 根据文件大小选择不同的复制算法
 // 如果目录路径的父目录不存在，自动补全
@@ -41,6 +43,7 @@ func CopyAuto(srcFile string, dstFile string, autoPerm os.FileMode) (written int
 	return copy(srcFile, dstFile, stat, stat.Mode())
 }
 
+// CopyTo
 // 复制文件到指定目录
 // 根据文件大小选择不同的复制算法
 func CopyTo(srcFile string, targetDir string) (written int64, err error) {
@@ -49,6 +52,7 @@ func CopyTo(srcFile string, targetDir string) (written int64, err error) {
 	return Copy(srcFile, newPath)
 }
 
+// CopyToAuto
 // 复制文件到指定目录
 // 根据文件大小选择不同的复制算法
 // 如果目录路径的父目录不存在，自动补全
@@ -58,6 +62,7 @@ func CopyToAuto(srcFile string, targetDir string, autoPerm os.FileMode) (written
 	return CopyAuto(srcFile, newPath, autoPerm)
 }
 
+// CopyMod
 // 复制文件
 // 根据文件大小选择不同的复制算法
 // 同时设置新的FileMode
@@ -70,6 +75,7 @@ func CopyMod(srcFile string, dstFile string, filePerm os.FileMode) (written int6
 	return copy(srcFile, dstFile, stat, filePerm)
 }
 
+// CopyModAuto
 // 复制文件
 // 根据文件大小选择不同的复制算法
 // 同时设置新的FileMode
@@ -88,6 +94,7 @@ func CopyModAuto(srcFile string, dstFile string, filePerm os.FileMode, autoPerm 
 	return copy(srcFile, dstFile, stat, filePerm)
 }
 
+// CopyModTo
 // 复制文件到指定目录
 // 根据文件大小选择不同的复制算法
 // 同时设置新的FileMode
@@ -97,6 +104,7 @@ func CopyModTo(srcFile string, targetDir string, filePerm os.FileMode) (written 
 	return CopyMod(srcFile, newPath, filePerm)
 }
 
+// CopyModToAuto
 // 复制文件到指定目录
 // 根据文件大小选择不同的复制算法
 // 同时设置新的FileMode

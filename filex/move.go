@@ -4,6 +4,7 @@ import (
 	"os"
 )
 
+// Move
 // 移动文件或目录
 // 文件移动：保留原有属性
 // 目录移动：保留原有属性，同时移动目录包含的文件及子目录
@@ -14,6 +15,7 @@ func Move(srcPath string, dstPath string) error {
 	return move(FormatPath(srcPath), FormatPath(dstPath))
 }
 
+// MoveAuto
 // 移动文件或目录
 // 文件移动：保留原有属性
 // 目录移动：保留原有属性，同时移动目录包含的文件及子目录
@@ -24,6 +26,7 @@ func MoveAuto(srcPath string, dstPath string, autoPerm os.FileMode) error {
 	return moveFileAuto(FormatPath(srcPath), FormatPath(dstPath), autoPerm)
 }
 
+// MoveTo
 // 移动文件或目录到指定目录
 // 文件移动：保留原有属性
 // 目录移动：保留原有属性，同时移动目录包含的文件及子目录
@@ -34,6 +37,7 @@ func MoveTo(srcPath string, dstDir string) error {
 	return moveTo(srcPath, dstDir)
 }
 
+// MoveToAuto
 // 移动文件或目录
 // 文件移动：保留原有属性
 // 目录移动：保留原有属性，同时移动目录包含的文件及子目录
