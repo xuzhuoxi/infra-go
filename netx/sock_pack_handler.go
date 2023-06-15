@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-10.
-//@author xuzhuoxi
+// Package netx
+// Created by xuzhuoxi
+// on 2019-03-10.
+// @author xuzhuoxi
 //
 package netx
 
@@ -13,6 +13,7 @@ import (
 	"sync"
 )
 
+// FuncPackHandler
 // 消息处理函数，用于处理Sock消息
 // @param data: 消息数据
 // @param senderAddress: 发送者连接地址
@@ -52,20 +53,27 @@ type IPackHandlerContainerGetter interface {
 }
 
 type IPackHandlerContainer interface {
+	// FirstHandler
 	// 由第一个处理
 	FirstHandler(first func(handler FuncPackHandler) bool)
+	// LastHandler
 	// 由最后一个处理
 	LastHandler(last func(handler FuncPackHandler) bool)
+	// ForEachHandler
 	// 依顺序遍历处理
 	// each返回true，则中断遍历
 	ForEachHandler(each func(handler FuncPackHandler) bool)
 
+	// AppendPackHandler
 	// 追加消息处理函数
 	AppendPackHandler(handler FuncPackHandler) error
+	// ClearHandler
 	// 清除消息处理函数
 	ClearHandler(handler FuncPackHandler) error
+	// ClearHandlers
 	// 清除全部消息处理函数
 	ClearHandlers() error
+	// SetPackHandlers
 	// 设置消息处理函数列表
 	SetPackHandlers(handlers []FuncPackHandler) error
 }

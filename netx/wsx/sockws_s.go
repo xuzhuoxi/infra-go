@@ -136,9 +136,9 @@ func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 	return nil
 }
 
-//通常来说:
-//LocalAddr=ws://ip:port+pattern
-//RemoteAddr=Origin
+// 通常来说:
+// LocalAddr=ws://ip:port+pattern
+// RemoteAddr=Origin
 func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
 	address := conn.Request().RemoteAddr //最根的地址信息
 	s.ChannelLimit.Add()

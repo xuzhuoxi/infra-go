@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-13.
-//@author xuzhuoxi
+// Package netx
+// Created by xuzhuoxi
+// on 2019-03-13.
+// @author xuzhuoxi
 //
 package netx
 
@@ -22,20 +22,27 @@ type IAddressProxyGetter interface {
 	GetAddressProxy() IAddressProxy
 }
 
-//难住地址与id的双向映射
+// IAddressProxy
+// 难住地址与id的双向映射
 type IAddressProxy interface {
 	eventx.IEventDispatcher
-	//能过地址找id
+	// GetId
+	// 能过地址找id
 	GetId(address string) (id string, ok bool)
-	//能过id找地址
+	// GetAddress
+	// 能过id找地址
 	GetAddress(id string) (address string, ok bool)
-	//把id和地址加入映射表
+	// MapIdAddress
+	// 把id和地址加入映射表
 	MapIdAddress(id string, address string)
-	//移除id相关映射
+	// RemoveById
+	// 移除id相关映射
 	RemoveById(id string)
-	//移除地址相关映射
+	// RemoveByAddress
+	// 移除地址相关映射
 	RemoveByAddress(address string)
-	//重置
+	// Reset
+	// 重置
 	Reset()
 }
 

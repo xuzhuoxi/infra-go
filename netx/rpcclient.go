@@ -10,12 +10,16 @@ func NewRPCClient(Network string) IRPCClient {
 }
 
 type IRPCClient interface {
+	// Dial
 	// 连接远程RPC服务
 	Dial(address string) error
+	// IsConnected
 	// RPC是否处理连接状态
 	IsConnected() bool
+	// Call
 	// 调用RPC服务
 	Call(serviceMethod string, args interface{}, reply interface{}) error
+	// Close
 	// 关闭远程RPC服务
 	Close()
 }

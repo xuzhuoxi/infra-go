@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-14.
-//@author xuzhuoxi
+// Package netx
+// Created by xuzhuoxi
+// on 2019-02-14.
+// @author xuzhuoxi
 //
 package netx
 
@@ -23,8 +23,10 @@ type IClientOpening interface {
 }
 
 type IClient interface {
+	// OpenClient
 	// 打开
 	OpenClient(params SockParams) error
+	// CloseClient
 	// 关闭
 	CloseClient() error
 }

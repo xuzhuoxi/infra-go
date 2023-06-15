@@ -12,18 +12,23 @@ const ReceiverBuffLen = 2048
 type iPackReceiver interface {
 	IPackHandlerContainerSetter
 	IPackHandlerContainerGetter
+	// StartReceiving
 	// 开始接收数据
 	StartReceiving() error
+	// StopReceiving
 	// 停止接收数据
 	StopReceiving() error
+	// IsReceiving
 	// 是否为数据接收中
 	IsReceiving() bool
 }
 
 type iPackSender interface {
-	//发送字节数据，不作任何处理
+	// SendBytes
+	// 发送字节数据，不作任何处理
 	SendBytes(bytes []byte, rAddress ...string) (int, error)
-	//发送数据包，把数据进行打包
+	// SendPack
+	// 发送数据包，把数据进行打包
 	SendPack(pack []byte, rAddress ...string) (int, error)
 }
 

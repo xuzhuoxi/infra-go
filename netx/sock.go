@@ -35,7 +35,7 @@ func (n SockNetwork) NewClient2() (server ISockClient, err error) {
 	return nil, errNetworkRegister
 }
 
-// 字符串转SockNetwork
+// ParseSockNetwork 字符串转 SockNetwork
 func ParseSockNetwork(str string) SockNetwork {
 	if "" == str {
 		return Undefined
@@ -105,17 +105,22 @@ type SockParams struct {
 }
 
 type ISockConn interface {
+	// Close
 	// 关闭
 	Close() error
+	// LocalAddr
 	// 本地连接地址
 	LocalAddr() net.Addr
+	// RemoteAddr
 	// 远程连接地址
 	RemoteAddr() net.Addr
 }
 
 type ISockSender interface {
+	// SendPackTo
 	// 发送二进制消息包(把数据打包，补充长度信息)
 	SendPackTo(data []byte, rAddress ...string) error
+	// SendBytesTo
 	// 发送二进制数据
 	SendBytesTo(bytes []byte, rAddress ...string) error
 }
@@ -129,8 +134,10 @@ type ISockSenderGetter interface {
 }
 
 type ISockName interface {
+	// SetName
 	// 设置标识名称
 	SetName(name string)
+	// GetName
 	// 获取标识名称
 	GetName() string
 }

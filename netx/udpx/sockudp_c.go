@@ -79,7 +79,6 @@ type IUDPClient interface {
 	netx.ISockClient
 }
 
-//UDPDialClient
 type UDPDialClient struct {
 	netx.SockClientBase
 }
@@ -126,7 +125,6 @@ func (c *UDPDialClient) CloseClient() error {
 	return nil
 }
 
-//UDPListenClient
 type UDPListenClient struct {
 	netx.SockClientBase
 }

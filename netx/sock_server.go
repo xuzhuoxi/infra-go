@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-14.
-//@author xuzhuoxi
+// Package netx
+// Created by xuzhuoxi
+// on 2019-02-14.
+// @author xuzhuoxi
 //
 package netx
 
@@ -25,15 +25,19 @@ type IServerRunning interface {
 }
 
 type IServer interface {
+	// StartServer
 	// 启动服务，会阻塞
 	StartServer(params SockParams) error
+	// StopServer
 	// 停止服务，会阻塞
 	StopServer() error
 }
 
 type ISockConnection interface {
+	// Connections
 	// 连接数
 	Connections() int
+	// CloseConnection
 	// 关闭指定连接
 	CloseConnection(address string) (err error, ok bool)
 }
