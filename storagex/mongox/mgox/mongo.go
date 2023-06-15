@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-06-14.
-//@author xuzhuoxi
+// Package mgox
+// Created by xuzhuoxi
+// on 2019-06-14.
+// @author xuzhuoxi
 //
 package mgox
 

@@ -1,7 +1,6 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-26.
-//@author xuzhuoxi
+// Package timex
+// Created by xuzhuoxi
+// on 2019-03-26.
 //
 package timex
 

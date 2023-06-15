@@ -14,8 +14,10 @@ const (
 )
 
 const (
-	// L_OR_U Uppercase or lowercase letter
+	// L_OR_U
+	// Uppercase or lowercase letter
 	L_OR_U = L | U
+	// DefaultPasswdFlag
 	// Include Number and Letter
 	DefaultPasswdFlag            = N | L_OR_U
 	mask              PasswdFlag = 0x11f
