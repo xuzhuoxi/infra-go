@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(NormalThreshold, BlendNormalThresholdColor, BlendNormalThresholdRGBA)
 }
 
+// BlendNormalThresholdColor
 // 阈值模式
 // 是默认的状态，其最终色和绘图色相同。可通过改变画笔工具选项栏中的“不透明度”来设定不同的透明度。当图像的颜色模式是“位图”或“索引颜色”时，“正常”模式就变成“阈值”模式。
 // 在基色存在透明度a%时，混合的运算方式是：最终色=基色*a% + 混合色*（1-a%）。
@@ -24,6 +25,7 @@ func BlendNormalThresholdColor(S, D color.Color, factor float64, destinationAlph
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendNormalThresholdRGBA
 // 阈值模式
 // 是默认的状态，其最终色和绘图色相同。可通过改变画笔工具选项栏中的“不透明度”来设定不同的透明度。当图像的颜色模式是“位图”或“索引颜色”时，“正常”模式就变成“阈值”模式。
 // 在基色存在透明度a%时，混合的运算方式是：最终色=基色*a% + 混合色*（1-a%）。

@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(LinearBurn, BlendLinearBurnColor, BlendLinearBurnRGBA)
 }
 
+// BlendLinearBurnColor
 // 线性加深模式
 // 查看每个通道的颜色信息，通过降低“亮度”使底色的颜色变暗来反映绘图色，和白色混合没变化。
 // R = S + D - 1
@@ -25,6 +26,7 @@ func BlendLinearBurnColor(S, D color.Color, _ float64, destinationAlpha bool) co
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendLinearBurnRGBA
 // 线性加深模式
 // 查看每个通道的颜色信息，通过降低“亮度”使底色的颜色变暗来反映绘图色，和白色混合没变化。
 // R = S + D - 1

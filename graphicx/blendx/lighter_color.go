@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(LighterColor, BlendLighterColor, BlendLighterColorRGBA)
 }
 
+// BlendLighterColor
 // 浅色模式
 // 公式：Dr+Dg+Db+Da >= Sr+Sg+Sb+Sa 则 R=D
 // 比较混合色和基色的所有通道值的总和并显示值较大的颜色。“浅色”不会生成第三种颜色（可以通过“变亮”混合获得），因为它将从基色和混合色中选取最大的通道值来创建结果色。
@@ -26,6 +27,7 @@ func BlendLighterColor(foreColor, backColor color.Color, _ float64, _ bool) colo
 	}
 }
 
+// BlendLighterColorRGBA
 // 浅色模式
 // 公式：Dr+Dg+Db+Da >= Sr+Sg+Sb+Sa 则 R=D
 // 比较混合色和基色的所有通道值的总和并显示值较大的颜色。“浅色”不会生成第三种颜色（可以通过“变亮”混合获得），因为它将从基色和混合色中选取最大的通道值来创建结果色。

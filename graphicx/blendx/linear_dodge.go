@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(LinearDodge, BlendLinearDodgeColor, BlendLinearDodgeRGBA)
 }
 
+// BlendLinearDodgeColor
 // 线性减淡模式
 // 查看每个通道的颜色信息，通过增加“亮度”使底色的颜色变亮来反映绘图色，和黑色混合没变化。
 // R = S + D
@@ -23,6 +24,7 @@ func BlendLinearDodgeColor(S, D color.Color, _ float64, destinationAlpha bool) c
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendLinearDodgeRGBA
 // 线性减淡模式
 // 查看每个通道的颜色信息，通过增加“亮度”使底色的颜色变亮来反映绘图色，和黑色混合没变化。
 // R = S + D

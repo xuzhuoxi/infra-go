@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(VividLight, BlendVividLightColor, BlendVividLightRGBA)
 }
 
+// BlendVividLightColor
 // 亮光模式
 // 根据绘图色通过增加或降低“对比度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过降低对比度被照亮，如果绘图色比50%的灰暗，图像通过增加对比度变暗。
 // (D<=128): R = S - (255-S)*(255-2*D) / (2*D)
@@ -27,6 +28,7 @@ func BlendVividLightColor(S, D color.Color, _ float64, destinationAlpha bool) co
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendVividLightRGBA
 // 亮光模式
 // 根据绘图色通过增加或降低“对比度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过降低对比度被照亮，如果绘图色比50%的灰暗，图像通过增加对比度变暗。
 // (D<=128): R = S - (255-S)*(255-2*D) / (2*D)

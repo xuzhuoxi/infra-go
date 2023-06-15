@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(Exclusion, BlendExclusionColor, BlendExclusionRGBA)
 }
 
+// BlendExclusionColor
 // 排除模式
 // 可生成和差值模式相似的效果，但比差值模式生成的颜色对比度较小，因而颜色较柔和。与白色混合将使底色反相；与黑色混合则不产生变化。
 // R = S + D - 2*S*D [0,1]
@@ -25,6 +26,7 @@ func BlendExclusionColor(S, D color.Color, _ float64, destinationAlpha bool) col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendExclusionRGBA
 // 排除模式
 // 可生成和差值模式相似的效果，但比差值模式生成的颜色对比度较小，因而颜色较柔和。与白色混合将使底色反相；与黑色混合则不产生变化。
 // R = S + D - 2*S*D [0,1]

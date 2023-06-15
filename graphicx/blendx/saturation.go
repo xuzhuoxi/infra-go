@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -15,6 +15,7 @@ func init() {
 	RegisterBlendFunc(Saturation, BlendSaturationColor, BlendSaturationRGBA)
 }
 
+// BlendSaturationColor
 // 饱和度模式
 // 是采用底色的亮度、色相以及绘图色的饱和度来创建最终色。如果绘图色的饱和度为0，则原图没有变化。
 // 在把纯蓝色应用到一个灰暗的背景图像中时，显出了背景中 的原始纯色，但蓝色并未加入到合成图像中。如果选择一种中性颜色（一种并不显示主流色 度的颜色），对背景图像不发生任何变化。
@@ -27,6 +28,7 @@ func BlendSaturationColor(foreColor, backColor color.Color, _ float64, destinati
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendSaturationRGBA
 // 饱和度模式
 // 是采用底色的亮度、色相以及绘图色的饱和度来创建最终色。如果绘图色的饱和度为0，则原图没有变化。
 // 在把纯蓝色应用到一个灰暗的背景图像中时，显出了背景中 的原始纯色，但蓝色并未加入到合成图像中。如果选择一种中性颜色（一种并不显示主流色 度的颜色），对背景图像不发生任何变化。

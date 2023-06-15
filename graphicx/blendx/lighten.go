@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(Lighten, BlendLightenColor, BlendLightenRGBA)
 }
 
+// BlendLightenColor
 // 变亮模式
 // 与Darken相反，取两个像素中更亮的作为结果。
 // 查看每个通道的颜色信息，并按照像素对比两个颜色，那个更亮，便以这种颜色作为此像素最终的颜色，也就是取两个颜色中的亮色作为最终色。绘图色中亮于底色的颜色被保留，暗于底色的颜色被替换。
@@ -24,6 +25,7 @@ func BlendLightenColor(S, D color.Color, _ float64, destinationAlpha bool) color
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendLightenRGBA
 // 变亮模式
 // 与Darken相反，取两个像素中更亮的作为结果。
 // 查看每个通道的颜色信息，并按照像素对比两个颜色，那个更亮，便以这种颜色作为此像素最终的颜色，也就是取两个颜色中的亮色作为最终色。绘图色中亮于底色的颜色被保留，暗于底色的颜色被替换。

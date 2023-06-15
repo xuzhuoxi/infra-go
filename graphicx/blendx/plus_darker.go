@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(PlusDarker, BlendPlusDarkerColor, BlendPlusDarkerRGBA)
 }
 
+// BlendPlusDarkerColor
 // R = MAX(0, (1 - D) + (1 - S)) [0,1]
 // R = MAX(0, (255-D) + (255-S)) [0,255]
 // R = MAX(0, (65535-D) + (65535-S)) [0,65535]
@@ -23,6 +24,7 @@ func BlendPlusDarkerColor(S, D color.Color, _ float64, destinationAlpha bool) co
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendPlusDarkerRGBA
 // R = MAX(0, (1 - D) + (1 - S)) [0,1]
 // R = MAX(0, (255-D) + (255-S)) [0,255]
 // R = MAX(0, (65535-D) + (65535-S)) [0,65535]

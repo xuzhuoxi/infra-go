@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -14,6 +14,7 @@ func init() {
 	RegisterBlendFunc(ColorBurn, BlendColorBurnColor, BlendColorBurnRGBA)
 }
 
+// BlendColorBurnColor
 // 颜色加深模式
 // 查看每个通道的颜色信息，通过增加“对比度”使底色的颜色变暗来反映绘图色，和白色混合没变化。
 // 除了背景上的较淡区域消失，且图像区域呈现尖锐的边缘特性之外，这种Color Burn模式创建的效果类似于由MuItiply模式创建的效果。
@@ -27,6 +28,7 @@ func BlendColorBurnColor(S, D color.Color, factor float64, destinationAlpha bool
 	return &color.NRGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendColorBurnRGBA
 // 颜色加深模式
 // 查看每个通道的颜色信息，通过增加“对比度”使底色的颜色变暗来反映绘图色，和白色混合没变化。
 // 除了背景上的较淡区域消失，且图像区域呈现尖锐的边缘特性之外，这种Color Burn模式创建的效果类似于由MuItiply模式创建的效果。

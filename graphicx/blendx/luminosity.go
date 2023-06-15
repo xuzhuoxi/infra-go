@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -15,6 +15,7 @@ func init() {
 	RegisterBlendFunc(Luminosity, BlendLuminosityColor, BlendLuminosityRGBA)
 }
 
+// BlendLuminosityColor
 // 亮度模式
 // 是采用底色的色相和饱和度以及绘图色的亮度来创建最终色。此模式创建于颜色模式相反效果。
 // 注： “差值”、“排除”、“色相”、“饱和度”、“颜色”和“明度”模式都不能与专色相混合，而且对于多数混合模式而言，指定为 100% K 的黑色会挖空下方图层中的颜色。请不要使用 100% 黑色，应改为使用 CMYK 值来指定复色黑。
@@ -26,6 +27,7 @@ func BlendLuminosityColor(S, D color.Color, _ float64, destinationAlpha bool) co
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendLuminosityRGBA
 // 亮度模式
 // 是采用底色的色相和饱和度以及绘图色的亮度来创建最终色。此模式创建于颜色模式相反效果。
 // 注： “差值”、“排除”、“色相”、“饱和度”、“颜色”和“明度”模式都不能与专色相混合，而且对于多数混合模式而言，指定为 100% K 的黑色会挖空下方图层中的颜色。请不要使用 100% 黑色，应改为使用 CMYK 值来指定复色黑。

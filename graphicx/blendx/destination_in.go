@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(DestinationIn, BlendDestinationInColor, BlendDestinationInRGBA)
 }
 
+// BlendDestinationInColor
 // R = D*Sa [0,1]
 // R = D*Sa/255 [0,255]
 // R = D*Sa/65535 [0,65535]
@@ -23,6 +24,7 @@ func BlendDestinationInColor(foreColor, backColor color.Color, _ float64, destin
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendDestinationInRGBA
 // R = D*Sa [0,1]
 // R = D*Sa/255 [0,255]
 // R = D*Sa/65535 [0,65535]

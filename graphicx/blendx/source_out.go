@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,7 +13,7 @@ func init() {
 	RegisterBlendFunc(SourceOut, BlendSourceOutColor, BlendSourceOutRGBA)
 }
 
-//
+// BlendSourceOutColor
 // R = S*(1 - Da)
 // R = S*(255 - Da)/255
 // R = S*(65535 - Da)/65535
@@ -24,7 +24,7 @@ func BlendSourceOutColor(S, D color.Color, _ float64, destinationAlpha bool) col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-//
+// BlendSourceOutRGBA
 // R = S*(1 - Da)
 // R = S*(255 - Da)/255
 // R = S*(65535 - Da)/65535

@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -15,6 +15,7 @@ func init() {
 	RegisterBlendFunc(Hue, BlendHueColor, BlendHueRGBA)
 }
 
+// BlendHueColor
 // 色相模式
 // 是采用底色的亮度、饱和度以及绘图色的色相来创建最终色。
 // HSV = Dh, Ss, Sv
@@ -25,6 +26,7 @@ func BlendHueColor(S, D color.Color, _ float64, destinationAlpha bool) color.Col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendHueRGBA
 // 色相模式
 // 是采用底色的亮度、饱和度以及绘图色的色相来创建最终色。
 // HSV = Dh, Ss, Sv

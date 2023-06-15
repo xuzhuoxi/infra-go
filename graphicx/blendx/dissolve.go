@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -14,6 +14,7 @@ func init() {
 	RegisterBlendFunc(Dissolve, BlendDissolveColor, BlendDissolveRGBA)
 }
 
+// BlendDissolveColor
 // 溶解模式
 // 最终色和绘图色相同，只是根据每个像素点所在的位置的透明度的不同，可随机以绘图色和底色取代。透明度越大，溶解效果就越明显。
 // 使用这种模式，像素仿佛是整个的来自一幅图像或是另一幅，看不出有什么混合的迹象，
@@ -28,6 +29,7 @@ func BlendDissolveColor(S, D color.Color, factor float64, destinationAlpha bool)
 	}
 }
 
+// BlendDissolveRGBA
 // 溶解模式
 // 最终色和绘图色相同，只是根据每个像素点所在的位置的透明度的不同，可随机以绘图色和底色取代。透明度越大，溶解效果就越明显。
 // 使用这种模式，像素仿佛是整个的来自一幅图像或是另一幅，看不出有什么混合的迹象，

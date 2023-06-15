@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(HardMix, BlendHardMixColor, BlendHardMixRGBA)
 }
 
+// BlendHardMixColor
 // 实色混合模式
 // 根据绘图颜色与底图颜色的颜色数值相加，当相加的颜色数值大于该颜色模式颜色数值的最大值，混合颜色为最大值；
 // 当相加的颜色数值小于该颜色模式颜色数值的最大值，混合颜色为0；
@@ -27,6 +28,7 @@ func BlendHardMixColor(S, D color.Color, _ float64, destinationAlpha bool) color
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendHardMixRGBA
 // 实色混合模式
 // 根据绘图颜色与底图颜色的颜色数值相加，当相加的颜色数值大于该颜色模式颜色数值的最大值，混合颜色为最大值；
 // 当相加的颜色数值小于该颜色模式颜色数值的最大值，混合颜色为0；

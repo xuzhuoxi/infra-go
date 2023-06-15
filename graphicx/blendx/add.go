@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(Add, BlendAddColor, BlendAddRGBA)
 }
 
+// BlendAddColor
 // 增加模式
 // 是将原始图像及混合图像的对应像素取出来并加在一起；
 // R = Min(1, S+D))
@@ -25,6 +26,7 @@ func BlendAddColor(S, D color.Color, _ float64, destinationAlpha bool) color.Col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendAddRGBA
 // 增加模式
 // 是将原始图像及混合图像的对应像素取出来并加在一起；
 // R = Min(1, S+D))

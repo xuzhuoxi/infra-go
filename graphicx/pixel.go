@@ -2,6 +2,7 @@ package graphicx
 
 import "image/color"
 
+// Pixel
 // ARGB像素值
 type Pixel uint32
 
@@ -10,7 +11,7 @@ func (p Pixel) RGBA() (R, G, B, A uint8) {
 	return
 }
 
-// ARGB像素值
+// Pixel64 ARGB像素值
 type Pixel64 uint64
 
 func (p Pixel64) RGBA() (R, G, B, A uint16) {

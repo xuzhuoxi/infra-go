@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(HardLight, BlendHardLightColor, BlendHardLightRGBA)
 }
 
+// BlendHardLightColor
 // 强光模式
 // 根据绘图色来决定是执行“正片叠底”还是“滤色”模式。当绘图色比50%的灰要亮时，则底色变亮，就执行“滤色”模式一样，这对增加图像的高光非常有帮助；
 // 当绘图色比50%的灰要暗时，则底色变暗，就执行“正片叠底”模式一样，可增加图像的暗部。当绘图色是纯白色或黑色时得到的是纯白色和黑色。此效果与耀眼的聚光灯照在图像上相似。像亮则更亮，暗则更暗。
@@ -32,6 +33,7 @@ func BlendHardLightColor(S, D color.Color, _ float64, destinationAlpha bool) col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendHardLightRGBA
 // 强光模式
 // 根据绘图色来决定是执行“正片叠底”还是“滤色”模式。当绘图色比50%的灰要亮时，则底色变亮，就执行“滤色”模式一样，这对增加图像的高光非常有帮助；
 // 当绘图色比50%的灰要暗时，则底色变暗，就执行“正片叠底”模式一样，可增加图像的暗部。当绘图色是纯白色或黑色时得到的是纯白色和黑色。此效果与耀眼的聚光灯照在图像上相似。像亮则更亮，暗则更暗。

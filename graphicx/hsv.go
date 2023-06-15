@@ -5,6 +5,7 @@ import (
 	"math"
 )
 
+// HSV2RGB
 // 求RGB 64位
 // H: 色调(色相) [0,360]
 // S: 饱和度 [0,1]
@@ -38,6 +39,7 @@ func HSV2RGB(H, S, V float64) (R, G, B uint32) {
 	return
 }
 
+// RGB2HSV
 // 取HSV
 // H: 色调(色相) [0,360]
 // S: 饱和度 [0,1]
@@ -68,6 +70,7 @@ func RGB2HSV(R, G, B uint32) (H, S, V float64) {
 	return
 }
 
+// Hue
 // 色调 H [0,360]
 func Hue(R, G, B uint32) (H float64) {
 	fr, fg, fb := float64(R), float64(G), float64(B)
@@ -91,6 +94,7 @@ func Hue(R, G, B uint32) (H float64) {
 	return
 }
 
+// Saturation
 // 饱和度 S [0,1]
 func Saturation(R, G, B uint32) (S float64) {
 	fr, fg, fb := float64(R), float64(G), float64(B)
@@ -99,6 +103,7 @@ func Saturation(R, G, B uint32) (S float64) {
 	return 1 - min/max
 }
 
+// Value
 // 明度 [0,1]
 func Value(R, G, B uint32) (V float64) {
 	fr, fg, fb := float64(R), float64(G), float64(B)

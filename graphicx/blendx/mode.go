@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ import (
 
 type BlendMode int
 
+// FuncBlendColor
 // resultColor		: 结果色
 // sourceColor		: 源颜色/背景色/混合色(ps概念)
 // destinationColor	：目标色/前景色/基色(ps概念)
@@ -45,114 +46,114 @@ func (m BlendMode) BlendRGBA(sourceR, sourceG, sourceB, sourceA uint32, destinat
 }
 
 const (
-	// 无
+	// None 无
 	None BlendMode = iota
 
 	//-----------------------------------
 
-	// 正常模式(已实现)
+	// Normal 正常模式(已实现)
 	Normal
-	// 阈值模式(已实现)
+	// NormalThreshold 阈值模式(已实现)
 	NormalThreshold
-	// 溶解模式(已实现)
+	// Dissolve 溶解模式(已实现)
 	Dissolve
-	// 背后模式(已实现)
+	// Behind 背后模式(已实现)
 	Behind
-	// 清除模式(已实现)
+	// Clear 清除模式(已实现)
 	Clear
-	// 覆盖模式(已实现)
+	// Copy 覆盖模式(已实现)
 	Copy
 
 	//-----------------------------------
 
-	// 变暗模式(已实现)
+	// Darken 变暗模式(已实现)
 	Darken
-	// 正片叠底(已实现)
+	// Multiply 正片叠底(已实现)
 	Multiply
-	// 颜色加深模式(已实现)
+	// ColorBurn 颜色加深模式(已实现)
 	ColorBurn
-	// 线性加深模式(已实现)
+	// LinearBurn 线性加深模式(已实现)
 	LinearBurn
-	// 深色模式----------------------------------------
+	// DarkerColor 深色模式----------------------------------------
 	DarkerColor
 
 	//-----------------------------------
 
-	// 增加模式(已实现)
+	// Add 增加模式(已实现)
 	Add
-	// 变亮模式(已实现)
+	// Lighten 变亮模式(已实现)
 	Lighten
-	// 滤色模式(已实现)
+	// Screen 滤色模式(已实现)
 	Screen
-	// 颜色减淡模式(已实现)
+	// ColorDodge 颜色减淡模式(已实现)
 	ColorDodge
-	// 线性减淡模式(已实现)
+	// LinearDodge 线性减淡模式(已实现)
 	LinearDodge
-	// 浅色模式----------------------------------
+	// LighterColor 浅色模式----------------------------------
 	LighterColor
 
 	//-----------------------------------
 
-	// 叠加模式(已实现)
+	// Overlay 叠加模式(已实现)
 	Overlay
-	// 柔光模式(已实现)
+	// SoftLight 柔光模式(已实现)
 	SoftLight
-	// 强光模式(已实现)
+	// HardLight 强光模式(已实现)
 	HardLight
-	// 亮光模式(已实现)
+	// VividLight 亮光模式(已实现)
 	VividLight
-	// 线性光模式(已实现)
+	// LinearLight 线性光模式(已实现)
 	LinearLight
-	// 点光模式(已实现)
+	// PinLight 点光模式(已实现)
 	PinLight
-	// 实色混合模式(已实现)
+	// HardMix 实色混合模式(已实现)
 	HardMix
 
 	//-----------------------------------
 
-	// 差值模式(已实现)
+	// Difference 差值模式(已实现)
 	Difference
-	// 排除模式(已实现)
+	// Exclusion 排除模式(已实现)
 	Exclusion
-	// 减去模式(已实现)
+	// Subtract 减去模式(已实现)
 	Subtract
-	// 划分模式(已实现)
+	// Divide 划分模式(已实现)
 	Divide
 
 	//-----------------------------------
 
-	// 色相模式
+	// Hue 色相模式
 	Hue
-	// 饱和度模式
+	// Saturation 饱和度模式
 	Saturation
-	// 颜色模式
+	// Color 颜色模式
 	Color
-	// 亮度模式
+	// Luminosity 亮度模式
 	Luminosity
 
 	//-----------------------------------
 
-	// (已实现)
+	// DestinationAtop (已实现)
 	DestinationAtop
-	// (已实现)
+	// DestinationIn (已实现)
 	DestinationIn
-	// (已实现)
+	// DestinationOut (已实现)
 	DestinationOut
-	// (已实现)
+	// DestinationOver (已实现)
 	DestinationOver
-	// 高级深色(已实现)
+	// PlusDarker 高级深色(已实现)
 	PlusDarker
-	// 高级浅色(已实现)
+	// PlusLighter 高级浅色(已实现)
 	PlusLighter
-	// (已实现)
+	// SourceAtop (已实现)
 	SourceAtop
-	// (已实现)
+	// SourceIn (已实现)
 	SourceIn
-	// (已实现)
+	// SourceOut (已实现)
 	SourceOut
-	// (已实现)
+	// SourceOver (已实现)
 	SourceOver
-	// 异或模式(已实现)
+	// Xor 异或模式(已实现)
 	Xor
 )
 

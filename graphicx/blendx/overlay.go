@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(Overlay, BlendOverlayColor, BlendOverlayRGBA)
 }
 
+// BlendOverlayColor
 // 叠加模式
 // 在保留底色明暗变化的基础上使用“正片叠底”或“滤色”模式，绘图的颜色被叠加到底色上，但保留底色的高光和阴影部分。底色的颜色没有被取代，而是和绘图色混合来体现原图的亮部和暗部。
 // 使用此模式可使底色的图像的饱和度及对比度得到相应的提高，使图像看起来更加鲜亮。
@@ -28,6 +29,7 @@ func BlendOverlayColor(S, D color.Color, _ float64, destinationAlpha bool) color
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendOverlayRGBA
 // 叠加模式
 // 在保留底色明暗变化的基础上使用“正片叠底”或“滤色”模式，绘图的颜色被叠加到底色上，但保留底色的高光和阴影部分。底色的颜色没有被取代，而是和绘图色混合来体现原图的亮部和暗部。
 // 使用此模式可使底色的图像的饱和度及对比度得到相应的提高，使图像看起来更加鲜亮。

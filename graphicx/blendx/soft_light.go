@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-26.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-26.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -14,6 +14,7 @@ func init() {
 	RegisterBlendFunc(SoftLight, BlendSoftLightColor, BlendSoftLightRGBA)
 }
 
+// BlendSoftLightColor
 // 柔光模式
 // 根据绘图色的明暗程度来决定最终色是变亮还是变暗，当绘图色比50%的灰要亮时，则底色图像变亮。当绘图色比50%的灰要暗时，则底色图像就变暗。如果绘图色有纯黑色或纯白色，最终色不是黑色或白色，而是稍微变暗或变亮。
 // 如果底色是纯白色或纯黑色，不产生任何效果。此效果与发散的聚光灯照在图像上相似。
@@ -32,6 +33,7 @@ func BlendSoftLightColor(S, D color.Color, _ float64, destinationAlpha bool) col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendSoftLightRGBA
 // 柔光模式
 // 根据绘图色的明暗程度来决定最终色是变亮还是变暗，当绘图色比50%的灰要亮时，则底色图像变亮。当绘图色比50%的灰要暗时，则底色图像就变暗。如果绘图色有纯黑色或纯白色，最终色不是黑色或白色，而是稍微变暗或变亮。
 // 如果底色是纯白色或纯黑色，不产生任何效果。此效果与发散的聚光灯照在图像上相似。

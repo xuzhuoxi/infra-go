@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(Subtract, BlendSubtractColor, BlendSubtractRGBA)
 }
 
+// BlendSubtractColor
 // 减去模式
 // 是将原始图像与混合图像相对应的像素提取出来并将它们相减。
 // C = Max(0,S-D)
@@ -23,6 +24,7 @@ func BlendSubtractColor(S, D color.Color, _ float64, destinationAlpha bool) colo
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendSubtractRGBA
 // 减去模式
 // 是将原始图像与混合图像相对应的像素提取出来并将它们相减。
 // C = Max(0,S-D)

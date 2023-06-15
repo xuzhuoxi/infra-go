@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -14,6 +14,7 @@ func init() {
 	RegisterBlendFunc(Behind, BlendBehindColor, BlendBehindRGBA)
 }
 
+// BlendBehindColor
 // 背后模式
 // 最终色和绘图色相同。当在有透明区域的图层上操作时背后模式才会出现，可将绘制的线条放在图层中图像的后面。
 // 这模式被用来在一个图层内透明的部分进行涂画；但当图层里的“保持透明区域”选中时就不可用了。
@@ -28,6 +29,7 @@ func BlendBehindColor(S, D color.Color, _ float64, _ bool) color.Color {
 	}
 }
 
+// BlendBehindRGBA
 // 背后模式
 // 最终色和绘图色相同。当在有透明区域的图层上操作时背后模式才会出现，可将绘制的线条放在图层中图像的后面。
 // 这模式被用来在一个图层内透明的部分进行涂画；但当图层里的“保持透明区域”选中时就不可用了。

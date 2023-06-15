@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(Screen, BlendScreenColor, BlendScreenRGBA)
 }
 
+// BlendScreenColor
 // 滤色模式
 // 作用结果和正片叠底刚好相反，它是将两个颜色的互补色的像素值相乘，然后除以255得到的最终色的像素值。通常执行滤色模式后的颜色都较浅。任何颜色和黑色执行滤色，原色不受影响;任何颜色和白色执行滤色得到的是白色；而与其他颜色执行滤色会产生漂白的效果。
 // 此屏幕模式对于在图像中创建霓虹辉光效果是有用的。如果在层上围绕背景对象的边缘涂了白色（或任何淡颜色），然后指定层Screen模式，通过调节层的opacity设置就能 获得饱满或稀薄的辉光效果。
@@ -27,6 +28,7 @@ func BlendScreenColor(S, D color.Color, _ float64, destinationAlpha bool) color.
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendScreenRGBA
 // 滤色模式
 // 作用结果和正片叠底刚好相反，它是将两个颜色的互补色的像素值相乘，然后除以255得到的最终色的像素值。通常执行滤色模式后的颜色都较浅。任何颜色和黑色执行滤色，原色不受影响;任何颜色和白色执行滤色得到的是白色；而与其他颜色执行滤色会产生漂白的效果。
 // 此屏幕模式对于在图像中创建霓虹辉光效果是有用的。如果在层上围绕背景对象的边缘涂了白色（或任何淡颜色），然后指定层Screen模式，通过调节层的opacity设置就能 获得饱满或稀薄的辉光效果。

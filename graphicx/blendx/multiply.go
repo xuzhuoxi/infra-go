@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-05-25.
-//@author xuzhuoxi
+// Package blendx
+// Created by xuzhuoxi
+// on 2019-05-25.
+// @author xuzhuoxi
 //
 package blendx
 
@@ -13,6 +13,7 @@ func init() {
 	RegisterBlendFunc(Multiply, BlendMultiplyColor, BlendMultiplyRGBA)
 }
 
+// BlendMultiplyColor
 // 正片叠底
 // 此模式就象是将两副透明的图像重叠夹在一起放在一张发光的桌子上。
 // 将两个颜色的像素值相乘，然后除以255得到的结果就是最终色的像素值。通常执行正片叠底模式后的颜色比原来两种颜色都深。
@@ -29,6 +30,7 @@ func BlendMultiplyColor(S, D color.Color, _ float64, destinationAlpha bool) colo
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
+// BlendMultiplyRGBA
 // 正片叠底
 // 此模式就象是将两副透明的图像重叠夹在一起放在一张发光的桌子上。
 // 将两个颜色的像素值相乘，然后除以255得到的结果就是最终色的像素值。通常执行正片叠底模式后的颜色比原来两种颜色都深。
