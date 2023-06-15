@@ -2,12 +2,14 @@ package mathx
 
 import "fmt"
 
-//二进制输出位信息
+// BitString
+// 二进制输出位信息
 func BitString(value int) string {
 	return fmt.Sprintf("%b", value)
 }
 
-/// <summary>
+// BitValid
+// <summary>
 /// 是否有效，1为效，0为无效
 /// </summary>
 /// <returns><c>true</c>, if valid was ised, <c>false</c> otherwise.</returns>
@@ -17,9 +19,10 @@ func BitValid(value int, bitIndex uint) bool {
 	return 0 != ((1 << bitIndex) & value)
 }
 
-//检查位值重复
-//isValid=true时，检查有效的重复位
-//isValid=false时，检查无效的重复位
+// BitFit
+// 检查位值重复
+// isValid=true时，检查有效的重复位
+// isValid=false时，检查无效的重复位
 func BitFit(value int, checkingValue int, isValid bool) bool {
 	if isValid {
 		return value&checkingValue != 0
@@ -28,7 +31,8 @@ func BitFit(value int, checkingValue int, isValid bool) bool {
 	}
 }
 
-//全部有效
+// BitValidAnd
+// 全部有效
 func BitValidAnd(value int, bitIndex ...uint) bool {
 	for _, index := range bitIndex {
 		if !BitValid(value, index) {
@@ -38,7 +42,8 @@ func BitValidAnd(value int, bitIndex ...uint) bool {
 	return true
 }
 
-//单个有效
+// BitValidOr
+// 单个有效
 func BitValidOr(value int, bitIndex ...uint) bool {
 	for _, index := range bitIndex {
 		if BitValid(value, index) {
@@ -48,7 +53,8 @@ func BitValidOr(value int, bitIndex ...uint) bool {
 	return false
 }
 
-//设置位
+// BitSet
+// 设置位
 func BitSet(value int, bitIndex uint, isValid bool) int {
 	v := 1 << bitIndex
 	if isValid {

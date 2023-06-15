@@ -11,6 +11,7 @@ var (
 
 var Threshold = 1000 //阀值
 
+// IOrderHashElement
 // 唯一标识支持
 type IOrderHashElement interface {
 	Id() string
@@ -34,66 +35,78 @@ func (s *OrderHashElement) SetId(Id string) {
 }
 
 type IOrderHashGroup interface {
-	// 数量
+	// Size 数量
 	Size() int
-	// 元素列表
+	// Collection 元素列表
 	Collection() []IOrderHashElement
-	// id列表
+	// Ids id列表
 	Ids() []string
 
-	// 取一个Element
+	// Get 取一个Element
 	Get(eleId string) (ele IOrderHashElement, ok bool)
-	// 取一个Element
+	// GetAt 取一个Element
 	GetAt(index int) (ele IOrderHashElement, ok bool)
-	// 判断
+	// Exists 判断
 	Exists(eleId string) (ok bool)
+	// Add
 	// 加入一个Element
 	// err:
 	//		ErrElementNil,ErrElementIdExists
 	Add(ele IOrderHashElement) error
+	// AddAt
 	// 加入一个Element
 	// err:
 	//		ErrElementNil,ErrElementIndex,ErrElementIdExists
 	AddAt(ele IOrderHashElement, index int) error
+	// Adds
 	// 加入多个Element
 	// count: 成功加入的Element数量
 	// err:
 	//		每个加入时产生的错误
 	Adds(eles []IOrderHashElement) (count int, failArr []IOrderHashElement, err []error)
+	// AddsAt
 	// 加入多个Element
 	// count: 成功加入的Element数量
 	// err:
 	//		每个加入时产生的错误
 	AddsAt(eles []IOrderHashElement, index int) (count int, failArr []IOrderHashElement, err []error)
+	// Remove
 	// 移除一个Element
 	// ele: 返回被移除的Element
 	// err:
 	//		ErrElementIdUnknown
 	Remove(eleId string) (ele IOrderHashElement, err error)
+	// RemoveAt
 	// 移除一个Element
 	// ele: 返回被移除的Element
 	// err:
 	//		ErrElementIndex
 	RemoveAt(index int) (ele IOrderHashElement, err error)
+	// Removes
 	// 移除多个Element
 	// eles: 返回被移除的Element数组
 	// err:
 	//		ErrElementIdUnknown
 	Removes(eleIdArr []string) (eles []IOrderHashElement, err []error)
+	// RemovesAt
 	// 移除多个Element
 	// eles: 返回被移除的Element数组
 	// err:
 	//		ErrElementIndex
 	RemovesAt(index int, count int) (eles []IOrderHashElement, err error)
+	// RemoveAll
 	// 移除全部Element
 	// eles: 返回被移除的Element数组
 	RemoveAll() (eles []IOrderHashElement)
+	// Update
 	// 替换一个Element
 	// 根据Id进行替换，如果找不到相同Id，直接加入
 	Update(ele IOrderHashElement) (replaced IOrderHashElement, err error)
+	// Updates
 	// 替换一个Element
 	// 根据Id进行替换，如果找不到相同Id，直接加入
 	Updates(eles []IOrderHashElement) (replaced []IOrderHashElement, err []error)
+	// ForEachElement
 	// 遍历元素
 	ForEachElement(f func(index int, ele IOrderHashElement) (stop bool))
 }

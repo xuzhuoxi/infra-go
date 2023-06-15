@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-03.
-//@author xuzhuoxi
+// Package listx
+// Created by xuzhuoxi
+// on 2019-04-03.
+// @author xuzhuoxi
 //
 package listx
 
@@ -9,6 +9,7 @@ import (
 	"github.com/xuzhuoxi/infra-go/lang"
 )
 
+// NewArrayList
 // 实例化一个用数组实现的List
 // ArrayList
 // maxSize: 列表允许的最大长度

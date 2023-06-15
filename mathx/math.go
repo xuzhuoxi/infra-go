@@ -1,6 +1,7 @@
 package mathx
 
 import (
+	"strconv"
 	"strings"
 )
 
@@ -16,10 +17,53 @@ const (
 	EB            = 1024 * PB
 )
 
-//十进制转换不确定进制
-//value:十进制数值
-//system:不确定进制数组
-//return;由十进制数据组成的数组
+func ParseSize(sizeStr string) SizeUnit {
+	sizeStr = strings.ToUpper(strings.TrimSpace(sizeStr))
+	if len(sizeStr) == 0 {
+		return 0
+	}
+	var size SizeUnit
+	var err error
+	if strings.HasSuffix(sizeStr, "KB") {
+		size, err = parseSize(sizeStr, KB)
+	} else if strings.HasSuffix(sizeStr, "MB") {
+		size, err = parseSize(sizeStr, MB)
+	} else if strings.HasSuffix(sizeStr, "GB") {
+		size, err = parseSize(sizeStr, GB)
+	} else if strings.HasSuffix(sizeStr, "TB") {
+		size, err = parseSize(sizeStr, TB)
+	} else if strings.HasSuffix(sizeStr, "PB") {
+		size, err = parseSize(sizeStr, PB)
+	} else if strings.HasSuffix(sizeStr, "EB") {
+		size, err = parseSize(sizeStr, EB)
+	} else {
+		value, err := strconv.ParseFloat(strings.TrimSpace(sizeStr), 64)
+		if err != nil {
+			return 0
+		}
+		return SizeUnit(value)
+	}
+	if err != nil {
+		return 0
+	}
+	return size
+}
+
+func parseSize(sizeStr string, unit SizeUnit) (size SizeUnit, err error) {
+	sizeStr = sizeStr[:len(sizeStr)-2]
+	sizeStr = strings.TrimSpace(sizeStr)
+	value, err := strconv.ParseFloat(sizeStr, 64)
+	if nil != err {
+		return 0, err
+	}
+	return SizeUnit(value * float64(unit)), nil
+}
+
+// SystemTo
+// 十进制转换不确定进制
+// value:十进制数值
+// system:不确定进制数组
+// return;由十进制数据组成的数组
 func SystemTo(value int, system []int) []int {
 	rs := make([]int, len(system))
 	temp := value
@@ -30,7 +74,8 @@ func SystemTo(value int, system []int) []int {
 	return rs
 }
 
-//十进制数 转为 26进制字符表示
+// System10To26
+// 十进制数 转为 26进制字符表示
 func System10To26(n int) string {
 	if 0 == n {
 		return ""
@@ -47,7 +92,8 @@ func System10To26(n int) string {
 	return s
 }
 
-//26进制字符 转为 十进制数
+// System26To10
+// 26进制字符 转为 十进制数
 func System26To10(s string) int {
 	if s == "" {
 		return 0

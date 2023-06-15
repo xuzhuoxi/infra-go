@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-03.
-//@author xuzhuoxi
+// Package mathx
+// Created by xuzhuoxi
+// on 2019-04-03.
+// @author xuzhuoxi
 //
 package mathx
 

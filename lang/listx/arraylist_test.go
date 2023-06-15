@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-04.
-//@author xuzhuoxi
+// Package listx
+// Created by xuzhuoxi
+// on 2019-04-04.
+// @author xuzhuoxi
 //
 package listx
 

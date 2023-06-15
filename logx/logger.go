@@ -1,12 +1,14 @@
 package logx
 
 import (
+	"github.com/xuzhuoxi/infra-go/filex"
 	"github.com/xuzhuoxi/infra-go/mathx"
+	"github.com/xuzhuoxi/infra-go/osxu"
 	"log"
 )
 
-type LogLevel uint8
 type LogType uint8
+type LogLevel uint8
 
 const (
 	LevelAll LogLevel = iota
@@ -20,13 +22,13 @@ const (
 )
 
 const (
-	//命令行
+	// TypeConsole 命令行
 	TypeConsole LogType = iota
-	//基于体积分割的文件日志
+	// TypeRollingFile 基于体积分割的文件日志
 	TypeRollingFile
-	//基于日期分割的文件日志
+	// TypeDailyFile 基于日期分割的文件日志
 	TypeDailyFile
-	//基于日期及体积分割的文件日志
+	// TypeDailyRollingFile 基于日期及体积分割的文件日志
 	TypeDailyRollingFile
 )
 
@@ -34,14 +36,40 @@ func DefaultLogger() ILogger {
 	return defaultLogger
 }
 
+type CfgLog struct {
+	LogType  LogType  `json:"type" yaml:"type"`
+	LogLevel LogLevel `json:"level" yaml:"level"`
+	LogPath  string   `json:"path" yaml:"path"`
+	LogSize  string   `json:"size" yaml:"size"`
+}
+
+func (o CfgLog) GetLogPath() string {
+	return filex.Combine(osxu.GetRunningDir(), o.LogPath)
+}
+
+func (o CfgLog) MaxSize() mathx.SizeUnit {
+	return mathx.ParseSize(o.LogSize)
+}
+
 type LogConfig struct {
-	Type        LogType
-	Level       LogLevel
-	Flag        int
-	FileDir     string
-	FileName    string
-	FileExtName string
+	Type        LogType  `json:"type" yaml:"type"`
+	Level       LogLevel `json:"level" yaml:"level"`
+	Flag        int      `json:"flag" yaml:"flag"`
+	FileDir     string   `json:"dir" yaml:"dir"`
+	FileName    string   `json:"name" yaml:"name"`
+	FileExtName string   `json:"ext" yaml:"ext"`
+	FilePath    string   `json:"path" yaml:"path"` // 这里有了就会覆盖FileDir,FileName,FileExtName属性
 	MaxSize     mathx.SizeUnit
+}
+
+func (o LogConfig) GetFileInfos() (fileDir, filename, fileExt string) {
+	if o.FilePath == "" {
+		return o.FileDir, o.FileName, o.FileExtName
+	} else {
+		dir, name := filex.Split(o.FilePath)
+		fn, fe, _ := filex.SplitFileName(name)
+		return dir, fn, fe
+	}
 }
 
 func SetColorFormat(enable bool) {
@@ -82,24 +110,26 @@ func (s *LoggerSupport) GetLogger() ILogger {
 }
 
 type ILogger interface {
-	//设置日志前缀
+	// SetPrefix 设置日志前缀
 	SetPrefix(prefix string)
-	//设置日志等级，只有大于等级设置等级的日志才会记录
-	//重置日志等级为level,t为空时重置全部
+	// SetLevel
+	// 设置日志等级，只有大于等级设置等级的日志才会记录
+	// 重置日志等级为level,t为空时重置全部
 	SetLevel(level LogLevel, t ...LogType)
 	// SetFlags sets the output flags for the logger.
-	//重置日志flag,t为空时重置全部
+	// 重置日志flag,t为空时重置全部
 	SetFlags(flag int, t ...LogType)
-	//配置Log,要求fileDir以"/"结尾
+	// SetConfig
+	// 配置Log,要求fileDir以"/"结尾
 	SetConfig(cfg LogConfig)
-	//移除配置
+	// RemoveConfig 移除配置
 	RemoveConfig(t LogType)
 
-	// 普通记录，忽略前缀
+	// Print 普通记录，忽略前缀
 	Print(v ...interface{})
-	// 普通记录，忽略前缀
+	// Printf 普通记录，忽略前缀
 	Printf(format string, v ...interface{})
-	// 普通记录，忽略前缀
+	// Println 普通记录，忽略前缀
 	Println(v ...interface{})
 
 	Log(level LogLevel, v ...interface{})

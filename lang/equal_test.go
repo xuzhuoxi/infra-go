@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-16.
-//@author xuzhuoxi
+// Package lang
+// Created by xuzhuoxi
+// on 2019-03-16.
+// @author xuzhuoxi
 //
 package lang
 

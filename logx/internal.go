@@ -109,10 +109,11 @@ func (l *logger) SetConfig(cfg LogConfig) {
 		}
 		return
 	}
-	if "" == cfg.FileDir {
+	fileDir, fileName, fileExt := cfg.GetFileInfos()
+	if "" == fileDir {
 		return
 	}
-	newFileDir := filex.FormatPath(cfg.FileDir)
+	newFileDir := filex.FormatPath(fileDir)
 	if !filex.IsExist(newFileDir) { //目标不存在，创建目录
 		os.MkdirAll(newFileDir, os.ModePerm)
 	}
@@ -120,12 +121,14 @@ func (l *logger) SetConfig(cfg LogConfig) {
 	if ok {
 		val.level = cfg.Level
 		val.fileDir = newFileDir
-		val.fileName = cfg.FileName
-		val.fileExtName = cfg.FileExtName
+		val.fileName = fileName
+		val.fileExtName = fileExt
 		val.maxSize = uint64(cfg.MaxSize)
 		val.logger.SetFlags(cfg.Flag)
 	} else {
-		l.infoMap[cfg.Type] = &logInfo{level: cfg.Level, fileDir: newFileDir, fileName: cfg.FileName, fileExtName: cfg.FileExtName, maxSize: uint64(cfg.MaxSize), logger: genLogger(l.defaultFlag)}
+		l.infoMap[cfg.Type] = &logInfo{level: cfg.Level,
+			fileDir: newFileDir, fileName: fileName, fileExtName: fileExt,
+			maxSize: uint64(cfg.MaxSize), logger: genLogger(l.defaultFlag)}
 	}
 	switch cfg.Type {
 	case TypeRollingFile:

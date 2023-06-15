@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-04-03.
-//@author xuzhuoxi
+// Package listx
+// Created by xuzhuoxi
+// on 2019-04-03.
+// @author xuzhuoxi
 //
 package listx
 
@@ -11,6 +11,7 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
+// NewLinkedList
 // 实例化一个基于链表实现的List
 // LinkedList
 func NewLinkedList() *LinkedList {
