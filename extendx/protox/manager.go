@@ -19,6 +19,9 @@ type IExtensionManager interface {
 	netx.IAddressProxySetter
 
 	// 初始化
+	// handlerContainer: 解包处理
+	// extensionContainer： 服务扩展
+	// sockSender: 消息发送器
 	InitManager(handlerContainer netx.IPackHandlerContainer, extensionContainer IProtocolExtensionContainer, sockSender netx.ISockSender)
 
 	// 开始运行

@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-25.
-//@author xuzhuoxi
+// Package jsonx
+// Created by xuzhuoxi
+// on 2019-03-25.
+// @author xuzhuoxi
 //
 package jsonx
 

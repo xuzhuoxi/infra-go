@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-25.
-//@author xuzhuoxi
+// Package gobx
+// Created by xuzhuoxi
+// on 2019-03-25.
+// @author xuzhuoxi
 //
 package gobx
 

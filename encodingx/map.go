@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-20.
-//@author xuzhuoxi
+// Package encodingx
+// Created by xuzhuoxi
+// on 2019-03-20.
+// @author xuzhuoxi
 //
 package encodingx
 
@@ -12,23 +12,24 @@ import (
 )
 
 type IKeyValue interface {
-	//序列化接口
+	// ICodingData
+	// 序列化接口
 	ICodingData
 
-	//键值对数量
+	// Len 键值对数量
 	Len() int
-	//设置键值
+	// Set 设置键值
 	Set(key string, value interface{}) (IKeyValue, bool)
-	//取值
+	// Get 取值
 	Get(key string) (interface{}, bool)
-	//删除键值
+	// Delete 删除键值
 	Delete(key string) (interface{}, bool)
-	//检查键值是否存在
+	// Check 检查键值是否存在
 	Check(key string) bool
 
-	//合并
+	// Merge 合并
 	Merge(vs IKeyValue) IKeyValue
-	//遍历
+	// ForEach 遍历
 	ForEach(handler func(key string, value interface{}))
 }
 
@@ -40,8 +41,9 @@ func NewCodingMap() CodingMap {
 
 type CodingMap map[string]interface{}
 
-//序列化
-//格式:
+// EncodeToBytes
+// 序列化
+// 格式:
 // 	Key + Value
 //	Key : string(uint16+[]byte)
 //	Value: Kind [+ Len] + Other

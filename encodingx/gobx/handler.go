@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-16.
-//@author xuzhuoxi
+// Package gobx
+// Created by xuzhuoxi
+// on 2019-02-16.
+// @author xuzhuoxi
 //
 package gobx
 
@@ -12,6 +12,7 @@ import (
 	"sync"
 )
 
+// NewGobCodingHandler
 // 由于复用buff，相同结构体只有第一次才会追加TypeDescriptor
 func NewGobCodingHandler() encodingx.ICodingHandler {
 	encoderBuff := bytes.NewBuffer(nil)
@@ -20,6 +21,7 @@ func NewGobCodingHandler() encodingx.ICodingHandler {
 		encoder: gob.NewEncoder(encoderBuff), decoder: gob.NewDecoder(decoderBuff)}
 }
 
+// NewGobCodingHandlerSync
 // 由于复用buff，相同结构体只有第一次才会追加TypeDescriptor
 func NewGobCodingHandlerSync() encodingx.ICodingHandler {
 	encoderBuff := bytes.NewBuffer(nil)
@@ -28,7 +30,8 @@ func NewGobCodingHandlerSync() encodingx.ICodingHandler {
 		encoder: gob.NewEncoder(encoderBuff), decoder: gob.NewDecoder(decoderBuff)}
 }
 
-//每次都会追加TypeDescriptor到编码中去
+// NewGobCodingHandlerAsync
+// 每次都会追加TypeDescriptor到编码中去
 func NewGobCodingHandlerAsync() encodingx.ICodingHandler {
 	return gobHandlerAsync{}
 }
@@ -42,9 +45,10 @@ type gobHandler struct {
 	decoder     *gob.Decoder
 }
 
-//把数据编码为[]byte
-//注意：返回的数据应该马上使用
-//因为：[]byte来源于buff的切片，再次执行会覆盖数据，导致上次的返回数据被修改
+// HandleEncode
+// 把数据编码为[]byte
+// 注意：返回的数据应该马上使用
+// 因为：[]byte来源于buff的切片，再次执行会覆盖数据，导致上次的返回数据被修改
 func (c *gobHandler) HandleEncode(data interface{}) []byte {
 	c.encoderBuff.Reset()
 	c.encoder.Encode(data)
@@ -69,9 +73,10 @@ type gobHandlerSync struct {
 	dMu         sync.RWMutex
 }
 
-//把数据编码为[]byte
-//注意：返回的数据应该马上使用
-//因为：[]byte来源于buff的切片，再次执行会覆盖数据，导致上次的返回数据被修改
+// HandleEncode
+// 把数据编码为[]byte
+// 注意：返回的数据应该马上使用
+// 因为：[]byte来源于buff的切片，再次执行会覆盖数据，导致上次的返回数据被修改
 func (c *gobHandlerSync) HandleEncode(data interface{}) []byte {
 	c.eMu.Lock()
 	defer c.eMu.Unlock()

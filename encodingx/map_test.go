@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-03-20.
-//@author xuzhuoxi
+// Package encodingx
+// Created by xuzhuoxi
+// on 2019-03-20.
+// @author xuzhuoxi
 //
 package encodingx
 

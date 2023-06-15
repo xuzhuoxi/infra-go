@@ -1,7 +1,7 @@
-//
-//Created by xuzhuoxi
-//on 2019-02-11.
-//@author xuzhuoxi
+// Package encodingx
+// Created by xuzhuoxi
+// on 2019-02-11.
+// @author xuzhuoxi
 //
 package encodingx
 
@@ -12,12 +12,12 @@ import (
 //-------------------------------
 
 type IEncodingData interface {
-	//序列化
+	// EncodeToBytes 序列化
 	EncodeToBytes() []byte
 }
 
 type IDecodingData interface {
-	//反序列化更新
+	// DecodeFromBytes 反序列化更新
 	DecodeFromBytes(bs []byte) bool
 }
 
