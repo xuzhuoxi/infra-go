@@ -52,9 +52,9 @@ func ParseSize(sizeStr string) SizeUnit {
 func parseSize(sizeStr string, unit SizeUnit) (size SizeUnit, err error) {
 	sizeStr = sizeStr[:len(sizeStr)-2]
 	sizeStr = strings.TrimSpace(sizeStr)
-	value, err := strconv.ParseFloat(sizeStr, 64)
-	if nil != err {
-		return 0, err
+	value, err1 := strconv.ParseFloat(sizeStr, 64)
+	if nil != err1 {
+		return 0, err1
 	}
 	return SizeUnit(value * float64(unit)), nil
 }
