@@ -43,7 +43,7 @@ type CfgLog struct {
 	LogSize  string   `json:"size" yaml:"size"`
 }
 
-func (o CfgLog) GetLogPath() string {
+func (o CfgLog) GetAbsLogPath() string {
 	return filex.Combine(osxu.GetRunningDir(), o.LogPath)
 }
 
@@ -51,15 +51,21 @@ func (o CfgLog) MaxSize() mathx.SizeUnit {
 	return mathx.ParseSize(o.LogSize)
 }
 
+func (o CfgLog) ToLogConfig() LogConfig {
+	return LogConfig{Type: o.LogType, Level: o.LogLevel,
+		FilePath: o.GetAbsLogPath(),
+		MaxSize:  o.MaxSize()}
+}
+
 type LogConfig struct {
-	Type        LogType  `json:"type" yaml:"type"`
-	Level       LogLevel `json:"level" yaml:"level"`
-	Flag        int      `json:"flag" yaml:"flag"`
-	FileDir     string   `json:"dir" yaml:"dir"`
-	FileName    string   `json:"name" yaml:"name"`
-	FileExtName string   `json:"ext" yaml:"ext"`
-	FilePath    string   `json:"path" yaml:"path"` // 这里有了就会覆盖FileDir,FileName,FileExtName属性
-	MaxSize     mathx.SizeUnit
+	Type        LogType        `json:"type" yaml:"type"`
+	Level       LogLevel       `json:"level" yaml:"level"`
+	Flag        int            `json:"flag,omitempty" yaml:"flag,omitempty"`
+	FileDir     string         `json:"dir" yaml:"dir"`
+	FileName    string         `json:"name" yaml:"name"`
+	FileExtName string         `json:"ext" yaml:"ext"`   // 要带"."
+	FilePath    string         `json:"path" yaml:"path"` // 这里有了就会覆盖FileDir,FileName,FileExtName属性
+	MaxSize     mathx.SizeUnit `json:"size,omitempty" yaml:"size,omitempty"`
 }
 
 func (o LogConfig) GetFileInfos() (fileDir, filename, fileExt string) {
