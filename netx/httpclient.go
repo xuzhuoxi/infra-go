@@ -1,9 +1,7 @@
 package netx
 
 import (
-	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -11,38 +9,42 @@ import (
 
 type ReqCallBack func(res *http.Response, body *[]byte)
 
-func HttpGet(url string, cb ReqCallBack) {
+func HttpGet(url string, cb ReqCallBack) error {
 	resp, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
-		return
+		//fmt.Println("HttpGet Err:", err)
+		return err
 	}
 	defer resp.Body.Close()
-	handleResponse(resp, cb)
+	return handleResponse(resp, cb)
 }
 
-func HttpPost(url, contentType string, body io.Reader, cb ReqCallBack) {
+func HttpPost(url, contentType string, body io.Reader, cb ReqCallBack) error {
 	resp, err := http.Post(url, contentType, body)
 	if err != nil {
-		log.Fatal(err)
-		return
+		//fmt.Println("HttpPost Err:", err)
+		return err
 	}
 	defer resp.Body.Close()
-	handleResponse(resp, cb)
+	return handleResponse(resp, cb)
 }
 
-func HttpPostString(url, body string, cb ReqCallBack) {
-	HttpPost(url, "application/x-www-form-urlencoded", strings.NewReader(body), cb)
+func HttpPostString(url, body string, cb ReqCallBack) error {
+	return HttpPost(url, "application/x-www-form-urlencoded", strings.NewReader(body), cb)
 }
 
-func HttpPostForm(url string, data url.Values, cb ReqCallBack) {
+func HttpPostForm(url string, data url.Values, cb ReqCallBack) error {
 	resp, err := http.PostForm(url, data)
 	if err != nil {
-		log.Fatal(err)
-		return
+		//fmt.Println("HttpPostForm Err:", err)
+		return err
 	}
 	defer resp.Body.Close()
-	handleResponse(resp, cb)
+	err = handleResponse(resp, cb)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 //func Do(url, contentType, body string, cb ReqCallBack) {
@@ -58,15 +60,15 @@ func HttpPostForm(url string, data url.Values, cb ReqCallBack) {
 //	handleResponse(resp, cb)
 //}
 
-func handleResponse(resp *http.Response, cb ReqCallBack) {
+func handleResponse(resp *http.Response, cb ReqCallBack) error {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
-		return
+		//fmt.Println("handleResponse Err:", err)
+		return err
 	}
-	if nil != cb {
-		cb(resp, &body)
-	} else {
-		fmt.Println(string(body))
+	if nil == cb {
+		return nil
 	}
+	cb(resp, &body)
+	return nil
 }
