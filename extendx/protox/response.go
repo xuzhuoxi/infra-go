@@ -84,14 +84,14 @@ func (resp *SockResponse) SetParamInfo(paramType ExtensionParamType, paramHandle
 
 func (resp *SockResponse) SendBinaryResponse(data ...[]byte) error {
 	resp.setHeader()
-	resp.writeBinary(data...)
+	resp.setBinaryData(data...)
 	msg := resp.BuffToBlock.ReadBytes()
 	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
 func (resp *SockResponse) SendBinaryResponseToClient(clientId string, data ...[]byte) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
 		resp.setHeader()
-		resp.writeBinary(data...)
+		resp.setBinaryData(data...)
 		msg := resp.BuffToBlock.ReadBytes()
 		return resp.SockSender.SendPackTo(msg, address)
 	}
@@ -100,61 +100,47 @@ func (resp *SockResponse) SendBinaryResponseToClient(clientId string, data ...[]
 
 func (resp *SockResponse) SendStringResponse(data ...string) error {
 	resp.setHeader()
-	resp.writeString()
-	msg, err := resp.makePackMessage(data)
+	err := resp.setStringData(data...)
 	if nil != err {
 		return err
 	}
+	msg := resp.BuffToBlock.ReadBytes()
 	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
 func (resp *SockResponse) SendStringResponseToClient(clientId string, data ...string) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		msg, err := resp.makePackMessage(data)
+		resp.setHeader()
+		err := resp.setStringData(data...)
 		if nil != err {
 			return err
 		}
-		resp.SockSender.SendPackTo(msg, address)
+		msg := resp.BuffToBlock.ReadBytes()
+		return resp.SockSender.SendPackTo(msg, address)
 	}
 	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
 }
 
 func (resp *SockResponse) SendObjectResponse(data ...interface{}) error {
-	msg, err := resp.makePackMessage(data)
+	resp.setHeader()
+	err := resp.setObjectData(data...)
 	if nil != err {
 		return err
 	}
-	resp.SockSender.SendPackTo(msg, resp.CAddress)
+	msg := resp.BuffToBlock.ReadBytes()
+	return resp.SockSender.SendPackTo(msg, resp.CAddress)
+
 }
 func (resp *SockResponse) SendObjectResponseToClient(clientId string, data ...interface{}) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		msg, err := resp.makePackMessage(data)
+		resp.setHeader()
+		err := resp.setObjectData(data...)
 		if nil != err {
 			return err
 		}
-		resp.SockSender.SendPackTo(msg, address)
+		msg := resp.BuffToBlock.ReadBytes()
+		return resp.SockSender.SendPackTo(msg, address)
 	}
 	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
-}
-
-func (resp *SockResponse) makePackMessage(data interface{}) (bs []byte, err error) {
-	resp.setHeader()
-	switch t := data.(type) {
-	case [][]byte:
-		fmt.Println("666:", resp.ParamHandler)
-		fmt.Println("777:", t)
-		for index := range t {
-			resp.BuffToBlock.WriteData(resp.ParamHandler.HandleResponseParam(t[index]))
-		}
-	case []string:
-		for index := range t {
-			resp.BuffToBlock.WriteData(resp.ParamHandler.HandleResponseParam(t[index]))
-		}
-	case []interface{}:
-		for index := range t {
-			resp.BuffToBlock.WriteData(resp.ParamHandler.HandleResponseParam(t[index]))
-		}
-	}
-	return resp.BuffToBlock.ReadBytes(), nil
 }
 
 func (resp *SockResponse) setHeader() {
@@ -164,7 +150,7 @@ func (resp *SockResponse) setHeader() {
 	resp.BuffToBlock.WriteString(resp.CId)
 }
 
-func (resp *SockResponse) writeBinary(data ...[]byte) {
+func (resp *SockResponse) setBinaryData(data ...[]byte) {
 	if len(data) == 0 {
 		return
 	}
@@ -173,7 +159,7 @@ func (resp *SockResponse) writeBinary(data ...[]byte) {
 	}
 }
 
-func (resp *SockResponse) writeString(data ...string) error {
+func (resp *SockResponse) setStringData(data ...string) error {
 	if len(data) == 0 {
 		return nil
 	}
@@ -187,7 +173,7 @@ func (resp *SockResponse) writeString(data ...string) error {
 	return nil
 }
 
-func (resp *SockResponse) writeObject(data ...interface{}) error {
+func (resp *SockResponse) setObjectData(data ...interface{}) error {
 	if len(data) == 0 {
 		return nil
 	}
