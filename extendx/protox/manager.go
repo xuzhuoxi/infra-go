@@ -183,7 +183,7 @@ func (m *ExtensionManager) OnMessageUnpack(msgData []byte, senderAddress string,
 // block1 : pid	utf8
 // block2 : uid	utf8
 // [n]其它信息
-func (m *ExtensionManager) ParseMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte) {
+func (m *ExtensionManager) ParseMessage(msgBytes []byte) (extName string, pid string, uid string, data [][]byte) {
 	if nil != m.FuncParseMessage {
 		return m.FuncParseMessage(msgBytes)
 	}
@@ -192,9 +192,9 @@ func (m *ExtensionManager) ParseMessage(msgBytes []byte) (name string, pid strin
 	defer bytex.DefaultPoolBuffToData.Recycle(buffToData)
 
 	buffToData.WriteBytes(msgBytes)
-	name = string(buffToData.ReadData())
-	pid = string(buffToData.ReadData())
-	uid = string(buffToData.ReadData())
+	extName = buffToData.ReadString()
+	pid = buffToData.ReadString()
+	uid = buffToData.ReadString()
 	if buffToData.Len() > 0 {
 		for buffToData.Len() > 0 {
 			n, d := buffToData.ReadDataTo(msgBytes[index:]) //由于msgBytes前部分数据已经处理完成，可以利用这部分空间
@@ -207,7 +207,7 @@ func (m *ExtensionManager) ParseMessage(msgBytes []byte) (name string, pid strin
 			index += n
 		}
 	}
-	return name, pid, uid, data
+	return extName, pid, uid, data
 }
 
 func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProtocolExtension, ok bool) {
@@ -247,7 +247,7 @@ func (m *ExtensionManager) GenParams(extension IProtocolExtension, senderAddress
 }
 
 func (m *ExtensionManager) DoRequest(extension IProtocolExtension, request IExtensionRequest, response IExtensionResponse) {
-	//响应处理
+	// 响应处理
 	if be, ok := extension.(IBeforeRequestExtension); ok { //前置处理
 		be.BeforeRequest(request)
 	}

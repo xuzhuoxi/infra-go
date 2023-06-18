@@ -6,6 +6,8 @@
 package protox
 
 import (
+	"errors"
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/bytex"
 	"github.com/xuzhuoxi/infra-go/netx"
 )
@@ -25,30 +27,30 @@ type IExtensionBinaryResponse interface {
 	IExtensionResponse
 	// SendBinaryResponse
 	// 响应客户端(二进制参数)
-	SendBinaryResponse(data ...[]byte)
+	SendBinaryResponse(data ...[]byte) error
 	// SendBinaryResponseToClient
 	// 响应指定客户端(二进制参数)
-	SendBinaryResponseToClient(clientId string, data ...[]byte)
+	SendBinaryResponseToClient(clientId string, data ...[]byte) error
 }
 
-type IExtensionJsonResponse interface {
+type IExtensionStringResponse interface {
 	IExtensionResponse
-	// SendJsonResponse
+	// SendStringResponse
 	// 响应客户端(Json字符串参数)
-	SendJsonResponse(data ...string)
-	// SendJsonResponseToClient
+	SendStringResponse(data ...string) error
+	// SendStringResponseToClient
 	// 响应指定客户端(Json字符串参数)
-	SendJsonResponseToClient(clientId string, data ...string)
+	SendStringResponseToClient(clientId string, data ...string) error
 }
 
 type IExtensionObjectResponse interface {
 	IExtensionResponse
 	// SendObjectResponse
 	// 响应客户端(具体结构体参数)
-	SendObjectResponse(data ...interface{})
+	SendObjectResponse(data ...interface{}) error
 	// SendObjectResponseToClient
 	// 响应指定客户端(具体结构体参数)
-	SendObjectResponseToClient(clientId string, data ...interface{})
+	SendObjectResponseToClient(clientId string, data ...interface{}) error
 }
 
 //-----------------
@@ -80,46 +82,66 @@ func (resp *SockResponse) SetParamInfo(paramType ExtensionParamType, paramHandle
 	resp.ParamType, resp.ParamHandler = paramType, paramHandler
 }
 
-func (resp *SockResponse) SendBinaryResponse(data ...[]byte) {
-	msg := resp.makePackMessage(data)
-	resp.SockSender.SendPackTo(msg, resp.CAddress)
+func (resp *SockResponse) SendBinaryResponse(data ...[]byte) error {
+	resp.setHeader()
+	resp.writeBinary(data...)
+	msg := resp.BuffToBlock.ReadBytes()
+	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
-func (resp *SockResponse) SendBinaryResponseToClient(clientId string, data ...[]byte) {
+func (resp *SockResponse) SendBinaryResponseToClient(clientId string, data ...[]byte) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		msg := resp.makePackMessage(data)
-		resp.SockSender.SendPackTo(msg, address)
+		resp.setHeader()
+		resp.writeBinary(data...)
+		msg := resp.BuffToBlock.ReadBytes()
+		return resp.SockSender.SendPackTo(msg, address)
 	}
+	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
 }
 
-func (resp *SockResponse) SendJsonResponse(data ...string) {
-	msg := resp.makePackMessage(data)
-	resp.SockSender.SendPackTo(msg, resp.CAddress)
+func (resp *SockResponse) SendStringResponse(data ...string) error {
+	resp.setHeader()
+	resp.writeString()
+	msg, err := resp.makePackMessage(data)
+	if nil != err {
+		return err
+	}
+	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
-func (resp *SockResponse) SendJsonResponseToClient(clientId string, data ...string) {
+func (resp *SockResponse) SendStringResponseToClient(clientId string, data ...string) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		msg := resp.makePackMessage(data)
+		msg, err := resp.makePackMessage(data)
+		if nil != err {
+			return err
+		}
 		resp.SockSender.SendPackTo(msg, address)
 	}
+	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
 }
 
-func (resp *SockResponse) SendObjectResponse(data ...interface{}) {
-	msg := resp.makePackMessage(data)
+func (resp *SockResponse) SendObjectResponse(data ...interface{}) error {
+	msg, err := resp.makePackMessage(data)
+	if nil != err {
+		return err
+	}
 	resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
-func (resp *SockResponse) SendObjectResponseToClient(clientId string, data ...interface{}) {
+func (resp *SockResponse) SendObjectResponseToClient(clientId string, data ...interface{}) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		msg := resp.makePackMessage(data)
+		msg, err := resp.makePackMessage(data)
+		if nil != err {
+			return err
+		}
 		resp.SockSender.SendPackTo(msg, address)
 	}
+	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
 }
 
-func (resp *SockResponse) makePackMessage(data interface{}) []byte {
-	resp.BuffToBlock.Reset()
-	resp.BuffToBlock.WriteData([]byte(resp.EName))
-	resp.BuffToBlock.WriteData([]byte(resp.PId))
-	resp.BuffToBlock.WriteData([]byte(resp.CId))
+func (resp *SockResponse) makePackMessage(data interface{}) (bs []byte, err error) {
+	resp.setHeader()
 	switch t := data.(type) {
 	case [][]byte:
+		fmt.Println("666:", resp.ParamHandler)
+		fmt.Println("777:", t)
 		for index := range t {
 			resp.BuffToBlock.WriteData(resp.ParamHandler.HandleResponseParam(t[index]))
 		}
@@ -132,7 +154,51 @@ func (resp *SockResponse) makePackMessage(data interface{}) []byte {
 			resp.BuffToBlock.WriteData(resp.ParamHandler.HandleResponseParam(t[index]))
 		}
 	}
-	return resp.BuffToBlock.ReadBytes()
+	return resp.BuffToBlock.ReadBytes(), nil
+}
+
+func (resp *SockResponse) setHeader() {
+	resp.BuffToBlock.Reset()
+	resp.BuffToBlock.WriteString(resp.EName)
+	resp.BuffToBlock.WriteString(resp.PId)
+	resp.BuffToBlock.WriteString(resp.CId)
+}
+
+func (resp *SockResponse) writeBinary(data ...[]byte) {
+	if len(data) == 0 {
+		return
+	}
+	for index := range data {
+		resp.BuffToBlock.WriteData(data[index])
+	}
+}
+
+func (resp *SockResponse) writeString(data ...string) error {
+	if len(data) == 0 {
+		return nil
+	}
+	if resp.ParamHandler == nil {
+		return errors.New("SendStringResponse Error: ParamHandler is nil! ")
+	}
+	for index := range data {
+		bs := resp.ParamHandler.HandleResponseParam(data[index])
+		resp.BuffToBlock.WriteData(bs)
+	}
+	return nil
+}
+
+func (resp *SockResponse) writeObject(data ...interface{}) error {
+	if len(data) == 0 {
+		return nil
+	}
+	if resp.ParamHandler == nil {
+		return errors.New("SendObjectResponse Error: ParamHandler is nil! ")
+	}
+	for index := range data {
+		bs := resp.ParamHandler.HandleResponseParam(data[index])
+		resp.BuffToBlock.WriteData(bs)
+	}
+	return nil
 }
 
 //-----------------

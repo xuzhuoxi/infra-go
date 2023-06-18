@@ -47,8 +47,8 @@ func (s *ProtocolExtensionSupport) SetRequestHandler(protoId string, handler Ext
 func (s *ProtocolExtensionSupport) SetRequestHandlerBinary(protoId string, handler ExtensionHandlerBinaryParam) {
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Binary, ExtensionHandler: handler}
 }
-func (s *ProtocolExtensionSupport) SetRequestHandlerJson(protoId string, handler ExtensionHandlerJsonParam) {
-	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Json, ExtensionHandler: handler, ParamHandler: NewProtocolJsonParamsHandler()}
+func (s *ProtocolExtensionSupport) SetRequestHandlerString(protoId string, handler ExtensionHandlerStringParam) {
+	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: String, ExtensionHandler: handler, ParamHandler: NewProtoStringParamsHandler()}
 }
 func (s *ProtocolExtensionSupport) SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam, ObjectOrigin interface{}, paramHandler IProtocolParamsHandler) {
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Object, ExtensionHandler: handler, ParamOrigin: ObjectOrigin, ParamHandler: paramHandler}
@@ -66,9 +66,9 @@ func (s *ProtocolExtensionSupport) OnRequest(resp IExtensionResponse, req IExten
 	case Binary:
 		handler := info.ExtensionHandler.(ExtensionHandlerBinaryParam)
 		handler(resp.(IExtensionBinaryResponse), req.(IExtensionBinaryRequest))
-	case Json:
-		handler := info.ExtensionHandler.(ExtensionHandlerJsonParam)
-		handler(resp.(IExtensionJsonResponse), req.(IExtensionJsonRequest))
+	case String:
+		handler := info.ExtensionHandler.(ExtensionHandlerStringParam)
+		handler(resp.(IExtensionStringResponse), req.(IExtensionStringRequest))
 	case Object:
 		handler := info.ExtensionHandler.(ExtensionHandlerObjectParam)
 		handler(resp.(IExtensionObjectResponse), req.(IExtensionObjectRequest))

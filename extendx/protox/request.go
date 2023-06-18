@@ -23,13 +23,13 @@ type IExtensionBinaryRequest interface {
 	RequestBinaryData() [][]byte
 }
 
-// IExtensionJsonRequest
+// IExtensionStringRequest
 // 数据参数为Json的请求对象参数集合接口
-type IExtensionJsonRequest interface {
+type IExtensionStringRequest interface {
 	IExtensionRequest
-	// RequestJsonData
-	// 请求的参数数据(Json)
-	RequestJsonData() []string
+	// RequestStringData
+	// 请求的参数数据(String)
+	RequestStringData() []string
 }
 
 // IExtensionObjectRequest
@@ -51,22 +51,22 @@ type SockRequest struct {
 	ExtensionHeader
 
 	BinaryData [][]byte
-	JsonData   []string
+	StringData []string
 	ObjectData []interface{}
 }
 
 func (req *SockRequest) SetRequestData(paramType ExtensionParamType, paramHandler IProtocolParamsHandler, data [][]byte) {
 	switch paramType {
 	case None:
-		req.BinaryData, req.JsonData, req.ObjectData = nil, nil, nil
+		req.BinaryData, req.StringData, req.ObjectData = nil, nil, nil
 	case Binary:
-		req.BinaryData, req.JsonData, req.ObjectData = data, nil, nil
-	case Json:
+		req.BinaryData, req.StringData, req.ObjectData = data, nil, nil
+	case String:
 		objData := paramHandler.HandleRequestParams(data)
-		req.BinaryData, req.JsonData, req.ObjectData = nil, req.toJsonArray(objData), nil
+		req.BinaryData, req.StringData, req.ObjectData = nil, req.toStringArray(objData), nil
 	case Object:
 		objData := paramHandler.HandleRequestParams(data)
-		req.BinaryData, req.JsonData, req.ObjectData = nil, nil, objData
+		req.BinaryData, req.StringData, req.ObjectData = nil, nil, objData
 	}
 }
 
@@ -74,15 +74,15 @@ func (req *SockRequest) RequestBinaryData() [][]byte {
 	return req.BinaryData
 }
 
-func (req *SockRequest) RequestJsonData() []string {
-	return req.JsonData
+func (req *SockRequest) RequestStringData() []string {
+	return req.StringData
 }
 
 func (req *SockRequest) RequestObjectData() []interface{} {
 	return req.ObjectData
 }
 
-func (req *SockRequest) toJsonArray(objArr []interface{}) []string {
+func (req *SockRequest) toStringArray(objArr []interface{}) []string {
 	if nil == objArr || len(objArr) == 0 {
 		return nil
 	}

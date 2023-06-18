@@ -30,36 +30,34 @@ type IProtocolParamsHandler interface {
 
 //----------------------------
 
-func NewProtocolJsonParamsHandler() IProtocolParamsHandler {
-	return &ProtocolJsonParamsHandler{}
+func NewProtoStringParamsHandler() IProtocolParamsHandler {
+	return &ProtoStringParamsHandler{}
 }
 
-type ProtocolJsonParamsHandler struct{}
+type ProtoStringParamsHandler struct{}
 
-func (h *ProtocolJsonParamsHandler) SetCodingHandler(handler encodingx.ICodingHandler) {
+func (h *ProtoStringParamsHandler) SetCodingHandler(handler encodingx.ICodingHandler) {
 	return
 }
 
-func (h *ProtocolJsonParamsHandler) HandleRequestParam(data []byte) interface{} {
+func (h *ProtoStringParamsHandler) HandleRequestParam(data []byte) interface{} {
 	return string(data)
 }
-func (h *ProtocolJsonParamsHandler) HandleRequestParams(data [][]byte) []interface{} {
+func (h *ProtoStringParamsHandler) HandleRequestParams(data [][]byte) []interface{} {
 	var objData []interface{}
 	for index := range data {
-		objData = append(objData, string(data[index]))
+		objData = append(objData, h.HandleRequestParam(data[index]))
 	}
 	return objData
 }
 
-func (h *ProtocolJsonParamsHandler) HandleResponseParam(data interface{}) []byte {
+func (h *ProtoStringParamsHandler) HandleResponseParam(data interface{}) []byte {
 	return []byte(data.(string))
 }
-func (h *ProtocolJsonParamsHandler) HandleResponseParams(data []interface{}) [][]byte {
+func (h *ProtoStringParamsHandler) HandleResponseParams(data []interface{}) [][]byte {
 	var byteData [][]byte
-	var str string
 	for index := range data {
-		str = data[index].(string)
-		byteData = append(byteData, []byte(str))
+		byteData = append(byteData, h.HandleResponseParam(data[index]))
 	}
 	return byteData
 }

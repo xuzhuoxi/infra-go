@@ -16,7 +16,7 @@ type ExtensionParamType int
 const (
 	None ExtensionParamType = iota
 	Binary
-	Json
+	String
 	Object
 )
 
@@ -28,9 +28,9 @@ type ExtensionHandlerNoneParam func(resp IExtensionResponse, req IExtensionReque
 // Extension响应函数－二进制参数
 type ExtensionHandlerBinaryParam func(resp IExtensionBinaryResponse, req IExtensionBinaryRequest)
 
-// ExtensionHandlerJsonParam
-// Extension响应函数－Json参数
-type ExtensionHandlerJsonParam func(resp IExtensionJsonResponse, req IExtensionJsonRequest)
+// ExtensionHandlerStringParam
+// Extension响应函数－字符串参数
+type ExtensionHandlerStringParam func(resp IExtensionStringResponse, req IExtensionStringRequest)
 
 // ExtensionHandlerObjectParam
 // Extension响应函数－具体对象参数
@@ -76,9 +76,9 @@ type IRequestExtensionSetter interface {
 	// SetRequestHandlerBinary
 	// 设置请求响应处理(字节数组参数)
 	SetRequestHandlerBinary(protoId string, handler ExtensionHandlerBinaryParam)
-	// SetRequestHandlerJson
-	// 设置请求响应处理(Json参数)
-	SetRequestHandlerJson(protoId string, handler ExtensionHandlerJsonParam)
+	// SetRequestHandlerString
+	// 设置请求响应处理(字符串参数)
+	SetRequestHandlerString(protoId string, handler ExtensionHandlerStringParam)
 	// SetRequestHandlerObject
 	//设置请求响应处理(对象参数)
 	SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam, paramOrigin interface{}, paramHandler IProtocolParamsHandler)

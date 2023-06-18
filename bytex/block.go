@@ -9,12 +9,6 @@ import (
 	"encoding/binary"
 )
 
-type HandlerDataToBlock func(data []byte, order binary.ByteOrder) (block []byte)
-
-// HandlerBlockToData
-// 数据数组 + Block长度 + 成功?
-type HandlerBlockToData func(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool)
-
 // DefaultDataToBlockHandler
 // block是安全的
 func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byte) {
@@ -47,45 +41,6 @@ func DefaultBlockToDataHandler(block []byte, order binary.ByteOrder) (data []byt
 }
 
 //----------------------------------------------------------
-
-type iOrderSetter interface {
-	SetOrder(order binary.ByteOrder)
-}
-
-type iOrderGetter interface {
-	GetOrder() binary.ByteOrder
-}
-
-type iToBlockHandler interface {
-	//对数据封装上长度
-	DataToBlock(data []byte) (block []byte)
-	SetDataToBlockHandler(handler HandlerDataToBlock)
-}
-
-type iToDataHandler interface {
-	//拆分一个数据出来
-	BlockToData(block []byte) (data []byte, length int, ok bool)
-	SetBlockToDataHandler(handler HandlerBlockToData)
-}
-
-type IDataToBlockHandler interface {
-	iOrderSetter
-	iOrderGetter
-	iToBlockHandler
-}
-
-type IBlockToDataHandler interface {
-	iOrderSetter
-	iOrderGetter
-	iToDataHandler
-}
-
-type IDataBlockHandler interface {
-	iOrderSetter
-	iOrderGetter
-	iToBlockHandler
-	iToDataHandler
-}
 
 func NewDefaultDataBlockHandler() IDataBlockHandler {
 	return newDataBlockHandler(DefaultOrder, DefaultDataToBlockHandler, DefaultBlockToDataHandler)
@@ -131,10 +86,10 @@ func (h *dataBlockHandler) GetOrder() binary.ByteOrder {
 	return h.order
 }
 
-func (h dataBlockHandler) DataToBlock(data []byte) (block []byte) {
+func (h *dataBlockHandler) DataToBlock(data []byte) (block []byte) {
 	return h.data2Block(data, h.order)
 }
 
-func (h dataBlockHandler) BlockToData(block []byte) (data []byte, length int, ok bool) {
+func (h *dataBlockHandler) BlockToData(block []byte) (data []byte, length int, ok bool) {
 	return h.block2Data(block, h.order)
 }
