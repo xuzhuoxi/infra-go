@@ -56,69 +56,73 @@ type SockClientBase struct {
 	PackHandler IPackHandlerContainer
 }
 
-func (c *SockClientBase) SetName(name string) {
-	c.Name = name
+func (o *SockClientBase) SetName(name string) {
+	o.Name = name
 }
 
-func (c *SockClientBase) GetName() string {
-	return c.Name
+func (o *SockClientBase) GetName() string {
+	return o.Name
 }
 
-func (c *SockClientBase) GetPackHandlerContainer() IPackHandlerContainer {
-	c.ClientMu.RLock()
-	defer c.ClientMu.RUnlock()
-	return c.PackHandler
+func (o *SockClientBase) GetPackHandlerContainer() IPackHandlerContainer {
+	o.ClientMu.RLock()
+	defer o.ClientMu.RUnlock()
+	return o.PackHandler
 }
 
-func (c *SockClientBase) SetPackHandlerContainer(packHandler IPackHandlerContainer) {
-	c.ClientMu.Lock()
-	defer c.ClientMu.Unlock()
-	c.PackHandler = packHandler
-	if c.PackProxy != nil {
-		c.PackProxy.SetPackHandlerContainer(c.PackHandler)
+func (o *SockClientBase) SetPackHandlerContainer(packHandler IPackHandlerContainer) {
+	o.ClientMu.Lock()
+	defer o.ClientMu.Unlock()
+	o.PackHandler = packHandler
+	if o.PackProxy != nil {
+		o.PackProxy.SetPackHandlerContainer(o.PackHandler)
 	}
 }
 
-func (c *SockClientBase) LocalAddress() string {
-	return c.Conn.LocalAddr().String()
+func (o *SockClientBase) LocalAddress() string {
+	return o.Conn.LocalAddr().String()
 }
 
-func (c *SockClientBase) IsReceiving() bool {
-	return c.PackProxy.IsReceiving()
+func (o *SockClientBase) IsReceiving() bool {
+	return o.PackProxy.IsReceiving()
 }
 
-func (c *SockClientBase) IsOpening() bool {
-	c.ClientMu.RLock()
-	defer c.ClientMu.RUnlock()
-	return c.Opening
+func (o *SockClientBase) IsOpening() bool {
+	o.ClientMu.RLock()
+	defer o.ClientMu.RUnlock()
+	return o.Opening
 }
 
-func (c *SockClientBase) GetLogger() logx.ILogger {
-	return c.Logger
+func (o *SockClientBase) GetLogger() logx.ILogger {
+	return o.Logger
 }
 
-func (s *SockClientBase) SetLogger(logger logx.ILogger) {
-	s.Logger = logger
+func (o *SockClientBase) SetLogger(logger logx.ILogger) {
+	o.Logger = logger
 }
 
-func (c *SockClientBase) SendPackTo(msg []byte, rAddress ...string) error {
-	_, err := c.PackProxy.SendPack(msg, rAddress...)
+func (o *SockClientBase) SendPackTo(msg []byte, rAddress ...string) error {
+	_, err := o.PackProxy.SendPack(msg, rAddress...)
 	return err
 }
 
-func (c *SockClientBase) SendBytesTo(bytes []byte, rAddress ...string) error {
-	_, err := c.PackProxy.SendBytes(bytes, rAddress...)
+func (o *SockClientBase) SendBytesTo(bytes []byte, rAddress ...string) error {
+	_, err := o.PackProxy.SendBytes(bytes, rAddress...)
 	return err
 }
 
-func (c *SockClientBase) StartReceiving() error {
-	c.Logger.Infoln(c.Name + ".StartReceiving()")
-	err := c.PackProxy.StartReceiving()
+func (o *SockClientBase) StartReceiving() error {
+	if nil != o.Logger {
+		o.Logger.Infoln(o.Name + ".StartReceiving()")
+	}
+	err := o.PackProxy.StartReceiving()
 	return err
 }
 
-func (c *SockClientBase) StopReceiving() error {
-	c.Logger.Infoln(c.Name + ".StopReceiving()")
-	err := c.PackProxy.StopReceiving()
+func (o *SockClientBase) StopReceiving() error {
+	if nil != o.Logger {
+		o.Logger.Infoln(o.Name + ".StopReceiving()")
+	}
+	err := o.PackProxy.StopReceiving()
 	return err
 }

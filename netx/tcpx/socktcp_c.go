@@ -1,6 +1,7 @@
 package tcpx
 
 import (
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"github.com/xuzhuoxi/infra-go/netx"
@@ -51,7 +52,7 @@ type TCPClient struct {
 }
 
 func (c *TCPClient) OpenClient(params netx.SockParams) error {
-	funcName := "TCPClient.OpenClient"
+	funcName := fmt.Sprintf("%s.OpenClient", c.Name)
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if "" != params.Network {
@@ -70,7 +71,7 @@ func (c *TCPClient) OpenClient(params netx.SockParams) error {
 }
 
 func (c *TCPClient) CloseClient() error {
-	funcName := "TCPClient.CloseClient"
+	funcName := fmt.Sprintf("%s.CloseClient", c.Name)
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if !c.Opening {

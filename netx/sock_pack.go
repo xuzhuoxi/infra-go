@@ -14,6 +14,7 @@ type iPackReceiver interface {
 	IPackHandlerContainerGetter
 	// StartReceiving
 	// 开始接收数据
+	// 这里一般会阻塞，应该使用协程进行调用
 	StartReceiving() error
 	// StopReceiving
 	// 停止接收数据
