@@ -46,7 +46,7 @@ func (o *ServiceConfig) ContainsService(name string) bool {
 }
 
 // GetServiceImpl
-// Take the specified server implementation object
+// Take the specified service implementation object
 // 取指定服务器实现对象，
 func (o *ServiceConfig) GetServiceImpl(name string) IService {
 	return o.FindServiceInfo(name).impl
