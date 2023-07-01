@@ -6,6 +6,7 @@
 package encodingx
 
 import (
+	"errors"
 	"unsafe"
 )
 
@@ -25,10 +26,12 @@ func (*utf8StringHandler) HandleEncode(data interface{}) []byte {
 	return nil
 }
 
-func (*utf8StringHandler) HandleDecode(bytes []byte, data interface{}) {
+func (*utf8StringHandler) HandleDecode(bytes []byte, data interface{}) error {
 	if _, ok := data.(*string); ok {
 		data = string(bytes)
+		return nil
 	}
+	return errors.New("data is not string type! ")
 }
 
 //-------------------------------

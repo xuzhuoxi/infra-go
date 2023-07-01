@@ -115,7 +115,7 @@ func (s *LoggerSupport) GetLogger() ILogger {
 	return s.logger
 }
 
-type ILogger interface {
+type ILoggerSettings interface {
 	// SetPrefix 设置日志前缀
 	SetPrefix(prefix string)
 	// SetLevel
@@ -130,7 +130,9 @@ type ILogger interface {
 	SetConfig(cfg LogConfig)
 	// RemoveConfig 移除配置
 	RemoveConfig(t LogType)
+}
 
+type ILoggerActions interface {
 	// Print 普通记录，忽略前缀
 	Print(v ...interface{})
 	// Printf 普通记录，忽略前缀
@@ -160,6 +162,11 @@ type ILogger interface {
 	Fatal(v ...interface{})
 	Fatalf(format string, v ...interface{})
 	Fatalln(v ...interface{})
+}
+
+type ILogger interface {
+	ILoggerSettings
+	ILoggerActions
 }
 
 func SetPrefix(prefix string) {

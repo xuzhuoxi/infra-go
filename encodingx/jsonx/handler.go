@@ -28,6 +28,6 @@ func (c jsonHandlerAsync) HandleEncode(data interface{}) []byte {
 	return bs
 }
 
-func (c jsonHandlerAsync) HandleDecode(bs []byte, data interface{}) {
-	jsoniter.Unmarshal(bs, data)
+func (c jsonHandlerAsync) HandleDecode(bs []byte, data interface{}) error {
+	return jsoniter.Unmarshal(bs, data)
 }

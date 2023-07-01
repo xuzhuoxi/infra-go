@@ -56,10 +56,10 @@ func (c *gobHandler) HandleEncode(data interface{}) []byte {
 	return c.encoderBuff.Bytes()
 }
 
-func (c *gobHandler) HandleDecode(bs []byte, data interface{}) {
+func (c *gobHandler) HandleDecode(bs []byte, data interface{}) error {
 	c.decoderBuff.Reset()
 	c.decoderBuff.Write(bs)
-	c.decoder.Decode(data)
+	return c.decoder.Decode(data)
 }
 
 //------------------------------------------
@@ -86,12 +86,15 @@ func (c *gobHandlerSync) HandleEncode(data interface{}) []byte {
 	return c.encoderBuff.Bytes()
 }
 
-func (c *gobHandlerSync) HandleDecode(bs []byte, data interface{}) {
+func (c *gobHandlerSync) HandleDecode(bs []byte, data interface{}) error {
 	c.dMu.Lock()
 	defer c.dMu.Unlock()
 	c.decoderBuff.Reset()
-	c.decoderBuff.Write(bs)
-	c.decoder.Decode(data)
+	_, err := c.decoderBuff.Write(bs)
+	if nil != err {
+		return err
+	}
+	return c.decoder.Decode(data)
 }
 
 //------------------------------------------
@@ -105,8 +108,8 @@ func (c gobHandlerAsync) HandleEncode(data interface{}) []byte {
 	return buff.Bytes()
 }
 
-func (c gobHandlerAsync) HandleDecode(bs []byte, data interface{}) {
+func (c gobHandlerAsync) HandleDecode(bs []byte, data interface{}) error {
 	buff := bytes.NewBuffer(bs)
 	dec := gob.NewDecoder(buff)
-	dec.Decode(data)
+	return dec.Decode(data)
 }

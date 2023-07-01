@@ -33,7 +33,7 @@ type IEncodeHandler interface {
 }
 
 type IDecodeHandler interface {
-	HandleDecode(bs []byte, data interface{})
+	HandleDecode(bs []byte, data interface{}) error
 }
 
 type ICodingHandler interface {
