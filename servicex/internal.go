@@ -48,7 +48,7 @@ func (o *initHandler) tryNext() {
 	}
 	info := o.currentServiceInfo()
 	checkIs := info.IsInitService()
-	o.dispatcher.DispatchEvent(EventOnServiceInitStart, o.dispatcher, &ServiceResultData{ServiceName: info.name, Suc: checkIs})
+	o.dispatcher.DispatchEvent(EventOnServiceInitStart, o.dispatcher, ServiceStartData{ServiceName: info.name, Ignore: !checkIs})
 	if checkIs {
 		o.doInit(info)
 	} else {
@@ -64,8 +64,7 @@ func (o *initHandler) doInit(info *ServiceInfo) {
 }
 
 func (o *initHandler) onInited(evd *eventx.EventData) {
-	name := evd.Data.(string)
-	o.dispatcher.DispatchEvent(EventOnServiceInited, o.dispatcher, name)
+	o.dispatcher.DispatchEvent(EventOnServiceInited, o.dispatcher, evd.Data)
 	o.index += 1
 	o.count += 1
 	o.tryNext()
@@ -95,7 +94,7 @@ func (o *initDataHandler) tryNext() {
 	}
 	info := o.currentServiceInfo()
 	checkIs := info.IsInitDataService()
-	o.dispatcher.DispatchEvent(EventOnServiceDataInitStart, o.dispatcher, &ServiceResultData{ServiceName: info.name, Suc: checkIs})
+	o.dispatcher.DispatchEvent(EventOnServiceDataInitStart, o.dispatcher, ServiceStartData{ServiceName: info.name, Ignore: !checkIs})
 	if checkIs {
 		o.doInitData(info)
 	} else {
@@ -111,8 +110,7 @@ func (o *initDataHandler) doInitData(info *ServiceInfo) {
 }
 
 func (o *initDataHandler) onDataInited(evd *eventx.EventData) {
-	name := evd.Data.(string)
-	o.dispatcher.DispatchEvent(EventOnServiceDataInited, o.dispatcher, name)
+	o.dispatcher.DispatchEvent(EventOnServiceDataInited, o.dispatcher, evd.Data)
 	o.index += 1
 	o.count += 1
 	o.tryNext()
@@ -142,7 +140,7 @@ func (o *loadDataHandler) tryNext() {
 	}
 	info := o.currentServiceInfo()
 	checkIs := info.IsLoadDataService()
-	o.dispatcher.DispatchEvent(EventOnServiceDataLoadStart, o.dispatcher, &ServiceResultData{ServiceName: info.name, Suc: checkIs})
+	o.dispatcher.DispatchEvent(EventOnServiceDataLoadStart, o.dispatcher, ServiceStartData{ServiceName: info.name, Ignore: !checkIs})
 	if checkIs {
 		o.doLoadData(info)
 	} else {
@@ -158,8 +156,7 @@ func (o *loadDataHandler) doLoadData(info *ServiceInfo) {
 }
 
 func (o *loadDataHandler) onDataLoaded(evd *eventx.EventData) {
-	name := evd.Data.(string)
-	o.dispatcher.DispatchEvent(EventOnServiceDataLoaded, o.dispatcher, name)
+	o.dispatcher.DispatchEvent(EventOnServiceDataLoaded, o.dispatcher, evd.Data)
 	o.index += 1
 	o.count += 1
 	o.tryNext()
@@ -189,7 +186,7 @@ func (o *saveDataHandler) tryNext() {
 	}
 	info := o.currentServiceInfo()
 	checkIs := info.IsSaveDataService()
-	o.dispatcher.DispatchEvent(EventOnServiceDataSaveStart, o.dispatcher, &ServiceResultData{ServiceName: info.name, Suc: checkIs})
+	o.dispatcher.DispatchEvent(EventOnServiceDataSaveStart, o.dispatcher, ServiceStartData{ServiceName: info.name, Ignore: !checkIs})
 	if checkIs {
 		o.doSaveData(info)
 	} else {
@@ -205,8 +202,7 @@ func (o *saveDataHandler) doSaveData(info *ServiceInfo) {
 }
 
 func (o *saveDataHandler) onDataSaved(evd *eventx.EventData) {
-	name := evd.Data.(string)
-	o.dispatcher.DispatchEvent(EventOnServiceDataSaved, o.dispatcher, name)
+	o.dispatcher.DispatchEvent(EventOnServiceDataSaved, o.dispatcher, evd.Data)
 	o.index += 1
 	o.count += 1
 	o.tryNext()

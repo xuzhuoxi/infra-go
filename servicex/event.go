@@ -57,16 +57,16 @@ const (
 	// EventOnServiceInitStart
 	// Single service initialization start event, dispatched by ServiceManager
 	// 单个服务初始化开始事件，由ServiceManager调度
-	// Event data format: ServiceResultData
-	// 事件数据格式：ServiceResultData
+	// Event data format: ServiceStartData
+	// 事件数据格式：ServiceStartData
 	EventOnServiceInitStart = "Service:OnInitStart"
 
 	// EventOnServiceInited
 	// A single service initialization complete event, which are dispatched by the service instance.
 	// Re-dispatched after being captured by ServiceManager.
 	// 单个服务初始化完成事件，由服务实例调度。被ServiceManager捕获后重新调度。
-	// Event data format: {named:string}
-	// 事件数据格式：{named:string}
+	// Event data format: ServiceResultData
+	// 事件数据格式：ServiceResultData
 	EventOnServiceInited = "Service:OnInited"
 
 	// EventOnServiceAllInited
@@ -79,16 +79,16 @@ const (
 	// EventOnServiceDataInitStart
 	// Single service data initialization start event, dispatched by ServiceManager
 	// 单个服务数据初始化开始事件，由ServiceManager调度
-	// Event data format: ServiceResultData
-	// 事件数据格式：ServiceResultData
+	// Event data format: ServiceStartData
+	// 事件数据格式：ServiceStartData
 	EventOnServiceDataInitStart = "Service:OnDataInitStart"
 
 	// EventOnServiceDataInited
 	// A single service data initialization complete event, which are dispatched by the service instance.
 	// Re-dispatched after being captured by ServiceManager.
 	// 单个服务数据初始化完成事件，由服务实例调度。被ServiceManager捕获后重新调度。
-	// Event data format: {named:string}
-	// 事件数据格式：{named:string}
+	// Event data format: ServiceResultData
+	// 事件数据格式：ServiceResultData
 	EventOnServiceDataInited = "Service:OnDataInited"
 
 	// EventOnServiceDataAllInited
@@ -104,16 +104,16 @@ const (
 	// A single  data service load data start event, dispatched by ServiceManager
 	// Succ=true when the service implements the ILoadDataService interface.
 	// 单个服务数据加载数据开始事件，由ServiceManager调度。当服务实现ILoadDataService接口时，Succ=true。
-	// Event data format: ServiceResultData
-	// 事件数据格式：ServiceResultData
+	// Event data format: ServiceStartData
+	// 事件数据格式：ServiceStartData
 	EventOnServiceDataLoadStart = "Service:OnDataLoadStart"
 
 	// EventOnServiceDataLoaded
 	// A single data service load data completion event, which are dispatched by the service instance.
 	// Re-dispatched after being captured by ServiceManager.
 	// 单个数据服务加载数据完成事件，由服务实例调度。被ServiceManager捕获后重新调度。
-	// Event data format: {named:string}
-	// 事件数据格式：{named:string}
+	// Event data format: ServiceResultData
+	// 事件数据格式：ServiceResultData
 	EventOnServiceDataLoaded = "Service:OnDataLoaded"
 
 	// EventOnServiceDataAllLoaded
@@ -129,16 +129,16 @@ const (
 	// A single data service save data start event, dispatched by ServiceManager
 	// Succ=true when the service implements the ISaveDataService interface.
 	// 单个服务数据保存数据开始事件，由ServiceManager调度。当服务实现ISaveDataService接口时，Succ=true。
-	// Event data format: ServiceResultData
-	// 事件数据格式：ServiceResultData
+	// Event data format: ServiceStartData
+	// 事件数据格式：ServiceStartData
 	EventOnServiceDataSaveStart = "Service:OnDataSaveStart"
 
 	// EventOnServiceDataSaved
 	// A single data service saves data completion events, which are dispatched by the service instance.
 	// Re-dispatched after being captured by ServiceManager.
 	// 单个数据服务保存数据完成事件，由服务实例调度。被ServiceManager捕获后重新调度。
-	// Event data format: {named:string}
-	// 事件数据格式：{named:string}
+	// Event data format: ServiceResultData
+	// 事件数据格式：ServiceResultData
 	EventOnServiceDataSaved = "Service:OnDataSaved"
 
 	// EventOnServiceDataAllSaved
@@ -148,7 +148,13 @@ const (
 	EventOnServiceDataAllSaved = "Service:OnDataAllSaved"
 )
 
+type ServiceStartData struct {
+	ServiceName string
+	Ignore      bool
+}
+
 type ServiceResultData struct {
 	ServiceName string
 	Suc         bool
+	Err         error
 }
