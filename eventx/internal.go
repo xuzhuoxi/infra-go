@@ -6,27 +6,22 @@ type _CallInfo struct {
 }
 
 func (ci *_CallInfo) Equal(other *_CallInfo) bool {
-	return ci == other || (ci.Once == other.Once && &ci.Call == &other.Call)
+	return ci == other || (ci.Once == other.Once && (&ci.Call == &other.Call || ci.Call.Equal(other.Call)))
 }
 
 type _EventDelegate struct {
 	EventType string
-
-	calls []*_CallInfo
+	calls     []*_CallInfo
 }
 
 func (d *_EventDelegate) Handle(data *EventData) {
 	if d.EventType != data.EventType || len(d.calls) == 0 {
 		return
 	}
-	copyArr := d.calls[:]
 	var onceTempAry []*_CallInfo
-	for _, call := range copyArr {
+	for _, call := range d.calls {
 		if data.stopped {
 			break
-		}
-		if !containsCall(d.calls, call) {
-			continue
 		}
 		call.Call(data)
 		if call.Once {
@@ -34,7 +29,7 @@ func (d *_EventDelegate) Handle(data *EventData) {
 		}
 	}
 	if len(onceTempAry) > 0 {
-		removeCall(d.calls, onceTempAry...)
+		d.removeCalls(onceTempAry...)
 	}
 }
 
@@ -52,10 +47,13 @@ func (d *_EventDelegate) OnceListener(call EventCall) {
 
 // RemoveListener
 // 删除监听函数
-func (d *_EventDelegate) RemoveListener(call EventCall) {
+func (d *_EventDelegate) RemoveListener(call EventCall, stopAfterMatch bool) {
 	for index := len(d.calls) - 1; index >= 0; index-- {
 		if d.calls[index].Call.Equal(call) {
 			d.calls = append(d.calls[:index], d.calls[index+1:]...)
+			if stopAfterMatch {
+				break
+			}
 		}
 	}
 }
@@ -66,32 +64,30 @@ func (d *_EventDelegate) RemoveListeners() {
 	d.calls = nil
 }
 
-func containsCall(calls []*_CallInfo, call *_CallInfo) bool {
-	if len(calls) == 0 {
+func (d *_EventDelegate) containsCall(call *_CallInfo) bool {
+	if len(d.calls) == 0 || nil == call {
 		return false
 	}
-	for _, v := range calls {
-		if v.Equal(call) {
+	for index := range d.calls {
+		if d.calls[index].Equal(call) {
 			return true
 		}
 	}
 	return false
 }
 
-func removeCall(calls []*_CallInfo, removeCalls ...*_CallInfo) []*_CallInfo {
-	l := len(calls)
-	if l == 0 {
-		return calls
+func (d *_EventDelegate) removeCalls(removes ...*_CallInfo) {
+	size := len(d.calls)
+	if size == 0 {
+		return
 	}
-	rs := calls[:]
-	for index := l - 1; index >= 0; index-- {
-		for index2, c := range removeCalls {
-			if rs[index].Equal(c) {
-				rs = append(rs[:index], rs[index+1:]...)
-				removeCalls = append(removeCalls[:index2], removeCalls[index2+1:]...)
+	for index := size - 1; index >= 0; index-- {
+		for index2 := range removes {
+			if d.calls[index].Equal(removes[index2]) {
+				d.calls = append(d.calls[:index], d.calls[index+1:]...)
+				removes = append(removes[:index2], removes[index2+1:]...)
 				break
 			}
 		}
 	}
-	return rs
 }

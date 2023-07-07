@@ -52,19 +52,23 @@ func NewEventDispatcher() *EventDispatcher {
 type IEventDispatcher interface {
 	// AddEventListener
 	// 添加事件
+	// 重复添加会执行多次
 	// @param eventType 事件类型
 	// @param func 监听函数
 	AddEventListener(eventType string, call EventCall)
 	// OnceEventListener
 	// 添加单次执行事件
+	// 重复添加会执行多次
 	// @param eventType
 	// @param func
 	OnceEventListener(eventType string, call EventCall)
 	// RemoveEventListener
 	// 删除事件
+	// 只要是相同的eventType和call, 全部移除
 	// @param eventType 事件类型
-	// @param func 监听函数
-	RemoveEventListener(eventType string, call EventCall)
+	// @param call 监听函数
+	// @param args 可选参数 [0]:bool stopAfterMatch
+	RemoveEventListener(eventType string, call EventCall, args ...bool)
 	// RemoveEventListenerByType
 	// 删除一类事件
 	// @param eventType 事件类型
@@ -92,11 +96,15 @@ func (e *EventDispatcher) OnceEventListener(eventType string, call EventCall) {
 	e.getDelegate(eventType).OnceListener(call)
 }
 
-func (e *EventDispatcher) RemoveEventListener(eventType string, call EventCall) {
+func (e *EventDispatcher) RemoveEventListener(eventType string, call EventCall, args ...bool) {
 	if !e.hasType(eventType) {
 		return
 	}
-	e.getDelegate(eventType).RemoveListener(call)
+	stopAfterMatch := false
+	if len(args) > 0 {
+		stopAfterMatch = args[0]
+	}
+	e.getDelegate(eventType).RemoveListener(call, stopAfterMatch)
 }
 
 func (e *EventDispatcher) RemoveEventListenerByType(eventType string) {
