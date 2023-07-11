@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	DefaultOrder            = binary.BigEndian
-	DefaultDataBlockHandler = bytex.NewDefaultDataBlockHandler()
+	DefaultOrder            binary.ByteOrder = bytex.DefaultOrder
+	DefaultDataBlockHandler                  = bytex.NewDefaultDataBlockHandler()
 )
 
 func NewDefaultBuffEncoder(encodeHandler IEncodeHandler) IBuffEncoder {

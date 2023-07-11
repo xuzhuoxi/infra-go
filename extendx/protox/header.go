@@ -5,6 +5,8 @@
 //
 package protox
 
+import "fmt"
+
 // IExtensionHeader
 // Extension参数头接口
 type IExtensionHeader interface {
@@ -23,6 +25,8 @@ type IExtensionHeader interface {
 	// SetHeader
 	// 设置参数头信息
 	SetHeader(extensionName string, protoId string, clientId string, clientAddress string)
+	// GetHeaderInfo 取头信息
+	GetHeaderInfo() IExtensionHeader
 }
 
 type ExtensionHeader struct {
@@ -30,6 +34,15 @@ type ExtensionHeader struct {
 	PId      string
 	CId      string
 	CAddress string
+}
+
+func (h *ExtensionHeader) String() string {
+	return fmt.Sprintf("Header{ENmae='%s', PId='%s', CID='%s', CAddr='%s'}",
+		h.EName, h.PId, h.CId, h.CAddress)
+}
+
+func (h *ExtensionHeader) GetHeaderInfo() IExtensionHeader {
+	return h
 }
 
 func (h *ExtensionHeader) ExtensionName() string {
