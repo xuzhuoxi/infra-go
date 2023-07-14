@@ -182,6 +182,7 @@ func (m *ExtensionManager) OnMessageUnpack(msgData []byte, senderAddress string,
 // block0 : eName utf8
 // block1 : pid	utf8
 // block2 : uid	utf8
+// block3 : data [][]byte
 // [n]其它信息
 func (m *ExtensionManager) ParseMessage(msgBytes []byte) (extName string, pid string, uid string, data [][]byte) {
 	if nil != m.FuncParseMessage {
@@ -199,7 +200,7 @@ func (m *ExtensionManager) ParseMessage(msgBytes []byte) (extName string, pid st
 		for buffToData.Len() > 0 {
 			n, d := buffToData.ReadDataTo(msgBytes[index:]) //由于msgBytes前部分数据已经处理完成，可以利用这部分空间
 			//h.singleCase.GetLogger().Traceln("parsePackMessage", uid, d)
-			if nil == d {
+			if n == 0 { // 没有读到字节，注意 n!=0时, d是有可能是nil的
 				//h.singleCase.GetLogger().Warnln("data is nil")
 				break
 			}
