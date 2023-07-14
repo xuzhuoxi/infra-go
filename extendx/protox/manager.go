@@ -160,7 +160,7 @@ func (m *ExtensionManager) DisableExtensions() {
 // 在netx中，TCP,Quic,WebSocket为并发响应，UDP为非并发响应
 // msgData非共享的，但在parsePackMessage后这部分数据会发生变化
 func (m *ExtensionManager) OnMessageUnpack(msgData []byte, senderAddress string, other interface{}) bool {
-	//m.logger.Infoln("ExtensionManager.onPack", senderAddress, msgData)
+	//m.Logger.Infoln("ExtensionManager.onPack", senderAddress, msgData)
 	m.CustomStartOnPack(senderAddress)
 	name, pid, uid, data := m.ParseMessage(msgData)
 	extension, ok := m.Verify(name, pid, uid)

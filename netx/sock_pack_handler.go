@@ -53,6 +53,9 @@ type IPackHandlerContainerGetter interface {
 }
 
 type IPackHandlerContainer interface {
+	// Size Handler size
+	// 处理函数数量
+	Size() int
 	// FirstHandler
 	// 由第一个处理
 	FirstHandler(first func(handler FuncPackHandler) bool)
@@ -81,6 +84,12 @@ type IPackHandlerContainer interface {
 type PackHandlerContainer struct {
 	handlers []FuncPackHandler
 	RWMutex  sync.RWMutex
+}
+
+func (ph *PackHandlerContainer) Size() int {
+	ph.RWMutex.RLock()
+	defer ph.RWMutex.RUnlock()
+	return len(ph.handlers)
 }
 
 func (ph *PackHandlerContainer) FirstHandler(first func(handler FuncPackHandler) bool) {

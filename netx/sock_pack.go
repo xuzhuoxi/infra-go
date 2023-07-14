@@ -193,8 +193,13 @@ func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, ad
 
 //--------------------------------------------------
 
-func newPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiver {
-	return &packSendReceiver{packSRBase: newPackSRBase(reader, writer, packHandler, dataBlockHandler, logger), toDataBuff: bytex.NewBuffToData(dataBlockHandler)}
+func newPackSendReceiver(reader IConnReaderAdapter, writer IConnWriterAdapter,
+	packHandler IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler,
+	logger logx.ILogger) *packSendReceiver {
+	return &packSendReceiver{
+		packSRBase: newPackSRBase(reader, writer, packHandler, dataBlockHandler, logger),
+		toDataBuff: bytex.NewBuffToData(dataBlockHandler),
+	}
 }
 
 type packSendReceiver struct {
@@ -211,8 +216,12 @@ func (sr *packSendReceiver) handleData(newData []byte, address string) {
 
 //--------------------------------------------------
 
-func newPackSendReceiverMulti(reader IConnReaderAdapter, writer IConnWriterAdapter, packHandler IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) *packSendReceiverMulti {
-	return &packSendReceiverMulti{packSRBase: newPackSRBase(reader, writer, packHandler, dataBlockHandler, logger), toDataBuffMap: make(map[string]bytex.IBuffToData)}
+func newPackSendReceiverMulti(reader IConnReaderAdapter, writer IConnWriterAdapter,
+	packHandler IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler,
+	logger logx.ILogger) *packSendReceiverMulti {
+	return &packSendReceiverMulti{
+		packSRBase:    newPackSRBase(reader, writer, packHandler, dataBlockHandler, logger),
+		toDataBuffMap: make(map[string]bytex.IBuffToData)}
 }
 
 type packSendReceiverMulti struct {
