@@ -5,6 +5,8 @@ package bytex
 
 import "encoding/binary"
 
+var BlockSizeLen = 2
+
 type HandlerDataToBlock func(data []byte, order binary.ByteOrder) (block []byte)
 
 // HandlerBlockToData

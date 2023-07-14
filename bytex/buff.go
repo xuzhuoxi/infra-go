@@ -195,11 +195,14 @@ func (b *buffDataBlock) readBytes() []byte {
 }
 
 func (b *buffDataBlock) readData() []byte {
-	rs, l, ok := b.handler.BlockToData(b.buff.Bytes())
+	if b.buff.Len() == 0 {
+		return nil
+	}
+	rs, ln, ok := b.handler.BlockToData(b.buff.Bytes())
 	if !ok {
 		return nil
 	}
-	b.buff.Next(l)
+	b.buff.Next(ln)
 	return rs
 }
 

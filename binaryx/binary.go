@@ -12,12 +12,6 @@ import (
 	"io"
 )
 
-var bit32 = true
-
-func SetLangBit(bit64 bool) {
-	bit32 = !bit64
-}
-
 // ReadBool
 // 从一个Reader中读取一个bool数据
 // r: Reader

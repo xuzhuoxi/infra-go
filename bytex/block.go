@@ -25,19 +25,19 @@ func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byt
 // DefaultBlockToDataHandler
 // data为共享切片，非安全
 func DefaultBlockToDataHandler(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool) {
-	lenLn := 2
-	blockLen := len(block)
-	if blockLen < lenLn {
+	totalLen := len(block)
+	if totalLen < BlockSizeLen {
 		return nil, 0, false
 	}
-	var packLen = int(order.Uint16(block[:lenLn]))
+	var packLen = int(order.Uint16(block[:BlockSizeLen]))
 	if 0 == packLen {
-		return nil, lenLn, true
+		return nil, BlockSizeLen, true
 	}
-	if blockLen < packLen+lenLn {
+	length = packLen + BlockSizeLen
+	if totalLen < length {
 		return nil, 0, false
 	}
-	return block[lenLn : lenLn+packLen], packLen + lenLn, true
+	return block[BlockSizeLen:length], length, true
 }
 
 //----------------------------------------------------------
