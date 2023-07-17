@@ -62,49 +62,49 @@ type ExtensionManagerCustomizeSupport struct {
 	FuncFinishOnRequest FuncFinishOnRequest
 }
 
-func (m *ExtensionManagerCustomizeSupport) SetCustomStartOnPackFunc(funcStartOnPack FuncStartOnPack) {
-	m.FuncStartOnPack = funcStartOnPack
+func (o *ExtensionManagerCustomizeSupport) SetCustomStartOnPackFunc(funcStartOnPack FuncStartOnPack) {
+	o.FuncStartOnPack = funcStartOnPack
 }
-func (m *ExtensionManagerCustomizeSupport) SetCustomParseFunc(funcParse FuncParseMessage) {
-	m.FuncParseMessage = funcParse
+func (o *ExtensionManagerCustomizeSupport) SetCustomParseFunc(funcParse FuncParseMessage) {
+	o.FuncParseMessage = funcParse
 }
-func (m *ExtensionManagerCustomizeSupport) SetCustomVerifyFunc(funcVerify FuncVerify) {
-	m.FuncVerify = funcVerify
+func (o *ExtensionManagerCustomizeSupport) SetCustomVerifyFunc(funcVerify FuncVerify) {
+	o.FuncVerify = funcVerify
 }
-func (m *ExtensionManagerCustomizeSupport) SetCustomStartOnRequestFunc(funcStart FuncStartOnRequest) {
-	m.FuncStartOnRequest = funcStart
+func (o *ExtensionManagerCustomizeSupport) SetCustomStartOnRequestFunc(funcStart FuncStartOnRequest) {
+	o.FuncStartOnRequest = funcStart
 }
-func (m *ExtensionManagerCustomizeSupport) SetCustomFinishOnRequestFunc(funcFinish FuncFinishOnRequest) {
-	m.FuncFinishOnRequest = funcFinish
+func (o *ExtensionManagerCustomizeSupport) SetCustomFinishOnRequestFunc(funcFinish FuncFinishOnRequest) {
+	o.FuncFinishOnRequest = funcFinish
 }
-func (m *ExtensionManagerCustomizeSupport) SetCustom(funcStartOnPack FuncStartOnPack, funcParse FuncParseMessage, funcVerify FuncVerify, funcStart FuncStartOnRequest, funcFinish FuncFinishOnRequest) {
-	m.FuncStartOnPack, m.FuncParseMessage, m.FuncVerify, m.FuncStartOnRequest, m.FuncFinishOnRequest = funcStartOnPack, funcParse, funcVerify, funcStart, funcFinish
+func (o *ExtensionManagerCustomizeSupport) SetCustom(funcStartOnPack FuncStartOnPack, funcParse FuncParseMessage, funcVerify FuncVerify, funcStart FuncStartOnRequest, funcFinish FuncFinishOnRequest) {
+	o.FuncStartOnPack, o.FuncParseMessage, o.FuncVerify, o.FuncStartOnRequest, o.FuncFinishOnRequest = funcStartOnPack, funcParse, funcVerify, funcStart, funcFinish
 }
 
-func (s *ExtensionManagerCustomizeSupport) CustomStartOnPack(senderAddress string) {
-	if nil != s.FuncStartOnPack {
-		s.FuncStartOnPack(senderAddress)
+func (o *ExtensionManagerCustomizeSupport) CustomStartOnPack(senderAddress string) {
+	if nil != o.FuncStartOnPack {
+		o.FuncStartOnPack(senderAddress)
 	}
 }
-func (s *ExtensionManagerCustomizeSupport) CustomParseMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte) {
-	if nil != s.FuncParseMessage {
-		return s.FuncParseMessage(msgBytes)
-	}
-	return
-}
-func (s *ExtensionManagerCustomizeSupport) CustomVerify(name string, pid string, uid string) (e IProtocolExtension, ok bool) {
-	if nil != s.FuncVerify {
-		return s.FuncVerify(name, pid, uid)
+func (o *ExtensionManagerCustomizeSupport) CustomParseMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte) {
+	if nil != o.FuncParseMessage {
+		return o.FuncParseMessage(msgBytes)
 	}
 	return
 }
-func (s *ExtensionManagerCustomizeSupport) CustomStartOnRequest(resp IExtensionResponse, req IExtensionRequest) {
-	if nil != s.FuncStartOnRequest {
-		s.FuncStartOnRequest(resp, req)
+func (o *ExtensionManagerCustomizeSupport) CustomVerify(name string, pid string, uid string) (e IProtocolExtension, ok bool) {
+	if nil != o.FuncVerify {
+		return o.FuncVerify(name, pid, uid)
+	}
+	return
+}
+func (o *ExtensionManagerCustomizeSupport) CustomStartOnRequest(resp IExtensionResponse, req IExtensionRequest) {
+	if nil != o.FuncStartOnRequest {
+		o.FuncStartOnRequest(resp, req)
 	}
 }
-func (s *ExtensionManagerCustomizeSupport) CustomFinishOnRequest(resp IExtensionResponse, req IExtensionRequest) {
-	if nil != s.FuncFinishOnRequest {
-		s.FuncFinishOnRequest(resp, req)
+func (o *ExtensionManagerCustomizeSupport) CustomFinishOnRequest(resp IExtensionResponse, req IExtensionRequest) {
+	if nil != o.FuncFinishOnRequest {
+		o.FuncFinishOnRequest(resp, req)
 	}
 }

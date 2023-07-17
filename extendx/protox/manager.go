@@ -188,7 +188,6 @@ func (m *ExtensionManager) ParseMessage(msgBytes []byte) (extName string, pid st
 	if nil != m.FuncParseMessage {
 		return m.FuncParseMessage(msgBytes)
 	}
-	index := 0
 	buffToData := bytex.DefaultPoolBuffToData.GetInstance()
 	defer bytex.DefaultPoolBuffToData.Recycle(buffToData)
 
@@ -196,17 +195,19 @@ func (m *ExtensionManager) ParseMessage(msgBytes []byte) (extName string, pid st
 	extName = buffToData.ReadString()
 	pid = buffToData.ReadString()
 	uid = buffToData.ReadString()
-	if buffToData.Len() > 0 {
-		for buffToData.Len() > 0 {
-			n, d := buffToData.ReadDataTo(msgBytes[index:]) //由于msgBytes前部分数据已经处理完成，可以利用这部分空间
-			//h.singleCase.GetLogger().Traceln("parsePackMessage", uid, d)
-			if n == 0 { // 没有读到字节，注意 n!=0时, d是有可能是nil的
-				//h.singleCase.GetLogger().Warnln("data is nil")
-				break
-			}
-			data = append(data, d)
-			index += n
+	if buffToData.Len() <= 0 {
+		return
+	}
+	index := 0
+	for buffToData.Len() > 0 {
+		n, d := buffToData.ReadDataTo(msgBytes[index:]) //由于msgBytes前部分数据已经处理完成，可以利用这部分空间
+		//h.singleCase.GetLogger().Traceln("parsePackMessage", uid, d)
+		if n == 0 { // 没有读到字节，注意 n!=0时, d是有可能是nil的
+			//h.singleCase.GetLogger().Warnln("data is nil")
+			break
 		}
+		data = append(data, d)
+		index += n
 	}
 	return extName, pid, uid, data
 }
