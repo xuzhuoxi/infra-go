@@ -92,10 +92,10 @@ func (v CodingMap) DecodeFromBytes(bs []byte) bool {
 			ln, _ := binaryx.ReadLen(buff, DefaultOrder) //Len
 			switch kind {
 			case binaryx.KindSliceString: //Value=[]string
-				val, err = binaryx.ReadSliceString(buff, DefaultOrder, ln)
+				val, err = binaryx.ReadSliceStringBy(buff, DefaultOrder, ln)
 			default: //Value
 				val = binaryx.GetKindValue(kind, ln)
-				err = binaryx.ReadSlice(buff, DefaultOrder, &val, ln)
+				err = binaryx.ReadSliceBy(buff, DefaultOrder, &val, ln)
 			}
 		} else {
 			switch kind {
