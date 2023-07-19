@@ -44,6 +44,7 @@ type IBuffByteWriter interface {
 // IBuffDataReader
 // 数据级处理，先读取长度信息，然后再根据长度读取数据
 type IBuffDataReader interface {
+	io.Reader
 	// ReadData
 	// 读取一个Block字节数据，并拆分出数据部分返回，数据不足返回nil
 	// 非数据安全
@@ -65,6 +66,7 @@ type IBuffDataReader interface {
 // IBuffDataWriter
 // 数据级处理，先写入长度信息，然后再写入数据
 type IBuffDataWriter interface {
+	io.Writer
 	// WriteData
 	// 把数据包装为一个Block,写入到缓冲中，数据长度为0时不进行处理
 	WriteData(bytes []byte)

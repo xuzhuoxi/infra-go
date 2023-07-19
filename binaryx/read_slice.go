@@ -406,7 +406,7 @@ func ReadSliceStringBy(r io.Reader, order binary.ByteOrder, byLen int) ([]string
 }
 
 // ReadSlice
-// 从Reader中读取数据，
+// 从Reader中读取数据，先读取长度
 // 目前data支持的类型为*[]bool,*[]int,*[]int8,*[]int16,*[]int32,*[]int64,*[]uint,*[]uint8,*[]uint16,*[]uint32,*[]uint64,*[]float32,*[]float64,*[]complex64,*[]complex128,*[]string
 func ReadSlice(r io.Reader, order binary.ByteOrder, data interface{}) (err error) {
 	byLen, errL := ReadLen(r, order)
@@ -417,7 +417,7 @@ func ReadSlice(r io.Reader, order binary.ByteOrder, data interface{}) (err error
 }
 
 // ReadSliceBy
-// 从Reader中读取数据，
+// 从Reader中读取数据
 // 目前data支持的类型为*[]bool,*[]int,*[]int8,*[]int16,*[]int32,*[]int64,*[]uint,*[]uint8,*[]uint16,*[]uint32,*[]uint64,*[]float32,*[]float64,*[]complex64,*[]complex128,*[]string
 func ReadSliceBy(r io.Reader, order binary.ByteOrder, data interface{}, byLen int) (err error) {
 	if dataPtr, ok := data.(*interface{}); ok {

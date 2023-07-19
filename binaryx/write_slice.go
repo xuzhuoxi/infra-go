@@ -4,26 +4,41 @@
 package binaryx
 
 import (
-	"bytes"
 	"encoding/binary"
+	"errors"
 	"io"
+	"reflect"
 )
+
+// WriteSliceStringAfterLen
+// 向Writer中写入一组string数据[长度+数据]
+// 格式：长度 + [长度+数据]...
+// 长度格式默认为uint16
+func WriteSliceStringAfterLen(w io.Writer, order binary.ByteOrder, str []string) error {
+	if err := writeLen(w, order, str); nil != err {
+		return err
+	}
+	return WriteSliceString(w, order, str)
+}
 
 // WriteSliceString
 // 向Writer中写入一组string数据[长度+数据]
 // 格式：长度 + [长度+数据]...
 // 长度格式默认为uint16
 func WriteSliceString(w io.Writer, order binary.ByteOrder, str []string) error {
-	buff := bytes.NewBuffer(nil)
 	for index := 0; index < len(str); index++ {
-		if err := WriteString(buff, order, str[index]); nil != err {
+		if err := WriteString(w, order, str[index]); nil != err {
 			return err
 		}
 	}
-	if _, err := w.Write(buff.Bytes()); nil != err {
+	return nil
+}
+
+func WriteSliceAfterLen(w io.Writer, order binary.ByteOrder, data interface{}) error {
+	if err := writeLen(w, order, data); nil != err {
 		return err
 	}
-	return nil
+	return WriteSlice(w, order, data)
 }
 
 // WriteSlice
@@ -69,4 +84,16 @@ func WriteSlice(w io.Writer, order binary.ByteOrder, data interface{}) error {
 	default:
 		return binary.Write(w, order, tempData)
 	}
+}
+
+func writeLen(w io.Writer, order binary.ByteOrder, data interface{}) error {
+	t := reflect.TypeOf(data)
+	if t.Kind() == reflect.Array {
+		return errors.New("data is not array! ")
+	}
+	v := reflect.ValueOf(data)
+	if err := WriteLen(w, order, v.Len()); nil != err {
+		return err
+	}
+	return nil
 }
