@@ -5,7 +5,12 @@
 //
 package protox
 
-import "github.com/xuzhuoxi/infra-go/encodingx"
+import (
+	"github.com/xuzhuoxi/infra-go/encodingx"
+)
+
+// ParamFactory 通用参数构造器
+type ParamFactory = func() interface{}
 
 // IProtocolParamsHandler
 // 协议参数处理器接口
@@ -30,34 +35,44 @@ type IProtocolParamsHandler interface {
 
 //----------------------------
 
-func NewProtoStringParamsHandler() IProtocolParamsHandler {
-	return &ProtoStringParamsHandler{}
+func NewProtoObjectParamsHandler(factory ParamFactory, handler encodingx.ICodingHandler) IProtocolParamsHandler {
+	return &ProtoObjectParamsHandler{ParamFactory: factory, Handler: handler}
 }
 
-type ProtoStringParamsHandler struct{}
-
-func (h *ProtoStringParamsHandler) SetCodingHandler(handler encodingx.ICodingHandler) {
-	return
+type ProtoObjectParamsHandler struct {
+	ParamFactory ParamFactory
+	Handler      encodingx.ICodingHandler
 }
 
-func (h *ProtoStringParamsHandler) HandleRequestParam(data []byte) interface{} {
-	return string(data)
+func (o *ProtoObjectParamsHandler) SetCodingHandler(handler encodingx.ICodingHandler) {
+	o.Handler = handler
 }
-func (h *ProtoStringParamsHandler) HandleRequestParams(data [][]byte) []interface{} {
+
+func (o *ProtoObjectParamsHandler) HandleRequestParam(data []byte) interface{} {
+	rs := o.ParamFactory()
+	err := o.Handler.HandleDecode(data, rs)
+	if nil != err {
+		return nil
+	}
+	return rs
+}
+
+func (o *ProtoObjectParamsHandler) HandleRequestParams(data [][]byte) []interface{} {
 	var objData []interface{}
 	for index := range data {
-		objData = append(objData, h.HandleRequestParam(data[index]))
+		objData = append(objData, o.HandleRequestParam(data[index]))
 	}
 	return objData
 }
 
-func (h *ProtoStringParamsHandler) HandleResponseParam(data interface{}) []byte {
-	return []byte(data.(string))
+func (o *ProtoObjectParamsHandler) HandleResponseParam(data interface{}) []byte {
+	return o.Handler.HandleEncode(data)
 }
-func (h *ProtoStringParamsHandler) HandleResponseParams(data []interface{}) [][]byte {
+
+func (o *ProtoObjectParamsHandler) HandleResponseParams(data []interface{}) [][]byte {
 	var byteData [][]byte
 	for index := range data {
-		byteData = append(byteData, h.HandleResponseParam(data[index]))
+		byteData = append(byteData, o.HandleResponseParam(data[index]))
 	}
 	return byteData
 }

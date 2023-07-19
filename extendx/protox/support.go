@@ -5,6 +5,8 @@
 //
 package protox
 
+import "github.com/xuzhuoxi/infra-go/encodingx"
+
 // ExtensionProtoInfo
 // 协议定义
 type ExtensionProtoInfo struct {
@@ -13,7 +15,7 @@ type ExtensionProtoInfo struct {
 	ExtensionHandler interface{}
 
 	ParamHandler IProtocolParamsHandler
-	ParamOrigin  interface{}
+	ParamFactory ParamFactory
 }
 
 //---------------------------------------
@@ -48,10 +50,12 @@ func (s *ProtocolExtensionSupport) SetRequestHandlerBinary(protoId string, handl
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Binary, ExtensionHandler: handler}
 }
 func (s *ProtocolExtensionSupport) SetRequestHandlerString(protoId string, handler ExtensionHandlerStringParam) {
-	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: String, ExtensionHandler: handler, ParamHandler: NewProtoStringParamsHandler()}
+	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: String, ExtensionHandler: handler}
 }
-func (s *ProtocolExtensionSupport) SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam, ObjectOrigin interface{}, paramHandler IProtocolParamsHandler) {
-	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Object, ExtensionHandler: handler, ParamOrigin: ObjectOrigin, ParamHandler: paramHandler}
+func (s *ProtocolExtensionSupport) SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam,
+	factory ParamFactory, codingHandler encodingx.ICodingHandler) {
+	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Object, ExtensionHandler: handler,
+		ParamFactory: factory, ParamHandler: NewProtoObjectParamsHandler(factory, codingHandler)}
 }
 func (s *ProtocolExtensionSupport) ClearRequestHandler(protoId string) {
 	delete(s.ProtoIdToInfo, protoId)

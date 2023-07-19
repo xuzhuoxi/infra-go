@@ -81,7 +81,8 @@ type IRequestExtensionSetter interface {
 	SetRequestHandlerString(protoId string, handler ExtensionHandlerStringParam)
 	// SetRequestHandlerObject
 	//设置请求响应处理(对象参数)
-	SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam, paramOrigin interface{}, paramHandler IProtocolParamsHandler)
+	SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam,
+		paramOrigin interface{}, paramHandler IProtocolParamsHandler)
 	// ClearRequestHandler
 	// 清除设置
 	ClearRequestHandler(protoId string)

@@ -5,10 +5,14 @@
 //
 package protox
 
+import "fmt"
+
 // IExtensionRequest
 // 请求对象参数集合接口
 type IExtensionRequest interface {
 	IExtensionHeader
+	// DataSize 数据长度
+	DataSize() int
 	// SetRequestData
 	// 设置集合数据信息
 	SetRequestData(paramType ExtensionParamType, paramHandler IProtocolParamsHandler, data [][]byte)
@@ -49,24 +53,42 @@ func NewSockRequest() *SockRequest {
 
 type SockRequest struct {
 	ExtensionHeader
-
+	ParamType  ExtensionParamType
 	BinaryData [][]byte
 	StringData []string
 	ObjectData []interface{}
 }
 
+func (req *SockRequest) String() string {
+	return fmt.Sprintf("{Request: %v, %v, %v, %v}",
+		req.ExtensionHeader, req.ParamType, req.BinaryData, req.ObjectData)
+}
+
+func (req *SockRequest) DataSize() int {
+	switch req.ParamType {
+	case Binary:
+		return len(req.BinaryData)
+	case String:
+		return len(req.StringData)
+	case Object:
+		return len(req.ObjectData)
+	}
+	return 0
+}
+
 func (req *SockRequest) SetRequestData(paramType ExtensionParamType, paramHandler IProtocolParamsHandler, data [][]byte) {
+	req.ParamType = paramType
+	req.BinaryData = data
 	switch paramType {
 	case None:
-		req.BinaryData, req.StringData, req.ObjectData = nil, nil, nil
+		req.StringData, req.ObjectData = nil, nil
 	case Binary:
-		req.BinaryData, req.StringData, req.ObjectData = data, nil, nil
+		req.StringData, req.ObjectData = nil, nil
 	case String:
-		objData := paramHandler.HandleRequestParams(data)
-		req.BinaryData, req.StringData, req.ObjectData = nil, req.toStringArray(objData), nil
+		req.StringData, req.ObjectData = req.toStringArray(data), nil
 	case Object:
 		objData := paramHandler.HandleRequestParams(data)
-		req.BinaryData, req.StringData, req.ObjectData = nil, nil, objData
+		req.StringData, req.ObjectData = nil, objData
 	}
 }
 
@@ -82,13 +104,13 @@ func (req *SockRequest) RequestObjectData() []interface{} {
 	return req.ObjectData
 }
 
-func (req *SockRequest) toStringArray(objArr []interface{}) []string {
-	if nil == objArr || len(objArr) == 0 {
+func (req *SockRequest) toStringArray(data [][]byte) []string {
+	if nil == data || len(data) == 0 {
 		return nil
 	}
-	rs := make([]string, len(objArr))
-	for index := range objArr {
-		rs[index] = objArr[index].(string)
+	rs := make([]string, len(data))
+	for index := range data {
+		rs[index] = string(data[index])
 	}
 	return rs
 }

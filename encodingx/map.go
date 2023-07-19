@@ -56,25 +56,14 @@ func (v CodingMap) EncodeToBytes() []byte {
 		}
 		binaryx.WriteString(buff, DefaultOrder, key) //Key
 		kind, ln := binaryx.GetValueKind(val)
-		//fmt.Println("Encode Kind:", kind, ln)
 		binaryx.Write(buff, DefaultOrder, kind) //Kind
+
 		if binaryx.IsSliceKind(kind) {
-			binaryx.WriteLen(buff, DefaultOrder, ln) //Len
-			switch kind {
-			case binaryx.KindSliceString: //Value=[]string
-				binaryx.WriteSliceString(buff, DefaultOrder, val.([]string))
-			default: //Value
-				binaryx.WriteSlice(buff, DefaultOrder, val)
-			}
+			binaryx.WriteLen(buff, DefaultOrder, ln)
+			binaryx.WriteSlice(buff, DefaultOrder, val)
 		} else {
-			switch kind {
-			case binaryx.KindString: //Value=string
-				binaryx.WriteString(buff, DefaultOrder, val.(string))
-			default: //Value
-				binaryx.Write(buff, DefaultOrder, val)
-			}
+			binaryx.Write(buff, DefaultOrder, val)
 		}
-		//fmt.Println("EncodeToBytes:", buff.Bytes())
 	}
 	return buff.Bytes()
 }
@@ -106,10 +95,10 @@ func (v CodingMap) DecodeFromBytes(bs []byte) bool {
 				err = binaryx.Read(buff, DefaultOrder, &val)
 			}
 		}
-		if nil == err {
-			v.Set(key, val)
+		if nil != err {
+			return false
 		}
-		//fmt.Println("DecodeFromBytes", buff.Len())
+		v.Set(key, val)
 	}
 	return true
 }
