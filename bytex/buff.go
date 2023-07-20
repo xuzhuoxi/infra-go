@@ -7,6 +7,7 @@ package bytex
 
 import (
 	"bytes"
+	"encoding/binary"
 	"github.com/xuzhuoxi/infra-go/binaryx"
 	"github.com/xuzhuoxi/infra-go/slicex"
 	"sync"
@@ -52,6 +53,10 @@ type buffDataBlock struct {
 	buff    *bytes.Buffer
 	handler IDataBlockHandler
 	lock    sync.RWMutex
+}
+
+func (b *buffDataBlock) GetOrder() binary.ByteOrder {
+	return b.handler.GetOrder()
 }
 
 func (b *buffDataBlock) Read(p []byte) (n int, err error) {

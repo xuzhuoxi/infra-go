@@ -86,6 +86,7 @@ type IBuffLen interface {
 }
 
 type IBuffToBlock interface {
+	iOrderGetter
 	IBuffByteReader
 	IBuffDataWriter
 	IBuffReset
@@ -93,6 +94,7 @@ type IBuffToBlock interface {
 }
 
 type IBuffToData interface {
+	iOrderGetter
 	IBuffDataReader
 	IBuffByteWriter
 	IBuffReset
@@ -100,6 +102,7 @@ type IBuffToData interface {
 }
 
 type IBuffDataBlock interface {
+	iOrderGetter
 	IBuffDataWriter
 	IBuffByteReader
 	IBuffDataReader
