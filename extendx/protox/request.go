@@ -22,27 +22,28 @@ type IExtensionRequest interface {
 // 数据参数为二进制的请求对象参数集合接口
 type IExtensionBinaryRequest interface {
 	IExtensionRequest
+	// BinaryData
 	// RequestBinaryData
 	// 请求的参数数据(二进制)
-	RequestBinaryData() [][]byte
+	BinaryData() [][]byte
 }
 
 // IExtensionStringRequest
 // 数据参数为Json的请求对象参数集合接口
 type IExtensionStringRequest interface {
 	IExtensionRequest
-	// RequestStringData
+	// StringData
 	// 请求的参数数据(String)
-	RequestStringData() []string
+	StringData() []string
 }
 
 // IExtensionObjectRequest
 // 数据参数为结构体的请求对象参数集合接口
 type IExtensionObjectRequest interface {
 	IExtensionRequest
-	// RequestObjectData
+	// ObjectData
 	// 请求的参数数据(具体数据)
-	RequestObjectData() []interface{}
+	ObjectData() []interface{}
 }
 
 //---------------------------------------
@@ -53,55 +54,55 @@ func NewSockRequest() *SockRequest {
 
 type SockRequest struct {
 	ExtensionHeader
-	ParamType  ExtensionParamType
-	BinaryData [][]byte
-	StringData []string
-	ObjectData []interface{}
+	ParamType ExtensionParamType
+	binData   [][]byte
+	strData   []string
+	objData   []interface{}
 }
 
 func (req *SockRequest) String() string {
 	return fmt.Sprintf("{Request: %v, %v, %v, %v}",
-		req.ExtensionHeader, req.ParamType, req.BinaryData, req.ObjectData)
+		req.ExtensionHeader, req.ParamType, req.binData, req.objData)
 }
 
 func (req *SockRequest) DataSize() int {
 	switch req.ParamType {
 	case Binary:
-		return len(req.BinaryData)
+		return len(req.binData)
 	case String:
-		return len(req.StringData)
+		return len(req.strData)
 	case Object:
-		return len(req.ObjectData)
+		return len(req.objData)
 	}
 	return 0
 }
 
 func (req *SockRequest) SetRequestData(paramType ExtensionParamType, paramHandler IProtocolParamsHandler, data [][]byte) {
 	req.ParamType = paramType
-	req.BinaryData = data
+	req.binData = data
 	switch paramType {
 	case None:
-		req.StringData, req.ObjectData = nil, nil
+		req.strData, req.objData = nil, nil
 	case Binary:
-		req.StringData, req.ObjectData = nil, nil
+		req.strData, req.objData = nil, nil
 	case String:
-		req.StringData, req.ObjectData = req.toStringArray(data), nil
+		req.strData, req.objData = req.toStringArray(data), nil
 	case Object:
 		objData := paramHandler.HandleRequestParams(data)
-		req.StringData, req.ObjectData = nil, objData
+		req.strData, req.objData = nil, objData
 	}
 }
 
-func (req *SockRequest) RequestBinaryData() [][]byte {
-	return req.BinaryData
+func (req *SockRequest) BinaryData() [][]byte {
+	return req.binData
 }
 
-func (req *SockRequest) RequestStringData() []string {
-	return req.StringData
+func (req *SockRequest) StringData() []string {
+	return req.strData
 }
 
-func (req *SockRequest) RequestObjectData() []interface{} {
-	return req.ObjectData
+func (req *SockRequest) ObjectData() []interface{} {
+	return req.objData
 }
 
 func (req *SockRequest) toStringArray(data [][]byte) []string {
