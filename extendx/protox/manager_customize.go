@@ -15,7 +15,7 @@ type FuncParseMessage func(msgBytes []byte) (name string, pid string, uid string
 
 // FuncVerify
 // 消息处理入口，这里是并发方法
-type FuncVerify func(name string, pid string, uid string) (e IProtocolExtension, ok bool)
+type FuncVerify func(name string, pid string, uid string) (e IProtocolExtension, rsCode int32)
 
 // FuncStartOnRequest
 // 响应开始
@@ -49,7 +49,7 @@ type IExtensionManagerCustomizeSetting interface {
 type IExtensionManagerCustomizeSupport interface {
 	CustomStartOnPack(senderAddress string)
 	CustomParseMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte)
-	CustomVerify(name string, pid string, uid string) (e IProtocolExtension, ok bool)
+	CustomVerify(name string, pid string, uid string) (e IProtocolExtension, rsCode int32)
 	CustomStartOnRequest(resp IExtensionResponse, req IExtensionRequest)
 	CustomFinishOnRequest(resp IExtensionResponse, req IExtensionRequest)
 }
@@ -92,7 +92,7 @@ func (o *ExtensionManagerCustomizeSupport) CustomParseMessage(msgBytes []byte) (
 	}
 	return
 }
-func (o *ExtensionManagerCustomizeSupport) CustomVerify(name string, pid string, uid string) (e IProtocolExtension, ok bool) {
+func (o *ExtensionManagerCustomizeSupport) CustomVerify(name string, pid string, uid string) (e IProtocolExtension, rsCode int32) {
 	if nil != o.FuncVerify {
 		return o.FuncVerify(name, pid, uid)
 	}

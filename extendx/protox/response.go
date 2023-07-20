@@ -8,6 +8,7 @@ package protox
 import (
 	"errors"
 	"fmt"
+	"github.com/xuzhuoxi/infra-go/binaryx"
 	"github.com/xuzhuoxi/infra-go/bytex"
 	"github.com/xuzhuoxi/infra-go/netx"
 )
@@ -21,39 +22,19 @@ type IExtensionResponse interface {
 	// SetParamInfo
 	// 设置参数类型与处理器
 	SetParamInfo(paramType ExtensionParamType, paramHandler IProtocolParamsHandler)
+	// SetResultCode
+	// 设置返回状态码
+	SetResultCode(rsCode int32)
+	// SendNoneResponse
+	// 无额外参数响应
+	SendNoneResponse() error
+	// SendNoneResponseToClient
+	// 无额外参数响到其它用户
+	SendNoneResponseToClient(clientId string) error
+	// SendNoneResponseToClients
+	// 无额外参数响到其它用户
+	SendNoneResponseToClients(clientIds []string) error
 }
-
-type IExtensionBinaryResponse interface {
-	IExtensionResponse
-	// SendBinaryResponse
-	// 响应客户端(二进制参数)
-	SendBinaryResponse(data ...[]byte) error
-	// SendBinaryResponseToClient
-	// 响应指定客户端(二进制参数)
-	SendBinaryResponseToClient(clientId string, data ...[]byte) error
-}
-
-type IExtensionStringResponse interface {
-	IExtensionResponse
-	// SendStringResponse
-	// 响应客户端(Json字符串参数)
-	SendStringResponse(data ...string) error
-	// SendStringResponseToClient
-	// 响应指定客户端(Json字符串参数)
-	SendStringResponseToClient(clientId string, data ...string) error
-}
-
-type IExtensionObjectResponse interface {
-	IExtensionResponse
-	// SendObjectResponse
-	// 响应客户端(具体结构体参数)
-	SendObjectResponse(data ...interface{}) error
-	// SendObjectResponseToClient
-	// 响应指定客户端(具体结构体参数)
-	SendObjectResponseToClient(clientId string, data ...interface{}) error
-}
-
-//-----------------
 
 func NewSockResponse() *SockResponse {
 	return &SockResponse{BuffToBlock: bytex.NewDefaultBuffToBlock()}
@@ -61,6 +42,7 @@ func NewSockResponse() *SockResponse {
 
 type SockResponse struct {
 	ExtensionHeader
+	RsCode int32
 
 	SockSender   netx.ISockSender
 	AddressProxy netx.IAddressProxy
@@ -82,65 +64,39 @@ func (resp *SockResponse) SetParamInfo(paramType ExtensionParamType, paramHandle
 	resp.ParamType, resp.ParamHandler = paramType, paramHandler
 }
 
-func (resp *SockResponse) SendBinaryResponse(data ...[]byte) error {
+func (resp *SockResponse) SetResultCode(rsCode int32) {
+	resp.RsCode = rsCode
+}
+
+func (resp *SockResponse) SendNoneResponse() error {
 	resp.setHeader()
-	resp.setBinaryData(data...)
 	msg := resp.BuffToBlock.ReadBytes()
 	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
-func (resp *SockResponse) SendBinaryResponseToClient(clientId string, data ...[]byte) error {
+func (resp *SockResponse) SendNoneResponseToClient(clientId string) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
 		resp.setHeader()
-		resp.setBinaryData(data...)
 		msg := resp.BuffToBlock.ReadBytes()
 		return resp.SockSender.SendPackTo(msg, address)
 	}
 	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
 }
 
-func (resp *SockResponse) SendStringResponse(data ...string) error {
-	resp.setHeader()
-	err := resp.setStringData(data...)
-	if nil != err {
-		return err
+func (resp *SockResponse) SendNoneResponseToClients(clientIds []string) error {
+	if len(clientIds) == 0 {
+		return nil
 	}
+	resp.setHeader()
 	msg := resp.BuffToBlock.ReadBytes()
-	return resp.SockSender.SendPackTo(msg, resp.CAddress)
-}
-func (resp *SockResponse) SendStringResponseToClient(clientId string, data ...string) error {
-	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		resp.setHeader()
-		err := resp.setStringData(data...)
-		if nil != err {
-			return err
+	for _, clientId := range clientIds {
+		if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
+			err := resp.SockSender.SendPackTo(msg, address)
+			if nil != err {
+				return err
+			}
 		}
-		msg := resp.BuffToBlock.ReadBytes()
-		return resp.SockSender.SendPackTo(msg, address)
 	}
-	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
-}
-
-func (resp *SockResponse) SendObjectResponse(data ...interface{}) error {
-	resp.setHeader()
-	err := resp.setObjectData(data...)
-	if nil != err {
-		return err
-	}
-	msg := resp.BuffToBlock.ReadBytes()
-	return resp.SockSender.SendPackTo(msg, resp.CAddress)
-
-}
-func (resp *SockResponse) SendObjectResponseToClient(clientId string, data ...interface{}) error {
-	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		resp.setHeader()
-		err := resp.setObjectData(data...)
-		if nil != err {
-			return err
-		}
-		msg := resp.BuffToBlock.ReadBytes()
-		return resp.SockSender.SendPackTo(msg, address)
-	}
-	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
+	return nil
 }
 
 func (resp *SockResponse) setHeader() {
@@ -148,6 +104,7 @@ func (resp *SockResponse) setHeader() {
 	resp.BuffToBlock.WriteString(resp.EName)
 	resp.BuffToBlock.WriteString(resp.PId)
 	resp.BuffToBlock.WriteString(resp.CId)
+	binaryx.Write(resp.BuffToBlock, resp.BuffToBlock.GetOrder(), resp.RsCode)
 }
 
 func (resp *SockResponse) setBinaryData(data ...[]byte) {
@@ -167,8 +124,7 @@ func (resp *SockResponse) setStringData(data ...string) error {
 		return errors.New("SendStringResponse Error: ParamHandler is nil! ")
 	}
 	for index := range data {
-		bs := resp.ParamHandler.HandleResponseParam(data[index])
-		resp.BuffToBlock.WriteData(bs)
+		resp.BuffToBlock.WriteString(data[index])
 	}
 	return nil
 }

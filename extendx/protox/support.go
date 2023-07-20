@@ -14,8 +14,8 @@ type ExtensionProtoInfo struct {
 	ParamType        ExtensionParamType
 	ExtensionHandler interface{}
 
-	ParamHandler IProtocolParamsHandler
-	ParamFactory ParamFactory
+	ParamHandler    IProtocolParamsHandler
+	ReqParamFactory ParamFactory
 }
 
 //---------------------------------------
@@ -55,7 +55,7 @@ func (s *ProtocolExtensionSupport) SetRequestHandlerString(protoId string, handl
 func (s *ProtocolExtensionSupport) SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam,
 	factory ParamFactory, codingHandler encodingx.ICodingHandler) {
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Object, ExtensionHandler: handler,
-		ParamFactory: factory, ParamHandler: NewProtoObjectParamsHandler(factory, codingHandler)}
+		ReqParamFactory: factory, ParamHandler: NewProtoObjectParamsHandler(factory, codingHandler)}
 }
 func (s *ProtocolExtensionSupport) ClearRequestHandler(protoId string) {
 	delete(s.ProtoIdToInfo, protoId)

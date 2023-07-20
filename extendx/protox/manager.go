@@ -163,12 +163,13 @@ func (m *ExtensionManager) OnMessageUnpack(msgData []byte, senderAddress string,
 	//m.Logger.Infoln("ExtensionManager.onPack", senderAddress, msgData)
 	m.CustomStartOnPack(senderAddress)
 	name, pid, uid, data := m.ParseMessage(msgData)
-	extension, ok := m.Verify(name, pid, uid)
-	if !ok {
+	extension, rsCode := m.Verify(name, pid, uid)
+	if CodeSuc != rsCode {
+		// 这里可以直接响应失败
 		return false
 	}
 	//参数处理
-	response, request := m.GenParams(extension, senderAddress, name, pid, uid, data)
+	response, request := m.GetRecycleParams(extension, senderAddress, name, pid, uid, data)
 	defer func() {
 		DefaultRequestPool.Recycle(request)
 		DefaultResponsePool.Recycle(response)
@@ -212,7 +213,7 @@ func (m *ExtensionManager) ParseMessage(msgBytes []byte) (extName string, pid st
 	return extName, pid, uid, data
 }
 
-func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProtocolExtension, ok bool) {
+func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProtocolExtension, rsCode int32) {
 	if nil != m.FuncVerify {
 		return m.FuncVerify(name, pid, uid)
 	}
@@ -222,30 +223,54 @@ func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProto
 		if nil != m.Logger {
 			m.Logger.Warnln(fmt.Sprintf("Undefined Extension(%s)! Sender(%s)", name, uid))
 		}
-		return nil, false
+		return nil, CodeProtoFail
 	}
 	if !extension.CheckProtocolId(pid) { //有效性检查
 		if nil != m.Logger {
 			m.Logger.Warnln(fmt.Sprintf("Undefined ProtoId(%s) Send to Extension(%s)! Sender(%s)", pid, name, uid))
 		}
-		return nil, false
+		return nil, CodeProtoFail
 	}
-	return extension, true
+	return extension, CodeSuc
 }
 
-// GenParams
+// GetRecycleParams
 // 构造响应参数
-func (m *ExtensionManager) GenParams(extension IProtocolExtension, senderAddress string, name string, pid string, uid string, data [][]byte) (resp IExtensionResponse, req IExtensionRequest) {
+func (m *ExtensionManager) GetRecycleParams(extension IProtocolExtension, senderAddress string, name string, pid string, uid string, data [][]byte) (resp IExtensionResponse, req IExtensionRequest) {
 	t, h := extension.GetParamInfo(pid)
 	response := DefaultResponsePool.GetInstance()
 	response.SetHeader(name, pid, uid, senderAddress)
 	response.SetSockSender(m.SockSender)
 	response.SetAddressProxy(m.AddressProxy)
+	response.SetResultCode(CodeSuc)
 	response.SetParamInfo(t, h)
 	request := DefaultRequestPool.GetInstance()
 	request.SetHeader(name, pid, uid, senderAddress)
 	request.SetRequestData(t, h, data)
 	return response, request
+}
+
+// GetRecycleResponse
+// 构造响应参数
+func (m *ExtensionManager) GetRecycleResponse(extension IProtocolExtension, senderAddress string, name string, pid string, uid string, data [][]byte) (resp IExtensionResponse) {
+	t, h := extension.GetParamInfo(pid)
+	response := DefaultResponsePool.GetInstance()
+	response.SetHeader(name, pid, uid, senderAddress)
+	response.SetSockSender(m.SockSender)
+	response.SetAddressProxy(m.AddressProxy)
+	response.SetResultCode(CodeSuc)
+	response.SetParamInfo(t, h)
+	return response
+}
+
+// GetRecycleRequest
+// 获取可回收的请求结构
+func (m *ExtensionManager) GetRecycleRequest(extension IProtocolExtension, senderAddress string, name string, pid string, uid string, data [][]byte) (req IExtensionRequest) {
+	t, h := extension.GetParamInfo(pid)
+	request := DefaultRequestPool.GetInstance()
+	request.SetHeader(name, pid, uid, senderAddress)
+	request.SetRequestData(t, h, data)
+	return request
 }
 
 func (m *ExtensionManager) DoRequest(extension IProtocolExtension, request IExtensionRequest, response IExtensionResponse) {
