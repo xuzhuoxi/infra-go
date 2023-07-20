@@ -20,48 +20,48 @@ type ExtensionProtoInfo struct {
 
 //---------------------------------------
 
-func NewProtocolExtensionSupport(Name string) ProtocolExtensionSupport {
-	return ProtocolExtensionSupport{
+func NewProtoExtensionSupport(Name string) ProtoExtensionSupport {
+	return ProtoExtensionSupport{
 		Name: Name, ProtoIdToInfo: make(map[string]*ExtensionProtoInfo),
 	}
 }
 
-type ProtocolExtensionSupport struct {
+type ProtoExtensionSupport struct {
 	Name          string
 	ProtoIdToInfo map[string]*ExtensionProtoInfo
 }
 
-func (s *ProtocolExtensionSupport) ExtensionName() string {
+func (s *ProtoExtensionSupport) ExtensionName() string {
 	return s.Name
 }
-func (s *ProtocolExtensionSupport) CheckProtocolId(protoId string) bool {
+func (s *ProtoExtensionSupport) CheckProtocolId(protoId string) bool {
 	_, ok := s.ProtoIdToInfo[protoId]
 	return ok
 }
-func (s *ProtocolExtensionSupport) GetParamInfo(protoId string) (paramType ExtensionParamType, handler IProtocolParamsHandler) {
+func (s *ProtoExtensionSupport) GetParamInfo(protoId string) (paramType ExtensionParamType, handler IProtocolParamsHandler) {
 	info, _ := s.ProtoIdToInfo[protoId]
 	return info.ParamType, info.ParamHandler
 }
 
-func (s *ProtocolExtensionSupport) SetRequestHandler(protoId string, handler ExtensionHandlerNoneParam) {
+func (s *ProtoExtensionSupport) SetRequestHandler(protoId string, handler ExtensionHandlerNoneParam) {
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: None, ExtensionHandler: handler}
 }
-func (s *ProtocolExtensionSupport) SetRequestHandlerBinary(protoId string, handler ExtensionHandlerBinaryParam) {
+func (s *ProtoExtensionSupport) SetRequestHandlerBinary(protoId string, handler ExtensionHandlerBinaryParam) {
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Binary, ExtensionHandler: handler}
 }
-func (s *ProtocolExtensionSupport) SetRequestHandlerString(protoId string, handler ExtensionHandlerStringParam) {
+func (s *ProtoExtensionSupport) SetRequestHandlerString(protoId string, handler ExtensionHandlerStringParam) {
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: String, ExtensionHandler: handler}
 }
-func (s *ProtocolExtensionSupport) SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam,
+func (s *ProtoExtensionSupport) SetRequestHandlerObject(protoId string, handler ExtensionHandlerObjectParam,
 	factory ParamFactory, codingHandler encodingx.ICodingHandler) {
 	s.ProtoIdToInfo[protoId] = &ExtensionProtoInfo{ProtoId: protoId, ParamType: Object, ExtensionHandler: handler,
 		ReqParamFactory: factory, ParamHandler: NewProtoObjectParamsHandler(factory, codingHandler)}
 }
-func (s *ProtocolExtensionSupport) ClearRequestHandler(protoId string) {
+func (s *ProtoExtensionSupport) ClearRequestHandler(protoId string) {
 	delete(s.ProtoIdToInfo, protoId)
 }
 
-func (s *ProtocolExtensionSupport) OnRequest(resp IExtensionResponse, req IExtensionRequest) {
+func (s *ProtoExtensionSupport) OnRequest(resp IExtensionResponse, req IExtensionRequest) {
 	info, _ := s.ProtoIdToInfo[req.ProtoId()]
 	switch info.ParamType {
 	case None:
