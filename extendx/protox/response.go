@@ -34,6 +34,15 @@ type IExtensionResponse interface {
 	// SendNoneResponseToClients
 	// 无额外参数响到其它用户
 	SendNoneResponseToClients(clientIds []string) error
+	// SendJsonResponse
+	// 响应客户端(Json字符串参数)
+	SendJsonResponse(data ...interface{}) error
+	// SendJsonResponseToClient
+	// 响应指定客户端(Json字符串参数)
+	SendJsonResponseToClient(clientId string, data ...interface{}) error
+	// SendJsonResponseToClients
+	// 响应指定客户端(Json字符串参数)
+	SendJsonResponseToClients(clientIds []string, data ...interface{}) error
 }
 
 func NewSockResponse() *SockResponse {
@@ -69,13 +78,15 @@ func (resp *SockResponse) SetResultCode(rsCode int32) {
 }
 
 func (resp *SockResponse) SendNoneResponse() error {
-	resp.setHeader()
+	resp.writeHeader()
 	msg := resp.BuffToBlock.ReadBytes()
+	fmt.Println("Response:", msg)
 	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
+
 func (resp *SockResponse) SendNoneResponseToClient(clientId string) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		resp.setHeader()
+		resp.writeHeader()
 		msg := resp.BuffToBlock.ReadBytes()
 		return resp.SockSender.SendPackTo(msg, address)
 	}
@@ -86,7 +97,7 @@ func (resp *SockResponse) SendNoneResponseToClients(clientIds []string) error {
 	if len(clientIds) == 0 {
 		return nil
 	}
-	resp.setHeader()
+	resp.writeHeader()
 	msg := resp.BuffToBlock.ReadBytes()
 	for _, clientId := range clientIds {
 		if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
@@ -99,74 +110,10 @@ func (resp *SockResponse) SendNoneResponseToClients(clientIds []string) error {
 	return nil
 }
 
-func (resp *SockResponse) setHeader() {
+func (resp *SockResponse) writeHeader() {
 	resp.BuffToBlock.Reset()
 	resp.BuffToBlock.WriteString(resp.EName)
 	resp.BuffToBlock.WriteString(resp.PId)
 	resp.BuffToBlock.WriteString(resp.CId)
 	binaryx.Write(resp.BuffToBlock, resp.BuffToBlock.GetOrder(), resp.RsCode)
 }
-
-func (resp *SockResponse) setBinaryData(data ...[]byte) {
-	if len(data) == 0 {
-		return
-	}
-	for index := range data {
-		resp.BuffToBlock.WriteData(data[index])
-	}
-}
-
-func (resp *SockResponse) setStringData(data ...string) error {
-	if len(data) == 0 {
-		return nil
-	}
-	if resp.ParamHandler == nil {
-		return errors.New("SendStringResponse Error: ParamHandler is nil! ")
-	}
-	for index := range data {
-		resp.BuffToBlock.WriteString(data[index])
-	}
-	return nil
-}
-
-func (resp *SockResponse) setObjectData(data ...interface{}) error {
-	if len(data) == 0 {
-		return nil
-	}
-	if resp.ParamHandler == nil {
-		return errors.New("SendObjectResponse Error: ParamHandler is nil! ")
-	}
-	for index := range data {
-		bs := resp.ParamHandler.HandleResponseParam(data[index])
-		resp.BuffToBlock.WriteData(bs)
-	}
-	return nil
-}
-
-//-----------------
-
-//type PackResponse struct {
-//	PackSender   netx.IPackSender
-//	AddressProxy netx.IAddressProxy
-//
-//	CId      string
-//	CAddress string
-//}
-//
-//func (resp *PackResponse) ClientId() string {
-//	return resp.CId
-//}
-//
-//func (resp *PackResponse) ClientAddress() string {
-//	return resp.CAddress
-//}
-//
-//func (resp *PackResponse) SendResponse(data []byte) {
-//	resp.PackSender.SendPack(data, resp.CAddress)
-//}
-//
-//func (resp *PackResponse) SendResponseToClient(clientId string, data []byte) {
-//	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-//		resp.PackSender.SendPack(data, address)
-//	}
-//}

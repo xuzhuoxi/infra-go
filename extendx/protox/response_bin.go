@@ -22,7 +22,7 @@ type IExtensionBinaryResponse interface {
 }
 
 func (resp *SockResponse) SendBinaryResponse(data ...[]byte) error {
-	resp.setHeader()
+	resp.writeHeader()
 	resp.setBinaryData(data...)
 	msg := resp.BuffToBlock.ReadBytes()
 	return resp.SockSender.SendPackTo(msg, resp.CAddress)
@@ -30,7 +30,7 @@ func (resp *SockResponse) SendBinaryResponse(data ...[]byte) error {
 
 func (resp *SockResponse) SendBinaryResponseToClient(clientId string, data ...[]byte) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		resp.setHeader()
+		resp.writeHeader()
 		resp.setBinaryData(data...)
 		msg := resp.BuffToBlock.ReadBytes()
 		return resp.SockSender.SendPackTo(msg, address)
@@ -42,7 +42,7 @@ func (resp *SockResponse) SendBinaryResponseToClients(clientIds []string, data .
 	if len(clientIds) == 0 {
 		return nil
 	}
-	resp.setHeader()
+	resp.writeHeader()
 	resp.setBinaryData(data...)
 	msg := resp.BuffToBlock.ReadBytes()
 	for _, clientId := range clientIds {
@@ -54,4 +54,13 @@ func (resp *SockResponse) SendBinaryResponseToClients(clientIds []string, data .
 		}
 	}
 	return nil
+}
+
+func (resp *SockResponse) setBinaryData(data ...[]byte) {
+	if len(data) == 0 {
+		return
+	}
+	for index := range data {
+		resp.BuffToBlock.WriteData(data[index])
+	}
 }

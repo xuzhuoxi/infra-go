@@ -22,7 +22,7 @@ type IExtensionObjectResponse interface {
 }
 
 func (resp *SockResponse) SendObjectResponse(data ...interface{}) error {
-	resp.setHeader()
+	resp.writeHeader()
 	err := resp.setObjectData(data...)
 	if nil != err {
 		return err
@@ -33,7 +33,7 @@ func (resp *SockResponse) SendObjectResponse(data ...interface{}) error {
 
 func (resp *SockResponse) SendObjectResponseToClient(clientId string, data ...interface{}) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		resp.setHeader()
+		resp.writeHeader()
 		err := resp.setObjectData(data...)
 		if nil != err {
 			return err
@@ -48,7 +48,7 @@ func (resp *SockResponse) SendObjectResponseToClients(clientIds []string, data .
 	if len(clientIds) == 0 {
 		return nil
 	}
-	resp.setHeader()
+	resp.writeHeader()
 	resp.setObjectData(data...)
 	msg := resp.BuffToBlock.ReadBytes()
 	for _, clientId := range clientIds {
@@ -58,6 +58,20 @@ func (resp *SockResponse) SendObjectResponseToClients(clientIds []string, data .
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+func (resp *SockResponse) setObjectData(data ...interface{}) error {
+	if len(data) == 0 {
+		return nil
+	}
+	if resp.ParamHandler == nil {
+		return errors.New("SendObjectResponse Error: ParamHandler is nil! ")
+	}
+	for index := range data {
+		bs := resp.ParamHandler.HandleResponseParam(data[index])
+		resp.BuffToBlock.WriteData(bs)
 	}
 	return nil
 }
