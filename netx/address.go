@@ -51,47 +51,60 @@ func NewIAddressProxy() IAddressProxy {
 }
 
 func NewAddressProxy() *AddressProxy {
-	return &AddressProxy{idAddr: make(map[string]string), addrId: make(map[string]string)}
+	return NewAddressProxyWithName("default")
+}
+
+func NewIAddressProxyWithName(name string) IAddressProxy {
+	return NewAddressProxyWithName(name)
+}
+
+func NewAddressProxyWithName(name string) *AddressProxy {
+	return &AddressProxy{
+		name:   name,
+		idAddr: make(map[string]string),
+		addrId: make(map[string]string)}
 }
 
 type AddressProxy struct {
 	eventx.EventDispatcher
+	name   string
 	idAddr map[string]string
 	addrId map[string]string
-	mu     sync.RWMutex
+	lock   sync.RWMutex
 }
 
 func (p *AddressProxy) Reset() {
-	p.mu.Lock()
-	defer p.mu.Unlock()
+	p.lock.Lock()
+	defer p.lock.Unlock()
 	p.idAddr = make(map[string]string)
 	p.addrId = make(map[string]string)
 }
 
 func (p *AddressProxy) GetId(address string) (id string, ok bool) {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
+	p.lock.RLock()
+	defer p.lock.RUnlock()
 	id, ok = p.addrId[address]
 	return
 }
 
 func (p *AddressProxy) GetAddress(id string) (address string, ok bool) {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
+	p.lock.RLock()
+	defer p.lock.RUnlock()
 	id, ok = p.idAddr[id]
 	return
 }
 
 func (p *AddressProxy) MapIdAddress(id string, address string) {
-	p.mu.Lock()
+	//fmt.Println(fmt.Sprintf("AddressProxy[%s].MapIdAddress:", p.name), id, address)
+	p.lock.Lock()
 	if p.checkGroup(id, address) {
-		p.mu.Unlock()
+		p.lock.Unlock()
 		return
 	}
 	var removeAddress string
 	var ok bool
 	defer func() {
-		p.mu.Unlock()
+		p.lock.Unlock()
 		if ok {
 			p.DispatchEvent(EventAddressRemoved, p, removeAddress)
 		}
@@ -106,11 +119,12 @@ func (p *AddressProxy) MapIdAddress(id string, address string) {
 }
 
 func (p *AddressProxy) RemoveById(id string) {
-	p.mu.Lock()
+	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveById:", p.name), id)
+	p.lock.Lock()
 	var address string
 	var ok bool
 	defer func() {
-		p.mu.Unlock()
+		p.lock.Unlock()
 		if ok {
 			p.DispatchEvent(EventAddressRemoved, p, address)
 		}
@@ -122,10 +136,11 @@ func (p *AddressProxy) RemoveById(id string) {
 }
 
 func (p *AddressProxy) RemoveByAddress(address string) {
-	p.mu.Lock()
+	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveByAddress:", p.name), address)
+	p.lock.Lock()
 	var ok bool
 	defer func() {
-		p.mu.Unlock()
+		p.lock.Unlock()
 		if ok {
 			p.DispatchEvent(EventAddressRemoved, p, address)
 		}
