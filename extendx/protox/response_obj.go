@@ -8,19 +8,6 @@ import (
 	"fmt"
 )
 
-type IExtensionObjectResponse interface {
-	IExtensionResponse
-	// SendObjectResponse
-	// 响应客户端(具体结构体参数)
-	SendObjectResponse(data ...interface{}) error
-	// SendObjectResponseToClient
-	// 响应指定客户端(具体结构体参数)
-	SendObjectResponseToClient(clientId string, data ...interface{}) error
-	// SendObjectResponseToClients
-	// 响应指定客户端(具体结构体参数)
-	SendObjectResponseToClients(clientIds []string, data ...interface{}) error
-}
-
 func (resp *SockResponse) SendObjectResponse(data ...interface{}) error {
 	resp.writeHeader()
 	err := resp.setObjectData(data...)

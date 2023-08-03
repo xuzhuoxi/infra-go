@@ -238,7 +238,7 @@ func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProto
 // 构造响应参数
 func (m *ExtensionManager) GetRecycleParams(extension IProtocolExtension, senderAddress string, name string, pid string, uid string, data [][]byte) (resp IExtensionResponse, req IExtensionRequest) {
 	t, h := extension.GetParamInfo(pid)
-	response := DefaultResponsePool.GetInstance()
+	response := DefaultResponsePool.GetInstance().(iExtResponse)
 	response.SetHeader(name, pid, uid, senderAddress)
 	response.SetSockSender(m.SockSender)
 	response.SetAddressProxy(m.AddressProxy)
@@ -254,7 +254,7 @@ func (m *ExtensionManager) GetRecycleParams(extension IProtocolExtension, sender
 // 构造响应参数
 func (m *ExtensionManager) GetRecycleResponse(extension IProtocolExtension, senderAddress string, name string, pid string, uid string, data [][]byte) (resp IExtensionResponse) {
 	t, h := extension.GetParamInfo(pid)
-	response := DefaultResponsePool.GetInstance()
+	response := DefaultResponsePool.GetInstance().(iExtResponse)
 	response.SetHeader(name, pid, uid, senderAddress)
 	response.SetSockSender(m.SockSender)
 	response.SetAddressProxy(m.AddressProxy)

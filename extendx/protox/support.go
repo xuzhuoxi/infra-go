@@ -69,13 +69,13 @@ func (s *ProtoExtensionSupport) OnRequest(resp IExtensionResponse, req IExtensio
 		handler(resp.(IExtensionResponse), req.(IExtensionRequest))
 	case Binary:
 		handler := info.ExtensionHandler.(ExtensionHandlerBinaryParam)
-		handler(resp.(IExtensionBinaryResponse), req.(IExtensionBinaryRequest))
+		handler(resp.(IExtensionResponse), req.(IExtensionBinaryRequest))
 	case String:
 		handler := info.ExtensionHandler.(ExtensionHandlerStringParam)
-		handler(resp.(IExtensionStringResponse), req.(IExtensionStringRequest))
+		handler(resp.(IExtensionResponse), req.(IExtensionStringRequest))
 	case Object:
 		handler := info.ExtensionHandler.(ExtensionHandlerObjectParam)
-		handler(resp.(IExtensionObjectResponse), req.(IExtensionObjectRequest))
+		handler(resp.(IExtensionResponse), req.(IExtensionObjectRequest))
 	}
 }
 

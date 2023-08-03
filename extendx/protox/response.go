@@ -13,18 +13,35 @@ import (
 	"github.com/xuzhuoxi/infra-go/netx"
 )
 
+type iExtResponse interface {
+	IExtensionResponseSettings
+	IExtensionResponse
+}
+
+type IExtensionResponseSettings interface {
+	netx.IAddressProxySetter
+	netx.ISockSenderSetter
+}
+
 // IExtensionResponse
 // 响应对象参数集合接口
 type IExtensionResponse interface {
 	IExtensionHeader
-	netx.IAddressProxySetter
-	netx.ISockSenderSetter
 	// SetParamInfo
 	// 设置参数类型与处理器
 	SetParamInfo(paramType ExtensionParamType, paramHandler IProtocolParamsHandler)
 	// SetResultCode
 	// 设置返回状态码
 	SetResultCode(rsCode int32)
+
+	iExtRespNone
+	iExtRespBin
+	iExtRespStr
+	iExtResJson
+	iExtRespObject
+}
+
+type iExtRespNone interface {
 	// SendNoneResponse
 	// 无额外参数响应
 	SendNoneResponse() error
@@ -34,6 +51,45 @@ type IExtensionResponse interface {
 	// SendNoneResponseToClients
 	// 无额外参数响到其它用户
 	SendNoneResponseToClients(clientIds []string) error
+}
+
+type iExtRespBin interface {
+	// SendBinaryResponse
+	// 响应客户端(二进制参数)
+	SendBinaryResponse(data ...[]byte) error
+	// SendBinaryResponseToClient
+	// 响应指定客户端(二进制参数)
+	SendBinaryResponseToClient(clientId string, data ...[]byte) error
+	// SendBinaryResponseToClients
+	// 响应指定客户端(二进制参数)
+	SendBinaryResponseToClients(clientIds []string, data ...[]byte) error
+}
+
+type iExtRespCommon interface {
+	// SendCommonResponse
+	// 响应客户端(基础数据参数)
+	SendCommonResponse(data ...interface{}) error
+	// SendCommonResponseToClient
+	// 响应指定客户端(基础数据参数)
+	SendCommonResponseToClient(clientId string, data ...interface{}) error
+	// SendCommonResponseToClients
+	// 响应指定客户端(基础数据参数)
+	SendCommonResponseToClients(clientIds []string, data ...interface{}) error
+}
+
+type iExtRespStr interface {
+	// SendStringResponse
+	// 响应客户端(字符串参数)
+	SendStringResponse(data ...string) error
+	// SendStringResponseToClient
+	// 响应指定客户端(字符串参数)
+	SendStringResponseToClient(clientId string, data ...string) error
+	// SendStringResponseToClients
+	// 响应指定客户端(字符串参数)
+	SendStringResponseToClients(clientIds []string, data ...string) error
+}
+
+type iExtResJson interface {
 	// SendJsonResponse
 	// 响应客户端(Json字符串参数)
 	SendJsonResponse(data ...interface{}) error
@@ -43,6 +99,18 @@ type IExtensionResponse interface {
 	// SendJsonResponseToClients
 	// 响应指定客户端(Json字符串参数)
 	SendJsonResponseToClients(clientIds []string, data ...interface{}) error
+}
+
+type iExtRespObject interface {
+	// SendObjectResponse
+	// 响应客户端(具体结构体参数)
+	SendObjectResponse(data ...interface{}) error
+	// SendObjectResponseToClient
+	// 响应指定客户端(具体结构体参数)
+	SendObjectResponseToClient(clientId string, data ...interface{}) error
+	// SendObjectResponseToClients
+	// 响应指定客户端(具体结构体参数)
+	SendObjectResponseToClients(clientIds []string, data ...interface{}) error
 }
 
 func NewSockResponse() *SockResponse {

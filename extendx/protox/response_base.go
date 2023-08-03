@@ -6,25 +6,26 @@ package protox
 import (
 	"errors"
 	"fmt"
+	"github.com/xuzhuoxi/infra-go/binaryx"
 )
 
-func (resp *SockResponse) SendStringResponse(data ...string) error {
-	return resp.sendStringResp(resp.CAddress, data...)
+func (resp *SockResponse) SendCommonResponse(data ...interface{}) error {
+	return resp.sendBaseResp(resp.CAddress, data...)
 }
 
-func (resp *SockResponse) SendStringResponseToClient(clientId string, data ...string) error {
+func (resp *SockResponse) SendCommonResponseToClient(clientId string, data ...interface{}) error {
 	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		return resp.sendStringResp(address, data...)
+		return resp.sendBaseResp(address, data...)
 	}
 	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
 }
 
-func (resp *SockResponse) SendStringResponseToClients(clientIds []string, data ...string) error {
+func (resp *SockResponse) SendCommonResponseToClients(clientIds []string, data ...interface{}) error {
 	if len(clientIds) == 0 {
 		return nil
 	}
 	resp.writeHeader()
-	resp.setStringData(data...)
+	resp.setCommonData(data...)
 	msg := resp.BuffToBlock.ReadBytes()
 	for _, clientId := range clientIds {
 		if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
@@ -37,9 +38,9 @@ func (resp *SockResponse) SendStringResponseToClients(clientIds []string, data .
 	return nil
 }
 
-func (resp *SockResponse) sendStringResp(address string, data ...string) error {
+func (resp *SockResponse) sendBaseResp(address string, data ...interface{}) error {
 	resp.writeHeader()
-	err := resp.setStringData(data...)
+	err := resp.setCommonData(data...)
 	if nil != err {
 		return err
 	}
@@ -47,12 +48,13 @@ func (resp *SockResponse) sendStringResp(address string, data ...string) error {
 	return resp.SockSender.SendPackTo(msg, address)
 }
 
-func (resp *SockResponse) setStringData(data ...string) error {
+func (resp *SockResponse) setCommonData(data ...interface{}) error {
 	if len(data) == 0 {
 		return nil
 	}
+	order := resp.BuffToBlock.GetOrder()
 	for index := range data {
-		resp.BuffToBlock.WriteString(data[index])
+		binaryx.Write(resp.BuffToBlock, order, data[index])
 	}
 	return nil
 }

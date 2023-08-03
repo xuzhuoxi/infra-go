@@ -26,15 +26,15 @@ type ExtensionHandlerNoneParam func(resp IExtensionResponse, req IExtensionReque
 
 // ExtensionHandlerBinaryParam
 // Extension响应函数－二进制参数
-type ExtensionHandlerBinaryParam func(resp IExtensionBinaryResponse, req IExtensionBinaryRequest)
+type ExtensionHandlerBinaryParam func(resp IExtensionResponse, req IExtensionBinaryRequest)
 
 // ExtensionHandlerStringParam
 // Extension响应函数－字符串参数
-type ExtensionHandlerStringParam func(resp IExtensionStringResponse, req IExtensionStringRequest)
+type ExtensionHandlerStringParam func(resp IExtensionResponse, req IExtensionStringRequest)
 
 // ExtensionHandlerObjectParam
 // Extension响应函数－具体对象参数
-type ExtensionHandlerObjectParam func(resp IExtensionObjectResponse, req IExtensionObjectRequest)
+type ExtensionHandlerObjectParam func(resp IExtensionResponse, req IExtensionObjectRequest)
 
 type IProtocolExtension interface {
 	extendx.IExtension

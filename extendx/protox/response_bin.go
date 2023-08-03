@@ -8,19 +8,6 @@ import (
 	"fmt"
 )
 
-type IExtensionBinaryResponse interface {
-	IExtensionResponse
-	// SendBinaryResponse
-	// 响应客户端(二进制参数)
-	SendBinaryResponse(data ...[]byte) error
-	// SendBinaryResponseToClient
-	// 响应指定客户端(二进制参数)
-	SendBinaryResponseToClient(clientId string, data ...[]byte) error
-	// SendBinaryResponseToClients
-	// 响应指定客户端(二进制参数)
-	SendBinaryResponseToClients(clientIds []string, data ...[]byte) error
-}
-
 func (resp *SockResponse) SendBinaryResponse(data ...[]byte) error {
 	resp.writeHeader()
 	resp.setBinaryData(data...)
