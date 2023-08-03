@@ -5,72 +5,48 @@ package protox
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 )
 
 var (
-	jsonMarshal func(v interface{}) ([]byte, error)
+	marshalHandler func(v interface{}) ([]byte, error)
 )
 
+func jsonMarshal(obj interface{}) ([]byte, error) {
+	if nil == marshalHandler {
+		return json.Marshal(obj)
+	} else {
+		return marshalHandler(obj)
+	}
+}
+
 func SetJsonMarshalHandler(handler func(v interface{}) ([]byte, error)) {
-	jsonMarshal = handler
+	marshalHandler = handler
 }
 
-func (resp *SockResponse) SendJsonResponse(data ...interface{}) error {
-	return resp.sendJsonResp(resp.CAddress, data...)
-}
-
-func (resp *SockResponse) SendJsonResponseToClient(clientId string, data ...interface{}) error {
-	if len(clientId) == 0 {
-		return nil
-	}
-	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		return resp.sendJsonResp(address, data...)
-	}
-	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
-}
-
-func (resp *SockResponse) SendJsonResponseToClients(clientIds []string, data ...interface{}) error {
-	if len(clientIds) == 0 {
-		return nil
-	}
-	resp.writeHeader()
-	resp.setJsonData(data...)
-	msg := resp.BuffToBlock.ReadBytes()
-	for _, clientId := range clientIds {
-		if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-			err := resp.SockSender.SendPackTo(msg, address)
-			if nil != err {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (resp *SockResponse) sendJsonResp(address string, data ...interface{}) error {
-	resp.writeHeader()
-	err := resp.setJsonData(data...)
-	if nil != err {
-		return err
-	}
-	msg := resp.BuffToBlock.ReadBytes()
-	return resp.SockSender.SendPackTo(msg, address)
-}
-
-func (resp *SockResponse) setJsonData(data ...interface{}) error {
+func (resp *SockResponse) AppendJson(data ...interface{}) error {
 	if len(data) == 0 {
 		return nil
 	}
 	for index := range data {
-		json, err1 := resp.toJson(data[index])
+		jsonStr, err1 := resp.toJson(data[index])
 		if nil != err1 {
 			return err1
 		}
-		resp.setStringData(json)
+		err2 := resp.AppendString(jsonStr)
+		if nil != err2 {
+			return err2
+		}
 	}
 	return nil
+}
+
+func (resp *SockResponse) SendJsonResponse(data ...interface{}) error {
+	resp.PrepareResponse()
+	err := resp.AppendJson(data...)
+	if nil != err {
+		return err
+	}
+	return resp.SendResponse()
 }
 
 func (resp *SockResponse) toJson(o interface{}) (json string, err error) {
@@ -83,13 +59,5 @@ func (resp *SockResponse) toJson(o interface{}) (json string, err error) {
 			return "", err1
 		}
 		return string(bs), nil
-	}
-}
-
-func (resp *SockResponse) jsonMarshal(obj interface{}) ([]byte, error) {
-	if nil == jsonMarshal {
-		return json.Marshal(obj)
-	} else {
-		return jsonMarshal(obj)
 	}
 }

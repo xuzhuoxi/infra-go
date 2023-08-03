@@ -6,8 +6,6 @@
 package protox
 
 import (
-	"errors"
-	"fmt"
 	"github.com/xuzhuoxi/infra-go/binaryx"
 	"github.com/xuzhuoxi/infra-go/bytex"
 	"github.com/xuzhuoxi/infra-go/netx"
@@ -33,8 +31,18 @@ type IExtensionResponse interface {
 	// SetResultCode
 	// 设置返回状态码
 	SetResultCode(rsCode int32)
+	// PrepareResponse
+	// 准备设置回复参数
+	PrepareResponse()
+	// SendResponse
+	// 根据设置好的参数响应
+	SendResponse() error
+	// SendResponseToClient
+	// 根据设置好的参数响应到其它用户
+	SendResponseToClient(interruptOnErr bool, clientIds ...string) error
 
 	iExtRespNone
+	iExtRespBase
 	iExtRespBin
 	iExtRespStr
 	iExtResJson
@@ -47,70 +55,52 @@ type iExtRespNone interface {
 	SendNoneResponse() error
 	// SendNoneResponseToClient
 	// 无额外参数响到其它用户
-	SendNoneResponseToClient(clientId string) error
-	// SendNoneResponseToClients
-	// 无额外参数响到其它用户
-	SendNoneResponseToClients(clientIds []string) error
+	SendNoneResponseToClient(interruptOnErr bool, clientIds ...string) error
 }
 
 type iExtRespBin interface {
+	// AppendBinary
+	// 追加响应参数 - 字节数组
+	AppendBinary(data ...[]byte) error
 	// SendBinaryResponse
 	// 响应客户端(二进制参数)
 	SendBinaryResponse(data ...[]byte) error
-	// SendBinaryResponseToClient
-	// 响应指定客户端(二进制参数)
-	SendBinaryResponseToClient(clientId string, data ...[]byte) error
-	// SendBinaryResponseToClients
-	// 响应指定客户端(二进制参数)
-	SendBinaryResponseToClients(clientIds []string, data ...[]byte) error
 }
 
-type iExtRespCommon interface {
+type iExtRespBase interface {
+	// AppendCommon
+	// 追加响应参数 - 通用数据类型
+	AppendCommon(data ...interface{}) error
 	// SendCommonResponse
 	// 响应客户端(基础数据参数)
 	SendCommonResponse(data ...interface{}) error
-	// SendCommonResponseToClient
-	// 响应指定客户端(基础数据参数)
-	SendCommonResponseToClient(clientId string, data ...interface{}) error
-	// SendCommonResponseToClients
-	// 响应指定客户端(基础数据参数)
-	SendCommonResponseToClients(clientIds []string, data ...interface{}) error
 }
 
 type iExtRespStr interface {
+	// AppendString
+	// 追加响应返回- 字符串
+	AppendString(data ...string) error
 	// SendStringResponse
 	// 响应客户端(字符串参数)
 	SendStringResponse(data ...string) error
-	// SendStringResponseToClient
-	// 响应指定客户端(字符串参数)
-	SendStringResponseToClient(clientId string, data ...string) error
-	// SendStringResponseToClients
-	// 响应指定客户端(字符串参数)
-	SendStringResponseToClients(clientIds []string, data ...string) error
 }
 
 type iExtResJson interface {
+	// AppendJson
+	// 追加响应返回- Json字符串 或 可序列化的Struct
+	AppendJson(data ...interface{}) error
 	// SendJsonResponse
 	// 响应客户端(Json字符串参数)
 	SendJsonResponse(data ...interface{}) error
-	// SendJsonResponseToClient
-	// 响应指定客户端(Json字符串参数)
-	SendJsonResponseToClient(clientId string, data ...interface{}) error
-	// SendJsonResponseToClients
-	// 响应指定客户端(Json字符串参数)
-	SendJsonResponseToClients(clientIds []string, data ...interface{}) error
 }
 
 type iExtRespObject interface {
+	// AppendObject
+	// 追加响应参数
+	AppendObject(data ...interface{}) error
 	// SendObjectResponse
 	// 响应客户端(具体结构体参数)
 	SendObjectResponse(data ...interface{}) error
-	// SendObjectResponseToClient
-	// 响应指定客户端(具体结构体参数)
-	SendObjectResponseToClient(clientId string, data ...interface{}) error
-	// SendObjectResponseToClients
-	// 响应指定客户端(具体结构体参数)
-	SendObjectResponseToClients(clientIds []string, data ...interface{}) error
 }
 
 func NewSockResponse() *SockResponse {
@@ -145,32 +135,28 @@ func (resp *SockResponse) SetResultCode(rsCode int32) {
 	resp.RsCode = rsCode
 }
 
-func (resp *SockResponse) SendNoneResponse() error {
-	resp.writeHeader()
+func (resp *SockResponse) PrepareResponse() {
+	resp.BuffToBlock.Reset()
+	resp.BuffToBlock.WriteString(resp.EName)
+	resp.BuffToBlock.WriteString(resp.PId)
+	resp.BuffToBlock.WriteString(resp.CId)
+	binaryx.Write(resp.BuffToBlock, resp.BuffToBlock.GetOrder(), resp.RsCode)
+}
+
+func (resp *SockResponse) SendResponse() error {
 	msg := resp.BuffToBlock.ReadBytes()
-	fmt.Println("Response:", msg)
 	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
 
-func (resp *SockResponse) SendNoneResponseToClient(clientId string) error {
-	if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
-		resp.writeHeader()
-		msg := resp.BuffToBlock.ReadBytes()
-		return resp.SockSender.SendPackTo(msg, address)
-	}
-	return errors.New(fmt.Sprintf("No clidnetId[%s] in AddressProxy! ", clientId))
-}
-
-func (resp *SockResponse) SendNoneResponseToClients(clientIds []string) error {
+func (resp *SockResponse) SendResponseToClient(interruptOnErr bool, clientIds ...string) error {
 	if len(clientIds) == 0 {
 		return nil
 	}
-	resp.writeHeader()
 	msg := resp.BuffToBlock.ReadBytes()
 	for _, clientId := range clientIds {
 		if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
 			err := resp.SockSender.SendPackTo(msg, address)
-			if nil != err {
+			if nil != err && interruptOnErr {
 				return err
 			}
 		}
@@ -178,10 +164,15 @@ func (resp *SockResponse) SendNoneResponseToClients(clientIds []string) error {
 	return nil
 }
 
-func (resp *SockResponse) writeHeader() {
-	resp.BuffToBlock.Reset()
-	resp.BuffToBlock.WriteString(resp.EName)
-	resp.BuffToBlock.WriteString(resp.PId)
-	resp.BuffToBlock.WriteString(resp.CId)
-	binaryx.Write(resp.BuffToBlock, resp.BuffToBlock.GetOrder(), resp.RsCode)
+func (resp *SockResponse) SendNoneResponse() error {
+	resp.PrepareResponse()
+	return resp.SendResponse()
+}
+
+func (resp *SockResponse) SendNoneResponseToClient(interruptOnErr bool, clientIds ...string) error {
+	if len(clientIds) == 0 {
+		return nil
+	}
+	resp.PrepareResponse()
+	return resp.SendResponseToClient(interruptOnErr, clientIds...)
 }
