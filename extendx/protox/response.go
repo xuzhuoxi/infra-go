@@ -34,12 +34,12 @@ type IExtensionResponse interface {
 	// PrepareResponse
 	// 准备设置回复参数
 	PrepareResponse()
-	// SendResponse
+	// SendPreparedResponse
 	// 根据设置好的参数响应
-	SendResponse() error
-	// SendResponseToClient
+	SendPreparedResponse() error
+	// SendPreparedResponseToClient
 	// 根据设置好的参数响应到其它用户
-	SendResponseToClient(interruptOnErr bool, clientIds ...string) error
+	SendPreparedResponseToClient(interruptOnErr bool, clientIds ...string) error
 
 	iExtRespNone
 	iExtRespBase
@@ -143,12 +143,12 @@ func (resp *SockResponse) PrepareResponse() {
 	binaryx.Write(resp.BuffToBlock, resp.BuffToBlock.GetOrder(), resp.RsCode)
 }
 
-func (resp *SockResponse) SendResponse() error {
+func (resp *SockResponse) SendPreparedResponse() error {
 	msg := resp.BuffToBlock.ReadBytes()
 	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }
 
-func (resp *SockResponse) SendResponseToClient(interruptOnErr bool, clientIds ...string) error {
+func (resp *SockResponse) SendPreparedResponseToClient(interruptOnErr bool, clientIds ...string) error {
 	if len(clientIds) == 0 {
 		return nil
 	}
@@ -166,7 +166,7 @@ func (resp *SockResponse) SendResponseToClient(interruptOnErr bool, clientIds ..
 
 func (resp *SockResponse) SendNoneResponse() error {
 	resp.PrepareResponse()
-	return resp.SendResponse()
+	return resp.SendPreparedResponse()
 }
 
 func (resp *SockResponse) SendNoneResponseToClient(interruptOnErr bool, clientIds ...string) error {
@@ -174,5 +174,5 @@ func (resp *SockResponse) SendNoneResponseToClient(interruptOnErr bool, clientId
 		return nil
 	}
 	resp.PrepareResponse()
-	return resp.SendResponseToClient(interruptOnErr, clientIds...)
+	return resp.SendPreparedResponseToClient(interruptOnErr, clientIds...)
 }

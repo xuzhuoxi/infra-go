@@ -46,7 +46,7 @@ func (resp *SockResponse) SendJsonResponse(data ...interface{}) error {
 	if nil != err {
 		return err
 	}
-	return resp.SendResponse()
+	return resp.SendPreparedResponse()
 }
 
 func (resp *SockResponse) toJson(o interface{}) (json string, err error) {

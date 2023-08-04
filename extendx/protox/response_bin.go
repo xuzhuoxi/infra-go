@@ -16,5 +16,5 @@ func (resp *SockResponse) AppendBinary(data ...[]byte) error {
 func (resp *SockResponse) SendBinaryResponse(data ...[]byte) error {
 	resp.PrepareResponse()
 	resp.AppendBinary(data...)
-	return resp.SendResponse()
+	return resp.SendPreparedResponse()
 }

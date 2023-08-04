@@ -24,5 +24,5 @@ func (resp *SockResponse) SendCommonResponse(data ...interface{}) error {
 	if nil != err {
 		return err
 	}
-	return resp.SendResponse()
+	return resp.SendPreparedResponse()
 }

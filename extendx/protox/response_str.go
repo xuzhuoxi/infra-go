@@ -19,5 +19,5 @@ func (resp *SockResponse) SendStringResponse(data ...string) error {
 	if nil != err {
 		return err
 	}
-	return resp.SendResponse()
+	return resp.SendPreparedResponse()
 }
