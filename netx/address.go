@@ -14,6 +14,11 @@ const (
 	EventAddressRemoved = "EventAddressRemoved"
 )
 
+type AddrRemovedInfo struct {
+	Id   string
+	Addr string
+}
+
 type IAddressProxySetter interface {
 	SetAddressProxy(proxy IAddressProxy)
 }
@@ -101,16 +106,16 @@ func (p *AddressProxy) MapIdAddress(id string, address string) {
 		p.lock.Unlock()
 		return
 	}
-	var removeAddress string
+	var removeId string
 	var ok bool
 	defer func() {
 		p.lock.Unlock()
-		if ok {
-			p.DispatchEvent(EventAddressRemoved, p, removeAddress)
+		if ok && removeId != id { // id不同
+			p.DispatchEvent(EventAddressRemoved, p, AddrRemovedInfo{Id: removeId, Addr: address})
 		}
 	}()
-	removeAddress, ok = p.removeId(id)
-	p.removeAddress(address)
+	p.removeId(id)
+	removeId, ok = p.removeAddress(address)
 
 	p.idAddr[id] = address
 	p.addrId[address] = id
@@ -126,7 +131,7 @@ func (p *AddressProxy) RemoveById(id string) {
 	defer func() {
 		p.lock.Unlock()
 		if ok {
-			p.DispatchEvent(EventAddressRemoved, p, address)
+			p.DispatchEvent(EventAddressRemoved, p, AddrRemovedInfo{Id: id, Addr: address})
 		}
 	}()
 	address, ok = p.removeId(id)
@@ -139,13 +144,14 @@ func (p *AddressProxy) RemoveByAddress(address string) {
 	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveByAddress:", p.name), address)
 	p.lock.Lock()
 	var ok bool
+	var id string
 	defer func() {
 		p.lock.Unlock()
 		if ok {
-			p.DispatchEvent(EventAddressRemoved, p, address)
+			p.DispatchEvent(EventAddressRemoved, p, AddrRemovedInfo{Id: id, Addr: address})
 		}
 	}()
-	_, ok = p.removeAddress(address)
+	id, ok = p.removeAddress(address)
 	//if ok {
 	//	p.traceLen()
 	//}
