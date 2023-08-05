@@ -18,11 +18,10 @@ type ISockClientGetter interface {
 	GetClient() ISockClient
 }
 
-type IClientOpening interface {
-	IsOpening() bool
-}
-
 type IClient interface {
+	// IsOpening
+	// 连接是否打开中
+	IsOpening() bool
 	// OpenClient
 	// 打开
 	OpenClient(params SockParams) error
@@ -34,7 +33,6 @@ type IClient interface {
 type ISockClient interface {
 	ISockName
 	IClient
-	IClientOpening
 	IPackReceiver
 	ISockSender
 

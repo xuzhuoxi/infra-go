@@ -104,6 +104,18 @@ type SockParams struct {
 	WSProtocol string
 }
 
+type ISockName interface {
+	// SetName
+	// 设置标识名称
+	SetName(name string)
+	// GetName
+	// 获取标识名称
+	GetName() string
+}
+
+// ISockConn
+// 这个是裁剪接口，函数签名不能改
+// 针对net.Conn、quic.Session、*net.UDPConn、*websocket.Conn
 type ISockConn interface {
 	// Close
 	// 关闭
@@ -117,12 +129,12 @@ type ISockConn interface {
 }
 
 type ISockSender interface {
+	// SendBytesTo
+	// 发送二进制数据, 不会重新打包
+	SendBytesTo(bytes []byte, rAddress ...string) error
 	// SendPackTo
 	// 发送二进制消息包(把数据打包，补充长度信息)
 	SendPackTo(data []byte, rAddress ...string) error
-	// SendBytesTo
-	// 发送二进制数据
-	SendBytesTo(bytes []byte, rAddress ...string) error
 }
 
 type ISockSenderSetter interface {
@@ -131,15 +143,6 @@ type ISockSenderSetter interface {
 
 type ISockSenderGetter interface {
 	GetSockSender() ISockSender
-}
-
-type ISockName interface {
-	// SetName
-	// 设置标识名称
-	SetName(name string)
-	// GetName
-	// 获取标识名称
-	GetName() string
 }
 
 //---------------------------

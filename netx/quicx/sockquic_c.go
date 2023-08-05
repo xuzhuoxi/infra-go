@@ -42,16 +42,16 @@ func (c *QUICClient) OpenClient(params netx.SockParams) error {
 	if "" != params.Network {
 		c.Network = params.Network
 	}
-	session, err := quic.DialAddr(params.RemoteAddress, &tls.Config{InsecureSkipVerify: true}, nil)
-	if nil != err {
-		c.Logger.Warnln(funcName, err)
-		return err
+	session, err1 := quic.DialAddr(params.RemoteAddress, &tls.Config{InsecureSkipVerify: true}, nil)
+	if nil != err1 {
+		c.Logger.Warnln(funcName, err1)
+		return err1
 	}
 	c.Conn = session
-	stream, err := session.OpenStreamSync()
-	if nil != err {
-		c.Logger.Warnln(funcName, err)
-		return err
+	stream, err2 := session.OpenStreamSync()
+	if nil != err2 {
+		c.Logger.Warnln(funcName, err2)
+		return err2
 	}
 	c.stream = stream
 	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}

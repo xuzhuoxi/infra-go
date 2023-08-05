@@ -7,7 +7,6 @@ package netx
 
 import (
 	"github.com/xuzhuoxi/infra-go/eventx"
-	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"sync"
 )
@@ -20,11 +19,10 @@ type ISockServerGetter interface {
 	GetSockServer() ISockServer
 }
 
-type IServerRunning interface {
-	IsRunning() bool
-}
-
 type IServer interface {
+	// IsRunning
+	// 服务是否启动中
+	IsRunning() bool
 	// StartServer
 	// 启动服务，会阻塞
 	StartServer(params SockParams) error
@@ -33,21 +31,40 @@ type IServer interface {
 	StopServer() error
 }
 
-type ISockConnection interface {
+type IServerConnSet interface {
+	// SetMaxConn
+	// 设置最大连接数量
+	SetMaxConn(max int)
 	// Connections
 	// 连接数
 	Connections() int
 	// CloseConnection
 	// 关闭指定连接
 	CloseConnection(address string) (err error, ok bool)
+	// FindConnection
+	// 查找连接
+	FindConnection(address string) (conn IServerConn, ok bool)
+}
+
+type IServerConn interface {
+	// ClientAddress
+	// 客户端连接地址
+	ClientAddress() string
+	// CloseConn
+	// 关闭连接
+	CloseConn() error
+	// SendBytes
+	// 发送二进制数据, 不会重新打包
+	SendBytes(bytes []byte) error
+	// SendPack
+	// 发送二进制消息包(把数据打包，补充长度信息)
+	SendPack(data []byte) error
 }
 
 type ISockServer interface {
 	ISockName
 	IServer
-	IServerRunning
-	lang.IChannelLimit
-	ISockConnection
+	IServerConnSet
 
 	ISockSender
 	IPackHandlerContainerSetter

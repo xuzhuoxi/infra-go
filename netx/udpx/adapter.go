@@ -14,8 +14,8 @@ func (rw *UDPConnAdapter) RemoteAddress() string {
 }
 
 func (rw *UDPConnAdapter) ReadBytes(bytes []byte) (n int, address string, err error) {
-	n, addr, err := rw.ReadWriter.ReadFromUDP(bytes)
-	return n, addr.String(), err
+	n1, addr, err1 := rw.ReadWriter.ReadFromUDP(bytes)
+	return n1, addr.String(), err1
 }
 
 func (rw *UDPConnAdapter) WriteBytes(bytes []byte, rAddress ...string) (n int, err error) {

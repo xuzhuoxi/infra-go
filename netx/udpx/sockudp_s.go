@@ -1,6 +1,7 @@
 package udpx
 
 import (
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/lang"
@@ -65,7 +66,7 @@ type UDPServer struct {
 }
 
 func (s *UDPServer) StartServer(params netx.SockParams) error {
-	funcName := "UDPServer.StartServer"
+	funcName := fmt.Sprintf("UDPServer[%s].StartServer", s.Name)
 	s.serverMu.Lock()
 	if s.Running {
 		defer s.serverMu.Unlock()
@@ -92,7 +93,7 @@ func (s *UDPServer) StartServer(params netx.SockParams) error {
 }
 
 func (s *UDPServer) StopServer() error {
-	funcName := "UDPServer.StopServer"
+	funcName := fmt.Sprintf("UDPServer[%s].StopServer", s.Name)
 	s.serverMu.Lock()
 	if !s.Running {
 		defer s.serverMu.Unlock()
@@ -110,6 +111,10 @@ func (s *UDPServer) StopServer() error {
 	return nil
 }
 
+func (s *UDPServer) SetMaxConn(max int) {
+	return
+}
+
 func (s *UDPServer) Connections() int {
 	return 0
 }
@@ -118,13 +123,17 @@ func (s *UDPServer) CloseConnection(address string) (err error, ok bool) {
 	return nil, false
 }
 
+func (s *UDPServer) FindConnection(address string) (conn netx.IServerConn, ok bool) {
+	return &UdpSockConn{Address: address, SRProxy: s.messageProxy}, true
+}
+
 func (s *UDPServer) SendPackTo(pack []byte, rAddress ...string) error {
 	bytes := UdpDataBlockHandler.DataToBlock(pack)
 	return s.SendBytesTo(bytes, rAddress...)
 }
 
 func (s *UDPServer) SendBytesTo(bytes []byte, rAddress ...string) error {
-	funcName := "UDPServer.SendPackTo"
+	funcName := fmt.Sprintf("UDPServer[%s].SendBytesTo", s.Name)
 	s.serverMu.RLock()
 	defer s.serverMu.RUnlock()
 	if !s.Running || s.messageProxy == nil || s.conn == nil {
