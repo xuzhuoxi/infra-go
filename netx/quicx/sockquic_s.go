@@ -35,7 +35,7 @@ type QUICServer struct {
 	netx.SockServerBase
 
 	listener quic.Listener
-	mapConn  map[string]*QuicSockConn
+	mapConn  map[string]netx.IServerConn
 }
 
 func (s *QUICServer) StartServer(params netx.SockParams) error {
@@ -55,7 +55,7 @@ func (s *QUICServer) StartServer(params netx.SockParams) error {
 	}
 	s.Logger.Infoln("[QUICServer] listening on:", params.LocalAddress)
 	s.listener = listener
-	s.mapConn = make(map[string]*QuicSockConn)
+	s.mapConn = make(map[string]netx.IServerConn)
 	s.Running = true
 	s.ServerMu.Unlock()
 	s.Logger.Infoln(funcName + "()")

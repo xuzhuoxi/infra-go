@@ -38,7 +38,7 @@ type WebSocketServer struct {
 
 	channelLimit lang.ChannelLimit
 	httpServer   *http.Server
-	mapConn      map[string]*WsSockConn
+	mapConn      map[string]netx.IServerConn
 }
 
 func (s *WebSocketServer) StartServer(params netx.SockParams) error {
@@ -53,7 +53,7 @@ func (s *WebSocketServer) StartServer(params netx.SockParams) error {
 	httpMux.Handle(params.WSPattern, websocket.Handler(s.onWSConn))
 	s.httpServer = &http.Server{Addr: params.LocalAddress, Handler: httpMux}
 	s.channelLimit.StartLimit()
-	s.mapConn = make(map[string]*WsSockConn)
+	s.mapConn = make(map[string]netx.IServerConn)
 	s.Running = true
 	s.ServerMu.Unlock()
 	s.Logger.Infoln(funcName + "()")

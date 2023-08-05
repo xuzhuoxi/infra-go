@@ -58,7 +58,7 @@ type TCPServer struct {
 	channelLimit lang.ChannelLimit
 	timeout      int
 	listener     *net.TCPListener
-	mapConn      map[string]*TcpSockConn
+	mapConn      map[string]netx.IServerConn
 }
 
 func (s *TCPServer) StartServer(params netx.SockParams) error {
@@ -79,7 +79,7 @@ func (s *TCPServer) StartServer(params netx.SockParams) error {
 	s.Logger.Infoln("[TCPServer] listening on:", params.LocalAddress)
 	s.listener = listener
 	s.channelLimit.StartLimit()
-	s.mapConn = make(map[string]*TcpSockConn)
+	s.mapConn = make(map[string]netx.IServerConn)
 	s.Running = true
 	s.ServerMu.Unlock()
 	s.Logger.Infoln(funcName + "()")
