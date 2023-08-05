@@ -6,6 +6,7 @@
 package netx
 
 import (
+	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"sync"
 )
@@ -37,6 +38,11 @@ type ISockClient interface {
 	ISockSender
 
 	LocalAddress() string
+}
+
+type ISockEventClient interface {
+	eventx.IEventDispatcher
+	ISockClient
 }
 
 type SockClientBase struct {

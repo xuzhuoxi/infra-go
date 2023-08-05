@@ -73,6 +73,11 @@ type ISockServer interface {
 	logx.ILoggerSupport
 }
 
+type ISockEventServer interface {
+	eventx.IEventDispatcher
+	ISockServer
+}
+
 type SockServerBase struct {
 	Name     string
 	Network  SockNetwork

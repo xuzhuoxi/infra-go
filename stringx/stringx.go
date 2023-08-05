@@ -1,9 +1,56 @@
 package stringx
 
 import (
+	"fmt"
 	"strings"
+	"sync"
 	"unicode/utf8"
 )
+
+var (
+	builder     = &strings.Builder{}
+	builderLock sync.RWMutex
+)
+
+func init() {
+	builder.Grow(1024)
+}
+
+func print(sb *strings.Builder, args ...interface{}) string {
+	if len(args) == 0 {
+		return ""
+	}
+	for index := range args {
+		if args[index] == nil {
+			sb.WriteString("[nil]")
+		}
+		if str, ok := args[index].(string); ok {
+			sb.WriteString(str)
+			continue
+		}
+		if sg, ok := args[index].(fmt.Stringer); ok {
+			sb.WriteString(sg.String())
+			continue
+		}
+		fmt.Fprintf(sb, "%v", args[index])
+		fmt.Print()
+	}
+	return sb.String()
+}
+
+// Print 字符串拼接
+func Print(args ...interface{}) string {
+	builder.Reset()
+	return print(builder, args...)
+}
+
+// PrintSafe 字符串拼接
+func PrintSafe(args ...interface{}) string {
+	builderLock.Lock()
+	defer builderLock.Unlock()
+	builder.Reset()
+	return print(builder, args...)
+}
 
 // GetRuneCount
 // 取字符串的字符个数
