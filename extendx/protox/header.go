@@ -7,14 +7,14 @@ package protox
 
 import "fmt"
 
-// IExtensionHeader
-// Extension参数头接口
-type IExtensionHeader interface {
-	// ExtensionName
-	// 请求Extension名称
-	ExtensionName() string
+// IProtoHeader
+// 协议参数头接口
+type IProtoHeader interface {
+	// ProtoGroup
+	// 协议分组
+	ProtoGroup() string
 	// ProtoId
-	// 请求Extension中对应的协议标识
+	// 协议标识
 	ProtoId() string
 	// ClientId
 	// 客户端标识
@@ -26,41 +26,41 @@ type IExtensionHeader interface {
 	// 设置参数头信息
 	SetHeader(extensionName string, protoId string, clientId string, clientAddress string)
 	// GetHeaderInfo 取头信息
-	GetHeaderInfo() IExtensionHeader
+	GetHeaderInfo() IProtoHeader
 }
 
-type ExtensionHeader struct {
-	EName    string
+type ProtoHeader struct {
+	PGroup   string
 	PId      string
 	CId      string
 	CAddress string
 }
 
-func (h *ExtensionHeader) String() string {
+func (h *ProtoHeader) String() string {
 	return fmt.Sprintf("Header{ENmae='%s', PId='%s', CID='%s', CAddr='%s'}",
-		h.EName, h.PId, h.CId, h.CAddress)
+		h.PGroup, h.PId, h.CId, h.CAddress)
 }
 
-func (h *ExtensionHeader) GetHeaderInfo() IExtensionHeader {
+func (h *ProtoHeader) GetHeaderInfo() IProtoHeader {
 	return h
 }
 
-func (h *ExtensionHeader) ExtensionName() string {
-	return h.EName
+func (h *ProtoHeader) ProtoGroup() string {
+	return h.PGroup
 }
 
-func (h *ExtensionHeader) ProtoId() string {
+func (h *ProtoHeader) ProtoId() string {
 	return h.PId
 }
 
-func (h *ExtensionHeader) ClientId() string {
+func (h *ProtoHeader) ClientId() string {
 	return h.CId
 }
 
-func (h *ExtensionHeader) ClientAddress() string {
+func (h *ProtoHeader) ClientAddress() string {
 	return h.CAddress
 }
 
-func (h *ExtensionHeader) SetHeader(extensionName string, protoId string, clientId string, clientAddress string) {
-	h.EName, h.PId, h.CId, h.CAddress = extensionName, protoId, clientId, clientAddress
+func (h *ProtoHeader) SetHeader(extensionName string, protoId string, clientId string, clientAddress string) {
+	h.PGroup, h.PId, h.CId, h.CAddress = extensionName, protoId, clientId, clientAddress
 }

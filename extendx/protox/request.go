@@ -10,7 +10,7 @@ import "fmt"
 // IExtensionRequest
 // 请求对象参数集合接口
 type IExtensionRequest interface {
-	IExtensionHeader
+	IProtoHeader
 	// DataSize 数据长度
 	DataSize() int
 	// SetRequestData
@@ -53,7 +53,7 @@ func NewSockRequest() *SockRequest {
 }
 
 type SockRequest struct {
-	ExtensionHeader
+	ProtoHeader
 	ParamType ExtensionParamType
 	binData   [][]byte
 	strData   []string
@@ -62,7 +62,7 @@ type SockRequest struct {
 
 func (req *SockRequest) String() string {
 	return fmt.Sprintf("{Request: %v, %v, %v, %v}",
-		req.ExtensionHeader, req.ParamType, req.binData, req.objData)
+		req.ProtoHeader, req.ParamType, req.binData, req.objData)
 }
 
 func (req *SockRequest) DataSize() int {

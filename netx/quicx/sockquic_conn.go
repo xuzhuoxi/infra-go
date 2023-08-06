@@ -18,10 +18,6 @@ type QuicSockConn struct {
 	Stream  quic.Stream
 }
 
-func (o *QuicSockConn) ClientAddress() string {
-	return o.Address
-}
-
 func (o *QuicSockConn) CloseConn() error {
 	err1 := o.SRProxy.StopReceiving()
 	err2 := o.Stream.Close()
@@ -33,6 +29,10 @@ func (o *QuicSockConn) CloseConn() error {
 		return err2
 	}
 	return err3
+}
+
+func (o *QuicSockConn) ClientAddress() string {
+	return o.Address
 }
 
 func (o *QuicSockConn) SendBytes(bytes []byte) error {

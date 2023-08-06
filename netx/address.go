@@ -95,7 +95,7 @@ func (p *AddressProxy) GetId(address string) (id string, ok bool) {
 func (p *AddressProxy) GetAddress(id string) (address string, ok bool) {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
-	id, ok = p.idAddr[id]
+	address, ok = p.idAddr[id]
 	return
 }
 

@@ -107,15 +107,12 @@ func (s *QUICServer) Connections() int {
 func (s *QUICServer) CloseConnection(address string) (err error, ok bool) {
 	s.ServerMu.Lock()
 	defer s.ServerMu.Unlock()
-	value, ok1 := s.mapConn[address]
-	if !ok1 {
-		return errors.New("QUICServer: No Connection At " + address), false
+	if conn, ok := s.mapConn[address]; ok {
+		delete(s.mapConn, address)
+		err = conn.CloseConn()
+		return err, nil != err
 	}
-	delete(s.mapConn, address)
-	if err1 := value.CloseConn(); nil != err1 {
-		return err1, false
-	}
-	return nil, true
+	return errors.New("QUICServer: No Connection At " + address), false
 }
 
 func (s *QUICServer) FindConnection(address string) (conn netx.IServerConn, ok bool) {
@@ -154,38 +151,45 @@ const (
 )
 
 func (s *QUICServer) handlerSession(address string, session quic.Session) {
+	stream, proxy := s.startConn(address, session)
+	if nil == stream || nil == proxy {
+		return
+	}
+	proxy.StartReceiving() // 这里会阻塞
+	s.endConn(address, session, stream)
+}
+
+func (s *QUICServer) startConn(address string, session quic.Session) (stream quic.Stream, proxy netx.IPackSendReceiver) {
 	s.ServerMu.Lock()
-	var stream quic.Stream
-	var err error
-	stream, err = session.AcceptStream()
+	stream1, err := session.AcceptStream()
 	if nil != err {
 		s.ServerMu.Unlock()
 		s.Logger.Warnln(funcNameHandlerSession, err)
 		return
 	}
-	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
-	proxy := netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, QuicDataBlockHandler, s.Logger, false)
-	s.mapConn[address] = &QuicSockConn{Address: address, Session: session, Stream: stream, SRProxy: proxy}
+	connProxy := &QUICStreamAdapter{Reader: stream1, Writer: stream1, RemoteAddr: session.RemoteAddr()}
+	proxy = netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, QuicDataBlockHandler, s.Logger, false)
+	s.mapConn[address] = &QuicSockConn{Address: address, Session: session, Stream: stream1, SRProxy: proxy}
 	s.ServerMu.Unlock()
+
 	s.DispatchServerConnOpenEvent(s, address)
 	s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Opened!")
+	return stream1, proxy
+}
 
-	defer func() {
-		s.DispatchServerConnCloseEvent(s, address)
-		s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Closed!")
-	}()
-	defer func() {
-		s.ServerMu.Lock()
-		delete(s.mapConn, address)
-		if nil != stream {
-			stream.Close()
-		}
-		if nil != session {
-			session.Close()
-		}
-		s.ServerMu.Unlock()
-	}()
-	proxy.StartReceiving() //这里会阻塞
+func (s *QUICServer) endConn(address string, session quic.Session, stream quic.Stream) {
+	s.ServerMu.Lock()
+	defer s.ServerMu.Unlock()
+
+	delete(s.mapConn, address)
+	if nil != stream {
+		stream.Close()
+	}
+	if nil != session {
+		session.Close()
+	}
+	s.DispatchServerConnCloseEvent(s, address)
+	s.Logger.Infoln("[QUICServer] Quic Connection:", address, "Closed!")
 }
 
 func listenQuic(address string) (quic.Listener, error) {

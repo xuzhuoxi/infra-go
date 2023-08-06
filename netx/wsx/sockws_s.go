@@ -83,7 +83,7 @@ func (s *WebSocketServer) StopServer() error {
 		s.httpServer = nil
 	}
 	for _, value := range s.mapConn {
-		value.CloseConn()
+		value.(netx.IServerConnCloser).CloseConn()
 	}
 	s.mapConn = nil
 	s.channelLimit.StopLimit()
@@ -106,10 +106,10 @@ func (s *WebSocketServer) CloseConnection(address string) (err error, ok bool) {
 	defer s.ServerMu.Unlock()
 	if conn, ok := s.mapConn[address]; ok {
 		delete(s.mapConn, address)
-		return conn.CloseConn(), true
-	} else {
-		return errors.New("WebSocketServer: No Connection At " + address), false
+		err = conn.(netx.IServerConnCloser).CloseConn()
+		return err, nil != err
 	}
+	return errors.New("WebSocketServer: No Connection At " + address), false
 }
 
 func (s *WebSocketServer) FindConnection(address string) (conn netx.IServerConn, ok bool) {
@@ -147,28 +147,35 @@ func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
 // LocalAddr=ws://ip:port+pattern
 // RemoteAddr=Origin
 func (s *WebSocketServer) onWSConn(conn *websocket.Conn) {
-	address := conn.Request().RemoteAddr //最根的地址信息
+	address := conn.Request().RemoteAddr //客户端地址信息
+	proxy := s.startConn(address, conn)
+	proxy.StartReceiving() // 这里会阻塞
+	s.endConn(address, conn)
+}
+
+func (s *WebSocketServer) startConn(address string, conn *websocket.Conn) netx.IPackSendReceiver {
 	s.channelLimit.Add()
 	s.ServerMu.Lock()
-	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: conn.Request().RemoteAddr}
-	proxy := netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, WsDataBlockHandler, s.Logger, false)
+	rwProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: conn.Request().RemoteAddr}
+	proxy := netx.NewPackSendReceiver(rwProxy, rwProxy, s.PackHandlerContainer, WsDataBlockHandler, s.Logger, false)
 	s.mapConn[address] = &WsSockConn{Address: address, Conn: conn, SRProxy: proxy}
 	s.ServerMu.Unlock()
+
 	s.DispatchServerConnOpenEvent(s, address)
 	s.Logger.Infoln("[WebSocketServer] WebSocket Connection:", address, "Opened!")
+	return proxy
+}
 
-	defer func() {
-		s.DispatchServerConnCloseEvent(s, address)
-		s.Logger.Infoln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
-	}()
-	defer func() {
-		s.ServerMu.Lock()
-		delete(s.mapConn, address)
-		if nil != conn {
-			conn.Close()
-		}
-		s.channelLimit.Done()
-		s.ServerMu.Unlock()
-	}()
-	proxy.StartReceiving() //这里会阻塞
+func (s *WebSocketServer) endConn(address string, conn *websocket.Conn) {
+	s.ServerMu.Lock()
+	defer s.ServerMu.Unlock()
+	// 删除连接
+	delete(s.mapConn, address)
+	if nil != conn {
+		conn.Close()
+	}
+	s.channelLimit.Done()
+	// 抛出事件
+	s.DispatchServerConnCloseEvent(s, address)
+	s.Logger.Infoln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
 }

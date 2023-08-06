@@ -12,6 +12,7 @@ import (
 var (
 	DefaultRequestPool  = NewPoolExtensionRequest()
 	DefaultResponsePool = NewPoolExtensionResponse()
+	DefaultNotifyPool   = NewPoolExtensionNotify()
 )
 
 // IPoolExtensionRequest
@@ -36,12 +37,26 @@ type IPoolExtensionResponse interface {
 	Recycle(instance IExtensionResponse) bool
 }
 
+// IPoolExtensionNotify
+// 通知参数集的对象池接口
+type IPoolExtensionNotify interface {
+	// Register 注册创建方法
+	Register(newFunc func() IExtensionNotify)
+	// GetInstance 获取一个实例
+	GetInstance() IExtensionNotify
+	// Recycle 回收一个实例
+	Recycle(instance IExtensionNotify) bool
+}
+
 func init() {
 	DefaultRequestPool.Register(func() IExtensionRequest {
 		return NewSockRequest()
 	})
 	DefaultResponsePool.Register(func() IExtensionResponse {
 		return NewSockResponse()
+	})
+	DefaultNotifyPool.Register(func() IExtensionNotify {
+		return NewSockNotify()
 	})
 }
 
@@ -53,6 +68,10 @@ func NewPoolExtensionRequest() IPoolExtensionRequest {
 
 func NewPoolExtensionResponse() IPoolExtensionResponse {
 	return &respPool{pool: lang.NewObjectPoolSync()}
+}
+
+func NewPoolExtensionNotify() IPoolExtensionNotify {
+	return &notifyPool{pool: lang.NewObjectPoolSync()}
 }
 
 type reqPool struct {
@@ -92,5 +111,25 @@ func (p *respPool) GetInstance() IExtensionResponse {
 }
 
 func (p *respPool) Recycle(instance IExtensionResponse) bool {
+	return p.pool.Recycle(instance)
+}
+
+type notifyPool struct {
+	pool lang.IObjectPool
+}
+
+func (p *notifyPool) Register(newFunc func() IExtensionNotify) {
+	p.pool.Register(func() interface{} {
+		return newFunc()
+	}, func(instance interface{}) bool {
+		return nil != instance
+	})
+}
+
+func (p *notifyPool) GetInstance() IExtensionNotify {
+	return p.pool.GetInstance().(IExtensionNotify)
+}
+
+func (p *notifyPool) Recycle(instance IExtensionNotify) bool {
 	return p.pool.Recycle(instance)
 }

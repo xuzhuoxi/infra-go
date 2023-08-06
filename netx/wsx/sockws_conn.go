@@ -17,10 +17,6 @@ type WsSockConn struct {
 	Conn    *websocket.Conn
 }
 
-func (o *WsSockConn) ClientAddress() string {
-	return o.Address
-}
-
 func (o *WsSockConn) CloseConn() error {
 	var err1 error
 	var err2 error
@@ -34,6 +30,10 @@ func (o *WsSockConn) CloseConn() error {
 		return err1
 	}
 	return err2
+}
+
+func (o *WsSockConn) ClientAddress() string {
+	return o.Address
 }
 
 func (o *WsSockConn) SendBytes(bytes []byte) error {

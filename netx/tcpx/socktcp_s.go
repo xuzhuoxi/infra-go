@@ -141,7 +141,8 @@ func (s *TCPServer) CloseConnection(address string) (err error, ok bool) {
 	defer s.ServerMu.Unlock()
 	if conn, ok := s.mapConn[address]; ok {
 		delete(s.mapConn, address)
-		return conn.CloseConn(), ok
+		err = conn.CloseConn()
+		return err, nil != err
 	}
 	return errors.New("TCPServer: No Connection At " + address), false
 }
@@ -180,28 +181,35 @@ func (s *TCPServer) SendBytesTo(data []byte, rAddress ...string) error {
 //private -----------------
 
 func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
+	proxy := s.startConn(address, conn)
+	proxy.StartReceiving() // 这里会阻塞
+	s.endConn(address, conn)
+}
+
+func (s *TCPServer) startConn(address string, conn *net.TCPConn) netx.IPackSendReceiver {
 	s.ServerMu.Lock()
-	connProxy := &netx.ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	proxy := netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, TcpDataBlockHandler, s.Logger, false)
+	rwProxy := &netx.ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	proxy := netx.NewPackSendReceiver(rwProxy, rwProxy, s.PackHandlerContainer, TcpDataBlockHandler, s.Logger, false)
 	s.mapConn[address] = &TcpSockConn{Address: address, Conn: conn, SRProxy: proxy}
 	s.ServerMu.Unlock()
+
 	s.DispatchServerConnOpenEvent(s, address)
 	s.Logger.Infoln("[TCPServer] TCP Connection:", address, "Opened!")
+	return proxy
+}
 
-	defer func() {
-		s.DispatchServerConnCloseEvent(s, address)
-		s.Logger.Infoln("[TCPServer] TCP Connection:", address, "Closed!")
-	}()
-	defer func() {
-		s.ServerMu.Lock()
-		delete(s.mapConn, address)
-		if nil != conn {
-			conn.Close()
-		}
-		s.channelLimit.Done()
-		s.ServerMu.Unlock()
-	}()
-	proxy.StartReceiving() //这里会阻塞
+func (s *TCPServer) endConn(address string, conn *net.TCPConn) {
+	s.ServerMu.Lock()
+	defer s.ServerMu.Unlock()
+	// 删除连接
+	delete(s.mapConn, address)
+	if nil != conn {
+		conn.Close()
+	}
+	s.channelLimit.Done()
+	// 抛出事件
+	s.DispatchServerConnCloseEvent(s, address)
+	s.Logger.Infoln("[TCPServer] TCP Connection:", address, "Closed!")
 }
 
 func listenTCP(network string, address string) (*net.TCPListener, error) {

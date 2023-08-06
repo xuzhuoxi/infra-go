@@ -6,8 +6,6 @@
 package protox
 
 import (
-	"github.com/xuzhuoxi/infra-go/binaryx"
-	"github.com/xuzhuoxi/infra-go/bytex"
 	"github.com/xuzhuoxi/infra-go/netx"
 )
 
@@ -24,99 +22,63 @@ type IExtensionResponseSettings interface {
 // IExtensionResponse
 // 响应对象参数集合接口
 type IExtensionResponse interface {
-	IExtensionHeader
+	IProtoReturnMessage
 	// SetParamInfo
 	// 设置参数类型与处理器
 	SetParamInfo(paramType ExtensionParamType, paramHandler IProtocolParamsHandler)
 	// SetResultCode
 	// 设置返回状态码
 	SetResultCode(rsCode int32)
-	// PrepareResponse
-	// 准备设置回复参数
-	PrepareResponse()
-	// SendPreparedResponse
+	// SendResponse
 	// 根据设置好的参数响应
-	SendPreparedResponse() error
-	// SendPreparedResponseToClient
+	SendResponse() error
+	// SendResponseTo
 	// 根据设置好的参数响应到其它用户
-	SendPreparedResponseToClient(interruptOnErr bool, clientIds ...string) error
-
-	iExtRespNone
-	iExtRespBase
-	iExtRespBin
-	iExtRespStr
-	iExtResJson
-	iExtRespObject
+	SendResponseTo(interruptOnErr bool, clientIds ...string) error
+	// SendNotify
+	// 根据设置好的参数响应
+	SendNotify(eName string, notifyPId string) error
+	// SendNotifyTo
+	// 根据设置好的参数响应到其它用户
+	SendNotifyTo(eName string, notifyPId string, interruptOnErr bool, clientIds ...string) error
+	iExtResp
 }
 
-type iExtRespNone interface {
+type iExtResp interface {
 	// SendNoneResponse
 	// 无额外参数响应
 	SendNoneResponse() error
 	// SendNoneResponseToClient
 	// 无额外参数响到其它用户
 	SendNoneResponseToClient(interruptOnErr bool, clientIds ...string) error
-}
-
-type iExtRespBin interface {
-	// AppendBinary
-	// 追加响应参数 - 字节数组
-	AppendBinary(data ...[]byte) error
 	// SendBinaryResponse
 	// 响应客户端(二进制参数)
 	SendBinaryResponse(data ...[]byte) error
-}
-
-type iExtRespBase interface {
-	// AppendCommon
-	// 追加响应参数 - 通用数据类型
-	AppendCommon(data ...interface{}) error
 	// SendCommonResponse
 	// 响应客户端(基础数据参数)
 	SendCommonResponse(data ...interface{}) error
-}
-
-type iExtRespStr interface {
-	// AppendString
-	// 追加响应返回- 字符串
-	AppendString(data ...string) error
 	// SendStringResponse
 	// 响应客户端(字符串参数)
 	SendStringResponse(data ...string) error
-}
-
-type iExtResJson interface {
-	// AppendJson
-	// 追加响应返回- Json字符串 或 可序列化的Struct
-	AppendJson(data ...interface{}) error
 	// SendJsonResponse
 	// 响应客户端(Json字符串参数)
 	SendJsonResponse(data ...interface{}) error
-}
-
-type iExtRespObject interface {
-	// AppendObject
-	// 追加响应参数
-	AppendObject(data ...interface{}) error
 	// SendObjectResponse
 	// 响应客户端(具体结构体参数)
 	SendObjectResponse(data ...interface{}) error
 }
 
 func NewSockResponse() *SockResponse {
-	return &SockResponse{BuffToBlock: bytex.NewDefaultBuffToBlock()}
+	return &SockResponse{
+		ProtoReturnMessage: *NewProtoReturnMessage(),
+	}
 }
 
 type SockResponse struct {
-	ExtensionHeader
-	RsCode int32
-
+	ProtoReturnMessage
 	SockSender   netx.ISockSender
 	AddressProxy netx.IAddressProxy
-
 	ParamType    ExtensionParamType
-	ParamHandler IProtocolParamsHandler
-	BuffToBlock  bytex.IBuffToBlock
 }
 
 func (resp *SockResponse) SetAddressProxy(proxy netx.IAddressProxy) {
@@ -135,24 +97,33 @@ func (resp *SockResponse) SetResultCode(rsCode int32) {
 	resp.RsCode = rsCode
 }
 
-func (resp *SockResponse) PrepareResponse() {
-	resp.BuffToBlock.Reset()
-	resp.BuffToBlock.WriteString(resp.EName)
-	resp.BuffToBlock.WriteString(resp.PId)
-	resp.BuffToBlock.WriteString(resp.CId)
-	binaryx.Write(resp.BuffToBlock, resp.BuffToBlock.GetOrder(), resp.RsCode)
+func (resp *SockResponse) SendResponse() error {
+	return resp.sendRedirectMsg(resp.PGroup, resp.PId)
 }
 
-func (resp *SockResponse) SendPreparedResponse() error {
-	msg := resp.BuffToBlock.ReadBytes()
-	return resp.SockSender.SendPackTo(msg, resp.CAddress)
+func (resp *SockResponse) SendResponseTo(interruptOnErr bool, clientIds ...string) error {
+	return resp.sendRedirectMsgTo(resp.PGroup, resp.PId, interruptOnErr, clientIds...)
 }
 
-func (resp *SockResponse) SendPreparedResponseToClient(interruptOnErr bool, clientIds ...string) error {
+func (resp *SockResponse) SendNotify(eName string, notifyPId string) error {
+	return resp.sendRedirectMsg(eName, notifyPId)
+}
+
+func (resp *SockResponse) SendNotifyTo(eName string, notifyPId string, interruptOnErr bool, clientIds ...string) error {
+	return resp.sendRedirectMsgTo(eName, notifyPId, interruptOnErr, clientIds...)
+}
+
+// private
+
+func (resp *SockResponse) sendRedirectMsgTo(eName string, pId string,
+	interruptOnErr bool, clientIds ...string) error {
 	if len(clientIds) == 0 {
 		return nil
 	}
-	msg := resp.BuffToBlock.ReadBytes()
+	msg, err1 := resp.genMsgBytes(eName, pId)
+	if nil != err1 {
+		return err1
+	}
 	for _, clientId := range clientIds {
 		if address, ok := resp.AddressProxy.GetAddress(clientId); ok {
 			err := resp.SockSender.SendPackTo(msg, address)
@@ -164,15 +135,10 @@ func (resp *SockResponse) SendPreparedResponseToClient(interruptOnErr bool, clie
 	return nil
 }
 
-func (resp *SockResponse) SendNoneResponse() error {
-	resp.PrepareResponse()
-	return resp.SendPreparedResponse()
-}
-
-func (resp *SockResponse) SendNoneResponseToClient(interruptOnErr bool, clientIds ...string) error {
-	if len(clientIds) == 0 {
-		return nil
+func (resp *SockResponse) sendRedirectMsg(eName string, pId string) error {
+	msg, err := resp.genMsgBytes(eName, pId)
+	if nil != err {
+		return err
 	}
-	resp.PrepareResponse()
-	return resp.SendPreparedResponseToClient(interruptOnErr, clientIds...)
+	return resp.SockSender.SendPackTo(msg, resp.CAddress)
 }

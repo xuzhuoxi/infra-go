@@ -17,10 +17,6 @@ type TcpSockConn struct {
 	Conn    *net.TCPConn
 }
 
-func (o *TcpSockConn) ClientAddress() string {
-	return o.Address
-}
-
 func (o *TcpSockConn) CloseConn() error {
 	var err1 error
 	var err2 error
@@ -34,6 +30,10 @@ func (o *TcpSockConn) CloseConn() error {
 		return err1
 	}
 	return err2
+}
+
+func (o *TcpSockConn) ClientAddress() string {
+	return o.Address
 }
 
 func (o *TcpSockConn) SendBytes(bytes []byte) error {

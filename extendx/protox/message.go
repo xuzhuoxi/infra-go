@@ -1,36 +1,164 @@
+// Package protox
+// Create on 2023/8/6
+// @author xuzhuoxi
 package protox
 
-import "github.com/xuzhuoxi/infra-go/bytex"
+import (
+	"errors"
+	"github.com/xuzhuoxi/infra-go/binaryx"
+	"github.com/xuzhuoxi/infra-go/bytex"
+)
 
-type IProtoMessageParser interface {
+type IProtoReturnMessage interface {
+	IProtoHeader
+	// PrepareData
+	// 准备设置回复参数
+	PrepareData()
+	// AppendLen
+	// 追加参数 - 长度值
+	AppendLen(ln int) error
+	// AppendBinary
+	// 追加参数 - 字节数组
+	AppendBinary(data ...[]byte) error
+	// AppendCommon
+	// 追加参数 - 通用数据类型
+	AppendCommon(data ...interface{}) error
+	// AppendString
+	// 追加返回- 字符串
+	AppendString(data ...string) error
+	// AppendJson
+	// 追加返回- Json字符串 或 可序列化的Struct
+	AppendJson(data ...interface{}) error
+	// AppendObject
+	// 追加参数
+	AppendObject(data ...interface{}) error
+	// GenMsgBytes
+	// 生成消息
+	GenMsgBytes() (msg []byte, err error)
 }
 
-type defaultProtoMessageParser struct {
+func NewProtoReturnMessage() *ProtoReturnMessage {
+	return &ProtoReturnMessage{
+		DataBuff: bytex.NewDefaultBuffToBlock(),
+		MsgBuff:  bytex.NewDefaultBuffToBlock(),
+	}
 }
 
-// ParseMessage
-// block0 : eName utf8
-// block1 : pid	utf8
-// block2 : uid	utf8
-// [n]其它信息
-func (m *defaultProtoMessageParser) ParseMessage(msgBytes []byte) (name string, pid string, uid string, data [][]byte) {
-	index := 0
-	buffToData := bytex.DefaultPoolBuffToData.GetInstance()
-	defer bytex.DefaultPoolBuffToData.Recycle(buffToData)
+type ProtoReturnMessage struct {
+	ProtoHeader
+	RsCode       int32
+	ParamHandler IProtocolParamsHandler
+	MsgBuff      bytex.IBuffToBlock
+	DataBuff     bytex.IBuffToBlock
+	dataBytes    []byte
+}
 
-	buffToData.WriteBytes(msgBytes)
-	name = buffToData.ReadString()
-	pid = buffToData.ReadString()
-	uid = buffToData.ReadString()
-	if buffToData.Len() > 0 {
-		for buffToData.Len() > 0 {
-			n, d := buffToData.ReadDataTo(msgBytes[index:]) //由于msgBytes前部分数据已经处理完成，可以利用这部分空间
-			if nil == d {
-				break
-			}
-			data = append(data, d)
-			index += n
+func (o *ProtoReturnMessage) PrepareData() {
+	o.dataBytes = nil
+	o.DataBuff.Reset()
+}
+
+func (o *ProtoReturnMessage) AppendLen(ln int) error {
+	order := o.DataBuff.GetOrder()
+	return binaryx.Write(o.DataBuff, order, uint16(ln))
+}
+
+func (o *ProtoReturnMessage) AppendBinary(data ...[]byte) error {
+	if len(data) == 0 {
+		return nil
+	}
+	for index := range data {
+		o.DataBuff.WriteData(data[index])
+	}
+	return nil
+}
+
+func (o *ProtoReturnMessage) AppendCommon(data ...interface{}) error {
+	if len(data) == 0 {
+		return nil
+	}
+	order := o.DataBuff.GetOrder()
+	for index := range data {
+		err := binaryx.Write(o.DataBuff, order, data[index])
+		if nil != err {
+			return err
 		}
 	}
-	return name, pid, uid, data
+	return nil
+}
+
+func (o *ProtoReturnMessage) AppendString(data ...string) error {
+	if len(data) == 0 {
+		return nil
+	}
+	for index := range data {
+		o.DataBuff.WriteString(data[index])
+	}
+	return nil
+}
+
+func (o *ProtoReturnMessage) AppendJson(data ...interface{}) error {
+	if len(data) == 0 {
+		return nil
+	}
+	for index := range data {
+		jsonStr, err1 := toJson(data[index])
+		if nil != err1 {
+			return err1
+		}
+		err2 := o.AppendString(jsonStr)
+		if nil != err2 {
+			return err2
+		}
+	}
+	return nil
+}
+
+func (o *ProtoReturnMessage) AppendObject(data ...interface{}) error {
+	if len(data) == 0 {
+		return nil
+	}
+	if o.ParamHandler == nil {
+		return errors.New("SendObjectResponse Error: ParamHandler is nil! ")
+	}
+	for index := range data {
+		bs := o.ParamHandler.HandleResponseParam(data[index])
+		o.DataBuff.WriteData(bs)
+	}
+	return nil
+}
+
+func (o *ProtoReturnMessage) GenMsgBytes() (msg []byte, err error) {
+	return o.genMsgBytes(o.PGroup, o.PId)
+}
+
+func (o *ProtoReturnMessage) genMsgBytes(eName string, pId string) (bytes []byte, err error) {
+	err1 := o.writeHeaderToMsg(eName, pId)
+	if nil != err1 {
+		return nil, err1
+	}
+	err2 := o.writeDataToMsg()
+	if nil != err2 {
+		return nil, err2
+	}
+	return o.MsgBuff.ReadBytes(), nil
+}
+
+func (o *ProtoReturnMessage) writeHeaderToMsg(eName string, pId string) error {
+	o.MsgBuff.Reset()
+	o.MsgBuff.WriteString(eName)
+	o.MsgBuff.WriteString(pId)
+	o.MsgBuff.WriteString(o.CId)
+	return binaryx.Write(o.MsgBuff, o.MsgBuff.GetOrder(), o.RsCode)
+}
+
+func (o *ProtoReturnMessage) writeDataToMsg() error {
+	if nil == o.dataBytes {
+		o.dataBytes = o.DataBuff.ReadBytesCopy()
+		if nil == o.dataBytes {
+			o.dataBytes = []byte{}
+		}
+	}
+	_, err1 := o.MsgBuff.Write(o.dataBytes)
+	return err1
 }

@@ -23,33 +23,7 @@ func SetJsonMarshalHandler(handler func(v interface{}) ([]byte, error)) {
 	marshalHandler = handler
 }
 
-func (resp *SockResponse) AppendJson(data ...interface{}) error {
-	if len(data) == 0 {
-		return nil
-	}
-	for index := range data {
-		jsonStr, err1 := resp.toJson(data[index])
-		if nil != err1 {
-			return err1
-		}
-		err2 := resp.AppendString(jsonStr)
-		if nil != err2 {
-			return err2
-		}
-	}
-	return nil
-}
-
-func (resp *SockResponse) SendJsonResponse(data ...interface{}) error {
-	resp.PrepareResponse()
-	err := resp.AppendJson(data...)
-	if nil != err {
-		return err
-	}
-	return resp.SendPreparedResponse()
-}
-
-func (resp *SockResponse) toJson(o interface{}) (json string, err error) {
+func toJson(o interface{}) (json string, err error) {
 	switch d := o.(type) {
 	case string:
 		return d, nil

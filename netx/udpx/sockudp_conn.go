@@ -15,12 +15,12 @@ type UdpSockConn struct {
 	SRProxy netx.IPackSendReceiver
 }
 
-func (o *UdpSockConn) ClientAddress() string {
-	return o.Address
-}
-
 func (o *UdpSockConn) CloseConn() error {
 	return nil
+}
+
+func (o *UdpSockConn) ClientAddress() string {
+	return o.Address
 }
 
 func (o *UdpSockConn) SendBytes(bytes []byte) error {

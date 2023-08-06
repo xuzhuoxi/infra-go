@@ -50,15 +50,15 @@ type IServerConn interface {
 	// ClientAddress
 	// 客户端连接地址
 	ClientAddress() string
-	// CloseConn
-	// 关闭连接
-	CloseConn() error
 	// SendBytes
 	// 发送二进制数据, 不会重新打包
 	SendBytes(bytes []byte) error
 	// SendPack
 	// 发送二进制消息包(把数据打包，补充长度信息)
 	SendPack(data []byte) error
+	// CloseConn
+	// 关闭连接
+	CloseConn() error
 }
 
 type ISockServer interface {
