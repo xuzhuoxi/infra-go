@@ -15,8 +15,10 @@ func NewQuicServer() IQUICServer {
 }
 
 func newQuicServer() netx.ISockServer {
-	server := &QUICServer{}
-	server.Name = "QuicServer"
+	server := &QUICServer{
+		logFuncNameSend: "QUICServer[Quic].SendBytesTo",
+	}
+	server.Name = "Quic"
 	server.Network = netx.QuicNetwork
 	server.Logger = logx.DefaultLogger()
 	server.PackHandlerContainer = netx.NewIPackHandler(nil)
@@ -33,6 +35,7 @@ type IQUICServer interface {
 type QUICServer struct {
 	eventx.EventDispatcher
 	netx.SockServerBase
+	logFuncNameSend string
 
 	listener quic.Listener
 	mapConn  map[string]netx.IServerConn
@@ -128,7 +131,7 @@ func (s *QUICServer) SendPackTo(pack []byte, rAddress ...string) error {
 }
 
 func (s *QUICServer) SendBytesTo(data []byte, rAddress ...string) error {
-	funcName := fmt.Sprintf("QUICServer[%s].SendBytesTo", s.Name)
+	funcName := s.logFuncNameSend
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
 	if !s.Running || nil == s.mapConn {

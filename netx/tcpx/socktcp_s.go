@@ -36,7 +36,9 @@ func newTCP6Server() netx.ISockServer {
 }
 
 func newTcpS(name string, network netx.SockNetwork) netx.ISockServer {
-	server := &TCPServer{}
+	server := &TCPServer{
+		logFuncNameSend: fmt.Sprintf("TCPServer[%s].SendBytesTo", name),
+	}
 	server.Name = name
 	server.Network = network
 	server.Logger = logx.DefaultLogger()
@@ -54,6 +56,7 @@ type ITCPServer interface {
 type TCPServer struct {
 	eventx.EventDispatcher
 	netx.SockServerBase
+	logFuncNameSend string
 
 	channelLimit lang.ChannelLimit
 	timeout      int
@@ -160,7 +163,7 @@ func (s *TCPServer) SendPackTo(pack []byte, rAddress ...string) error {
 }
 
 func (s *TCPServer) SendBytesTo(data []byte, rAddress ...string) error {
-	funcName := fmt.Sprintf("TCPServer[%s].SendBytesTo", s.Name)
+	funcName := s.logFuncNameSend
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
 	if !s.Running || nil == s.mapConn {

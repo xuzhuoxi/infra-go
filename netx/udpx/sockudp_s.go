@@ -40,7 +40,9 @@ func newUDP6Server() netx.ISockServer {
 }
 
 func newUdpS(name string, network netx.SockNetwork) netx.ISockServer {
-	server := &UDPServer{}
+	server := &UDPServer{
+		logFuncNameSend: fmt.Sprintf("UDPServer[%s].SendBytesTo", name),
+	}
 	server.Name = name
 	server.Network = network
 	server.Logger = logx.DefaultLogger()
@@ -59,6 +61,7 @@ type UDPServer struct {
 	eventx.EventDispatcher
 	netx.SockServerBase
 	lang.ChannelLimitNone
+	logFuncNameSend string
 
 	conn         *net.UDPConn
 	messageProxy netx.IPackSendReceiver
@@ -133,7 +136,7 @@ func (s *UDPServer) SendPackTo(pack []byte, rAddress ...string) error {
 }
 
 func (s *UDPServer) SendBytesTo(bytes []byte, rAddress ...string) error {
-	funcName := fmt.Sprintf("UDPServer[%s].SendBytesTo", s.Name)
+	funcName := s.logFuncNameSend
 	s.serverMu.RLock()
 	defer s.serverMu.RUnlock()
 	if !s.Running || s.messageProxy == nil || s.conn == nil {

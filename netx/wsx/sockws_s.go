@@ -17,7 +17,9 @@ func NewWebSocketServer() IWebSocketServer {
 }
 
 func newWebSocketServer() netx.ISockServer {
-	server := &WebSocketServer{}
+	server := &WebSocketServer{
+		logFuncNameSend: "WebSocketServer[WSServer].SendBytesTo",
+	}
 	server.Name = "WSServer"
 	server.Network = netx.WSNetwork
 	server.Logger = logx.DefaultLogger()
@@ -35,6 +37,7 @@ type IWebSocketServer interface {
 type WebSocketServer struct {
 	eventx.EventDispatcher
 	netx.SockServerBase
+	logFuncNameSend string
 
 	channelLimit lang.ChannelLimit
 	httpServer   *http.Server
@@ -83,7 +86,7 @@ func (s *WebSocketServer) StopServer() error {
 		s.httpServer = nil
 	}
 	for _, value := range s.mapConn {
-		value.(netx.IServerConnCloser).CloseConn()
+		value.CloseConn()
 	}
 	s.mapConn = nil
 	s.channelLimit.StopLimit()
@@ -106,7 +109,7 @@ func (s *WebSocketServer) CloseConnection(address string) (err error, ok bool) {
 	defer s.ServerMu.Unlock()
 	if conn, ok := s.mapConn[address]; ok {
 		delete(s.mapConn, address)
-		err = conn.(netx.IServerConnCloser).CloseConn()
+		err = conn.CloseConn()
 		return err, nil != err
 	}
 	return errors.New("WebSocketServer: No Connection At " + address), false
@@ -125,7 +128,7 @@ func (s *WebSocketServer) SendPackTo(pack []byte, rAddress ...string) error {
 }
 
 func (s *WebSocketServer) SendBytesTo(bytes []byte, rAddress ...string) error {
-	funcName := fmt.Sprintf("WebSocketServer[%s].SendBytesTo", s.Name)
+	funcName := s.logFuncNameSend
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
 	if !s.Running || nil == s.mapConn {
