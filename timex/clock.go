@@ -1,3 +1,4 @@
 package timex
 
-//使用github.con/facebookgo/clock
+// https://github.com/facebookarchive/clock
+// https://github.com/benbjohnson/clock
