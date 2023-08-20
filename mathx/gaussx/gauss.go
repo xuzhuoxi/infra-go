@@ -4,12 +4,14 @@ import (
 	"math"
 )
 
+// GaussFunc2
 // 二维高斯函数
 // sigma: 标准差
 func GaussFunc2(x, y int, sigma float64) float64 {
 	return (1.0 / (2.0 * math.Pi * sigma * sigma)) * math.Exp(-(float64(x*x+y*y) / (2.0 * sigma * sigma)))
 }
 
+// CreateGaussKernel
 // 计算高斯卷积核(二维数据)
 // radius： 半径
 // sigma： 	标准差

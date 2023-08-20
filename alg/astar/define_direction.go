@@ -5,7 +5,7 @@
 //
 package astar
 
-// 方向定义
+// Direction 方向定义
 type Direction uint8
 
 // 3D方向

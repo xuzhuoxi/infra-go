@@ -57,5 +57,5 @@ func NewPriorityPosition2D(x, y, p int) *PriorityPosition {
 
 // NewPriorityPosition3D 新建3D带权值的坐标点
 func NewPriorityPosition3D(x, y, z, p int) *PriorityPosition {
-	return &PriorityPosition{Position: Position{x, y, 0}, Priority: p}
+	return &PriorityPosition{Position: Position{x, y, z}, Priority: p}
 }

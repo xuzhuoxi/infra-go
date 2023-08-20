@@ -16,7 +16,7 @@ func init() {
 	builder.Grow(1024)
 }
 
-func print(sb *strings.Builder, args ...interface{}) string {
+func printX(sb *strings.Builder, args ...interface{}) string {
 	if len(args) == 0 {
 		return ""
 	}
@@ -41,7 +41,7 @@ func print(sb *strings.Builder, args ...interface{}) string {
 // Print 字符串拼接
 func Print(args ...interface{}) string {
 	builder.Reset()
-	return print(builder, args...)
+	return printX(builder, args...)
 }
 
 // PrintSafe 字符串拼接
@@ -49,7 +49,7 @@ func PrintSafe(args ...interface{}) string {
 	builderLock.Lock()
 	defer builderLock.Unlock()
 	builder.Reset()
-	return print(builder, args...)
+	return printX(builder, args...)
 }
 
 // GetRuneCount

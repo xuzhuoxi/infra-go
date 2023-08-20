@@ -11,7 +11,7 @@ import (
 
 type ValueKind uint8
 
-//简单类型定义
+// 简单类型定义
 const (
 	KindNone ValueKind = iota
 	KindBool

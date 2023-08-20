@@ -77,5 +77,4 @@ func TestThree(t *testing.T) {
 	source2 := source[0:2:2]
 	source2[0] = 1
 	fmt.Println(3333, source, source1, source2)
-
 }

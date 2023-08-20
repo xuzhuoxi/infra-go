@@ -34,15 +34,15 @@ type IAStarAlg interface {
 	// 设置自定义的估值函数
 	SetCustomFuncHn(hn FuncHn)
 
-	// 初始化地图Size
+	// InitMapSize 初始化地图Size
 	InitMapSize(width, height, depth int)
-	// 初始化地图Size
+	// InitMapSize2D 初始化地图Size
 	InitMapSize2D(width, height int)
-	// 设置地图数据
+	// SetData 设置地图数据
 	SetData(data []int) (sourceData [][][]int, err error)
-	// 设置地图数据
+	// SetData2D 设置地图数据
 	SetData2D(data [][]int) (sourceData [][][]int, err error)
-	// 设置地图数据
+	// SetData3D 设置地图数据
 	SetData3D(data [][][]int) (sourceData [][][]int, err error)
 	// Search2D 寻路
 	// sx:StartX; sy:StartY
@@ -52,7 +52,7 @@ type IAStarAlg interface {
 	// sx:StartX; sy:StartY; sz:StartZ
 	// ex:EndX; ey:EndY; ez:EndZ
 	Search(sx, sy, sz, ex, ey, ez int) (path []Position, ok bool)
-	// 寻路
+	// SearchPosition 寻路
 	SearchPosition(startPos, endPos Position) (path []Position, ok bool)
 }
 
@@ -121,13 +121,13 @@ func (h history) getLastPositionIndex(pos Position) int {
 type AStarAlg struct {
 	// 地图的大小
 	size *Size
-	//可行方向
+	// 可行方向
 	nextDirs []Direction
-	//自定义估值函数
+	// 自定义估值函数
 	customFuncHn FuncHn
-	//初始地图数据
+	// 初始地图数据
 	sourceMap [][][]int
-	//检索地图数据
+	// 检索地图数据
 	searchMap [][][]int
 
 	baseMask  int
