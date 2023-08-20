@@ -70,9 +70,9 @@ const (
 	URL = `^((https|http|ftp|rtsp|mms)?://)[^s]+`
 	// URL2 网址URL
 	URL2 = `[a-zA-z]+://[^s]*`
-	// Account 帐号 字母开头，允许5-16字节，允许字母数字下划线
+	// Account 账号 字母开头，允许 5-16 个字节，允许字母数字下划线
 	Account = `^[a-zA-Z][a-zA-Z0-9_]{4,15}$`
-	// Nickname 昵称 字母开头，允许5-16字节，允许字母数字下划线
+	// Nickname 昵称 字母开头，允许 5-16 个字节，允许字母数字下划线
 	Nickname = `[A-Za-z0-9_\-\u4e00-\u9fa5]+`
 	// ChinaPhone1 国内电话号码 匹配形式如 0511-4405222 或 021-87888822
 	ChinaPhone1 = `\d{3}-\d{8}|\d{4}-\d{7}`
