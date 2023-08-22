@@ -9,6 +9,9 @@ import (
 	"time"
 )
 
+// ParseDuration
+// 解释持续时间字符串获得time.Duration。如果持续时间 Str 不合法，则返回 0。
+// parses a duration string. Returns 0 if durationStr is not legal。
 func ParseDuration(durationStr string) time.Duration {
 	d, err := time.ParseDuration(strings.ToLower(strings.TrimSpace(durationStr)))
 	if nil != err {
