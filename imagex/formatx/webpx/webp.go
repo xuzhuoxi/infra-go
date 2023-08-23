@@ -4,7 +4,7 @@
 package webpx
 
 import (
-	"github.com/CodisLabs/codis/pkg/utils/errors"
+	"errors"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image"
 	"io"

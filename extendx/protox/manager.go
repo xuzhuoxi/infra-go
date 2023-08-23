@@ -214,9 +214,6 @@ func (m *ExtensionManager) ParseMessage(msgBytes []byte) (extName string, pid st
 }
 
 func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProtocolExtension, rsCode int32) {
-	if nil != m.FuncVerify {
-		return m.FuncVerify(name, pid, uid)
-	}
 	extension, ok := m.GetProtocolExtension(name)
 	//有效性验证
 	if !ok {
@@ -231,7 +228,7 @@ func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProto
 		}
 		return nil, CodeProtoFail
 	}
-	return extension, CodeSuc
+	return extension, m.CustomVerify(name, pid, uid)
 }
 
 // GetRecycleParams

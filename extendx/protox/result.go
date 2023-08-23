@@ -22,8 +22,8 @@ const (
 	CodeStatus int32 = 7
 	// CodeRepeat 请求重复
 	CodeRepeat int32 = 8
-	// CodeFrequent 请求过于频繁
-	CodeFrequent int32 = 9
+	// CodeFreq 请求过于频繁
+	CodeFreq int32 = 9
 	// CodeOther 其它错误
 	CodeOther int32 = 10
 )
