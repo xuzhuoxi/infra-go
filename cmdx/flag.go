@@ -8,7 +8,6 @@ package cmdx
 import (
 	"errors"
 	"flag"
-	"github.com/xuzhuoxi/infra-go/slicex"
 	"os"
 	"reflect"
 	"strings"
@@ -28,7 +27,8 @@ func NewFlagSetExtend(name string, errorHandling flag.ErrorHandling) *FlagSetExt
 
 type FlagSetExtend struct {
 	flag.FlagSet
-	keyList       []string
+	argSet ArgSet
+	//keyList       []string
 	errorHandling flag.ErrorHandling
 }
 
@@ -42,33 +42,26 @@ func (fs *FlagSetExtend) Parse(arguments []string) error {
 	if nil != err {
 		return err
 	}
-	for _, kv := range arguments {
-		s := strings.IndexByte(kv, '-')
-		e := strings.LastIndexByte(kv, '=')
-		if -1 == s || -1 == e {
-			return errors.New("bad flag syntax: " + kv)
-		}
-		key := kv[s+1 : e]
-		fs.keyList = append(fs.keyList, key)
-	}
-	return nil
+	return fs.argSet.ParseArgs(arguments)
 }
 
 func (fs *FlagSetExtend) CheckKey(key string) bool {
-	_, ok := slicex.IndexString(fs.keyList, strings.ToLower(key))
-	return ok
+	return fs.argSet.CheckKey(key)
 }
 
 func (fs *FlagSetExtend) GetReflectValue(key string) (val reflect.Value, ok bool) {
 	key = strings.ToLower(key)
-	flag := fs.Lookup(key)
-	if nil != flag {
-		return reflect.ValueOf(flag.Value).Elem(), true
+	f := fs.Lookup(key)
+	if nil != f {
+		return reflect.ValueOf(f.Value).Elem(), true
 	}
 	return reflect.Value{}, false
 }
 
 func (fs *FlagSetExtend) GetBool(key string) (val bool, ok bool) {
+	if val, ok = fs.argSet.GetBool(key); ok {
+		return
+	}
 	if val, ok := fs.GetReflectValue(key); ok {
 		if val.Kind() == reflect.Bool {
 			return val.Bool(), true
@@ -78,6 +71,9 @@ func (fs *FlagSetExtend) GetBool(key string) (val bool, ok bool) {
 }
 
 func (fs *FlagSetExtend) GetString(key string) (val string, ok bool) {
+	if val, ok = fs.argSet.GetString(key); ok {
+		return
+	}
 	if val, ok := fs.GetReflectValue(key); ok {
 		if val.Kind() == reflect.String {
 			return val.String(), true
@@ -87,6 +83,9 @@ func (fs *FlagSetExtend) GetString(key string) (val string, ok bool) {
 }
 
 func (fs *FlagSetExtend) GetDuration(key string) (val time.Duration, ok bool) {
+	if val, ok = fs.argSet.GetDuration(key); ok {
+		return
+	}
 	if val, ok := fs.GetReflectValue(key); ok {
 		if val.Kind() == reflect.Int64 {
 			return time.Duration(val.Int()), true
@@ -96,6 +95,9 @@ func (fs *FlagSetExtend) GetDuration(key string) (val time.Duration, ok bool) {
 }
 
 func (fs *FlagSetExtend) GetFloat64(key string) (val float64, ok bool) {
+	if val, ok = fs.argSet.GetFloat64(key); ok {
+		return
+	}
 	if val, ok := fs.GetReflectValue(key); ok {
 		if val.Kind() == reflect.Float64 || val.Kind() == reflect.Float32 {
 			return float64(val.Float()), true
@@ -105,6 +107,9 @@ func (fs *FlagSetExtend) GetFloat64(key string) (val float64, ok bool) {
 }
 
 func (fs *FlagSetExtend) GetInt64(key string) (val int64, ok bool) {
+	if val, ok = fs.argSet.GetInt64(key); ok {
+		return
+	}
 	if val, ok := fs.GetReflectValue(key); ok {
 		if val.Kind() == reflect.Int || val.Kind() == reflect.Int8 || val.Kind() == reflect.Int16 || val.Kind() == reflect.Int32 || val.Kind() == reflect.Int64 {
 			return int64(val.Int()), true
@@ -114,6 +119,9 @@ func (fs *FlagSetExtend) GetInt64(key string) (val int64, ok bool) {
 }
 
 func (fs *FlagSetExtend) GetUint64(key string) (val uint64, ok bool) {
+	if val, ok = fs.argSet.GetUint64(key); ok {
+		return
+	}
 	if val, ok := fs.GetReflectValue(key); ok {
 		if val.Kind() == reflect.Uint || val.Kind() == reflect.Uint8 || val.Kind() == reflect.Uint16 || val.Kind() == reflect.Uint32 || val.Kind() == reflect.Uint64 {
 			return uint64(val.Uint()), true
@@ -123,6 +131,9 @@ func (fs *FlagSetExtend) GetUint64(key string) (val uint64, ok bool) {
 }
 
 func (fs *FlagSetExtend) GetInt(key string) (val int, ok bool) {
+	if val, ok = fs.argSet.GetInt(key); ok {
+		return
+	}
 	if val, ok := fs.GetReflectValue(key); ok {
 		if val.Kind() == reflect.Int || val.Kind() == reflect.Int8 || val.Kind() == reflect.Int16 || val.Kind() == reflect.Int32 || val.Kind() == reflect.Int64 {
 			return int(val.Int()), true
@@ -132,6 +143,9 @@ func (fs *FlagSetExtend) GetInt(key string) (val int, ok bool) {
 }
 
 func (fs *FlagSetExtend) GetUint(key string) (val uint, ok bool) {
+	if val, ok = fs.argSet.GetUint(key); ok {
+		return
+	}
 	if val, ok := fs.GetReflectValue(key); ok {
 		if val.Kind() == reflect.Uint || val.Kind() == reflect.Uint8 || val.Kind() == reflect.Uint16 || val.Kind() == reflect.Uint32 || val.Kind() == reflect.Uint64 {
 			return uint(val.Uint()), true
