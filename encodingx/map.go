@@ -7,8 +7,10 @@ package encodingx
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/binaryx"
 	"github.com/xuzhuoxi/infra-go/lang"
+	"strings"
 )
 
 type IKeyValue interface {
@@ -19,7 +21,7 @@ type IKeyValue interface {
 	// Len 键值对数量
 	Len() int
 	// Set 设置键值
-	Set(key string, value interface{}) (IKeyValue, bool)
+	Set(key string, value interface{}) (old interface{}, ok bool)
 	// Get 取值
 	Get(key string) (interface{}, bool)
 	// Delete 删除键值
@@ -28,9 +30,13 @@ type IKeyValue interface {
 	Check(key string) bool
 
 	// Merge 合并
-	Merge(vs IKeyValue) IKeyValue
+	Merge(vs IKeyValue) (update IKeyValue, del []string)
 	// ForEach 遍历
 	ForEach(handler func(key string, value interface{}))
+	// Clone 克隆
+	Clone() IKeyValue
+	// CloneEmpty 克隆空
+	CloneEmpty() IKeyValue
 }
 
 //-------------------------
@@ -41,6 +47,25 @@ func NewCodingMap() CodingMap {
 
 type CodingMap map[string]interface{}
 
+func (v CodingMap) String() string {
+	if len(v) == 0 {
+		return "{}"
+	}
+	builder := &strings.Builder{}
+	builder.WriteString("{")
+	index := 0
+	ln := len(v)
+	for key, val := range v {
+		builder.WriteString(key + ":" + fmt.Sprint(val))
+		index++
+		if index < ln {
+			builder.WriteString(",")
+		}
+	}
+	builder.WriteString("}")
+	return builder.String()
+}
+
 // EncodeToBytes
 // 序列化
 // 格式:
@@ -50,19 +75,23 @@ type CodingMap map[string]interface{}
 //	Other: []byte... 或 string(uint16+[]byte)...
 func (v CodingMap) EncodeToBytes() []byte {
 	buff := bytes.NewBuffer(nil)
+	err := binaryx.WriteLen(buff, DefaultOrder, len(v))
+	if nil != err {
+		return nil
+	}
 	for key, val := range v {
 		if !binaryx.CheckValue(val) { //非法值
 			continue
 		}
-		binaryx.WriteString(buff, DefaultOrder, key) //Key
+		_ = binaryx.WriteString(buff, DefaultOrder, key) //Key
 		kind, ln := binaryx.GetValueKind(val)
-		binaryx.Write(buff, DefaultOrder, kind) //Kind
+		_ = binaryx.Write(buff, DefaultOrder, kind) //Kind
 
 		if binaryx.IsSliceKind(kind) {
-			binaryx.WriteLen(buff, DefaultOrder, ln)
-			binaryx.WriteSlice(buff, DefaultOrder, val)
+			_ = binaryx.WriteLen(buff, DefaultOrder, ln)
+			_ = binaryx.WriteSlice(buff, DefaultOrder, val)
 		} else {
-			binaryx.Write(buff, DefaultOrder, val)
+			_ = binaryx.Write(buff, DefaultOrder, val)
 		}
 	}
 	return buff.Bytes()
@@ -70,11 +99,14 @@ func (v CodingMap) EncodeToBytes() []byte {
 
 func (v CodingMap) DecodeFromBytes(bs []byte) bool {
 	buff := bytes.NewBuffer(bs)
-	var err error
-	for buff.Len() > 0 {
+	ln, err := binaryx.ReadLen(buff, DefaultOrder)
+	if nil != err {
+		return false
+	}
+	for ln >= 0 && buff.Len() > 0 {
 		key, _ := binaryx.ReadString(buff, DefaultOrder)
 		var kind binaryx.ValueKind
-		binaryx.Read(buff, DefaultOrder, &kind) //Kind
+		_ = binaryx.Read(buff, DefaultOrder, &kind) //Kind
 		//fmt.Println("Decode Kind:", kind)
 		var val interface{}
 		if binaryx.IsSliceKind(kind) {
@@ -99,6 +131,7 @@ func (v CodingMap) DecodeFromBytes(bs []byte) bool {
 			return false
 		}
 		v.Set(key, val)
+		ln--
 	}
 	return true
 }
@@ -107,14 +140,12 @@ func (v CodingMap) Len() int {
 	return len(v)
 }
 
-func (v CodingMap) Set(key string, value interface{}) (IKeyValue, bool) {
-	if v2, ok := v[key]; ok && lang.Equal(v2, value) {
+func (v CodingMap) Set(key string, value interface{}) (old interface{}, ok bool) {
+	if old, ok = v[key]; ok && lang.Equal(old, value) {
 		return nil, false
 	}
 	v[key] = value
-	rs := NewCodingMap()
-	rs[key] = value
-	return rs, true
+	return old, true
 }
 
 func (v CodingMap) Get(key string) (interface{}, bool) {
@@ -136,31 +167,41 @@ func (v CodingMap) Check(key string) bool {
 	return ok
 }
 
-func (v CodingMap) Merge(vs IKeyValue) IKeyValue {
+func (v CodingMap) Merge(vs IKeyValue) (update IKeyValue, del []string) {
 	if nil == vs {
-		return nil
+		return nil, nil
 	}
 	var rm []string
 	vs.ForEach(func(key string, value interface{}) {
-		if v2, ok := v[key]; ok && lang.Equal(v2, value) {
-			rm = append(rm, key)
+		if value == nil {
+			del = append(del, key)
+			v.Delete(key)
 			return
 		}
-		v[key] = value
+		_, _ = v.Set(key, value)
 	})
 	if len(rm) > 0 { //有重复
 		for _, key := range rm {
 			vs.Delete(key)
 		}
 	}
-	if vs.Len() == 0 {
-		return nil
-	}
-	return vs
+	return vs, del
 }
 
 func (v CodingMap) ForEach(handler func(key string, value interface{})) {
 	for key, value := range v {
 		handler(key, value)
 	}
+}
+
+func (v CodingMap) Clone() IKeyValue {
+	rs := make(CodingMap)
+	for key, val := range v {
+		rs[key] = val
+	}
+	return rs
+}
+
+func (v CodingMap) CloneEmpty() IKeyValue {
+	return make(CodingMap)
 }

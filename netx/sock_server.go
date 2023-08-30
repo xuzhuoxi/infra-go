@@ -31,6 +31,14 @@ type IServer interface {
 	StopServer() error
 }
 
+type ISockConnSetSetter interface {
+	SetSockConnSet(set IServerConnSet)
+}
+
+type ISockConnSetGetter interface {
+	GetSockConnSet() IServerConnSet
+}
+
 type IServerConnSet interface {
 	// SetMaxConn
 	// 设置最大连接数量
