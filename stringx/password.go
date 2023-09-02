@@ -3,27 +3,40 @@ package stringx
 type PasswdFlag int
 
 const (
-	// N Numbers
+	// N 0-9
+	// Numbers 0-9
+	// 数字 0-9
 	N PasswdFlag = 1 << iota
-	// L Lowercase letters
+	// L a-z
+	// Lowercase letters a-z
+	// 小写字母 a-z
 	L
-	// U Uppercase letter
+	// U
+	// Uppercase letter A-Z
+	// 大写字母 A-Z
 	U
-	// S Symbols found on the keyboard (all keyboard characters not defined as letters or numerals) and spaces
+	// S
+	// Symbols found on the keyboard (all keyboard characters not defined as letters or numerals) and spaces
+	// 在键盘上找到的符号（所有未定义为字母或数字的键盘字符）和空格
 	S
 )
 
 const (
 	// LOrU
 	// Uppercase or lowercase letter
+	// 全部字母
 	LOrU = L | U
 	// DefaultPasswdFlag
 	// Include Number and Letter
+	// 数字和字母
 	DefaultPasswdFlag            = N | LOrU
 	mask              PasswdFlag = 0x11f
 )
 
-func PasswordCheck(pwd string, flag PasswdFlag, minLen int, maxLen int) bool {
+// CheckPassword
+// Check that the password content is legitimate
+// 检查密码内容是否合法
+func CheckPassword(pwd string, flag PasswdFlag, minLen int, maxLen int) bool {
 	if minLen > maxLen {
 		minLen, maxLen = maxLen, minLen
 	}
