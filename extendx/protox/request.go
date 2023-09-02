@@ -26,6 +26,9 @@ type IExtensionBinaryRequest interface {
 	// RequestBinaryData
 	// 请求的参数数据(二进制)
 	BinaryData() [][]byte
+	// FristBinary
+	// 第一个请求参数
+	FristBinary() []byte
 }
 
 // IExtensionStringRequest
@@ -35,6 +38,9 @@ type IExtensionStringRequest interface {
 	// StringData
 	// 请求的参数数据(String)
 	StringData() []string
+	// FristString
+	// 第一个请求参数
+	FristString() string
 }
 
 // IExtensionObjectRequest
@@ -44,6 +50,9 @@ type IExtensionObjectRequest interface {
 	// ObjectData
 	// 请求的参数数据(具体数据)
 	ObjectData() []interface{}
+	// FristObject
+	// 第一个请求参数
+	FristObject() interface{}
 }
 
 //---------------------------------------
@@ -97,12 +106,36 @@ func (req *SockRequest) BinaryData() [][]byte {
 	return req.binData
 }
 
+func (req *SockRequest) FristBinary() []byte {
+	if len(req.binData) == 0 {
+		return nil
+	} else {
+		return req.binData[0]
+	}
+}
+
 func (req *SockRequest) StringData() []string {
 	return req.strData
 }
 
+func (req *SockRequest) FristString() string {
+	if len(req.strData) == 0 {
+		return ""
+	} else {
+		return req.strData[0]
+	}
+}
+
 func (req *SockRequest) ObjectData() []interface{} {
 	return req.objData
+}
+
+func (req *SockRequest) FristObject() interface{} {
+	if len(req.objData) == 0 {
+		return nil
+	} else {
+		return req.objData[0]
+	}
 }
 
 func (req *SockRequest) toStringArray(data [][]byte) []string {

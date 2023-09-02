@@ -72,6 +72,7 @@ func CreateGaussKernel(radius int, sigma float64) [][]float64 {
 //	return arr
 //}
 
+// CreateGaussKernel2
 // 计算高斯卷积核(一维数据)
 // radius： 半径
 // sigma： 	标准差
@@ -94,6 +95,7 @@ func CreateGaussKernel2(radius int, sigma float64) []float64 {
 	return rs
 }
 
+// CreateGaussKernelInt
 // 计算高斯卷积核(二维数据)
 // 整数值卷积核
 // radius： 	半径
@@ -115,6 +117,7 @@ func CreateGaussKernelInt(radius int, sigma float64, scale float64) [][]int {
 	return rs
 }
 
+// CreateGaussKernelInt2
 // 计算高斯卷积核(一维数据)
 // 整数值卷积核
 // radius： 	半径
