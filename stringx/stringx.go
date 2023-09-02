@@ -166,11 +166,3 @@ func SplitToken(str string, separator string, trimTokens bool, ignoreEmptyTokens
 	}
 	return rs
 }
-
-func HasSuffixAt(str string, prefix string, tOffset int) bool {
-	if tOffset >= len(str) || tOffset < 0 {
-		return false
-	}
-	checkStr := str[tOffset:]
-	return strings.HasSuffix(checkStr, prefix)
-}
