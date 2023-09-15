@@ -66,7 +66,11 @@ func (o *ProtoObjectParamsHandler) HandleRequestParams(data [][]byte) []interfac
 }
 
 func (o *ProtoObjectParamsHandler) HandleResponseParam(data interface{}) []byte {
-	return o.Handler.HandleEncode(data)
+	bs, err := o.Handler.HandleEncode(data)
+	if nil != err {
+		return nil
+	}
+	return bs
 }
 
 func (o *ProtoObjectParamsHandler) HandleResponseParams(data []interface{}) [][]byte {

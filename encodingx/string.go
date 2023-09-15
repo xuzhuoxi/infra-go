@@ -10,6 +10,10 @@ import (
 	"unsafe"
 )
 
+var (
+	ErrNotString = errors.New("data is not string type! ")
+)
+
 func NewUtf8StringCodingHandle() ICodingHandler {
 	return &utf8StringHandler{}
 }
@@ -19,11 +23,11 @@ func NewUtf8StringCodingHandle() ICodingHandler {
 type utf8StringHandler struct {
 }
 
-func (*utf8StringHandler) HandleEncode(data interface{}) []byte {
+func (*utf8StringHandler) HandleEncode(data interface{}) (bs []byte, err error) {
 	if str, ok := data.(string); ok {
-		return []byte(str)
+		return []byte(str), nil
 	}
-	return nil
+	return nil, ErrNotString
 }
 
 func (*utf8StringHandler) HandleDecode(bytes []byte, data interface{}) error {
@@ -31,7 +35,7 @@ func (*utf8StringHandler) HandleDecode(bytes []byte, data interface{}) error {
 		data = string(bytes)
 		return nil
 	}
-	return errors.New("data is not string type! ")
+	return ErrNotString
 }
 
 //-------------------------------

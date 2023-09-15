@@ -13,12 +13,12 @@ import (
 
 type IEncodingData interface {
 	// EncodeToBytes 序列化
-	EncodeToBytes() []byte
+	EncodeToBytes() (bs []byte, err error)
 }
 
 type IDecodingData interface {
 	// DecodeFromBytes 反序列化更新
-	DecodeFromBytes(bs []byte) bool
+	DecodeFromBytes(bs []byte) error
 }
 
 type ICodingData interface {
@@ -29,7 +29,7 @@ type ICodingData interface {
 //------------------------------------
 
 type IEncodeHandler interface {
-	HandleEncode(data interface{}) []byte
+	HandleEncode(data interface{}) (bs []byte, err error)
 }
 
 type IDecodeHandler interface {

@@ -20,12 +20,8 @@ func NewJsonCodingHandlerSync() encodingx.ICodingHandler {
 
 type jsonHandlerAsync struct{}
 
-func (c jsonHandlerAsync) HandleEncode(data interface{}) []byte {
-	bs, err := jsoniter.Marshal(data)
-	if nil != err {
-		return nil
-	}
-	return bs
+func (c jsonHandlerAsync) HandleEncode(data interface{}) (bs []byte, err error) {
+	return jsoniter.Marshal(data)
 }
 
 func (c jsonHandlerAsync) HandleDecode(bs []byte, data interface{}) error {

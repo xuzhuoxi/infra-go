@@ -18,7 +18,7 @@ type IProtoReturnMessage interface {
 	// 追加参数 - 长度值
 	AppendLen(ln int) error
 	// AppendBinary
-	// 追加参数 - 字节数组
+	// 追加参数 - 字节数组, 自动补充长度数据
 	AppendBinary(data ...[]byte) error
 	// AppendCommon
 	// 追加参数 - 通用数据类型

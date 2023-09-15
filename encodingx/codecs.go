@@ -43,9 +43,11 @@ func (bc *buffCodecs) EncodeDataToBuff(data ...interface{}) {
 	defer bc.codecsLock.Unlock()
 	for index := 0; index < len(data); index++ {
 		if cd, ok := data[index].(IEncodingData); ok {
-			bc.WriteData(cd.EncodeToBytes())
+			bs, _ := cd.EncodeToBytes()
+			bc.WriteData(bs)
 		} else {
-			bc.WriteData(bc.encodeHandler.HandleEncode(data[index]))
+			bs, _ := bc.encodeHandler.HandleEncode(data[index])
+			bc.WriteData(bs)
 		}
 	}
 }

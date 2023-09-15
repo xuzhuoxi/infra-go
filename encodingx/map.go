@@ -31,6 +31,8 @@ type IKeyValue interface {
 
 	// Merge 合并
 	Merge(vs IKeyValue) (update IKeyValue, del []string)
+	// MergeArray 合并
+	MergeArray(keys []string, vals []interface{}) (update IKeyValue, del []string)
 	// ForEach 遍历
 	ForEach(handler func(key string, value interface{}))
 	// Clone 克隆
@@ -73,35 +75,50 @@ func (v CodingMap) String() string {
 //	Key : string(uint16+[]byte)
 //	Value: Kind [+ Len] + Other
 //	Other: []byte... 或 string(uint16+[]byte)...
-func (v CodingMap) EncodeToBytes() []byte {
+func (v CodingMap) EncodeToBytes() (bs []byte, err error) {
 	buff := bytes.NewBuffer(nil)
-	err := binaryx.WriteLen(buff, DefaultOrder, len(v))
+	err = binaryx.WriteLen(buff, DefaultOrder, len(v))
 	if nil != err {
-		return nil
+		return
 	}
 	for key, val := range v {
 		if !binaryx.CheckValue(val) { //非法值
 			continue
 		}
-		_ = binaryx.WriteString(buff, DefaultOrder, key) //Key
+		err = binaryx.WriteString(buff, DefaultOrder, key) //Key
+		if nil != err {
+			return
+		}
 		kind, ln := binaryx.GetValueKind(val)
-		_ = binaryx.Write(buff, DefaultOrder, kind) //Kind
+		err = binaryx.Write(buff, DefaultOrder, kind) //Kind
+		if nil != err {
+			return
+		}
 
 		if binaryx.IsSliceKind(kind) {
-			_ = binaryx.WriteLen(buff, DefaultOrder, ln)
-			_ = binaryx.WriteSlice(buff, DefaultOrder, val)
+			err = binaryx.WriteLen(buff, DefaultOrder, ln)
+			if nil != err {
+				return
+			}
+			err = binaryx.WriteSlice(buff, DefaultOrder, val)
+			if nil != err {
+				return
+			}
 		} else {
-			_ = binaryx.Write(buff, DefaultOrder, val)
+			err = binaryx.Write(buff, DefaultOrder, val)
+			if nil != err {
+				return
+			}
 		}
 	}
-	return buff.Bytes()
+	return buff.Bytes(), nil
 }
 
-func (v CodingMap) DecodeFromBytes(bs []byte) bool {
+func (v CodingMap) DecodeFromBytes(bs []byte) error {
 	buff := bytes.NewBuffer(bs)
 	ln, err := binaryx.ReadLen(buff, DefaultOrder)
 	if nil != err {
-		return false
+		return err
 	}
 	for ln >= 0 && buff.Len() > 0 {
 		key, _ := binaryx.ReadString(buff, DefaultOrder)
@@ -128,12 +145,12 @@ func (v CodingMap) DecodeFromBytes(bs []byte) bool {
 			}
 		}
 		if nil != err {
-			return false
+			return err
 		}
 		v.Set(key, val)
 		ln--
 	}
-	return true
+	return nil
 }
 
 func (v CodingMap) Len() int {
@@ -186,6 +203,20 @@ func (v CodingMap) Merge(vs IKeyValue) (update IKeyValue, del []string) {
 		}
 	}
 	return vs, del
+}
+
+func (v CodingMap) MergeArray(keys []string, vals []interface{}) (update IKeyValue, del []string) {
+	update = NewCodingMap()
+	for index := range keys {
+		if vals[index] == nil {
+			del = append(del, keys[index])
+			v.Delete(keys[index])
+			return
+		}
+		_, _ = v.Set(keys[index], vals[index])
+		_, _ = update.Set(keys[index], vals[index])
+	}
+	return
 }
 
 func (v CodingMap) ForEach(handler func(key string, value interface{})) {
