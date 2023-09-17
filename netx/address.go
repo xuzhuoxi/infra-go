@@ -11,10 +11,15 @@ import (
 )
 
 const (
+	// EventAddressAdded
+	// EventData: AddrProxyEventInfo
+	EventAddressAdded = "EventAddressAdded"
+	// EventAddressRemoved
+	// EventData: AddrProxyEventInfo
 	EventAddressRemoved = "EventAddressRemoved"
 )
 
-type AddrRemovedInfo struct {
+type AddrProxyEventInfo struct {
 	Id   string
 	Addr string
 }
@@ -78,106 +83,86 @@ type AddressProxy struct {
 	lock   sync.RWMutex
 }
 
-func (p *AddressProxy) Reset() {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-	p.idAddr = make(map[string]string)
-	p.addrId = make(map[string]string)
+func (o *AddressProxy) Reset() {
+	o.lock.Lock()
+	defer o.lock.Unlock()
+	o.idAddr = make(map[string]string)
+	o.addrId = make(map[string]string)
 }
 
-func (p *AddressProxy) GetId(address string) (id string, ok bool) {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-	id, ok = p.addrId[address]
+func (o *AddressProxy) GetId(address string) (id string, ok bool) {
+	o.lock.RLock()
+	defer o.lock.RUnlock()
+	id, ok = o.addrId[address]
 	return
 }
 
-func (p *AddressProxy) GetAddress(id string) (address string, ok bool) {
-	p.lock.RLock()
-	defer p.lock.RUnlock()
-	address, ok = p.idAddr[id]
+func (o *AddressProxy) GetAddress(id string) (address string, ok bool) {
+	o.lock.RLock()
+	defer o.lock.RUnlock()
+	address, ok = o.idAddr[id]
 	return
 }
 
-func (p *AddressProxy) MapIdAddress(id string, address string) {
+func (o *AddressProxy) MapIdAddress(id string, address string) {
 	//fmt.Println(fmt.Sprintf("AddressProxy[%s].MapIdAddress:", p.name), id, address)
-	p.lock.Lock()
-	if p.checkGroup(id, address) {
-		p.lock.Unlock()
+	o.lock.Lock()
+	defer o.lock.Unlock()
+	if o.checkGroup(id, address) {
 		return
 	}
-	var removeId string
-	var ok bool
-	defer func() {
-		p.lock.Unlock()
-		if ok && removeId != id { // id不同
-			p.DispatchEvent(EventAddressRemoved, p, AddrRemovedInfo{Id: removeId, Addr: address})
-		}
-	}()
-	p.removeId(id)
-	removeId, ok = p.removeAddress(address)
-
-	p.idAddr[id] = address
-	p.addrId[address] = id
-
-	//p.traceLen()
+	_, _ = o.removeId(id)
+	_, _ = o.removeAddress(address)
+	o.mapIdAddr(id, address)
+	o.DispatchEvent(EventAddressAdded, o, AddrProxyEventInfo{Id: id, Addr: address})
 }
 
-func (p *AddressProxy) RemoveById(id string) {
-	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveById:", p.name), id)
-	p.lock.Lock()
-	var address string
-	var ok bool
-	defer func() {
-		p.lock.Unlock()
-		if ok {
-			p.DispatchEvent(EventAddressRemoved, p, AddrRemovedInfo{Id: id, Addr: address})
-		}
-	}()
-	address, ok = p.removeId(id)
-	//if ok {
-	//	p.traceLen()
-	//}
+func (o *AddressProxy) RemoveById(id string) {
+	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveById:", o.name), id)
+	o.lock.Lock()
+	defer o.lock.Unlock()
+	address, ok := o.removeId(id)
+	if ok {
+		o.DispatchEvent(EventAddressRemoved, o, AddrProxyEventInfo{Id: id, Addr: address})
+	}
 }
 
-func (p *AddressProxy) RemoveByAddress(address string) {
-	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveByAddress:", p.name), address)
-	p.lock.Lock()
-	var ok bool
-	var id string
-	defer func() {
-		p.lock.Unlock()
-		if ok {
-			p.DispatchEvent(EventAddressRemoved, p, AddrRemovedInfo{Id: id, Addr: address})
-		}
-	}()
-	id, ok = p.removeAddress(address)
-	//if ok {
-	//	p.traceLen()
-	//}
+func (o *AddressProxy) RemoveByAddress(address string) {
+	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveByAddress:", o.name), address)
+	o.lock.Lock()
+	defer o.lock.Unlock()
+	id, ok := o.removeAddress(address)
+	if ok {
+		o.DispatchEvent(EventAddressRemoved, o, AddrProxyEventInfo{Id: id, Addr: address})
+	}
 }
 
-func (p *AddressProxy) removeId(id string) (address string, ok bool) {
-	if address, ok := p.idAddr[id]; ok {
-		delete(p.addrId, address)
-		delete(p.idAddr, id)
+func (o *AddressProxy) mapIdAddr(id string, address string) {
+	o.idAddr[id] = address
+	o.addrId[address] = id
+}
+
+func (o *AddressProxy) removeId(id string) (address string, ok bool) {
+	if address, ok = o.idAddr[id]; ok {
+		delete(o.addrId, address)
+		delete(o.idAddr, id)
 		return address, true
 	}
 	return "", false
 }
 
-func (p *AddressProxy) removeAddress(address string) (id string, ok bool) {
-	if id, ok := p.addrId[address]; ok {
-		delete(p.idAddr, id)
-		delete(p.addrId, address)
+func (o *AddressProxy) removeAddress(address string) (id string, ok bool) {
+	if id, ok = o.addrId[address]; ok {
+		delete(o.idAddr, id)
+		delete(o.addrId, address)
 		return id, true
 	}
 	return "", false
 }
 
-func (p *AddressProxy) checkGroup(id string, address string) bool {
-	address1, ok1 := p.idAddr[id]
-	id2, ok2 := p.addrId[address]
+func (o *AddressProxy) checkGroup(id string, address string) bool {
+	address1, ok1 := o.idAddr[id]
+	id2, ok2 := o.addrId[address]
 	if ok1 && ok2 && address == address1 && id == id2 {
 		return true
 	}
