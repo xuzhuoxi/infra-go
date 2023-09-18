@@ -7,6 +7,12 @@ package encodingx
 
 import "github.com/xuzhuoxi/infra-go/lang"
 
+type IPoolKeyValue interface {
+	Register(newFunc func() IKeyValue)
+	GetInstance() IKeyValue
+	Recycle(instance IKeyValue) bool
+}
+
 type IPoolCodingHandler interface {
 	Register(newFunc func() ICodingHandler)
 	GetInstance() ICodingHandler
@@ -31,6 +37,10 @@ type IPoolBuffCodecs interface {
 	Recycle(instance IBuffCodecs) bool
 }
 
+func NewPoolKeyValue() IPoolKeyValue {
+	return &poolKeyValue{pool: lang.NewObjectPoolSync()}
+}
+
 func NewPoolCodingHandler() IPoolCodingHandler {
 	return &poolCodingHandler{pool: lang.NewObjectPoolSync()}
 }
@@ -45,6 +55,33 @@ func NewPoolBuffDecoder() IPoolBuffDecoder {
 
 func NewPoolBuffCodecs() IPoolBuffCodecs {
 	return &poolBuffCodecs{pool: lang.NewObjectPoolSync()}
+}
+
+//------------------------------
+type poolKeyValue struct {
+	pool lang.IObjectPool
+}
+
+func (p poolKeyValue) Register(newFunc func() IKeyValue) {
+	p.pool.Register(func() interface{} {
+		return newFunc()
+	}, func(instance interface{}) bool {
+		if nil == instance {
+			return false
+		}
+		if _, ok := instance.(IKeyValue); ok {
+			return ok
+		}
+		return false
+	})
+}
+
+func (p poolKeyValue) GetInstance() IKeyValue {
+	return p.pool.GetInstance().(IKeyValue)
+}
+
+func (p poolKeyValue) Recycle(instance IKeyValue) bool {
+	return p.pool.Recycle(instance)
 }
 
 //------------------------------
