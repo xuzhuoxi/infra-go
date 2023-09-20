@@ -182,9 +182,8 @@ func (s *QUICServer) startConn(address string, session quic.Session) (stream qui
 
 func (s *QUICServer) endConn(address string, session quic.Session, stream quic.Stream) {
 	s.ServerMu.Lock()
-	defer s.ServerMu.Unlock()
-
 	delete(s.mapConn, address)
+	s.ServerMu.Unlock()
 	if nil != stream {
 		stream.Close()
 	}

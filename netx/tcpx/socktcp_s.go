@@ -203,9 +203,9 @@ func (s *TCPServer) startConn(address string, conn *net.TCPConn) netx.IPackSendR
 
 func (s *TCPServer) endConn(address string, conn *net.TCPConn) {
 	s.ServerMu.Lock()
-	defer s.ServerMu.Unlock()
 	// 删除连接
 	delete(s.mapConn, address)
+	s.ServerMu.Unlock()
 	if nil != conn {
 		conn.Close()
 	}

@@ -170,10 +170,11 @@ func (s *WebSocketServer) startConn(address string, conn *websocket.Conn) netx.I
 }
 
 func (s *WebSocketServer) endConn(address string, conn *websocket.Conn) {
-	s.ServerMu.Lock()
-	defer s.ServerMu.Unlock()
 	// 删除连接
+	s.ServerMu.Lock()
 	delete(s.mapConn, address)
+	s.ServerMu.Unlock()
+
 	if nil != conn {
 		conn.Close()
 	}
