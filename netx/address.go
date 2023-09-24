@@ -107,21 +107,22 @@ func (o *AddressProxy) GetAddress(id string) (address string, ok bool) {
 func (o *AddressProxy) MapIdAddress(id string, address string) {
 	//fmt.Println(fmt.Sprintf("AddressProxy[%s].MapIdAddress:", p.name), id, address)
 	o.lock.Lock()
-	defer o.lock.Unlock()
 	if o.checkGroup(id, address) {
+		o.lock.Unlock()
 		return
 	}
 	_, _ = o.removeId(id)
 	_, _ = o.removeAddress(address)
 	o.mapIdAddr(id, address)
+	o.lock.Unlock()
 	o.DispatchEvent(EventAddressAdded, o, AddrProxyEventInfo{Id: id, Addr: address})
 }
 
 func (o *AddressProxy) RemoveById(id string) {
 	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveById:", o.name), id)
 	o.lock.Lock()
-	defer o.lock.Unlock()
 	address, ok := o.removeId(id)
+	o.lock.Unlock()
 	if ok {
 		o.DispatchEvent(EventAddressRemoved, o, AddrProxyEventInfo{Id: id, Addr: address})
 	}
@@ -130,8 +131,8 @@ func (o *AddressProxy) RemoveById(id string) {
 func (o *AddressProxy) RemoveByAddress(address string) {
 	//fmt.Println(fmt.Sprintf("AddressProxy[%s].RemoveByAddress:", o.name), address)
 	o.lock.Lock()
-	defer o.lock.Unlock()
 	id, ok := o.removeAddress(address)
+	o.lock.Unlock()
 	if ok {
 		o.DispatchEvent(EventAddressRemoved, o, AddrProxyEventInfo{Id: id, Addr: address})
 	}

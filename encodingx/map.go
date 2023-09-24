@@ -30,15 +30,17 @@ type IKeyValue interface {
 	Check(key string) bool
 
 	// Merge 合并
-	Merge(vs IKeyValue) (update IKeyValue, del []string)
+	Merge(vs IKeyValue) (updated []string)
 	// MergeArray 合并
-	MergeArray(keys []string, vals []interface{}) (update IKeyValue, del []string)
+	MergeArray(keys []string, vals []interface{}) (updated []string)
 	// ForEach 遍历
 	ForEach(handler func(key string, value interface{}))
 	// Clone 克隆
 	Clone() IKeyValue
 	// CloneEmpty 克隆空
 	CloneEmpty() IKeyValue
+	// CopyFrom 复制部分
+	CopyFrom(from IKeyValue, keys []string) (n int)
 }
 
 //-------------------------
@@ -158,7 +160,11 @@ func (v CodingMap) Len() int {
 }
 
 func (v CodingMap) Set(key string, value interface{}) (old interface{}, ok bool) {
-	if old, ok = v[key]; ok && lang.Equal(old, value) {
+	old, ok = v[key]
+	if !ok && nil == value {
+		return nil, false
+	}
+	if ok && lang.Equal(old, value) {
 		return nil, false
 	}
 	v[key] = value
@@ -184,37 +190,35 @@ func (v CodingMap) Check(key string) bool {
 	return ok
 }
 
-func (v CodingMap) Merge(vs IKeyValue) (update IKeyValue, del []string) {
+func (v CodingMap) Merge(vs IKeyValue) (updated []string) {
 	if nil == vs {
-		return nil, nil
+		return
 	}
-	var rm []string
 	vs.ForEach(func(key string, value interface{}) {
 		if value == nil {
-			del = append(del, key)
+			updated = append(updated, key)
 			v.Delete(key)
 			return
 		}
-		_, _ = v.Set(key, value)
-	})
-	if len(rm) > 0 { //有重复
-		for _, key := range rm {
-			vs.Delete(key)
+		_, ok := v.Set(key, value)
+		if ok {
+			updated = append(updated, key)
 		}
-	}
-	return vs, del
+	})
+	return
 }
 
-func (v CodingMap) MergeArray(keys []string, vals []interface{}) (update IKeyValue, del []string) {
-	update = NewCodingMap()
+func (v CodingMap) MergeArray(keys []string, vals []interface{}) (updated []string) {
 	for index := range keys {
 		if vals[index] == nil {
-			del = append(del, keys[index])
+			updated = append(updated, keys[index])
 			v.Delete(keys[index])
 			return
 		}
-		_, _ = v.Set(keys[index], vals[index])
-		_, _ = update.Set(keys[index], vals[index])
+		_, ok := v.Set(keys[index], vals[index])
+		if ok {
+			updated = append(updated, keys[index])
+		}
 	}
 	return
 }
@@ -235,4 +239,14 @@ func (v CodingMap) Clone() IKeyValue {
 
 func (v CodingMap) CloneEmpty() IKeyValue {
 	return make(CodingMap)
+}
+
+func (v CodingMap) CopyFrom(from IKeyValue, keys []string) (n int) {
+	for index := range keys {
+		if val, ok := from.Get(keys[index]); ok {
+			v.Set(keys[index], val)
+			n++
+		}
+	}
+	return
 }
