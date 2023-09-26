@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"github.com/xuzhuoxi/infra-go/binaryx"
 	"github.com/xuzhuoxi/infra-go/lang"
+	"sort"
 	"strings"
 )
 
@@ -20,6 +21,8 @@ type IKeyValue interface {
 
 	// Len 键值对数量
 	Len() int
+	// Clear 清理全部键值对
+	Clear()
 	// Set 设置键值
 	Set(key string, value interface{}) (old interface{}, ok bool)
 	// Get 取值
@@ -30,9 +33,9 @@ type IKeyValue interface {
 	Check(key string) bool
 
 	// Merge 合并
-	Merge(vs IKeyValue) (updated []string)
+	Merge(vs IKeyValue, ignoreSame bool) (updated []string)
 	// MergeArray 合并
-	MergeArray(keys []string, vals []interface{}) (updated []string)
+	MergeArray(keys []string, vals []interface{}, ignoreSame bool) (updated []string)
 	// ForEach 遍历
 	ForEach(handler func(key string, value interface{}))
 	// Clone 克隆
@@ -55,14 +58,17 @@ func (v CodingMap) String() string {
 	if len(v) == 0 {
 		return "{}"
 	}
+	var keys []string
+	for key := range v {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
 	builder := &strings.Builder{}
 	builder.WriteString("{")
-	index := 0
-	ln := len(v)
-	for key, val := range v {
-		builder.WriteString(key + ":" + fmt.Sprint(val))
-		index++
-		if index < ln {
+	ln := len(keys)
+	for index, key := range keys {
+		builder.WriteString(key + ":" + fmt.Sprint(v[key]))
+		if index < ln-1 {
 			builder.WriteString(",")
 		}
 	}
@@ -155,6 +161,12 @@ func (v CodingMap) DecodeFromBytes(bs []byte) error {
 	return nil
 }
 
+func (v CodingMap) Clear() {
+	for key := range v {
+		delete(v, key)
+	}
+}
+
 func (v CodingMap) Len() int {
 	return len(v)
 }
@@ -190,7 +202,7 @@ func (v CodingMap) Check(key string) bool {
 	return ok
 }
 
-func (v CodingMap) Merge(vs IKeyValue) (updated []string) {
+func (v CodingMap) Merge(vs IKeyValue, ignoreSame bool) (updated []string) {
 	if nil == vs {
 		return
 	}
@@ -201,14 +213,14 @@ func (v CodingMap) Merge(vs IKeyValue) (updated []string) {
 			return
 		}
 		_, ok := v.Set(key, value)
-		if ok {
+		if ok || ignoreSame {
 			updated = append(updated, key)
 		}
 	})
 	return
 }
 
-func (v CodingMap) MergeArray(keys []string, vals []interface{}) (updated []string) {
+func (v CodingMap) MergeArray(keys []string, vals []interface{}, ignoreSame bool) (updated []string) {
 	for index := range keys {
 		if vals[index] == nil {
 			updated = append(updated, keys[index])
@@ -216,7 +228,7 @@ func (v CodingMap) MergeArray(keys []string, vals []interface{}) (updated []stri
 			return
 		}
 		_, ok := v.Set(keys[index], vals[index])
-		if ok {
+		if ok || ignoreSame {
 			updated = append(updated, keys[index])
 		}
 	}

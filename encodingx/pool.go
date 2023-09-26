@@ -77,7 +77,9 @@ func (p poolKeyValue) Register(newFunc func() IKeyValue) {
 }
 
 func (p poolKeyValue) GetInstance() IKeyValue {
-	return p.pool.GetInstance().(IKeyValue)
+	rs := p.pool.GetInstance().(IKeyValue)
+	rs.Clear()
+	return rs
 }
 
 func (p poolKeyValue) Recycle(instance IKeyValue) bool {

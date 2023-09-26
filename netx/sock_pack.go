@@ -158,6 +158,7 @@ func (sr *packSRBase) StartReceiving() error {
 	for sr.receiving {
 		n, address, err := sr.reader.ReadBytes(buff[:])
 		if err != nil {
+			sr.Logger.Warnln(err)
 			break
 		}
 		sr.onReceiveBytes(buff[:n], address)
