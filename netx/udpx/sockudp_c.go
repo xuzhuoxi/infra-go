@@ -84,7 +84,7 @@ type UDPDialClient struct {
 }
 
 func (c *UDPDialClient) OpenClient(params netx.SockParams) error {
-	funcName := "UDPDialClient.OpenClient"
+	funcName := "[UDPDialClient.OpenClient]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if c.Opening {
@@ -105,12 +105,12 @@ func (c *UDPDialClient) OpenClient(params netx.SockParams) error {
 	connProxy := &netx.ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
 	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, false)
 	c.Opening = true
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }
 
 func (c *UDPDialClient) CloseClient() error {
-	funcName := "UDPDialClient.Close"
+	funcName := "[UDPDialClient.Close]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if !c.Opening {
@@ -121,7 +121,7 @@ func (c *UDPDialClient) CloseClient() error {
 		c.Conn.Close()
 		c.Conn = nil
 	}
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }
 
@@ -130,7 +130,7 @@ type UDPListenClient struct {
 }
 
 func (c *UDPListenClient) OpenClient(params netx.SockParams) error {
-	funcName := "UDPListenClient.OpenClient"
+	funcName := "[UDPListenClient.OpenClient]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if c.Opening {
@@ -151,12 +151,12 @@ func (c *UDPListenClient) OpenClient(params netx.SockParams) error {
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
 	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, true)
 	c.Opening = true
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }
 
 func (c *UDPListenClient) CloseClient() error {
-	funcName := "UDPListenClient.Close"
+	funcName := "[UDPListenClient.Close]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if !c.Opening {
@@ -167,6 +167,6 @@ func (c *UDPListenClient) CloseClient() error {
 		c.Conn.Close()
 		c.Conn = nil
 	}
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }

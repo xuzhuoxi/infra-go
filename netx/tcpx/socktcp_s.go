@@ -65,7 +65,7 @@ type TCPServer struct {
 }
 
 func (s *TCPServer) StartServer(params netx.SockParams) error {
-	funcName := fmt.Sprintf("TCPServer[%s].StartServer", s.Name)
+	funcName := fmt.Sprintf("[TCPServer(%s).StartServer]", s.Name)
 	s.ServerMu.Lock()
 	if s.Running {
 		defer s.ServerMu.Unlock()
@@ -79,13 +79,13 @@ func (s *TCPServer) StartServer(params netx.SockParams) error {
 		defer s.ServerMu.Unlock()
 		return err
 	}
-	s.Logger.Infoln("[TCPServer] listening on:", params.LocalAddress)
+	s.Logger.Infoln(funcName, "listening on:", params.LocalAddress)
 	s.listener = listener
 	s.channelLimit.StartLimit()
 	s.mapConn = make(map[string]netx.IServerConn)
 	s.Running = true
 	s.ServerMu.Unlock()
-	s.Logger.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName, "()")
 	s.DispatchServerStartedEvent(s)
 
 	defer s.StopServer()
@@ -105,7 +105,7 @@ func (s *TCPServer) StartServer(params netx.SockParams) error {
 }
 
 func (s *TCPServer) StopServer() error {
-	funcName := fmt.Sprintf("TCPServer[%s].StopServer", s.Name)
+	funcName := fmt.Sprintf("[TCPServer(%s).StopServer]", s.Name)
 	s.ServerMu.Lock()
 	if !s.Running {
 		defer s.ServerMu.Unlock()
@@ -113,7 +113,7 @@ func (s *TCPServer) StopServer() error {
 	}
 	defer func() {
 		s.ServerMu.Unlock()
-		s.Logger.Infoln(funcName + "()")
+		s.Logger.Infoln(funcName, "()")
 		s.DispatchServerStoppedEvent(s)
 	}()
 	if nil != s.listener {
@@ -197,7 +197,7 @@ func (s *TCPServer) startConn(address string, conn *net.TCPConn) netx.IPackSendR
 	s.ServerMu.Unlock()
 
 	s.DispatchServerConnOpenEvent(s, address)
-	s.Logger.Infoln("[TCPServer] TCP Connection:", address, "Opened!")
+	s.Logger.Infoln("[TCPServer.startConn]", "TCP Connection:", address, "Opened!")
 	return proxy
 }
 
@@ -212,7 +212,7 @@ func (s *TCPServer) endConn(address string, conn *net.TCPConn) {
 	s.channelLimit.Done()
 	// 抛出事件
 	s.DispatchServerConnCloseEvent(s, address)
-	s.Logger.Infoln("[TCPServer] TCP Connection:", address, "Closed!")
+	s.Logger.Infoln("[TCPServer.endConn]", "TCP Connection:", address, "Closed!")
 }
 
 func listenTCP(network string, address string) (*net.TCPListener, error) {

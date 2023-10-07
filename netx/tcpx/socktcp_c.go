@@ -52,7 +52,7 @@ type TCPClient struct {
 }
 
 func (c *TCPClient) OpenClient(params netx.SockParams) error {
-	funcName := fmt.Sprintf("%s.OpenClient", c.Name)
+	funcName := fmt.Sprintf("[TCPClient(%s).OpenClient]", c.Name)
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if "" != params.Network {
@@ -66,12 +66,12 @@ func (c *TCPClient) OpenClient(params netx.SockParams) error {
 	connProxy := &netx.ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
 	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, c.Logger, false)
 	c.Opening = true
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }
 
 func (c *TCPClient) CloseClient() error {
-	funcName := fmt.Sprintf("%s.CloseClient", c.Name)
+	funcName := fmt.Sprintf("[TCPClient(%s).CloseClient]", c.Name)
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if !c.Opening {
@@ -82,6 +82,6 @@ func (c *TCPClient) CloseClient() error {
 		c.Conn.Close()
 		c.Conn = nil
 	}
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }

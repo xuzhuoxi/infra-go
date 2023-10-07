@@ -45,7 +45,7 @@ type WebSocketServer struct {
 }
 
 func (s *WebSocketServer) StartServer(params netx.SockParams) error {
-	funcName := fmt.Sprintf("WebSocketServer[%s].StartServer", s.Name)
+	funcName := fmt.Sprintf("[WebSocketServer(%s).StartServer]", s.Name)
 	s.ServerMu.Lock()
 	if s.Running {
 		defer s.ServerMu.Unlock()
@@ -59,7 +59,7 @@ func (s *WebSocketServer) StartServer(params netx.SockParams) error {
 	s.mapConn = make(map[string]netx.IServerConn)
 	s.Running = true
 	s.ServerMu.Unlock()
-	s.Logger.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName, "()")
 	s.DispatchServerStartedEvent(s)
 	err := s.httpServer.ListenAndServe()
 	if nil != err {
@@ -70,7 +70,7 @@ func (s *WebSocketServer) StartServer(params netx.SockParams) error {
 }
 
 func (s *WebSocketServer) StopServer() error {
-	funcName := fmt.Sprintf("WebSocketServer[%s].StopServer", s.Name)
+	funcName := fmt.Sprintf("[WebSocketServer(%s).StopServer]", s.Name)
 	s.ServerMu.Lock()
 	if !s.Running {
 		defer s.ServerMu.Unlock()
@@ -78,7 +78,7 @@ func (s *WebSocketServer) StopServer() error {
 	}
 	defer func() { //应该解锁后抛出事件
 		s.ServerMu.Unlock()
-		s.Logger.Infoln(funcName + "()")
+		s.Logger.Infoln(funcName, "()")
 		s.DispatchServerStoppedEvent(s)
 	}()
 	if nil != s.httpServer {
@@ -165,7 +165,7 @@ func (s *WebSocketServer) startConn(address string, conn *websocket.Conn) netx.I
 	s.ServerMu.Unlock()
 
 	s.DispatchServerConnOpenEvent(s, address)
-	s.Logger.Infoln("[WebSocketServer] WebSocket Connection:", address, "Opened!")
+	s.Logger.Infoln("[WebSocketServer.startConn] WebSocket Connection:", address, "Opened!")
 	return proxy
 }
 
@@ -181,5 +181,5 @@ func (s *WebSocketServer) endConn(address string, conn *websocket.Conn) {
 	s.channelLimit.Done()
 	// 抛出事件
 	s.DispatchServerConnCloseEvent(s, address)
-	s.Logger.Infoln("[WebSocketServer] WebSocket Connection:", address, "Closed!")
+	s.Logger.Infoln("[WebSocketServer.endConn] WebSocket Connection:", address, "Closed!")
 }

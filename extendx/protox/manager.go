@@ -218,13 +218,13 @@ func (m *ExtensionManager) Verify(name string, pid string, uid string) (e IProto
 	//有效性验证
 	if !ok {
 		if nil != m.Logger {
-			m.Logger.Warnln(fmt.Sprintf("Undefined Extension(%s)! Sender(%s)", name, uid))
+			m.Logger.Warnln("[ExtensionManager.Verify]", fmt.Sprintf("Undefined Extension(%s)! Sender(%s)", name, uid))
 		}
 		return nil, CodeProtoFail
 	}
 	if !extension.CheckProtocolId(pid) { //有效性检查
 		if nil != m.Logger {
-			m.Logger.Warnln(fmt.Sprintf("Undefined ProtoId(%s) Send to Extension(%s)! Sender(%s)", pid, name, uid))
+			m.Logger.Warnln("[ExtensionManager.Verify]", fmt.Sprintf("Undefined ProtoId(%s) Send to Extension(%s)! Sender(%s)", pid, name, uid))
 		}
 		return nil, CodeProtoFail
 	}

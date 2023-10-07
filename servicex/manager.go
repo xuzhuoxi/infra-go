@@ -23,7 +23,7 @@ type ServiceManager struct {
 
 func (o *ServiceManager) Init(config *ServiceConfig, endCall lang.FuncCallback) {
 	o.config, o.endCall = config, lang.NewCallback(endCall)
-	o.GetLogger().Infoln("ServiceManager:Init ---------- Start!")
+	o.GetLogger().Infoln("[ServiceManager.Init]", "---------- Start!")
 	o.addListeners()
 	o.activeServices()
 	o.startInitServices()
@@ -76,42 +76,43 @@ func (o *ServiceManager) removeListeners() {
 }
 
 func (o *ServiceManager) onEventLog(evd *eventx.EventData) {
+	funcName := "[ServiceManager.onEventLog]"
 	evtType := evd.EventType
 	logger := o.GetLogger()
 	switch evtType {
 	case EventOnServiceInitStart:
 		r := evd.Data.(ServiceStartData)
-		logger.Infoln(fmt.Sprintf("Service[name=%s] Init Start: Ignore=%v ", r.ServiceName, r.Ignore))
+		logger.Infoln(funcName, fmt.Sprintf("Service[name=%s] Init Start: Ignore=%v ", r.ServiceName, r.Ignore))
 	case EventOnServiceDataInitStart:
 		r := evd.Data.(ServiceStartData)
-		logger.Infoln(fmt.Sprintf("Service[name=%s] Data Init Start: Ignore=%v ", r.ServiceName, r.Ignore))
+		logger.Infoln(funcName, fmt.Sprintf("Service[name=%s] Data Init Start: Ignore=%v ", r.ServiceName, r.Ignore))
 	case EventOnServiceDataLoadStart:
 		r := evd.Data.(ServiceStartData)
-		logger.Infoln(fmt.Sprintf("Service[name=%s] Data Load Start: Ignore=%v ", r.ServiceName, r.Ignore))
+		logger.Infoln(funcName, fmt.Sprintf("Service[name=%s] Data Load Start: Ignore=%v ", r.ServiceName, r.Ignore))
 	// ---
 	case EventOnServiceInited:
 		r := evd.Data.(ServiceResultData)
-		logger.Infoln(fmt.Sprintf("Service[name=%s, suc=%v] Inited! ", r.ServiceName, r.Suc))
+		logger.Infoln(funcName, fmt.Sprintf("Service[name=%s, suc=%v] Inited! ", r.ServiceName, r.Suc))
 	case EventOnServiceDataInited:
 		r := evd.Data.(ServiceResultData)
-		logger.Infoln(fmt.Sprintf("Service[name=%s, suc=%v] Data Inited! ", r.ServiceName, r.Suc))
+		logger.Infoln(funcName, fmt.Sprintf("Service[name=%s, suc=%v] Data Inited! ", r.ServiceName, r.Suc))
 	case EventOnServiceDataLoaded:
 		r := evd.Data.(ServiceResultData)
-		logger.Infoln(fmt.Sprintf("Service[name=%s, suc=%v] Data Loaded! ", r.ServiceName, r.Suc))
+		logger.Infoln(funcName, fmt.Sprintf("Service[name=%s, suc=%v] Data Loaded! ", r.ServiceName, r.Suc))
 	// ---
 	case EventOnServiceAwaked:
-		logger.Infoln(fmt.Sprintf("Service[name=%s] Awaked! ", evd.Data.(string)))
+		logger.Infoln(funcName, fmt.Sprintf("Service[name=%s] Awaked! ", evd.Data.(string)))
 	case EventOnServiceAllAwaked:
-		logger.Infoln(fmt.Sprintf("Services[num=%d] All Awaked! ", evd.Data.(int)))
+		logger.Infoln(funcName, fmt.Sprintf("Services[num=%d] All Awaked! ", evd.Data.(int)))
 	case EventOnServiceAllInited:
-		logger.Infoln(fmt.Sprintf("Services[num=%d] All Inited! ", evd.Data.(int)))
+		logger.Infoln(funcName, fmt.Sprintf("Services[num=%d] All Inited! ", evd.Data.(int)))
 	case EventOnServiceDataAllInited:
-		logger.Infoln(fmt.Sprintf("Services[num=%d] All Data Inited! ", evd.Data.(int)))
+		logger.Infoln(funcName, fmt.Sprintf("Services[num=%d] All Data Inited! ", evd.Data.(int)))
 	case EventOnServiceDataAllLoaded:
-		logger.Infoln(fmt.Sprintf("Services[num=%d] All Data Loaded! ", evd.Data.(int)))
+		logger.Infoln(funcName, fmt.Sprintf("Services[num=%d] All Data Loaded! ", evd.Data.(int)))
 	// ---
 	case EventOnManagerInitFinish:
-		logger.Infoln("ServiceManager:Init ---------- Finish!")
+		logger.Infoln(funcName, "---------- Finish!")
 	}
 }
 

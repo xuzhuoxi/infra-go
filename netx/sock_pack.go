@@ -141,7 +141,7 @@ func (sr *packSRBase) SendPack(msg []byte, rAddress ...string) (int, error) {
 	sr.toBlockBuff.WriteData(msg)
 	n, err := sr.writer.WriteBytes(sr.toBlockBuff.ReadBytes(), rAddress...)
 	if nil != err {
-		sr.Logger.Warnln("packSRBase.SendPack", err)
+		sr.Logger.Warnln("[packSRBase.SendPack]", "packSRBase.SendPack", err)
 		return n, err
 	}
 	return n, nil
@@ -158,7 +158,7 @@ func (sr *packSRBase) StartReceiving() error {
 	for sr.receiving {
 		n, address, err := sr.reader.ReadBytes(buff[:])
 		if err != nil {
-			sr.Logger.Warnln(err)
+			sr.Logger.Warnln("[packSRBase.StartReceiving]", err)
 			break
 		}
 		sr.onReceiveBytes(buff[:n], address)

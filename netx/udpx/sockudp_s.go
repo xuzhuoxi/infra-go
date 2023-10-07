@@ -69,7 +69,7 @@ type UDPServer struct {
 }
 
 func (s *UDPServer) StartServer(params netx.SockParams) error {
-	funcName := fmt.Sprintf("UDPServer[%s].StartServer", s.Name)
+	funcName := fmt.Sprintf("[UDPServer(%s).StartServer]", s.Name)
 	s.serverMu.Lock()
 	if s.Running {
 		defer s.serverMu.Unlock()
@@ -83,20 +83,20 @@ func (s *UDPServer) StartServer(params netx.SockParams) error {
 		defer s.serverMu.Unlock()
 		return err
 	}
-	s.Logger.Infoln("[UDPServer] listening on:", params.LocalAddress)
+	s.Logger.Infoln(funcName, "listening on:", params.LocalAddress)
 	s.Running = true
 	s.conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
 	s.messageProxy = netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, UdpDataBlockHandler, s.Logger, true)
 	s.serverMu.Unlock()
-	s.Logger.Infoln(funcName + "()")
+	s.Logger.Infoln(funcName, "()")
 	s.DispatchServerStartedEvent(s)
 	err2 := s.messageProxy.StartReceiving()
 	return err2
 }
 
 func (s *UDPServer) StopServer() error {
-	funcName := fmt.Sprintf("UDPServer[%s].StopServer", s.Name)
+	funcName := fmt.Sprintf("[UDPServer(%s).StopServer]", s.Name)
 	s.serverMu.Lock()
 	if !s.Running {
 		defer s.serverMu.Unlock()
@@ -104,7 +104,7 @@ func (s *UDPServer) StopServer() error {
 	}
 	defer func() {
 		s.serverMu.Unlock()
-		s.Logger.Infoln(funcName + "()")
+		s.Logger.Infoln(funcName, "()")
 		s.DispatchServerStoppedEvent(s)
 	}()
 	if nil != s.conn {

@@ -117,7 +117,7 @@ func (o *SockClientBase) SendBytesTo(bytes []byte, rAddress ...string) error {
 
 func (o *SockClientBase) StartReceiving() error {
 	if nil != o.Logger {
-		o.Logger.Infoln(o.Name + ".StartReceiving()")
+		o.Logger.Infoln("[SockClientBase.StartReceiving]", "ServerName="+o.Name)
 	}
 	err := o.PackProxy.StartReceiving()
 	return err
@@ -125,7 +125,7 @@ func (o *SockClientBase) StartReceiving() error {
 
 func (o *SockClientBase) StopReceiving() error {
 	if nil != o.Logger {
-		o.Logger.Infoln(o.Name + ".StopReceiving()")
+		o.Logger.Infoln("[SockClientBase.StopReceiving]", "ServerName="+o.Name)
 	}
 	err := o.PackProxy.StopReceiving()
 	return err

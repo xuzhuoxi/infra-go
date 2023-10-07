@@ -33,7 +33,7 @@ type QUICClient struct {
 }
 
 func (c *QUICClient) OpenClient(params netx.SockParams) error {
-	funcName := "QUICClient.OpenClient"
+	funcName := "[QUICClient.OpenClient]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if c.Opening {
@@ -57,12 +57,12 @@ func (c *QUICClient) OpenClient(params netx.SockParams) error {
 	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
 	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, c.Logger, false)
 	c.Opening = true
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }
 
 func (c *QUICClient) CloseClient() error {
-	funcName := "QUICClient.CloseClient"
+	funcName := "[QUICClient.CloseClient]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if !c.Opening {
@@ -77,6 +77,6 @@ func (c *QUICClient) CloseClient() error {
 		c.Conn.Close()
 		c.Conn = nil
 	}
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }

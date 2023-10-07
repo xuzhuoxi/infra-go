@@ -31,7 +31,7 @@ type WebSocketClient struct {
 }
 
 func (c *WebSocketClient) OpenClient(params netx.SockParams) error {
-	funcName := "WebSocketClient.OpenClient"
+	funcName := "[WebSocketClient.OpenClient]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if "" != params.Network {
@@ -45,12 +45,12 @@ func (c *WebSocketClient) OpenClient(params netx.SockParams) error {
 	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: params.RemoteAddress}
 	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, WsDataBlockHandler, c.Logger, false)
 	c.Opening = true
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }
 
 func (c *WebSocketClient) CloseClient() error {
-	funcName := "WebSocketClient.CloseClient"
+	funcName := "[WebSocketClient.CloseClient]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if !c.Opening {
@@ -61,6 +61,6 @@ func (c *WebSocketClient) CloseClient() error {
 		c.Conn.Close()
 		c.Conn = nil
 	}
-	c.Logger.Infoln(funcName + "()")
+	c.Logger.Infoln(funcName, "()")
 	return nil
 }
