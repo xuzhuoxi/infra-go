@@ -10,11 +10,11 @@ import (
 	"reflect"
 )
 
-// WriteSliceStringAfterLen
+// WriteSliceStringWithLen
 // 向Writer中写入一组string数据[长度+数据]
 // 格式：长度 + [长度+数据]...
 // 长度格式默认为uint16
-func WriteSliceStringAfterLen(w io.Writer, order binary.ByteOrder, str []string) error {
+func WriteSliceStringWithLen(w io.Writer, order binary.ByteOrder, str []string) error {
 	if err := writeLen(w, order, str); nil != err {
 		return err
 	}
@@ -34,7 +34,7 @@ func WriteSliceString(w io.Writer, order binary.ByteOrder, str []string) error {
 	return nil
 }
 
-func WriteSliceAfterLen(w io.Writer, order binary.ByteOrder, data interface{}) error {
+func WriteSliceWithLen(w io.Writer, order binary.ByteOrder, data interface{}) error {
 	if err := writeLen(w, order, data); nil != err {
 		return err
 	}
