@@ -187,9 +187,6 @@ func (b *buffDataBlock) WriteData(bytes []byte) {
 }
 
 func (b *buffDataBlock) WriteString(str string) {
-	if len(str) == 0 {
-		return
-	}
 	b.WriteData([]byte(str))
 }
 
