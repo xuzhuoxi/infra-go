@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-const ReceiverBuffLen = 2048
+var ReceiverBuffLen = 2048
 
 type iPackReceiver interface {
 	IPackHandlerContainerSetter
@@ -148,13 +148,14 @@ func (sr *packSRBase) SendPack(msg []byte, rAddress ...string) (int, error) {
 }
 func (sr *packSRBase) StartReceiving() error {
 	funcName := "packSRBase.StartReceiving"
+	sr.mu.Lock()
 	if sr.receiving {
+		sr.mu.Unlock()
 		return errorsx.FuncRepeatedCallError(funcName)
 	}
-
-	defer sr.StopReceiving()
 	sr.receiving = true
-	var buff [ReceiverBuffLen]byte
+	sr.mu.Unlock()
+	buff := make([]byte, ReceiverBuffLen, ReceiverBuffLen)
 	for sr.receiving {
 		n, address, err := sr.reader.ReadBytes(buff[:])
 		if err != nil {
@@ -163,6 +164,7 @@ func (sr *packSRBase) StartReceiving() error {
 		}
 		sr.onReceiveBytes(buff[:n], address)
 	}
+	_ = sr.StopReceiving()
 	return nil
 }
 func (sr *packSRBase) StopReceiving() error {
