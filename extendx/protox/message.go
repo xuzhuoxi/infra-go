@@ -119,10 +119,10 @@ func (o *ProtoReturnMessage) AppendObject(data ...interface{}) error {
 		return nil
 	}
 	if o.ParamHandler == nil {
-		return errors.New("SendObjectResponse Error: ParamHandler is nil! ")
+		return errors.New("AppendObject Error: ParamHandler is nil! ")
 	}
 	for index := range data {
-		bs := o.ParamHandler.HandleResponseParam(data[index])
+		bs := o.ParamHandler.HandleReturnParam(data[index])
 		o.DataBuff.WriteData(bs)
 	}
 	return nil

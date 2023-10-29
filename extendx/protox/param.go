@@ -19,38 +19,48 @@ type IProtocolParamsHandler interface {
 	// SetCodingHandler
 	// 设置编解码器
 	SetCodingHandler(handler encodingx.ICodingHandler)
+	// SetCodingHandlers
+	// 设置编解码器
+	SetCodingHandlers(reqHandler encodingx.ICodingHandler, returnHandler encodingx.ICodingHandler)
 	// HandleRequestParam
 	// 处理请求参数转换：二进制->具体数据
 	HandleRequestParam(data []byte) interface{}
 	// HandleRequestParams
 	// 处理请求参数转换：二进制->具体数据(批量)
 	HandleRequestParams(data [][]byte) []interface{}
-	// HandleResponseParam
+	// HandleReturnParam
 	// 处理响应参数转换：具体数据->二进制
-	HandleResponseParam(data interface{}) []byte
-	// HandleResponseParams
+	HandleReturnParam(data interface{}) []byte
+	// HandleReturnParams
 	// 处理响应参数转换：具体数据->二进制(批量)
-	HandleResponseParams(data []interface{}) [][]byte
+	HandleReturnParams(data []interface{}) [][]byte
 }
 
 //----------------------------
 
 func NewProtoObjectParamsHandler(factory ParamFactory, handler encodingx.ICodingHandler) IProtocolParamsHandler {
-	return &ProtoObjectParamsHandler{ParamFactory: factory, Handler: handler}
+	rs := &ProtoObjectParamsHandler{ParamFactory: factory}
+	rs.SetCodingHandler(handler)
+	return rs
 }
 
 type ProtoObjectParamsHandler struct {
-	ParamFactory ParamFactory
-	Handler      encodingx.ICodingHandler
+	ParamFactory  ParamFactory
+	ReqHandler    encodingx.ICodingHandler
+	ReturnHandler encodingx.ICodingHandler
 }
 
 func (o *ProtoObjectParamsHandler) SetCodingHandler(handler encodingx.ICodingHandler) {
-	o.Handler = handler
+	o.ReqHandler, o.ReturnHandler = handler, handler
+}
+
+func (o *ProtoObjectParamsHandler) SetCodingHandlers(reqHandler encodingx.ICodingHandler, returnHandler encodingx.ICodingHandler) {
+	o.ReqHandler, o.ReturnHandler = reqHandler, returnHandler
 }
 
 func (o *ProtoObjectParamsHandler) HandleRequestParam(data []byte) interface{} {
 	rs := o.ParamFactory()
-	err := o.Handler.HandleDecode(data, rs)
+	err := o.ReqHandler.HandleDecode(data, rs)
 	if nil != err {
 		return nil
 	}
@@ -65,18 +75,18 @@ func (o *ProtoObjectParamsHandler) HandleRequestParams(data [][]byte) []interfac
 	return objData
 }
 
-func (o *ProtoObjectParamsHandler) HandleResponseParam(data interface{}) []byte {
-	bs, err := o.Handler.HandleEncode(data)
+func (o *ProtoObjectParamsHandler) HandleReturnParam(data interface{}) []byte {
+	bs, err := o.ReturnHandler.HandleEncode(data)
 	if nil != err {
 		return nil
 	}
 	return bs
 }
 
-func (o *ProtoObjectParamsHandler) HandleResponseParams(data []interface{}) [][]byte {
+func (o *ProtoObjectParamsHandler) HandleReturnParams(data []interface{}) [][]byte {
 	var byteData [][]byte
 	for index := range data {
-		byteData = append(byteData, o.HandleResponseParam(data[index]))
+		byteData = append(byteData, o.HandleReturnParam(data[index]))
 	}
 	return byteData
 }
