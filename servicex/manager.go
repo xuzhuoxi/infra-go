@@ -158,6 +158,13 @@ func (o *ServiceManager) startLoadData() {
 
 func (o *ServiceManager) onServicesDataLoaded(evd *eventx.EventData) {
 	o.endCall.Invoke()
-	o.DispatchEvent(EventOnManagerInitFinish, o, nil)
 	o.removeListeners()
+	o.endInit()
+}
+
+func (o *ServiceManager) endInit() {
+	funcName := "[ServiceManager.endInit]"
+	logger := o.GetLogger()
+	logger.Infoln(funcName)
+	o.DispatchEvent(EventOnManagerInitFinish, o, nil)
 }
