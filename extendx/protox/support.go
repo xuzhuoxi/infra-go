@@ -60,6 +60,9 @@ func (s *ProtoExtensionSupport) SetRequestHandlerObject(protoId string, handler 
 func (s *ProtoExtensionSupport) ClearRequestHandler(protoId string) {
 	delete(s.ProtoIdToInfo, protoId)
 }
+func (s *ProtoExtensionSupport) ClearRequestHandlers() {
+	s.ProtoIdToInfo = make(map[string]*ExtensionProtoInfo)
+}
 
 func (s *ProtoExtensionSupport) OnRequest(resp IExtensionResponse, req IExtensionRequest) {
 	info, _ := s.ProtoIdToInfo[req.ProtoId()]
