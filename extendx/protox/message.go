@@ -31,6 +31,8 @@ type IProtoReturnMessage interface {
 	AppendJson(data ...interface{}) error
 	// AppendObject
 	// 追加参数
+	// data only supports pointer types
+	// data 只支持指针类型
 	AppendObject(data ...interface{}) error
 	// GenMsgBytes
 	// 生成消息

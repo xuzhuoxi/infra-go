@@ -65,6 +65,8 @@ type iExtResp interface {
 	SendJsonResponse(data ...interface{}) error
 	// SendObjectResponse
 	// 响应客户端(具体结构体参数)
+	// data only supports pointer types
+	// data 只支持指针类型
 	SendObjectResponse(data ...interface{}) error
 }
 
