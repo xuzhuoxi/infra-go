@@ -1,22 +1,49 @@
 # infra-go
 
-A go library.
+<div align=center>
 
-## Compatibility
+<br/>
 
-go 1.11
+![Go version](https://img.shields.io/badge/go-%3E%3Dv1.16-9cf)
+[![Tags](https://img.shields.io/badge/tags-1.0.4-green.svg)](https://github.com/xuzhuoxi/infra-go/tags)
+[![GoDoc](https://godoc.org/github.com/xuzhuoxi/infra-go?status.svg)](https://pkg.go.dev/github.com/xuzhuoxi/infra-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/xuzhuoxi/infra-go)](https://goreportcard.com/report/github.com/xuzhuoxi/infra-go)
+[![test](https://github.com/xuzhuoxi/infra-go/actions/workflows/codecov.yml/badge.svg?branch=main&event=push)](https://github.com/xuzhuoxi/infra-go/actions/workflows/codecov.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/xuzhuoxi/infra-go/blob/master/LICENSE)
 
-## Contact
+</div>
 
-xuzhuoxi 
+<div STYLE="page-break-after: always;"></div>
+<p style="font-size: 20px"> 
+  A go library.
+</p>
 
-<xuzhuoxi@gmail.com> or <mailxuzhuoxi@163.com>
+English | [简体中文](./README_zh-CN.md)
 
-## License
-"infra-go" source code is available under the MIT [License](/LICENSE).
+## Features
++ **Core dependencies**: mainly depend on go standard library and golang.org/x extension library.  
++ **Business dependency**: Functions with business nature may depend on third-party libraries, for example: reading yaml configuration, using quic communication, etc.  
++ **Coupling degree**: The coupling degree of core dependencies related packages is average, and the coupling degree of business-related packages is low.  
++ **Reusable**  
++ **Extensible**  
 
-# Package Description
+## Installation
+1. It is required to use go1.16 to have the above version.  
+2. `go get github.com/xuzhuoxi/infra-go`  
 
+## Usage
++ infra-go is organized in a package structure, and it can be used immediately after importing.  
++ For example: using the TCP server function  
+```go
+import "github.com/xuzhuoxi/infra-go/netx/tcpx"
+```
+
+## Example
+```go
+
+```
+
+## Documentation
 <details>
 <summary>Expand view</summary>
 <pre><code>.
@@ -51,40 +78,11 @@ xuzhuoxi
 ├── stringx: A set of functions for string.
 ├── timex: A set of functions for timer
 </code></pre>
-</details>
+</details>  
 
-<details>
-<summary>展开代码说明(中文)</summary>
-<pre><code>.
-├── alg: 通用算法
-│   ├── astar: 一个支持二维与三维的A星寻路算法
-├── binaryx: 二进制数据的序列化与反序列化
-├── bytex: 字节切片及缓存的序列化与反序列化
-├── cmdx: 控制台命令行监听，解释与处理
-├── cryptox: 加解密
-├── encodingx: 编码与解码
-│   ├── gobx: Gob编码与解码
-│   ├── jsonx: Json编码与解码
-├── graphicx: 图像处理库，图像色彩相关功能
-│   ├── blendx: 混合模式支持
-├── imagex: 图片处理库，包含各种图片格式的加载保存处理等功能
-│   ├── formatx: 图片格式支持
-│   │   ├── jpegx: jpg,jpeg,jps支持
-│   │   ├── pngx: png支持
-│   ├── resizex: 缩放支持
-├── errorsx: 错误异常
-├── eventx: 一个简单的事件处理模块
-├── extendx: 通用扩展模块
-│   ├── protox: 通用协议扩展模块
-├── lang: 一些通用常用的功能函数
-│   ├── listx: 列表，包含数据实现和链表实现
-├── logx:  日志模块
-├── mathx: 数学函数集
-├── netx:  网络库，包含http,rpc,quic,tcp,udp,websocket等实现，同步支持服务端与客户端
-├── osxu:  操作系统级的常用函数
-├── regexpx: 常用正则表达式
-├── slicex: 关于基本类型切片的常用函数
-├── stringx: 关于字符串处理的常用函数
-├── timex: 关于计时器的常用函数
-</code></pre>
-</details>
+## Contact
+xuzhuoxi   
+<xuzhuoxi@gmail.com> or <mailxuzhuoxi@163.com>  
+
+## License
+"infra-go" source code is available under the MIT [License](/LICENSE).

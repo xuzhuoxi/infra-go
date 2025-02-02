@@ -1,0 +1,7 @@
+# go项目
+language: go
+# go版本
+go:
+  - "1.16"
+  - "1.18"
+install: true
