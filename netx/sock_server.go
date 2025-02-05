@@ -69,6 +69,22 @@ type IServerConn interface {
 	CloseConn() error
 }
 
+// ISockServer Socket连接服务器
+//
+// 一般结构如下：/n
+//
+//  ISocketServer
+//   ∟  map[address:IServerConn]
+//  	每接收到一个新连接，创建一个IServerConn
+// 		udp兼容了接口，但实际上只有一个IServerConn
+//  IServerConn
+//   ∟  ISockConn
+//   ∟  IPackSendReceiver
+//        ∟  IConnReadWriterAdapter
+//             ∟  Writer
+//             ∟  Reader
+//        ∟  IPackHandlerContainer
+//             ∟ - FuncPackHandler (数据包响应函数)
 type ISockServer interface {
 	ISockName
 	IServer
