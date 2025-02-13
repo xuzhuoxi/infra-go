@@ -1,6 +1,7 @@
-package netx
+package httpx
 
 import (
+	"github.com/xuzhuoxi/infra-go/netx"
 	"net/http"
 	"time"
 )
@@ -47,7 +48,7 @@ func (s *HttpServer) StartServer(addr string) error {
 		s.ServeMux = http.NewServeMux()
 	}
 	if nil != s.Server { //启动中
-		return ErrHttpServerStarted
+		return netx.ErrHttpServerStarted
 	}
 	s.Server = &http.Server{Addr: addr, Handler: s.ServeMux}
 	err := s.Server.ListenAndServe()

@@ -32,11 +32,11 @@ func newUDPServer() netx.ISockServer {
 }
 
 func newUDP4Server() netx.ISockServer {
-	return newUdpS("UDP4Server", netx.UDPNetwork4)
+	return newUdpS("UDP4Server", netx.UDP4Network)
 }
 
 func newUDP6Server() netx.ISockServer {
-	return newUdpS("UDP6Server", netx.UDPNetwork6)
+	return newUdpS("UDP6Server", netx.UDP6Network)
 }
 
 func newUdpS(name string, network netx.SockNetwork) netx.ISockServer {

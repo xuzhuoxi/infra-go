@@ -36,11 +36,11 @@ func newUDPDialClient() netx.ISockClient {
 }
 
 func newUDP4DialClient() netx.ISockClient {
-	return newUdpDC("UDP4DialClient", netx.UDPNetwork4)
+	return newUdpDC("UDP4DialClient", netx.UDP4Network)
 }
 
 func newUDP6DialClient() netx.ISockClient {
-	return newUdpDC("UDP6DialClient", netx.UDPNetwork6)
+	return newUdpDC("UDP6DialClient", netx.UDP6Network)
 }
 
 func newUDPListenClient() netx.ISockClient {
@@ -48,11 +48,11 @@ func newUDPListenClient() netx.ISockClient {
 }
 
 func newUDP4ListenClient() netx.ISockClient {
-	return newUdpLC("UDP4ListenClient", netx.UDPNetwork4)
+	return newUdpLC("UDP4ListenClient", netx.UDP4Network)
 }
 
 func newUDP6ListenClient() netx.ISockClient {
-	return newUdpLC("UDP6ListenClient", netx.UDPNetwork6)
+	return newUdpLC("UDP6ListenClient", netx.UDP6Network)
 }
 
 func newUdpDC(name string, network netx.SockNetwork) netx.ISockClient {

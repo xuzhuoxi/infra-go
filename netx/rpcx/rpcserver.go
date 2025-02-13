@@ -1,27 +1,37 @@
-package netx
+package rpcx
 
 import (
 	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 	"net"
 	"net/rpc"
 )
 
 const (
-	RpcNetworkTCP  = "tcp"
-	RpcNetworkHttp = "http"
+	TCP  = netx.TcpNetwork
+	TCP4 = netx.Tcp4Network
+	TCP6 = netx.Tcp6Network
+	UDP  = netx.UDPNetwork
 )
 
 func NewRPCServer() IRPCServer {
-	rs := &RPCServer{Network: "tcp", Server: rpc.NewServer()}
+	return NewRPCServerWithNetwork(TCP.String())
+}
+func NewRPCServerWithNetwork(network string) IRPCServer {
+	rs := &RPCServer{Network: network, Server: rpc.NewServer()}
 	return rs
 }
 
 type IRPCServer interface {
 	// Register
 	// publishes in the server the set of methods of the receiver value that satisfy the following conditions:
+	// 参数格式：
+	//   rcvr: new(Arith), Arith为结构体
 	Register(rcvr interface{}) error
 	// RegisterName
 	// is like Register but uses the provided name for the type instead of the receiver's concrete type.
+	// 参数格式：
+	//   rcvr: new(Arith), Arith为结构体
 	RegisterName(name string, rcvr interface{}) error
 	// StartServer
 	// 启动RPC服务,会阻塞
@@ -51,20 +61,16 @@ func (s *RPCServer) StartServer(addr string) {
 	if nil == s.Server {
 		return
 	}
-	l, newServerAddr := s.listenRPC(addr)
-	s.GetLogger().Info("[RPCServer] listening on:", newServerAddr)
+	l, e := net.Listen(s.Network, addr) // any available address
+	if e != nil {
+		s.GetLogger().Fatalln("\tnetx.Listen "+s.Network+" "+addr+": %v", e)
+		return
+	}
+	s.GetLogger().Info("[RPCServer] listening on:", l.Addr().String())
 	s.Listener = l
 	s.Server.Accept(l)
 }
 
 func (s *RPCServer) StopServer() {
 	s.Listener.Close()
-}
-
-func (s *RPCServer) listenRPC(address string) (net.Listener, string) {
-	l, e := net.Listen(s.Network, address) // any available address
-	if e != nil {
-		s.GetLogger().Fatalln("\tnetxu.Listen "+s.Network+" "+address+": %v", e)
-	}
-	return l, l.Addr().String()
 }

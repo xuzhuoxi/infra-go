@@ -25,11 +25,11 @@ func newTCPClient() netx.ISockClient {
 }
 
 func newTCP4Client() netx.ISockClient {
-	return newTcpC("TCP4Client", netx.TcpNetwork4)
+	return newTcpC("TCP4Client", netx.Tcp4Network)
 }
 
 func newTCP6Client() netx.ISockClient {
-	return newTcpC("TCP6Client", netx.TcpNetwork6)
+	return newTcpC("TCP6Client", netx.Tcp6Network)
 }
 
 func newTcpC(name string, network netx.SockNetwork) netx.ISockClient {

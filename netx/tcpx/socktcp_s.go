@@ -28,11 +28,11 @@ func newTCPServer() netx.ISockServer {
 }
 
 func newTCP4Server() netx.ISockServer {
-	return newTcpS("TCP4Server", netx.TcpNetwork4)
+	return newTcpS("TCP4Server", netx.Tcp4Network)
 }
 
 func newTCP6Server() netx.ISockServer {
-	return newTcpS("TCP6Server", netx.TcpNetwork6)
+	return newTcpS("TCP6Server", netx.Tcp6Network)
 }
 
 func newTcpS(name string, network netx.SockNetwork) netx.ISockServer {

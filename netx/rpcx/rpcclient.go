@@ -1,12 +1,16 @@
-package netx
+package rpcx
 
 import (
 	"errors"
 	"net/rpc"
 )
 
-func NewRPCClient(Network string) IRPCClient {
-	return &RPCClient{Network: Network}
+func NewRPCClient() IRPCClient {
+	return NewRPCClientWithNetwork(TCP.String())
+}
+
+func NewRPCClientWithNetwork(network string) IRPCClient {
+	return &RPCClient{Network: network}
 }
 
 type IRPCClient interface {
@@ -18,6 +22,10 @@ type IRPCClient interface {
 	IsConnected() bool
 	// Call
 	// 调用RPC服务
+	// args: 远程RPC服务方法参数
+	// reply: 远程RPC服务方法返回值, 必须为指针引用
+	// 返回值: 错误信息
+	// 错误信息: nil: 成功; 非nil: 失败
 	Call(serviceMethod string, args interface{}, reply interface{}) error
 	// Close
 	// 关闭远程RPC服务
