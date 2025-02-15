@@ -38,7 +38,7 @@ type QUICServer struct {
 	logFuncNameSend string
 
 	listener quic.Listener
-	mapConn  map[string]netx.IServerConn
+	mapConn  map[string]netx.IServerConn // [connId:netx.IServerConn]
 }
 
 func (s *QUICServer) StartServer(params netx.SockParams) error {
@@ -68,7 +68,7 @@ func (s *QUICServer) StartServer(params netx.SockParams) error {
 		if !s.Running || nil != err {
 			return err
 		}
-		go s.handlerSession(session.RemoteAddr().String(), session)
+		go s.handlerSession(session)
 	}
 	return nil
 }
@@ -107,41 +107,41 @@ func (s *QUICServer) Connections() int {
 	return len(s.mapConn)
 }
 
-func (s *QUICServer) CloseConnection(address string) (err error, ok bool) {
+func (s *QUICServer) CloseConnection(connId string) (err error, ok bool) {
 	s.ServerMu.Lock()
 	defer s.ServerMu.Unlock()
-	if conn, ok := s.mapConn[address]; ok {
-		delete(s.mapConn, address)
+	if conn, ok := s.mapConn[connId]; ok {
+		delete(s.mapConn, connId)
 		err = conn.CloseConn()
 		return err, nil != err
 	}
-	return errors.New("QUICServer: No Connection At " + address), false
+	return errors.New("QUICServer: No Connection At " + connId), false
 }
 
-func (s *QUICServer) FindConnection(address string) (conn netx.IServerConn, ok bool) {
+func (s *QUICServer) FindConnection(connId string) (conn netx.IServerConn, ok bool) {
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
-	conn, ok = s.mapConn[address]
+	conn, ok = s.mapConn[connId]
 	return
 }
 
-func (s *QUICServer) SendPackTo(pack []byte, rAddress ...string) error {
+func (s *QUICServer) SendPackTo(pack []byte, connId ...string) error {
 	bytes := QuicDataBlockHandler.DataToBlock(pack)
-	return s.SendBytesTo(bytes, rAddress...)
+	return s.SendBytesTo(bytes, connId...)
 }
 
-func (s *QUICServer) SendBytesTo(data []byte, rAddress ...string) error {
+func (s *QUICServer) SendBytesTo(data []byte, connId ...string) error {
 	funcName := s.logFuncNameSend
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
 	if !s.Running || nil == s.mapConn {
 		return netx.ConnNilError(funcName)
 	}
-	if 0 == len(rAddress) {
+	if 0 == len(connId) {
 		return netx.NoAddrError(funcName)
 	}
-	for _, address := range rAddress {
-		ts, ok := s.mapConn[address]
+	for _, cId := range connId {
+		ts, ok := s.mapConn[cId]
 		if ok {
 			ts.SendBytes(data)
 		}
@@ -149,16 +149,19 @@ func (s *QUICServer) SendBytesTo(data []byte, rAddress ...string) error {
 	return nil
 }
 
-func (s *QUICServer) handlerSession(address string, session quic.Session) {
-	stream, proxy := s.startConn(address, session)
+func (s *QUICServer) handlerSession(session quic.Session) {
+	localAddress := session.LocalAddr().String()
+	remoteAddress := session.RemoteAddr().String()
+	connInfo := netx.NewConnInfo(localAddress, remoteAddress)
+	stream, proxy := s.startConn(connInfo, session)
 	if nil == stream || nil == proxy {
 		return
 	}
 	proxy.StartReceiving() // 这里会阻塞
-	s.endConn(address, session, stream)
+	s.endConn(connInfo, session, stream)
 }
 
-func (s *QUICServer) startConn(address string, session quic.Session) (stream quic.Stream, proxy netx.IPackSendReceiver) {
+func (s *QUICServer) startConn(connInfo netx.IConnInfo, session quic.Session) (stream quic.Stream, proxy netx.IPackSendReceiver) {
 	s.ServerMu.Lock()
 	stream1, err := session.AcceptStream()
 	if nil != err {
@@ -166,19 +169,19 @@ func (s *QUICServer) startConn(address string, session quic.Session) (stream qui
 		s.Logger.Warnln("[QUICServer.startConn]", err)
 		return
 	}
-	connProxy := &QUICStreamAdapter{Reader: stream1, Writer: stream1, RemoteAddr: session.RemoteAddr()}
-	proxy = netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, QuicDataBlockHandler, s.Logger, false)
-	s.mapConn[address] = &QuicSockConn{Address: address, Session: session, Stream: stream1, SRProxy: proxy}
+	connProxy := &QUICStreamAdapter{Reader: stream1, Writer: stream1, remoteAddress: connInfo.GetRemoteAddress()}
+	proxy = netx.NewPackSendReceiver(connInfo, connProxy, connProxy, s.PackHandlerContainer, QuicDataBlockHandler, s.Logger, false)
+	s.mapConn[connInfo.GetConnId()] = &QuicSockConn{QuicConnInfo: connInfo, Session: session, Stream: stream1, SRProxy: proxy}
 	s.ServerMu.Unlock()
 
-	s.DispatchServerConnOpenEvent(s, address)
-	s.Logger.Infoln("[QUICServer.startConn] Quic Connection:", address, "Opened!")
+	s.DispatchServerConnOpenEvent(s, connInfo)
+	s.Logger.Infoln("[QUICServer.startConn] Quic Connection:", connInfo, "Opened!")
 	return stream1, proxy
 }
 
-func (s *QUICServer) endConn(address string, session quic.Session, stream quic.Stream) {
+func (s *QUICServer) endConn(connInfo netx.IConnInfo, session quic.Session, stream quic.Stream) {
 	s.ServerMu.Lock()
-	delete(s.mapConn, address)
+	delete(s.mapConn, connInfo.GetConnId())
 	s.ServerMu.Unlock()
 	if nil != stream {
 		stream.Close()
@@ -186,10 +189,10 @@ func (s *QUICServer) endConn(address string, session quic.Session, stream quic.S
 	if nil != session {
 		session.Close()
 	}
-	s.DispatchServerConnCloseEvent(s, address)
-	s.Logger.Infoln("[QUICServer.endConn] Quic Connection:", address, "Closed!")
+	s.DispatchServerConnCloseEvent(s, connInfo)
+	s.Logger.Infoln("[QUICServer.endConn] Quic Connection:", connInfo, "Closed!")
 }
 
-func listenQuic(address string) (quic.Listener, error) {
-	return quic.ListenAddr(address, generateTLSConfig(), nil)
+func listenQuic(localAddress string) (quic.Listener, error) {
+	return quic.ListenAddr(localAddress, generateTLSConfig(), nil)
 }

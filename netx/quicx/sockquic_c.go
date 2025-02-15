@@ -54,8 +54,9 @@ func (c *QUICClient) OpenClient(params netx.SockParams) error {
 		return err2
 	}
 	c.stream = stream
-	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, RemoteAddr: session.RemoteAddr()}
-	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, c.Logger, false)
+	connInfo := netx.NewRemoteOnlyConnInfo(session.LocalAddr().String(), session.RemoteAddr().String())
+	connProxy := &QUICStreamAdapter{Reader: stream, Writer: stream, remoteAddress: session.RemoteAddr().String()}
+	c.PackProxy = netx.NewPackSendReceiver(connInfo, connProxy, connProxy, c.PackHandler, QuicDataBlockHandler, c.Logger, false)
 	c.Opening = true
 	c.Logger.Infoln(funcName, "()")
 	return nil

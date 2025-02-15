@@ -1,6 +1,7 @@
 package netx
 
 import (
+	"io"
 	"net"
 )
 
@@ -35,9 +36,7 @@ type ISockName interface {
 // 这个是裁剪接口，函数签名不能改
 // 针对net.Conn、quic.Session、*net.UDPConn、*websocket.Conn
 type ISockConn interface {
-	// Close
-	// 关闭
-	Close() error
+	io.Closer
 	// LocalAddr
 	// 本地连接地址
 	LocalAddr() net.Addr
@@ -49,10 +48,10 @@ type ISockConn interface {
 type ISockSender interface {
 	// SendBytesTo
 	// 发送二进制数据, 不会重新打包
-	SendBytesTo(bytes []byte, rAddress ...string) error
+	SendBytesTo(bytes []byte, connId ...string) error
 	// SendPackTo
 	// 发送二进制消息包(把数据打包，补充长度信息)
-	SendPackTo(data []byte, rAddress ...string) error
+	SendPackTo(data []byte, connId ...string) error
 }
 
 type ISockSenderSetter interface {

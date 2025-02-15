@@ -48,10 +48,10 @@ type IServerConnSet interface {
 	Connections() int
 	// CloseConnection
 	// 关闭指定连接
-	CloseConnection(address string) (err error, ok bool)
+	CloseConnection(connId string) (err error, ok bool)
 	// FindConnection
 	// 查找连接
-	FindConnection(address string) (conn IServerConn, ok bool)
+	FindConnection(connInd string) (conn IServerConn, ok bool)
 }
 
 type IServerConn interface {
@@ -155,10 +155,10 @@ func (s *SockServerBase) DispatchServerStoppedEvent(dispatcher eventx.IEventDisp
 	dispatcher.DispatchEvent(ServerEventStop, dispatcher, nil)
 }
 
-func (s *SockServerBase) DispatchServerConnOpenEvent(dispatcher eventx.IEventDispatcher, address string) {
-	dispatcher.DispatchEvent(ServerEventConnOpened, dispatcher, address)
+func (s *SockServerBase) DispatchServerConnOpenEvent(dispatcher eventx.IEventDispatcher, connInfo IConnInfo) {
+	dispatcher.DispatchEvent(ServerEventConnOpened, dispatcher, connInfo)
 }
 
-func (s *SockServerBase) DispatchServerConnCloseEvent(dispatcher eventx.IEventDispatcher, address string) {
-	dispatcher.DispatchEvent(ServerEventConnClosed, dispatcher, address)
+func (s *SockServerBase) DispatchServerConnCloseEvent(dispatcher eventx.IEventDispatcher, connInfo IConnInfo) {
+	dispatcher.DispatchEvent(ServerEventConnClosed, dispatcher, connInfo)
 }

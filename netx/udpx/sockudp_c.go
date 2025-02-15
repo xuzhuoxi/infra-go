@@ -102,8 +102,9 @@ func (c *UDPDialClient) OpenClient(params netx.SockParams) error {
 		return cErr
 	}
 	c.Conn = conn
-	connProxy := &netx.ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, false)
+	connAdapter := &netx.ConnReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()} // 由于这里是客户端，因此是对服务器的一对一连接，不需要使用 UDPConnAdapter
+	connInfo := netx.NewRemoteOnlyConnInfo(conn.LocalAddr().String(), conn.RemoteAddr().String())
+	c.PackProxy = netx.NewPackSendReceiver(connInfo, connAdapter, connAdapter, c.PackHandler, UdpDataBlockHandler, c.Logger, false)
 	c.Opening = true
 	c.Logger.Infoln(funcName, "()")
 	return nil
@@ -149,7 +150,8 @@ func (c *UDPListenClient) OpenClient(params netx.SockParams) error {
 	}
 	c.Conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
-	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, true)
+	connInfo := netx.NewRemoteOnlyConnInfo(conn.LocalAddr().String(), conn.RemoteAddr().String())
+	c.PackProxy = netx.NewPackSendReceiver(connInfo, connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, true)
 	c.Opening = true
 	c.Logger.Infoln(funcName, "()")
 	return nil

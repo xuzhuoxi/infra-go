@@ -12,27 +12,14 @@ import (
 var errProxyNil = errors.New("QuicConn.SRProxy is ni")
 
 type QuicSockConn struct {
-	Address string
-	SRProxy netx.IPackSendReceiver
-	Session quic.Session
-	Stream  quic.Stream
-}
-
-func (o *QuicSockConn) CloseConn() error {
-	err1 := o.SRProxy.StopReceiving()
-	err2 := o.Stream.Close()
-	err3 := o.Session.Close()
-	if nil != err1 {
-		return err1
-	}
-	if nil != err2 {
-		return err2
-	}
-	return err3
+	QuicConnInfo netx.IConnInfo
+	SRProxy      netx.IPackSendReceiver
+	Session      quic.Session
+	Stream       quic.Stream
 }
 
 func (o *QuicSockConn) ClientAddress() string {
-	return o.Address
+	return o.QuicConnInfo.GetRemoteAddress()
 }
 
 func (o *QuicSockConn) SendBytes(bytes []byte) error {
@@ -49,4 +36,17 @@ func (o *QuicSockConn) SendPack(data []byte) error {
 	}
 	_, err := o.SRProxy.SendPack(data)
 	return err
+}
+
+func (o *QuicSockConn) CloseConn() error {
+	err1 := o.SRProxy.StopReceiving()
+	err2 := o.Stream.Close()
+	err3 := o.Session.Close()
+	if nil != err1 {
+		return err1
+	}
+	if nil != err2 {
+		return err2
+	}
+	return err3
 }

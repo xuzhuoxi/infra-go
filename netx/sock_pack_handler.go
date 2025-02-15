@@ -19,12 +19,12 @@ import (
 // @param senderAddress: 发送者连接地址
 // @param other: 其它信息
 // @return catch; 当前是否已经把消息处理
-type FuncPackHandler func(data []byte, senderAddress string, other interface{}) (catch bool)
+type FuncPackHandler func(data []byte, connInfo IConnInfo, other interface{}) (catch bool)
 
 //--------------------------
 
-func DefaultPackHandler(data []byte, senderAddress string, other interface{}) bool {
-	logx.Traceln(fmt.Sprintf("DefaultMessageHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, data, other))
+func DefaultPackHandler(data []byte, connInfo IConnInfo, other interface{}) bool {
+	logx.Traceln(fmt.Sprintf("DefaultMessageHandler{Conn=%s,Data=%s,Other=%s]}", connInfo, data, other))
 	return true
 }
 

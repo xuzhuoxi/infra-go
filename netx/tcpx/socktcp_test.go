@@ -12,11 +12,11 @@ import (
 func TestTCPServer(t *testing.T) {
 	server := NewTCPServer()
 	server.SetMaxConn(200)
-	var packHandler = func(data []byte, senderAddress string, other interface{}) bool {
-		logx.Traceln(fmt.Sprintf("TestTCPServer.packHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, fmt.Sprint(data), fmt.Sprint(other)))
+	var packHandler = func(data []byte, connInfo netx.IConnInfo, other interface{}) bool {
+		logx.Traceln(fmt.Sprintf("TestTCPServer.packHandler{Conn=%s,Data=%s,Other=%s]}", connInfo, fmt.Sprint(data), fmt.Sprint(other)))
 		rs := []byte{byte(len(data))}
 		rs = append(rs, data...)
-		server.SendPackTo(rs, senderAddress)
+		server.SendPackTo(rs, connInfo.GetConnId())
 		return true
 	}
 	server.GetPackHandlerContainer().SetPackHandlers([]netx.FuncPackHandler{packHandler})

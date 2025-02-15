@@ -12,28 +12,13 @@ import (
 var errProxyNil = errors.New("WsConn.SRProxy is ni")
 
 type WsSockConn struct {
-	Address string
-	SRProxy netx.IPackSendReceiver
-	Conn    *websocket.Conn
-}
-
-func (o *WsSockConn) CloseConn() error {
-	var err1 error
-	var err2 error
-	if nil != o.SRProxy {
-		err1 = o.SRProxy.StopReceiving()
-	}
-	if nil != o.Conn {
-		err2 = o.Conn.Close()
-	}
-	if nil != err1 {
-		return err1
-	}
-	return err2
+	WsConnInfo netx.IConnInfo
+	SRProxy    netx.IPackSendReceiver
+	Conn       *websocket.Conn
 }
 
 func (o *WsSockConn) ClientAddress() string {
-	return o.Address
+	return o.WsConnInfo.GetRemoteAddress()
 }
 
 func (o *WsSockConn) SendBytes(bytes []byte) error {
@@ -50,4 +35,19 @@ func (o *WsSockConn) SendPack(data []byte) error {
 	}
 	_, err := o.SRProxy.SendPack(data)
 	return err
+}
+
+func (o *WsSockConn) CloseConn() error {
+	var err1 error
+	var err2 error
+	if nil != o.SRProxy {
+		err1 = o.SRProxy.StopReceiving()
+	}
+	if nil != o.Conn {
+		err2 = o.Conn.Close()
+	}
+	if nil != err1 {
+		return err1
+	}
+	return err2
 }

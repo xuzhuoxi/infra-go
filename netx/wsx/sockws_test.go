@@ -13,11 +13,11 @@ import (
 func TestWSServer(t *testing.T) {
 	server := NewWebSocketServer()
 	server.SetMaxConn(5)
-	var packHandler = func(data []byte, senderAddress string, other interface{}) bool {
-		logx.Traceln(fmt.Sprintf("TestWSServer.packHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, fmt.Sprint(data), fmt.Sprint(other)))
+	var packHandler = func(data []byte, connInfo netx.IConnInfo, other interface{}) bool {
+		logx.Traceln(fmt.Sprintf("TestWSServer.packHandler{Conn=%s,Data=%s,Other=%s]}", connInfo, fmt.Sprint(data), fmt.Sprint(other)))
 		rs := []byte{byte(len(data))}
 		rs = append(rs, data...)
-		server.SendPackTo(rs, senderAddress)
+		server.SendPackTo(rs, connInfo.GetConnId())
 		return true
 	}
 	server.GetPackHandlerContainer().SetPackHandlers([]netx.FuncPackHandler{packHandler})

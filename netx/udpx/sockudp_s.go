@@ -87,7 +87,8 @@ func (s *UDPServer) StartServer(params netx.SockParams) error {
 	s.Running = true
 	s.conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
-	s.messageProxy = netx.NewPackSendReceiver(connProxy, connProxy, s.PackHandlerContainer, UdpDataBlockHandler, s.Logger, true)
+	connInfo := netx.NewRemoteMuiltConnInfo(conn.LocalAddr().String(), "")
+	s.messageProxy = netx.NewPackSendReceiver(connInfo, connProxy, connProxy, s.PackHandlerContainer, UdpDataBlockHandler, s.Logger, true)
 	s.serverMu.Unlock()
 	s.Logger.Infoln(funcName, "()")
 	s.DispatchServerStartedEvent(s)
@@ -122,34 +123,41 @@ func (s *UDPServer) Connections() int {
 	return 0
 }
 
-func (s *UDPServer) CloseConnection(address string) (err error, ok bool) {
+func (s *UDPServer) CloseConnection(connId string) (err error, ok bool) {
 	return nil, false
 }
 
-func (s *UDPServer) FindConnection(address string) (conn netx.IServerConn, ok bool) {
-	return &UdpSockConn{Address: address, SRProxy: s.messageProxy}, true
+// FindConnection
+// connId: RemoteAddress
+func (s *UDPServer) FindConnection(connId string) (conn netx.IServerConn, ok bool) {
+	// Udp没有实际连接，也不保证NAT端口利用情况下的数据准确性，因此使用远程地址作为连接id
+	return &UdpSockConn{ConnId: connId, RemoteAddress: connId, SRProxy: s.messageProxy}, true
 }
 
-func (s *UDPServer) SendPackTo(pack []byte, rAddress ...string) error {
+// SendPackTo
+// connId : Use RemoteAddress
+func (s *UDPServer) SendPackTo(pack []byte, connId ...string) error {
 	bytes := UdpDataBlockHandler.DataToBlock(pack)
-	return s.SendBytesTo(bytes, rAddress...)
+	return s.SendBytesTo(bytes, connId...)
 }
 
-func (s *UDPServer) SendBytesTo(bytes []byte, rAddress ...string) error {
+// SendBytesTo
+// connId : Use RemoteAddress
+func (s *UDPServer) SendBytesTo(bytes []byte, connId ...string) error {
 	funcName := s.logFuncNameSend
 	s.serverMu.RLock()
 	defer s.serverMu.RUnlock()
 	if !s.Running || s.messageProxy == nil || s.conn == nil {
 		return netx.ConnNilError(funcName)
 	}
-	if len(rAddress) == 0 {
+	if len(connId) == 0 {
 		return netx.NoAddrError(funcName)
 	}
-	_, err := s.messageProxy.SendBytes(bytes, rAddress...)
+	_, err := s.messageProxy.SendBytes(bytes, connId...)
 	return err
 }
 
-func listenUDP(network string, address string) (*net.UDPConn, error) {
-	udpAddr, _ := GetUDPAddr(network, address)
+func listenUDP(network string, localAddress string) (*net.UDPConn, error) {
+	udpAddr, _ := GetUDPAddr(network, localAddress)
 	return net.ListenUDP(network, udpAddr)
 }

@@ -63,8 +63,9 @@ func (c *TCPClient) OpenClient(params netx.SockParams) error {
 		return err
 	}
 	c.Conn = conn
-	connProxy := &netx.ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, c.Logger, false)
+	connInfo := netx.NewRemoteOnlyConnInfo(conn.LocalAddr().String(), conn.RemoteAddr().String())
+	connProxy := &netx.ConnReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	c.PackProxy = netx.NewPackSendReceiver(connInfo, connProxy, connProxy, c.PackHandler, TcpDataBlockHandler, c.Logger, false)
 	c.Opening = true
 	c.Logger.Infoln(funcName, "()")
 	return nil

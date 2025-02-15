@@ -42,8 +42,9 @@ func (c *WebSocketClient) OpenClient(params netx.SockParams) error {
 		return err
 	}
 	c.Conn = conn //LocalAddr=Origin
-	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddrString: params.RemoteAddress}
-	c.PackProxy = netx.NewPackSendReceiver(connProxy, connProxy, c.PackHandler, WsDataBlockHandler, c.Logger, false)
+	connProxy := &WSConnAdapter{Reader: conn, Writer: conn, remoteAddress: params.RemoteAddress}
+	connInfo := netx.NewRemoteOnlyConnInfo(conn.LocalAddr().String(), conn.RemoteAddr().String())
+	c.PackProxy = netx.NewPackSendReceiver(connInfo, connProxy, connProxy, c.PackHandler, WsDataBlockHandler, c.Logger, false)
 	c.Opening = true
 	c.Logger.Infoln(funcName, "()")
 	return nil

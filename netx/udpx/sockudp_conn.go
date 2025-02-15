@@ -11,23 +11,20 @@ import (
 var errProxyNil = errors.New("UdpConn.SRProxy is ni")
 
 type UdpSockConn struct {
-	Address string
-	SRProxy netx.IPackSendReceiver
-}
-
-func (o *UdpSockConn) CloseConn() error {
-	return nil
+	ConnId        string
+	RemoteAddress string
+	SRProxy       netx.IPackSendReceiver
 }
 
 func (o *UdpSockConn) ClientAddress() string {
-	return o.Address
+	return o.RemoteAddress
 }
 
 func (o *UdpSockConn) SendBytes(bytes []byte) error {
 	if nil == o.SRProxy {
 		return errProxyNil
 	}
-	_, err := o.SRProxy.SendBytes(bytes, o.Address)
+	_, err := o.SRProxy.SendBytes(bytes, o.ConnId)
 	return err
 }
 
@@ -35,6 +32,10 @@ func (o *UdpSockConn) SendPack(data []byte) error {
 	if nil == o.SRProxy {
 		return errProxyNil
 	}
-	_, err := o.SRProxy.SendPack(data, o.Address)
+	_, err := o.SRProxy.SendPack(data, o.ConnId)
 	return err
+}
+
+func (o *UdpSockConn) CloseConn() error {
+	return nil
 }

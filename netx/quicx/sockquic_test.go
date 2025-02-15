@@ -11,12 +11,12 @@ import (
 func TestQUICServer(t *testing.T) {
 	server := NewQuicServer()
 	c := 0
-	var packHandler = func(data []byte, senderAddress string, other interface{}) bool {
-		logx.Traceln(fmt.Sprintf("TestQUICServer.packHandler{Sender=%s,Data=%s,Other=%s]}", senderAddress, fmt.Sprint(data), fmt.Sprint(other)))
+	var packHandler = func(data []byte, connInfo netx.IConnInfo, other interface{}) bool {
+		logx.Traceln(fmt.Sprintf("TestQUICServer.packHandler{Conn=%s,Data=%s,Other=%s]}", connInfo, fmt.Sprint(data), fmt.Sprint(other)))
 		c++
 		rs := []byte{byte(len(data))}
 		rs = append(rs, data...)
-		server.SendPackTo(rs, senderAddress)
+		server.SendPackTo(rs, connInfo.GetConnId())
 		return true
 	}
 	server.GetPackHandlerContainer().SetPackHandlers([]netx.FuncPackHandler{packHandler})
@@ -39,7 +39,7 @@ func TestQUICServer(t *testing.T) {
 			//time.Sleep(1 * time.Second)
 		}
 	}()
-	time.Sleep(3 * time.Second)
+	time.Sleep(1 * time.Second)
 	b = false
 	client.CloseClient()
 	server.StopServer()

@@ -61,7 +61,7 @@ type TCPServer struct {
 	channelLimit lang.ChannelLimit
 	timeout      int
 	listener     *net.TCPListener
-	mapConn      map[string]netx.IServerConn
+	mapConn      map[string]netx.IServerConn // [connId:netx.IServerConn]
 }
 
 func (s *TCPServer) StartServer(params netx.SockParams) error {
@@ -98,8 +98,7 @@ func (s *TCPServer) StartServer(params netx.SockParams) error {
 		if nil != err { //Listener已经关闭
 			return err
 		}
-		rAddress := tcpConn.RemoteAddr().String()
-		go s.processTCPConn(rAddress, tcpConn)
+		go s.processTCPConn(tcpConn)
 	}
 	return nil
 }
@@ -139,41 +138,41 @@ func (s *TCPServer) Connections() int {
 	return len(s.mapConn)
 }
 
-func (s *TCPServer) CloseConnection(address string) (err error, ok bool) {
+func (s *TCPServer) CloseConnection(connId string) (err error, ok bool) {
 	s.ServerMu.Lock()
 	defer s.ServerMu.Unlock()
-	if conn, ok := s.mapConn[address]; ok {
-		delete(s.mapConn, address)
+	if conn, ok := s.mapConn[connId]; ok {
+		delete(s.mapConn, connId)
 		err = conn.CloseConn()
 		return err, nil != err
 	}
-	return errors.New("TCPServer: No Connection At " + address), false
+	return errors.New("TCPServer: No Connection At " + connId), false
 }
 
-func (s *TCPServer) FindConnection(address string) (conn netx.IServerConn, ok bool) {
+func (s *TCPServer) FindConnection(connId string) (conn netx.IServerConn, ok bool) {
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
-	conn, ok = s.mapConn[address]
+	conn, ok = s.mapConn[connId]
 	return
 }
 
-func (s *TCPServer) SendPackTo(pack []byte, rAddress ...string) error {
+func (s *TCPServer) SendPackTo(pack []byte, connId ...string) error {
 	bytes := TcpDataBlockHandler.DataToBlock(pack)
-	return s.SendBytesTo(bytes, rAddress...)
+	return s.SendBytesTo(bytes, connId...)
 }
 
-func (s *TCPServer) SendBytesTo(data []byte, rAddress ...string) error {
+func (s *TCPServer) SendBytesTo(data []byte, connId ...string) error {
 	funcName := s.logFuncNameSend
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
 	if !s.Running || nil == s.mapConn {
 		return netx.ConnNilError(funcName)
 	}
-	if 0 == len(rAddress) {
+	if 0 == len(connId) {
 		return netx.NoAddrError(funcName)
 	}
-	for _, address := range rAddress {
-		ts, ok := s.mapConn[address]
+	for _, cId := range connId {
+		ts, ok := s.mapConn[cId]
 		if ok {
 			ts.SendBytes(data)
 		}
@@ -183,39 +182,40 @@ func (s *TCPServer) SendBytesTo(data []byte, rAddress ...string) error {
 
 //private -----------------
 
-func (s *TCPServer) processTCPConn(address string, conn *net.TCPConn) {
-	proxy := s.startConn(address, conn)
+func (s *TCPServer) processTCPConn(conn *net.TCPConn) {
+	connInfo := netx.NewConnInfo(conn.LocalAddr().String(), conn.RemoteAddr().String())
+	proxy := s.startConn(connInfo, conn)
 	proxy.StartReceiving() // 这里会阻塞
-	s.endConn(address, conn)
+	s.endConn(connInfo, conn)
 }
 
-func (s *TCPServer) startConn(address string, conn *net.TCPConn) netx.IPackSendReceiver {
+func (s *TCPServer) startConn(connInfo netx.IConnInfo, conn *net.TCPConn) netx.IPackSendReceiver {
 	s.ServerMu.Lock()
-	rwProxy := &netx.ReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
-	proxy := netx.NewPackSendReceiver(rwProxy, rwProxy, s.PackHandlerContainer, TcpDataBlockHandler, s.Logger, false)
-	s.mapConn[address] = &TcpSockConn{Address: address, Conn: conn, SRProxy: proxy}
+	rwProxy := &netx.ConnReadWriterAdapter{Reader: conn, Writer: conn, RemoteAddr: conn.RemoteAddr()}
+	proxy := netx.NewPackSendReceiver(connInfo, rwProxy, rwProxy, s.PackHandlerContainer, TcpDataBlockHandler, s.Logger, false)
+	s.mapConn[connInfo.GetConnId()] = &TcpSockConn{TcpConnInfo: connInfo, Conn: conn, SRProxy: proxy}
 	s.ServerMu.Unlock()
 
-	s.DispatchServerConnOpenEvent(s, address)
-	s.Logger.Infoln("[TCPServer.startConn]", "TCP Connection:", address, "Opened!")
+	s.DispatchServerConnOpenEvent(s, connInfo)
+	s.Logger.Infoln("[TCPServer.startConn]", "TCP Connection:", connInfo, "Opened!")
 	return proxy
 }
 
-func (s *TCPServer) endConn(address string, conn *net.TCPConn) {
+func (s *TCPServer) endConn(connInfo netx.IConnInfo, conn *net.TCPConn) {
 	s.ServerMu.Lock()
 	// 删除连接
-	delete(s.mapConn, address)
+	delete(s.mapConn, connInfo.GetConnId())
 	s.ServerMu.Unlock()
 	if nil != conn {
 		conn.Close()
 	}
 	s.channelLimit.Done()
 	// 抛出事件
-	s.DispatchServerConnCloseEvent(s, address)
-	s.Logger.Infoln("[TCPServer.endConn]", "TCP Connection:", address, "Closed!")
+	s.DispatchServerConnCloseEvent(s, connInfo)
+	s.Logger.Infoln("[TCPServer.endConn]", "TCP Connection:", connInfo, "Closed!")
 }
 
-func listenTCP(network string, address string) (*net.TCPListener, error) {
-	tcpAddr, _ := GetTCPAddr(network, address)
+func listenTCP(network string, localAddress string) (*net.TCPListener, error) {
+	tcpAddr, _ := GetTCPAddr(network, localAddress)
 	return net.ListenTCP(network, tcpAddr)
 }
