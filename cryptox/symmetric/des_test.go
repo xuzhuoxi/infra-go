@@ -1,24 +1,27 @@
-// Package cryptox
-//Created by xuzhuoxi
-//on 2019-02-05.
-//@author xuzhuoxi
+// Package symcrypto
+// Created by xuzhuoxi
+// on 2019-02-05.
+// @author xuzhuoxi
 //
-package cryptox
+package symmetric
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"github.com/xuzhuoxi/infra-go/cryptox"
+	"github.com/xuzhuoxi/infra-go/slicex"
 	"testing"
 )
 
-type esTest struct {
+var desMode = []cryptox.BlockMode{cryptox.ECB, cryptox.CBC, cryptox.CTR}
+
+type desTest struct {
 	key []byte
 	in  []byte
 	out []byte
 }
 
-var encryptDESTests = []esTest{
+var encryptDESTests = []desTest{
 	{
 		[]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 		[]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -129,68 +132,50 @@ var encryptDESTests = []esTest{
 		[]byte{0x94, 0xc5, 0x35, 0xb2, 0xc5, 0x8b, 0x39, 0x72}},
 }
 
-func TestDESSimple(t *testing.T) {
-	key := [8]byte{0x73, 0x65, 0x63, 0x52, 0x33, 0x74, 0x24, 0x3b}
-	iv := [8]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	in := []byte{0x61, 0x20, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32}
-	out := []byte{0x37, 0x0d, 0xee, 0x2c, 0x1f, 0xb4, 0xf7, 0xa5}
-	fmt.Println(key, iv, in, string(in), hex.EncodeToString(in), base64.StdEncoding.EncodeToString(in), out)
-
-	tf := func(title string, mode DESMode, padding FuncPadding, unPadding FuncUnPadding) {
-		fmt.Println(title)
-		cipher := NewDESCipher(key, iv, mode, padding, unPadding)
-		out, err := cipher.Encrypt(in)
-		fmt.Println("加密：", out, hex.EncodeToString(out))
-		orig, err := cipher.Decrypt(out)
-		fmt.Println("解密：", orig, err)
-	}
-	tf("ECB", ECB, PKCS7Padding, PKCS7UnPadding)
-	tf("CBC", CBC, PKCS7Padding, PKCS7UnPadding)
+type desResult struct {
+	in         []byte
+	ciphertext []byte
+	plaintext  []byte
 }
 
-func Test3DESSimple(t *testing.T) {
-	key := [24]byte{0x73, 0x65, 0x63, 0x52, 0x33, 0x74, 0x24, 0x3b, 0x73, 0x65, 0x63, 0x52, 0x33, 0x74, 0x24, 0x3b, 0x73, 0x65, 0x63, 0x52, 0x33, 0x74, 0x24, 0x3b}
-	iv := [8]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	in := []byte{0x61, 0x20, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32}
-	out := []byte{0x37, 0x0d, 0xee, 0x2c, 0x1f, 0xb4, 0xf7, 0xa5}
-	fmt.Println(key, iv, in, string(in), hex.EncodeToString(in), base64.StdEncoding.EncodeToString(in), out)
-
-	tf := func(title string, mode DESMode, padding FuncPadding, unPadding FuncUnPadding) {
-		fmt.Println(title)
-		cipher := NewTripleDESCipher(key, iv, mode, padding, unPadding)
-		out, err := cipher.Encrypt(in)
-		fmt.Println("加密：", out, hex.EncodeToString(out))
-		orig, err := cipher.Decrypt(out)
-		fmt.Println("解密：", orig, err)
-	}
-	tf("ECB", ECB, PKCS7Padding, PKCS7UnPadding)
-	tf("CBC", CBC, PKCS7Padding, PKCS7UnPadding)
-}
-
-func TestAESSimple(t *testing.T) {
-	key := [16]byte{0x73, 0x65, 0x63, 0x52, 0x33, 0x74, 0x24, 0x3b, 0x73, 0x65, 0x63, 0x52, 0x33, 0x74, 0x24, 0x3b}
-	iv := [16]byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}
-	in := []byte{0x61, 0x20, 0x74, 0x65, 0x73, 0x74, 0x31, 0x32}
-	out := []byte{0x37, 0x0d, 0xee, 0x2c, 0x1f, 0xb4, 0xf7, 0xa5}
-	fmt.Println(key, iv, in, string(in), hex.EncodeToString(in), base64.StdEncoding.EncodeToString(in), out)
-
-	tf := func(title string, mode DESMode, padding FuncPadding, unPadding FuncUnPadding) {
-		fmt.Println(title)
-		cipher := NewAESCipher(key, iv, mode, padding, unPadding)
-		out, err := cipher.Encrypt(in)
-		fmt.Println("加密：", out, hex.EncodeToString(out))
-		orig, err := cipher.Decrypt(out)
-		fmt.Println("解密：", orig, err)
-	}
-	tf("ECB", ECB, PKCS7Padding, PKCS7UnPadding)
-	tf("CBC", CBC, PKCS7Padding, PKCS7UnPadding)
+func (o *desResult) String() string {
+	return fmt.Sprintf("In:{bs=%v, hex=%v}; Ciphertext:{hex=%v}; Plaintext:{bs=%v, hex=%v}",
+		o.in, hex.EncodeToString(o.in),
+		hex.EncodeToString(o.ciphertext),
+		o.plaintext, hex.EncodeToString(o.plaintext))
 }
 
 func TestDES(t *testing.T) {
+	for _, test := range encryptDESTests {
+		for _, m := range desMode {
+			cipher := NewDESCipher(test.key)
+			ciphertext, err1 := cipher.Encrypt(test.in, m)
+			plaintext, err2 := cipher.Decrypt(ciphertext, m)
+			compareDesCipherResult(t, string(m), &desResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
+		}
+		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
+	}
 }
-
-func TestAES(t *testing.T) {
-}
-
 func Test3DES(t *testing.T) {
+	for _, test := range encryptDESTests {
+		for _, m := range desMode {
+			cipher := NewDESCipher(append(test.key, test.key...))
+			ciphertext, err1 := cipher.Encrypt(test.in, m)
+			plaintext, err2 := cipher.Decrypt(ciphertext, m)
+			compareDesCipherResult(t, string(m), &desResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
+		}
+		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
+	}
+}
+
+func compareDesCipherResult(t *testing.T, title string, r *desResult, err1, err2 error) {
+	if err1 != nil || err2 != nil {
+		t.Fatal(title, r, err1, err2)
+		return
+	}
+	if !slicex.EqualUint8(r.in, r.plaintext) {
+		t.Fatal(title, r)
+		return
+	}
+	t.Log(title, r)
 }

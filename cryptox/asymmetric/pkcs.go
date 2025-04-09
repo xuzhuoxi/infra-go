@@ -1,9 +1,9 @@
-// Package cryptox
+// Package asymmetric
 // Created by xuzhuoxi
 // on 2019-02-05.
 // @author xuzhuoxi
 //
-package cryptox
+package asymmetric
 
 // PKCS#1：定义RSA公开密钥算法加密和签名机制，主要用于组织PKCS#7中所描述的数字签名和数字信封[22]。
 // PKCS#3：定义Diffie-Hellman密钥交换协议[23]。

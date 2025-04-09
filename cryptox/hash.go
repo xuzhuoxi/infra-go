@@ -5,36 +5,11 @@ import (
 	"crypto/md5"
 	"crypto/sha1"
 	"encoding/hex"
+	"errors"
 	"os"
 )
 
-//
-//type FuncHash func([]byte) []byte
-//
-//var (
-//	hashMap map[crypto.Hash]FuncHash
-//)
-
-func init() {
-	//hashMap = make(map[crypto.Hash]FuncHash)
-	//hashMap[crypto.MD5] = _md5
-	//hashMap[crypto.Sha1] = _sha1
-	//hashMap[crypto.SHA224] = _sha224
-	//hashMap[crypto.SHA256] = _sha256
-	//hashMap[crypto.SHA384] = _sha384
-	//hashMap[crypto.SHA512] = _sha512
-	//hashMap[crypto.SHA512_224] = _sha512_224
-	//hashMap[crypto.SHA512_256] = _sha512_256
-	//hashMap[crypto.RIPEMD160] = _ripemd160
-	//hashMap[crypto.SHA3_224] = _sha3_224
-	//hashMap[crypto.SHA3_256] = _sha3_256
-	//hashMap[crypto.SHA3_384] = _sha3_384
-	//hashMap[crypto.SHA3_512] = _sha3_512
-	//hashMap[crypto.BLAKE2s_256] = _blake2s_256
-	//hashMap[crypto.BLAKE2b_256] = _blake2b_256
-	//hashMap[crypto.BLAKE2b_384] = _blake2b_384
-	//hashMap[crypto.BLAKE2b_512] = _blake2b_512
-}
+var ErrUnsupportedHash = errors.New("unsupported hash")
 
 func Md5(data []byte) string {
 	return hex.EncodeToString(_md5(data))
@@ -112,65 +87,3 @@ func _sha1(data []byte) []byte {
 	arr := sha1.Sum(data)
 	return arr[:]
 }
-
-//func _sha224(data []byte) []byte {
-//	arr := sha256.Sum224(data)
-//	return arr[:]
-//}
-//func _sha256(data []byte) []byte {
-//	arr := sha256.Sum256(data)
-//	return arr[:]
-//}
-//func _sha384(data []byte) []byte {
-//	arr := sha512.Sum384(data)
-//	return arr[:]
-//}
-//func _sha512(data []byte) []byte {
-//	arr := sha512.Sum512(data)
-//	return arr[:]
-//}
-//func _sha512_224(data []byte) []byte {
-//	arr := sha512.Sum512_224(data)
-//	return arr[:]
-//}
-//func _sha512_256(data []byte) []byte {
-//	arr := sha512.Sum512_256(data)
-//	return arr[:]
-//}
-//func _ripemd160(data []byte) []byte {
-//	digest := ripemd160.New()
-//	digest.Write(data)
-//	return digest.Sum(nil)
-//}
-//func _sha3_224(data []byte) []byte {
-//	arr := sha3.Sum224(data)
-//	return arr[:]
-//}
-//func _sha3_256(data []byte) []byte {
-//	arr := sha3.Sum256(data)
-//	return arr[:]
-//}
-//func _sha3_384(data []byte) []byte {
-//	arr := sha3.Sum384(data)
-//	return arr[:]
-//}
-//func _sha3_512(data []byte) []byte {
-//	arr := sha3.Sum512(data)
-//	return arr[:]
-//}
-//func _blake2s_256(data []byte) []byte {
-//	arr := blake2s.Sum256(data)
-//	return arr[:]
-//}
-//func _blake2b_256(data []byte) []byte {
-//	arr := blake2b.Sum256(data)
-//	return arr[:]
-//}
-//func _blake2b_384(data []byte) []byte {
-//	arr := blake2b.Sum384(data)
-//	return arr[:]
-//}
-//func _blake2b_512(data []byte) []byte {
-//	arr := blake2b.Sum512(data)
-//	return arr[:]
-//}

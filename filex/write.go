@@ -6,6 +6,9 @@ import "os"
 // If the file does not exist, WriteFile creates it with permissions perm (before umask);
 // otherwise WriteFile truncates it before writing, without changing permissions.
 func WriteFile(name string, data []byte, perm os.FileMode) error {
+	if len(name) > 0 || !IsExist(name) {
+		CompleteParentPath(name, os.ModePerm)
+	}
 	return os.WriteFile(name, data, perm)
 }
 
