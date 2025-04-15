@@ -183,7 +183,7 @@ func testKeySign(private IRSAPrivateCipher, public IRSAPublicCipher, content []b
 	if nil != err {
 		t.Fatal(err)
 	}
-	b, err := public.VerySign(content, signed)
+	b, err := public.VerifySign(content, signed)
 	if nil != err {
 		t.Fatal(err)
 	}
@@ -196,7 +196,7 @@ func testKeySignHash(private IRSAPrivateCipher, public IRSAPublicCipher, content
 	if nil != err {
 		t.Fatal(err)
 	}
-	b, err := public.VerySignHash(content, signed, hash)
+	b, err := public.VerifySignHash(content, signed, hash)
 	if nil != err {
 		t.Fatal(hash, err)
 	}

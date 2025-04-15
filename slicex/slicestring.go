@@ -1,5 +1,7 @@
 package slicex
 
+import "strings"
+
 // MergeString
 // 合并
 func MergeString(slices ...[]string) []string {
@@ -142,15 +144,41 @@ func ContainsString(slice []string, target string) bool {
 	return ok
 }
 
+// ContainsCaseString
+// 包含
+// ignoreCase 是否忽略大小写
+func ContainsCaseString(slice []string, target string, ignoreCase bool) bool {
+	if !ignoreCase {
+		return ContainsString(slice, target)
+	}
+	_, ok := IndexCaseString(slice, target, true)
+	return ok
+}
+
 // IndexString
 // 从头部查找
 func IndexString(slice []string, target string) (int, bool) {
+	return IndexCaseString(slice, target, false)
+}
+
+// IndexCaseString
+// 从头部查找
+// ignoreCase 是否忽略大小写
+func IndexCaseString(slice []string, target string, ignoreCase bool) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
 	}
-	for index, value := range slice {
-		if value == target {
-			return index, true
+	if !ignoreCase {
+		for index, value := range slice {
+			if value == target {
+				return index, true
+			}
+		}
+	} else {
+		for index, value := range slice {
+			if strings.EqualFold(value, target) {
+				return index, true
+			}
 		}
 	}
 	return -1, false
@@ -159,12 +187,27 @@ func IndexString(slice []string, target string) (int, bool) {
 // LastIndexString
 // 从尾部查找
 func LastIndexString(slice []string, target string) (int, bool) {
+	return LastIndexCaseString(slice, target, false)
+}
+
+// LastIndexCaseString
+// 从尾部查找
+// ignoreCase 是否忽略大小写
+func LastIndexCaseString(slice []string, target string, ignoreCase bool) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
 	}
-	for index := len(slice) - 1; index >= 0; index-- {
-		if slice[index] == target {
-			return index, true
+	if !ignoreCase {
+		for index := len(slice) - 1; index >= 0; index-- {
+			if slice[index] == target {
+				return index, true
+			}
+		}
+	} else {
+		for index := len(slice) - 1; index >= 0; index-- {
+			if strings.EqualFold(slice[index], target) {
+				return index, true
+			}
 		}
 	}
 	return -1, false

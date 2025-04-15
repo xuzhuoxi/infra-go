@@ -1,6 +1,7 @@
 package filex
 
 import (
+	"github.com/xuzhuoxi/infra-go/osxu"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -19,6 +20,10 @@ const (
 	UnixSeparatorStr    = "/"  // Linux路径级分隔符
 	WindowsSeparator    = '\\' // Windows路径级分隔符
 	WindowsSeparatorStr = "\\" // Windows路径级分隔符
+)
+
+var (
+	RunningDir = osxu.GetRunningDir()
 )
 
 // IsRelativeFormat 检查路径是否为相对路径格式
@@ -101,8 +106,8 @@ func IsEmptyFolder(path string) bool {
 
 // CompleteParentPath 根据文件路径补全缺失父目录路径
 // filePath必须绝对路径
-func CompleteParentPath(filePathStr string, perm os.FileMode) error {
-	dstUpDir, err := GetUpDir(filePathStr)
+func CompleteParentPath(absPath string, perm os.FileMode) error {
+	dstUpDir, err := GetUpDir(absPath)
 	if nil != err {
 		return err
 	}
@@ -222,6 +227,39 @@ func GetPathsInDir(dir string, filter PathFilter) (paths []string, err error) {
 }
 
 //FilePath Func ------------------------------------
+
+// FixFilePath
+// 修复文件路径
+// 文件存在：则返回 传入路径
+// 文件不存在：则返回 运行时目录+传入路径
+func FixFilePath(filePath string) string {
+	if IsFile(filePath) {
+		return filePath
+	}
+	return Combine(RunningDir, filePath)
+}
+
+// FixDirPath
+// 修复目录路径
+// 目录存在：则返回 传入路径
+// 目录不存在：则返回 运行时目录+传入路径
+func FixDirPath(dirPath string) string {
+	if IsDir(dirPath) {
+		return dirPath
+	}
+	return Combine(RunningDir, dirPath)
+}
+
+// FixPath
+// 修复路径
+// 路径存在：则返回 传入路径
+// 路径不存在：则返回 运行时目录+传入路径
+func FixPath(path string) string {
+	if IsExist(path) {
+		return path
+	}
+	return Combine(RunningDir, path)
+}
 
 // Combine
 // 合并路径

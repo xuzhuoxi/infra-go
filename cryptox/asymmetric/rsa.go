@@ -29,14 +29,22 @@ type IRSAPrivateCipher interface {
 	Decrypt(ciphertext []byte) ([]byte, error)
 	// DecryptHybrid 混合解密
 	DecryptHybrid(encryptedKey []byte, ciphertext []byte) (plaintext []byte, err error)
-	// Sign 签名，使用sha256
+	// Sign 签名
+	// 使用sha256
 	Sign(origData []byte) ([]byte, error)
+	// SignBase64 签名
+	// 使用sha256
+	// 签名结果转化为Base64编码字符串
+	SignBase64(origData []byte, base64Encoding *base64.Encoding) (string, error)
 	// SignHash 指定Hash算法进行签名
 	// 注意：MD5SHA1不可用
 	// 各个Hash算法，可能要引用指定的包，详细请看crypto/crypto.go中的常量定义说明
 	SignHash(origData []byte, hash crypto.Hash) ([]byte, error)
-	// SignBase64 Base64编码签名
-	SignBase64(origData []byte, hash crypto.Hash) (string, error)
+	// SignHashBase64 指定Hash算法进行签名
+	// 注意：MD5SHA1不可用
+	// 各个Hash算法，可能要引用指定的包，详细请看crypto/crypto.go中的常量定义说明
+	// 签名结果转化为Base64编码字符串
+	SignHashBase64(origData []byte, hash crypto.Hash, base64Encoding *base64.Encoding) (string, error)
 }
 
 type IRSAPublicCipher interface {
@@ -45,14 +53,19 @@ type IRSAPublicCipher interface {
 	Encrypt(plaintext []byte) ([]byte, error)
 	// EncryptHybrid 混合加密
 	EncryptHybrid(plaintext []byte) (encryptedKey []byte, ciphertext []byte, err error)
-	// VerySign 验签，使用sha256
-	VerySign(origData, signedData []byte) (bool, error)
-	// VerySignHash 指定Hash算法验签
+	// VerifySign  验签，使用sha256
+	VerifySign(origData, signature []byte) (bool, error)
+	// VerifySignBase64 验签
+	// 使用sha256
+	// 签名数据为Base64编码字符串
+	VerifySignBase64(origData []byte, base64Signature string, base64Encoding *base64.Encoding) (bool, error)
+	// VerifySignHash 指定Hash算法验签
 	// 注意：MD5SHA1不可用
 	// 各个Hash算法，可能要引用指定的包，详细请看crypto/crypto.go中的常量定义说明
-	VerySignHash(origData, signedData []byte, hash crypto.Hash) (bool, error)
-	// VerifyBase64 Base64编译验签
-	VerifyBase64(origData []byte, signedBase64Data string, hash crypto.Hash) (bool, error)
+	VerifySignHash(origData, signature []byte, hash crypto.Hash) (bool, error)
+	// VerifySignHashBase64 验签
+	// 签名数据为Base64编码字符串
+	VerifySignHashBase64(origData []byte, base64Signature string, hash crypto.Hash, base64Encoding *base64.Encoding) (bool, error)
 }
 
 type IRSACipher interface {
@@ -148,6 +161,14 @@ func (o *rsaPrivateCipher) Sign(origData []byte) ([]byte, error) {
 	return rsa.SignPKCS1v15(rand.Reader, o.PriKey, crypto.SHA256, hashed[:])
 }
 
+func (o *rsaPrivateCipher) SignBase64(origData []byte, base64Encoding *base64.Encoding) (string, error) {
+	signature, err := o.Sign(origData)
+	if nil != err {
+		return "", err
+	}
+	return base64Encoding.EncodeToString(signature), nil
+}
+
 func (o *rsaPrivateCipher) SignHash(origData []byte, hash crypto.Hash) ([]byte, error) {
 	hashed := cryptox.Hash(hash, origData)
 	if nil == hashed {
@@ -156,12 +177,12 @@ func (o *rsaPrivateCipher) SignHash(origData []byte, hash crypto.Hash) ([]byte, 
 	return rsa.SignPKCS1v15(rand.Reader, o.PriKey, hash, hashed)
 }
 
-func (o *rsaPrivateCipher) SignBase64(origData []byte, hash crypto.Hash) (string, error) {
-	signed, err := o.SignHash(origData, hash)
+func (o *rsaPrivateCipher) SignHashBase64(origData []byte, hash crypto.Hash, base64Encoding *base64.Encoding) (string, error) {
+	signature, err := o.SignHash(origData, hash)
 	if nil != err {
 		return "", err
 	}
-	return base64.StdEncoding.EncodeToString(signed), nil
+	return base64Encoding.EncodeToString(signature), nil
 }
 
 func splitGroup(buf []byte, lim int) [][]byte {
@@ -243,27 +264,35 @@ func (o *rsaPublicCipher) EncryptHybrid(plaintext []byte) (encryptedKey []byte, 
 	return encryptedKey, ciphertext, nil
 }
 
-func (o *rsaPublicCipher) VerySign(origData, signedData []byte) (bool, error) {
+func (o *rsaPublicCipher) VerifySign(origData, signature []byte) (bool, error) {
 	hashed := sha256.Sum256(origData)
-	err := rsa.VerifyPKCS1v15(o.PubKey, crypto.SHA256, hashed[:], signedData)
+	err := rsa.VerifyPKCS1v15(o.PubKey, crypto.SHA256, hashed[:], signature)
 	return nil == err, err
 }
 
-func (o *rsaPublicCipher) VerySignHash(origData, signedData []byte, hash crypto.Hash) (bool, error) {
+func (o *rsaPublicCipher) VerifySignBase64(origData []byte, base64Signature string, base64Encoding *base64.Encoding) (bool, error) {
+	sig, err := base64Encoding.DecodeString(base64Signature)
+	if err != nil {
+		return false, err
+	}
+	return o.VerifySign(origData, sig)
+}
+
+func (o *rsaPublicCipher) VerifySignHash(origData, signature []byte, hash crypto.Hash) (bool, error) {
 	hashed := cryptox.Hash(hash, origData)
 	if nil == hashed {
 		return false, cryptox.ErrUnsupportedHash
 	}
-	err := rsa.VerifyPKCS1v15(o.PubKey, hash, hashed, signedData)
+	err := rsa.VerifyPKCS1v15(o.PubKey, hash, hashed, signature)
 	return nil == err, err
 }
 
-func (o *rsaPublicCipher) VerifyBase64(origData []byte, signedBase64Data string, hash crypto.Hash) (bool, error) {
-	sig, err := base64.StdEncoding.DecodeString(signedBase64Data)
+func (o *rsaPublicCipher) VerifySignHashBase64(origData []byte, base64Signature string, hash crypto.Hash, base64Encoding *base64.Encoding) (bool, error) {
+	sig, err := base64Encoding.DecodeString(base64Signature)
 	if err != nil {
 		return false, err
 	}
-	return o.VerySignHash(origData, sig, hash)
+	return o.VerifySignHash(origData, sig, hash)
 }
 
 // 生成Key ---------- ---------- ---------- ---------- ----------

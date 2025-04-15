@@ -18,6 +18,8 @@ import (
 //  1. 对称加密
 //  2. 一个SK扩展成多个子SK，多轮加密
 type IAESCipher interface {
+	// Key 获取密钥,只读
+	Key() []byte
 	// SetPaddingFunc 设置填充方式
 	SetPaddingFunc(padding cryptox.FuncPadding, unPadding cryptox.FuncUnPadding)
 	// Encrypt 指定BlockMode加密
@@ -39,7 +41,7 @@ type IAESCipher interface {
 }
 
 func NewAESCipher(key []byte) IAESCipher {
-	rs := &aesCipher{key: key}
+	rs := &aesCipher{key: key, keyStr: string(key)}
 	rs.block, rs.err = aes.NewCipher(key)
 	rs.padding, rs.unPadding = cryptox.PKCS7Padding, cryptox.PKCS7UnPadding
 	return rs
@@ -47,10 +49,15 @@ func NewAESCipher(key []byte) IAESCipher {
 
 type aesCipher struct {
 	key       []byte
+	keyStr    string
 	padding   cryptox.FuncPadding
 	unPadding cryptox.FuncUnPadding
 	block     cipher.Block
 	err       error
+}
+
+func (o *aesCipher) Key() []byte {
+	return []byte(o.keyStr)
 }
 
 func (o *aesCipher) SetPaddingFunc(padding cryptox.FuncPadding, unPadding cryptox.FuncUnPadding) {
@@ -125,12 +132,14 @@ func (o *aesCipher) EncryptCTR(plaintext []byte) ([]byte, error) {
 		return nil, err
 	}
 	stream := cipher.NewCTR(o.block, nonce)
+	//fmt.Println("EncryptCTR:", len(plaintext), plaintext)
 	ciphertext := make([]byte, len(plaintext))
 	stream.XORKeyStream(ciphertext, plaintext)
 	return append(nonce, ciphertext...), nil
 }
 
 func (o *aesCipher) DecryptCTR(ciphertext []byte) ([]byte, error) {
+	//fmt.Println("DecryptCTR:", len(ciphertext), ciphertext)
 	if len(ciphertext) < aes.BlockSize {
 		return nil, errors.New("ciphertext too short")
 	}

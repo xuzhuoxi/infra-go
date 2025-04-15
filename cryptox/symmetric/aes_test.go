@@ -145,6 +145,20 @@ func (o *aesResult) String() string {
 		o.plaintext, hex.EncodeToString(o.plaintext))
 }
 
+func TestSameKey(t *testing.T) {
+	key := []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
+		0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef}
+	cipher := NewAESCipher(key)
+	for _, test := range encryptAESTests {
+		for _, m := range aesMode {
+			ciphertext, err1 := cipher.Encrypt(test.in, m)
+			plaintext, err2 := cipher.Decrypt(ciphertext, m)
+			compareAesCipherResult(t, string(m), &aesResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
+		}
+		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
+	}
+}
+
 func TestAES16(t *testing.T) {
 	for _, test := range encryptAESTests {
 		for _, m := range aesMode {
