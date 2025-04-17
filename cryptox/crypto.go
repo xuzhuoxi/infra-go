@@ -5,3 +5,21 @@ package cryptox
 //
 // 加密方案二：
 // 直接使用非对称密钥加密数据
+
+// IEncryptCipher 加密处理器
+type IEncryptCipher interface {
+	// Encrypt 加密
+	Encrypt(plaintext []byte) ([]byte, error)
+}
+
+// IDecryptCipher 解密处理器
+type IDecryptCipher interface {
+	// Decrypt 解密
+	Decrypt(ciphertext []byte) ([]byte, error)
+}
+
+// ICipher 加密解密处理器
+type ICipher interface {
+	IEncryptCipher
+	IDecryptCipher
+}

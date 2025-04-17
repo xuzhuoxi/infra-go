@@ -149,8 +149,8 @@ func TestDES(t *testing.T) {
 	for _, test := range encryptDESTests {
 		for _, m := range desMode {
 			cipher := NewDESCipher(test.key)
-			ciphertext, err1 := cipher.Encrypt(test.in, m)
-			plaintext, err2 := cipher.Decrypt(ciphertext, m)
+			ciphertext, err1 := cipher.EncryptMode(test.in, m)
+			plaintext, err2 := cipher.DecryptMode(ciphertext, m)
 			compareDesCipherResult(t, string(m), &desResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
@@ -160,8 +160,8 @@ func Test3DES(t *testing.T) {
 	for _, test := range encryptDESTests {
 		for _, m := range desMode {
 			cipher := NewDESCipher(append(test.key, test.key...))
-			ciphertext, err1 := cipher.Encrypt(test.in, m)
-			plaintext, err2 := cipher.Decrypt(ciphertext, m)
+			ciphertext, err1 := cipher.EncryptMode(test.in, m)
+			plaintext, err2 := cipher.DecryptMode(ciphertext, m)
 			compareDesCipherResult(t, string(m), &desResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")

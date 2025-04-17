@@ -18,12 +18,13 @@ import (
 //  1. 对称加密
 //  2. 同一个SK
 type IDESCipher interface {
+	cryptox.ICipher
 	// SetPaddingFunc 设置填充方式
 	SetPaddingFunc(padding cryptox.FuncPadding, unPadding cryptox.FuncUnPadding)
-	// Encrypt 指定BlockMode加密
-	Encrypt(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error)
-	// Decrypt 指定BlockMode解密
-	Decrypt(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error)
+	// EncryptMode 指定BlockMode加密
+	EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error)
+	// DecryptMode 指定BlockMode解密
+	DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error)
 	// EncryptECB 使用ECB模式加密
 	EncryptECB(plaintext []byte) ([]byte, error)
 	// DecryptECB 使用ECB模式解密
@@ -68,7 +69,15 @@ func (o *desCipher) SetPaddingFunc(padding cryptox.FuncPadding, unPadding crypto
 	o.padding, o.unPadding = padding, unPadding
 }
 
-func (o *desCipher) Encrypt(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
+func (o *desCipher) Encrypt(plaintext []byte) ([]byte, error) {
+	return o.EncryptCBC(plaintext)
+}
+
+func (o *desCipher) Decrypt(ciphertext []byte) ([]byte, error) {
+	return o.DecryptCBC(ciphertext)
+}
+
+func (o *desCipher) EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
 	if nil != o.err {
 		return nil, o.err
 	}
@@ -84,7 +93,7 @@ func (o *desCipher) Encrypt(plaintext []byte, blockMode cryptox.BlockMode) ([]by
 	}
 }
 
-func (o *desCipher) Decrypt(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
+func (o *desCipher) DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
 	if nil != o.err {
 		return nil, o.err
 	}

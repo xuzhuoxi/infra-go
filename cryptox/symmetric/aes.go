@@ -18,14 +18,15 @@ import (
 //  1. 对称加密
 //  2. 一个SK扩展成多个子SK，多轮加密
 type IAESCipher interface {
+	cryptox.ICipher
 	// Key 获取密钥,只读
 	Key() []byte
 	// SetPaddingFunc 设置填充方式
 	SetPaddingFunc(padding cryptox.FuncPadding, unPadding cryptox.FuncUnPadding)
-	// Encrypt 指定BlockMode加密
-	Encrypt(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error)
-	// Decrypt 指定BlockMode解密
-	Decrypt(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error)
+	// EncryptMode 指定BlockMode加密
+	EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error)
+	// DecryptMode Decrypt 指定BlockMode解密
+	DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error)
 	// EncryptCBC 使用CBC模式加密
 	EncryptCBC(plaintext []byte) ([]byte, error)
 	// DecryptCBC 使用CBC模式解密
@@ -64,7 +65,15 @@ func (o *aesCipher) SetPaddingFunc(padding cryptox.FuncPadding, unPadding crypto
 	o.padding, o.unPadding = padding, unPadding
 }
 
-func (o *aesCipher) Encrypt(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
+func (o *aesCipher) Encrypt(plaintext []byte) ([]byte, error) {
+	return o.EncryptGCM(plaintext)
+}
+
+func (o *aesCipher) Decrypt(ciphertext []byte) ([]byte, error) {
+	return o.DecryptGCM(ciphertext)
+}
+
+func (o *aesCipher) EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
 	if nil != o.err {
 		return nil, o.err
 	}
@@ -80,7 +89,7 @@ func (o *aesCipher) Encrypt(plaintext []byte, blockMode cryptox.BlockMode) ([]by
 	}
 }
 
-func (o *aesCipher) Decrypt(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
+func (o *aesCipher) DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
 	if nil != o.err {
 		return nil, o.err
 	}

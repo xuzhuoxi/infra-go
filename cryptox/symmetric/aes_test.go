@@ -151,8 +151,8 @@ func TestSameKey(t *testing.T) {
 	cipher := NewAESCipher(key)
 	for _, test := range encryptAESTests {
 		for _, m := range aesMode {
-			ciphertext, err1 := cipher.Encrypt(test.in, m)
-			plaintext, err2 := cipher.Decrypt(ciphertext, m)
+			ciphertext, err1 := cipher.EncryptMode(test.in, m)
+			plaintext, err2 := cipher.DecryptMode(ciphertext, m)
 			compareAesCipherResult(t, string(m), &aesResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
@@ -162,21 +162,18 @@ func TestSameKey(t *testing.T) {
 func TestAES16(t *testing.T) {
 	for _, test := range encryptAESTests {
 		for _, m := range aesMode {
-			cipher := NewAESCipher(test.key)
-			ciphertext, err1 := cipher.Encrypt(test.in, m)
-			plaintext, err2 := cipher.Decrypt(ciphertext, m)
-			compareAesCipherResult(t, string(m), &aesResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
+			key := test.key
+			testEncryptDecrypt(t, key, test.in, m)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
 	}
+	//time.Sleep(time.Second * 10)
 }
 func TestAES24(t *testing.T) {
 	for _, test := range encryptAESTests {
 		for _, m := range aesMode {
-			cipher := NewAESCipher(append(test.key, test.key[:8]...))
-			ciphertext, err1 := cipher.Encrypt(test.in, m)
-			plaintext, err2 := cipher.Decrypt(ciphertext, m)
-			compareAesCipherResult(t, string(m), &aesResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
+			key := append(test.key, test.key[:8]...)
+			testEncryptDecrypt(t, key, test.in, m)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
 	}
@@ -184,13 +181,18 @@ func TestAES24(t *testing.T) {
 func TestAES32(t *testing.T) {
 	for _, test := range encryptAESTests {
 		for _, m := range aesMode {
-			cipher := NewAESCipher(append(test.key, test.key[:16]...))
-			ciphertext, err1 := cipher.Encrypt(test.in, m)
-			plaintext, err2 := cipher.Decrypt(ciphertext, m)
-			compareAesCipherResult(t, string(m), &aesResult{in: test.in, ciphertext: ciphertext, plaintext: plaintext}, err1, err2)
+			key := append(test.key, test.key[:16]...)
+			testEncryptDecrypt(t, key, test.in, m)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
 	}
+}
+
+func testEncryptDecrypt(t *testing.T, key []byte, plaintext []byte, blockMode cryptox.BlockMode) {
+	cipher := NewAESCipher(key)
+	ciphertext, err1 := cipher.EncryptMode(plaintext, blockMode)
+	plaintext2, err2 := cipher.DecryptMode(ciphertext, blockMode)
+	compareAesCipherResult(t, string(blockMode), &aesResult{in: plaintext, ciphertext: ciphertext, plaintext: plaintext2}, err1, err2)
 }
 
 func compareAesCipherResult(t *testing.T, title string, r *aesResult, err1, err2 error) {
