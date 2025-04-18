@@ -3,13 +3,18 @@
 // @author xuzhuoxi
 package serialx
 
+// ISerialManager Events
 const (
+	// Module Events ---------- ---------- ---------- ---------- ----------
+
 	// EventOnSerialModuleStarted
 	// Serial module start finish event
 	EventOnSerialModuleStarted = "Serial-Module:OnObserverStarted"
 	// EventOnSerialModuleStopped
 	// Serial module stop finish event
 	EventOnSerialModuleStopped = "Serial-Module:OnObserverStopped"
+
+	// Manager Events ---------- ---------- ---------- ---------- ----------
 
 	// EventOnSerialManagerStarted
 	// Serial manger start finish event
@@ -19,7 +24,10 @@ const (
 	EventOnSerialManagerStopped = "Serial-Manager:OnManagerStopped"
 )
 
+// IStartupManager Events
 const (
+	// Module Events ---------- ---------- ---------- ---------- ----------
+
 	// EventOnStartupModuleSaved
 	// Startup module save finish event
 	EventOnStartupModuleSaved = "Startup-Module:OnStartupModuleSaved"
@@ -29,6 +37,8 @@ const (
 	// EventOnStartupModuleStopped
 	// Startup module stop finish event
 	EventOnStartupModuleStopped = "Startup-Module:OnStartupModuleStopped"
+
+	// Manager Events ---------- ---------- ---------- ---------- ----------
 
 	// EventOnStartupManagerSaved
 	// Startup manger save finish event
