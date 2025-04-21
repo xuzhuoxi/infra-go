@@ -37,7 +37,10 @@ func (b *gobBuffCodecs) EncodeDataToBuff(data ...interface{}) {
 	b.codecsLock.Lock()
 	defer b.codecsLock.Unlock()
 	for index := 0; index < len(data); index++ {
-		bytes := b.gobHandler.HandleEncode(data[index])
+		bytes, err := b.gobHandler.HandleEncode(data[index])
+		if nil != err {
+			return
+		}
 		b.WriteData(bytes)
 		//fmt.Println("EncodeDataToBuff:", bytes, data[index])
 	}
@@ -51,7 +54,10 @@ func (b *gobBuffCodecs) DecodeDataFromBuff(data ...interface{}) {
 	defer b.codecsLock.Unlock()
 	for index := 0; index < len(data); index++ {
 		bytes := b.ReadData()
-		b.gobHandler.HandleDecode(bytes, data[index])
+		err := b.gobHandler.HandleDecode(bytes, data[index])
+		if nil != err {
+			return
+		}
 		//fmt.Println("DecodeDataFromBuff:", bytes, data[index])
 	}
 }

@@ -96,10 +96,10 @@ func NewPackSendReceiver(connInfo IConnInfo, reader IConnReaderAdapter, writer I
 
 func newPackSRBase(connInfo IConnInfo, reader IConnReaderAdapter, writer IConnWriterAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) packSRBase {
 	return packSRBase{
-		connInfo:             connInfo, reader: reader, writer: writer,
+		connInfo: connInfo, reader: reader, writer: writer,
 		PackHandlerContainer: packHandlerContainer,
 		dataBlockHandler:     dataBlockHandler, toBlockBuff: bytex.NewBuffDataBlock(dataBlockHandler),
-		Logger:               logger}
+		Logger: logger}
 }
 
 type packSRBase struct {
@@ -162,14 +162,14 @@ func (sr *packSRBase) StartReceiving() error {
 	}
 	sr.receiving = true
 	sr.mu.Unlock()
-	buff := make([]byte, ReceiverBuffLen, ReceiverBuffLen)
+	buff := make([]byte, ReceiverBuffLen)
 	for sr.receiving {
 		n, address, err := sr.reader.ReadBytes(buff[:])
 		if err != nil {
 			sr.Logger.Warnln("[packSRBase.StartReceiving][for loop]", err)
 			break
 		}
-		sr.Logger.Traceln("Receiving loop:", n, address, sr.connInfo.One2One())
+		sr.Logger.Traceln("[packSRBase.StartReceiving] Receiving loop:", n, address, sr.connInfo.One2One())
 		if sr.connInfo.One2One() { // 一对一连接
 			sr.onReceiveBytes(buff[:n], sr.connInfo)
 		} else { // 一对多连接
