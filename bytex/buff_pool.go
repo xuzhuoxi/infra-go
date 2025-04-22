@@ -6,115 +6,95 @@
 package bytex
 
 import (
-	"github.com/xuzhuoxi/infra-go/lang"
+	"sync"
 )
 
 var (
-	DefaultPoolBuffDataBlock = NewPoolBuffDataBlock()
-	DefaultPoolBuffToData    = NewPoolBuffToData()
-	DefaultPoolBuffToBlock   = NewPoolBuffToBlock()
+	DefaultPoolBuffDataBlock = NewPoolBuffDataBlock(NewDefaultBuffDataBlock)
+	DefaultPoolBuffToData    = NewPoolBuffToData(NewDefaultBuffToData)
+	DefaultPoolBuffToBlock   = NewPoolBuffToBlock(NewDefaultBuffToBlock)
 )
 
-func init() {
-	DefaultPoolBuffDataBlock.Register(NewDefaultBuffDataBlock)
-	DefaultPoolBuffToData.Register(NewDefaultBuffToData)
-	DefaultPoolBuffToBlock.Register(NewDefaultBuffToBlock)
+// IPoolBuffDataBlock ---------- ---------- ---------- ---------- ----------
+
+func NewPoolBuffDataBlock(newFunc func() IBuffDataBlock) IPoolBuffDataBlock {
+	return &poolBuffDataBlock{pool: sync.Pool{
+		New: func() interface{} {
+			return newFunc()
+		},
+	}}
 }
 
 type IPoolBuffDataBlock interface {
-	Register(newFunc func() IBuffDataBlock)
 	GetInstance() IBuffDataBlock
-	Recycle(instance IBuffDataBlock) bool
+	Recycle(instance IBuffDataBlock)
 }
-
-type IPoolBuffToData interface {
-	Register(newFunc func() IBuffToData)
-	GetInstance() IBuffToData
-	Recycle(instance IBuffToData) bool
-}
-
-type IPoolBuffToBlock interface {
-	Register(newFunc func() IBuffToBlock)
-	GetInstance() IBuffToBlock
-	Recycle(instance IBuffToBlock) bool
-}
-
-func NewPoolBuffDataBlock() IPoolBuffDataBlock {
-	return &poolBuffDataBlock{pool: lang.NewObjectPoolSync()}
-}
-
-func NewPoolBuffToData() IPoolBuffToData {
-	return &poolBuffToData{pool: lang.NewObjectPoolSync()}
-}
-
-func NewPoolBuffToBlock() IPoolBuffToBlock {
-	return &poolBuffToBlock{pool: lang.NewObjectPoolSync()}
-}
-
-//--------------------------------------------
 
 type poolBuffDataBlock struct {
-	pool lang.IObjectPool
-}
-
-func (p *poolBuffDataBlock) Register(newFunc func() IBuffDataBlock) {
-	p.pool.Register(func() interface{} {
-		return newFunc()
-	}, func(instance interface{}) bool {
-		return nil != instance
-	})
+	pool sync.Pool
 }
 
 func (p *poolBuffDataBlock) GetInstance() IBuffDataBlock {
-	rs := p.pool.GetInstance().(IBuffDataBlock)
-	rs.Reset()
-	return rs
+	return p.pool.Get().(IBuffDataBlock)
 }
 
-func (p *poolBuffDataBlock) Recycle(instance IBuffDataBlock) bool {
-	return p.pool.Recycle(instance)
+func (p *poolBuffDataBlock) Recycle(instance IBuffDataBlock) {
+	instance.Reset()
+	p.pool.Put(instance)
+}
+
+// IPoolBuffToData ---------- ---------- ---------- ---------- ----------
+
+func NewPoolBuffToData(newFunc func() IBuffToData) IPoolBuffToData {
+	return &poolBuffToData{pool: sync.Pool{
+		New: func() interface{} {
+			return newFunc()
+		},
+	}}
+}
+
+type IPoolBuffToData interface {
+	GetInstance() IBuffToData
+	Recycle(instance IBuffToData)
 }
 
 type poolBuffToData struct {
-	pool lang.IObjectPool
-}
-
-func (p *poolBuffToData) Register(newFunc func() IBuffToData) {
-	p.pool.Register(func() interface{} {
-		return newFunc()
-	}, func(instance interface{}) bool {
-		return nil != instance
-	})
+	pool sync.Pool
 }
 
 func (p *poolBuffToData) GetInstance() IBuffToData {
-	rs := p.pool.GetInstance().(IBuffToData)
-	rs.Reset()
-	return rs
+	return p.pool.Get().(IBuffToData)
 }
 
-func (p *poolBuffToData) Recycle(instance IBuffToData) bool {
-	return p.pool.Recycle(instance)
+func (p *poolBuffToData) Recycle(instance IBuffToData) {
+	instance.Reset()
+	p.pool.Put(instance)
+}
+
+// IPoolBuffToBlock ---------- ---------- ---------- ---------- ----------
+
+type IPoolBuffToBlock interface {
+	GetInstance() IBuffToBlock
+	Recycle(instance IBuffToBlock)
+}
+
+func NewPoolBuffToBlock(newFunc func() IBuffToBlock) IPoolBuffToBlock {
+	return &poolBuffToBlock{pool: sync.Pool{
+		New: func() interface{} {
+			return newFunc()
+		},
+	}}
 }
 
 type poolBuffToBlock struct {
-	pool lang.IObjectPool
-}
-
-func (p *poolBuffToBlock) Register(newFunc func() IBuffToBlock) {
-	p.pool.Register(func() interface{} {
-		return newFunc()
-	}, func(instance interface{}) bool {
-		return nil != instance
-	})
+	pool sync.Pool
 }
 
 func (p *poolBuffToBlock) GetInstance() IBuffToBlock {
-	rs := p.pool.GetInstance().(IBuffToBlock)
-	rs.Reset()
-	return rs
+	return p.pool.Get().(IBuffToBlock)
 }
 
-func (p *poolBuffToBlock) Recycle(instance IBuffToBlock) bool {
-	return p.pool.Recycle(instance)
+func (p *poolBuffToBlock) Recycle(instance IBuffToBlock) {
+	instance.Reset()
+	p.pool.Put(instance)
 }
