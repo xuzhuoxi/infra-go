@@ -3,12 +3,16 @@
 // @author xuzhuoxi
 package poolx
 
-import "sync"
+import (
+	"errors"
+	"sync"
+)
 
 var (
 	defaultBytePoolCap = 2048
 	bytePoolLock       sync.RWMutex
 	bytePools          = make(map[int]IByteSlicePool)
+	errLenTooLarge     = errors.New("len too large")
 )
 
 // NewByteSlicePool 创建一个字节切片池
@@ -38,9 +42,20 @@ func NewByteSlicePool(cap int) IByteSlicePool {
 
 // IByteSlicePool 字节切片池
 type IByteSlicePool interface {
-	// Get 获取一个切片引用
+	// Cap
+	// 切片实例的设置容量
+	Cap() int
+	// Get
+	// 获取一个切片引用
+	// len=0
 	Get() *[]byte
-	// Put 归还一个切片引用
+	// GetL
+	// 获取一个切片引用
+	// 切片的len值为l
+	// 如果 ln>cap值，返回一个错误
+	GetL(ln int) (*[]byte, error)
+	// Put
+	// 归还一个切片引用
 	Put(bs *[]byte)
 }
 
@@ -49,10 +64,26 @@ type byteSlicePool struct {
 	pool *sync.Pool
 }
 
+func (o *byteSlicePool) Cap() int {
+	return o.cap
+}
+
+func (o *byteSlicePool) GetL(ln int) (*[]byte, error) {
+	if ln > o.cap {
+		return nil, errLenTooLarge
+	}
+	rs := o.pool.Get().(*[]byte)
+	*rs = (*rs)[:ln]
+	return rs, nil
+}
+
 func (o *byteSlicePool) Get() *[]byte {
 	return o.pool.Get().(*[]byte)
 }
 
 func (o *byteSlicePool) Put(bs *[]byte) {
+	if nil == bs {
+		return
+	}
 	o.pool.Put(bs)
 }

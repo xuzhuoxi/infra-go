@@ -18,7 +18,7 @@ var (
 // IPoolBuffDataBlock ---------- ---------- ---------- ---------- ----------
 
 func NewPoolBuffDataBlock(newFunc func() IBuffDataBlock) IPoolBuffDataBlock {
-	return &poolBuffDataBlock{pool: sync.Pool{
+	return &poolBuffDataBlock{pool: &sync.Pool{
 		New: func() interface{} {
 			return newFunc()
 		},
@@ -31,7 +31,7 @@ type IPoolBuffDataBlock interface {
 }
 
 type poolBuffDataBlock struct {
-	pool sync.Pool
+	pool *sync.Pool
 }
 
 func (p *poolBuffDataBlock) GetInstance() IBuffDataBlock {
@@ -39,6 +39,9 @@ func (p *poolBuffDataBlock) GetInstance() IBuffDataBlock {
 }
 
 func (p *poolBuffDataBlock) Recycle(instance IBuffDataBlock) {
+	if nil == instance {
+		return
+	}
 	instance.Reset()
 	p.pool.Put(instance)
 }
@@ -46,7 +49,7 @@ func (p *poolBuffDataBlock) Recycle(instance IBuffDataBlock) {
 // IPoolBuffToData ---------- ---------- ---------- ---------- ----------
 
 func NewPoolBuffToData(newFunc func() IBuffToData) IPoolBuffToData {
-	return &poolBuffToData{pool: sync.Pool{
+	return &poolBuffToData{pool: &sync.Pool{
 		New: func() interface{} {
 			return newFunc()
 		},
@@ -59,7 +62,7 @@ type IPoolBuffToData interface {
 }
 
 type poolBuffToData struct {
-	pool sync.Pool
+	pool *sync.Pool
 }
 
 func (p *poolBuffToData) GetInstance() IBuffToData {
@@ -67,6 +70,9 @@ func (p *poolBuffToData) GetInstance() IBuffToData {
 }
 
 func (p *poolBuffToData) Recycle(instance IBuffToData) {
+	if nil == instance {
+		return
+	}
 	instance.Reset()
 	p.pool.Put(instance)
 }
@@ -79,7 +85,7 @@ type IPoolBuffToBlock interface {
 }
 
 func NewPoolBuffToBlock(newFunc func() IBuffToBlock) IPoolBuffToBlock {
-	return &poolBuffToBlock{pool: sync.Pool{
+	return &poolBuffToBlock{pool: &sync.Pool{
 		New: func() interface{} {
 			return newFunc()
 		},
@@ -87,7 +93,7 @@ func NewPoolBuffToBlock(newFunc func() IBuffToBlock) IPoolBuffToBlock {
 }
 
 type poolBuffToBlock struct {
-	pool sync.Pool
+	pool *sync.Pool
 }
 
 func (p *poolBuffToBlock) GetInstance() IBuffToBlock {
@@ -95,6 +101,9 @@ func (p *poolBuffToBlock) GetInstance() IBuffToBlock {
 }
 
 func (p *poolBuffToBlock) Recycle(instance IBuffToBlock) {
+	if nil == instance {
+		return
+	}
 	instance.Reset()
 	p.pool.Put(instance)
 }
