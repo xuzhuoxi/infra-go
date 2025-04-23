@@ -79,17 +79,17 @@ func (p *poolBuffToData) Recycle(instance IBuffToData) {
 
 // IPoolBuffToBlock ---------- ---------- ---------- ---------- ----------
 
-type IPoolBuffToBlock interface {
-	GetInstance() IBuffToBlock
-	Recycle(instance IBuffToBlock)
-}
-
 func NewPoolBuffToBlock(newFunc func() IBuffToBlock) IPoolBuffToBlock {
 	return &poolBuffToBlock{pool: &sync.Pool{
 		New: func() interface{} {
 			return newFunc()
 		},
 	}}
+}
+
+type IPoolBuffToBlock interface {
+	GetInstance() IBuffToBlock
+	Recycle(instance IBuffToBlock)
 }
 
 type poolBuffToBlock struct {
