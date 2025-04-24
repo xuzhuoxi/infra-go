@@ -169,7 +169,7 @@ func (sr *packSRBase) StartReceiving() error {
 			sr.Logger.Warnln("[packSRBase.StartReceiving][for loop]", err)
 			break
 		}
-		sr.Logger.Traceln("[packSRBase.StartReceiving] Receiving loop:", n, address, sr.connInfo.One2One())
+		//sr.Logger.Traceln("[packSRBase.StartReceiving] Receiving loop:", n, address, sr.connInfo.One2One())
 		if sr.connInfo.One2One() { // 一对一连接
 			sr.onReceiveBytes(buff[:n], sr.connInfo)
 		} else { // 一对多连接
