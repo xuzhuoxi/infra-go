@@ -17,6 +17,12 @@ func ParseDuration(durationStr string) time.Duration {
 	if len(durationStr) == 0 {
 		return 0
 	}
+	// 尝试解析为int64
+	t, err := strconv.ParseInt(durationStr, 10, 64)
+	if nil == err {
+		return time.Duration(t)
+	}
+	// 尝试解析为Duration
 	d, err := time.ParseDuration(durationStr)
 	if nil != err {
 		return 0

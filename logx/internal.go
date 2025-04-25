@@ -16,6 +16,10 @@ type logFormats struct {
 	format string // 显示颜色
 }
 
+func (o *logFormats) String() string {
+	return fmt.Sprintf("logFromats{prefix:%v, format:%s}", o.prefix, o.format)
+}
+
 type logInfo struct {
 	level       LogLevel
 	fileDir     string //以"/"结尾
@@ -27,12 +31,20 @@ type logInfo struct {
 	maxSize     uint64
 }
 
+func (o *logInfo) String() string {
+	return fmt.Sprintf("logInfo{level:%v,}", o.level)
+}
+
 type logger struct {
 	prefix      string
 	defaultFlag int
 
 	mu      sync.RWMutex
 	infoMap map[LogType]*logInfo
+}
+
+func (o *logger) String() string {
+	return fmt.Sprintf("logger{prefix:%s, flag:%v, infoMap:%v}", o.prefix, o.defaultFlag, o.infoMap)
 }
 
 var (
@@ -52,22 +64,22 @@ func init() {
 	levelFormats[LevelFatal] = logFormats{prefix: "[Fatal] ", format: "\033[31m"} // FG: Red
 }
 
-func (l *logger) SetPrefix(prefix string) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.prefix = prefix
+func (o *logger) SetPrefix(prefix string) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.prefix = prefix
 }
 
-func (l *logger) SetLevel(level LogLevel, t ...LogType) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+func (o *logger) SetLevel(level LogLevel, t ...LogType) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
 	if len(t) == 0 {
-		for _, value := range l.infoMap {
+		for _, value := range o.infoMap {
 			value.level = level
 		}
 	} else {
 		for _, tp := range t {
-			value, ok := l.infoMap[tp]
+			value, ok := o.infoMap[tp]
 			if ok {
 				value.level = level
 			}
@@ -75,17 +87,17 @@ func (l *logger) SetLevel(level LogLevel, t ...LogType) {
 	}
 }
 
-func (l *logger) SetFlags(flag int, t ...LogType) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.defaultFlag = flag
+func (o *logger) SetFlags(flag int, t ...LogType) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.defaultFlag = flag
 	if len(t) == 0 {
-		for _, value := range l.infoMap {
+		for _, value := range o.infoMap {
 			value.logger.SetFlags(flag)
 		}
 	} else {
 		for _, tp := range t {
-			value, ok := l.infoMap[tp]
+			value, ok := o.infoMap[tp]
 			if ok {
 				value.logger.SetFlags(flag)
 			}
@@ -93,19 +105,19 @@ func (l *logger) SetFlags(flag int, t ...LogType) {
 	}
 }
 
-func (l *logger) SetConfig(cfg LogConfig) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
+func (o *logger) SetConfig(cfg LogConfig) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
 	if 0 == cfg.Flag {
-		cfg.Flag = l.defaultFlag
+		cfg.Flag = o.defaultFlag
 	}
 	if cfg.Type == TypeConsole {
-		val, ok := l.infoMap[cfg.Type]
+		val, ok := o.infoMap[cfg.Type]
 		if ok {
 			val.level = cfg.Level
 			val.logger.SetFlags(cfg.Flag)
 		} else {
-			l.infoMap[cfg.Type] = &logInfo{level: cfg.Level, logger: genLogger(l.defaultFlag)}
+			o.infoMap[cfg.Type] = &logInfo{level: cfg.Level, logger: genLogger(o.defaultFlag)}
 		}
 		return
 	}
@@ -117,7 +129,7 @@ func (l *logger) SetConfig(cfg LogConfig) {
 	if !filex.IsExist(newFileDir) { //目标不存在，创建目录
 		os.MkdirAll(newFileDir, os.ModePerm)
 	}
-	val, ok := l.infoMap[cfg.Type]
+	val, ok := o.infoMap[cfg.Type]
 	if ok {
 		val.level = cfg.Level
 		val.fileDir = newFileDir
@@ -126,36 +138,36 @@ func (l *logger) SetConfig(cfg LogConfig) {
 		val.maxSize = uint64(cfg.MaxSize)
 		val.logger.SetFlags(cfg.Flag)
 	} else {
-		l.infoMap[cfg.Type] = &logInfo{level: cfg.Level,
+		o.infoMap[cfg.Type] = &logInfo{level: cfg.Level,
 			fileDir: newFileDir, fileName: fileName, fileExtName: fileExt,
-			maxSize: uint64(cfg.MaxSize), logger: genLogger(l.defaultFlag)}
+			maxSize: uint64(cfg.MaxSize), logger: genLogger(o.defaultFlag)}
 	}
 	switch cfg.Type {
 	case TypeRollingFile:
-		l.infoMap[cfg.Type].index = getRollingIndex(newFileDir, cfg.FileName, cfg.FileExtName)
+		o.infoMap[cfg.Type].index = getRollingIndex(newFileDir, cfg.FileName, cfg.FileExtName)
 	case TypeDailyRollingFile:
-		l.infoMap[cfg.Type].index = getRollingIndex(newFileDir, cfg.FileName+"_"+getTodayStr(), cfg.FileExtName)
+		o.infoMap[cfg.Type].index = getRollingIndex(newFileDir, cfg.FileName+"_"+getTodayStr(), cfg.FileExtName)
 	}
 }
 
-func (l *logger) RemoveConfig(t LogType) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	val, ok := l.infoMap[t]
+func (o *logger) RemoveConfig(t LogType) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	val, ok := o.infoMap[t]
 	if ok && nil != val.file {
 		closeFile(val.file)
 	}
-	delete(l.infoMap, t)
+	delete(o.infoMap, t)
 }
 
-func (l *logger) Print(v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if len(l.infoMap) == 0 {
+func (o *logger) Print(v ...interface{}) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if len(o.infoMap) == 0 {
 		return
 	}
-	checkFile(l.infoMap)
-	for _, info := range l.infoMap {
+	checkFile(o.infoMap)
+	for _, info := range o.infoMap {
 		flag := info.logger.Flags()
 		info.logger.SetFlags(0)
 		info.logger.SetPrefix("")
@@ -164,14 +176,14 @@ func (l *logger) Print(v ...interface{}) {
 	}
 }
 
-func (l *logger) Printf(format string, v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if len(l.infoMap) == 0 {
+func (o *logger) Printf(format string, v ...interface{}) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if len(o.infoMap) == 0 {
 		return
 	}
-	checkFile(l.infoMap)
-	for _, info := range l.infoMap {
+	checkFile(o.infoMap)
+	for _, info := range o.infoMap {
 		flag := info.logger.Flags()
 		info.logger.SetFlags(0)
 		info.logger.SetPrefix("")
@@ -180,14 +192,14 @@ func (l *logger) Printf(format string, v ...interface{}) {
 	}
 }
 
-func (l *logger) Println(v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if len(l.infoMap) == 0 {
+func (o *logger) Println(v ...interface{}) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if len(o.infoMap) == 0 {
 		return
 	}
-	checkFile(l.infoMap)
-	for _, info := range l.infoMap {
+	checkFile(o.infoMap)
+	for _, info := range o.infoMap {
 		flag := info.logger.Flags()
 		info.logger.SetFlags(0)
 		info.logger.SetPrefix("")
@@ -196,16 +208,16 @@ func (l *logger) Println(v ...interface{}) {
 	}
 }
 
-func (l *logger) Log(level LogLevel, v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if len(l.infoMap) == 0 {
+func (o *logger) Log(level LogLevel, v ...interface{}) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if len(o.infoMap) == 0 {
 		return
 	}
-	checkFile(l.infoMap)
-	prefix := getLevelPrefix(level, l.prefix)
+	checkFile(o.infoMap)
+	prefix := getLevelPrefix(level, o.prefix)
 	logged := false
-	for _, info := range l.infoMap {
+	for _, info := range o.infoMap {
 		if level < info.level {
 			continue
 		}
@@ -218,16 +230,16 @@ func (l *logger) Log(level LogLevel, v ...interface{}) {
 	}
 }
 
-func (l *logger) Logf(level LogLevel, format string, v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if len(l.infoMap) == 0 {
+func (o *logger) Logf(level LogLevel, format string, v ...interface{}) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if len(o.infoMap) == 0 {
 		return
 	}
-	checkFile(l.infoMap)
-	prefix := getLevelPrefix(level, l.prefix)
+	checkFile(o.infoMap)
+	prefix := getLevelPrefix(level, o.prefix)
 	logged := false
-	for _, info := range l.infoMap {
+	for _, info := range o.infoMap {
 		if level < info.level {
 			continue
 		}
@@ -240,16 +252,16 @@ func (l *logger) Logf(level LogLevel, format string, v ...interface{}) {
 	}
 }
 
-func (l *logger) Logln(level LogLevel, v ...interface{}) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	if len(l.infoMap) == 0 {
+func (o *logger) Logln(level LogLevel, v ...interface{}) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if len(o.infoMap) == 0 {
 		return
 	}
-	checkFile(l.infoMap)
-	prefix := getLevelPrefix(level, l.prefix)
+	checkFile(o.infoMap)
+	prefix := getLevelPrefix(level, o.prefix)
 	logged := false
-	for _, info := range l.infoMap {
+	for _, info := range o.infoMap {
 		if level < info.level {
 			continue
 		}
@@ -262,76 +274,76 @@ func (l *logger) Logln(level LogLevel, v ...interface{}) {
 	}
 }
 
-func (l *logger) Trace(v ...interface{}) {
-	l.Log(LevelTrace, v...)
+func (o *logger) Trace(v ...interface{}) {
+	o.Log(LevelTrace, v...)
 }
 
-func (l *logger) Tracef(format string, v ...interface{}) {
-	l.Logf(LevelTrace, format, v...)
+func (o *logger) Tracef(format string, v ...interface{}) {
+	o.Logf(LevelTrace, format, v...)
 }
 
-func (l *logger) Traceln(v ...interface{}) {
-	l.Logln(LevelTrace, v...)
+func (o *logger) Traceln(v ...interface{}) {
+	o.Logln(LevelTrace, v...)
 }
 
-func (l *logger) Debug(v ...interface{}) {
-	l.Log(LevelDebug, v...)
+func (o *logger) Debug(v ...interface{}) {
+	o.Log(LevelDebug, v...)
 }
 
-func (l *logger) Debugf(format string, v ...interface{}) {
-	l.Logf(LevelDebug, format, v...)
+func (o *logger) Debugf(format string, v ...interface{}) {
+	o.Logf(LevelDebug, format, v...)
 }
 
-func (l *logger) Debugln(v ...interface{}) {
-	l.Logln(LevelDebug, v...)
+func (o *logger) Debugln(v ...interface{}) {
+	o.Logln(LevelDebug, v...)
 }
 
-func (l *logger) Info(v ...interface{}) {
-	l.Log(LevelInfo, v...)
+func (o *logger) Info(v ...interface{}) {
+	o.Log(LevelInfo, v...)
 }
 
-func (l *logger) Infof(format string, v ...interface{}) {
-	l.Logf(LevelInfo, format, v...)
+func (o *logger) Infof(format string, v ...interface{}) {
+	o.Logf(LevelInfo, format, v...)
 }
 
-func (l *logger) Infoln(v ...interface{}) {
-	l.Logln(LevelInfo, v...)
+func (o *logger) Infoln(v ...interface{}) {
+	o.Logln(LevelInfo, v...)
 }
 
-func (l *logger) Warn(v ...interface{}) {
-	l.Log(LevelWarn, v...)
+func (o *logger) Warn(v ...interface{}) {
+	o.Log(LevelWarn, v...)
 }
 
-func (l *logger) Warnf(format string, v ...interface{}) {
-	l.Logf(LevelWarn, format, v...)
+func (o *logger) Warnf(format string, v ...interface{}) {
+	o.Logf(LevelWarn, format, v...)
 }
 
-func (l *logger) Warnln(v ...interface{}) {
-	l.Logln(LevelWarn, v...)
+func (o *logger) Warnln(v ...interface{}) {
+	o.Logln(LevelWarn, v...)
 }
 
-func (l *logger) Error(v ...interface{}) {
-	l.Log(LevelError, v...)
+func (o *logger) Error(v ...interface{}) {
+	o.Log(LevelError, v...)
 }
 
-func (l *logger) Errorf(format string, v ...interface{}) {
-	l.Logf(LevelError, format, v...)
+func (o *logger) Errorf(format string, v ...interface{}) {
+	o.Logf(LevelError, format, v...)
 }
 
-func (l *logger) Errorln(v ...interface{}) {
-	l.Logln(LevelError, v...)
+func (o *logger) Errorln(v ...interface{}) {
+	o.Logln(LevelError, v...)
 }
 
-func (l *logger) Fatal(v ...interface{}) {
-	l.Log(LevelFatal, v...)
+func (o *logger) Fatal(v ...interface{}) {
+	o.Log(LevelFatal, v...)
 }
 
-func (l *logger) Fatalf(format string, v ...interface{}) {
-	l.Logf(LevelFatal, format, v...)
+func (o *logger) Fatalf(format string, v ...interface{}) {
+	o.Logf(LevelFatal, format, v...)
 }
 
-func (l *logger) Fatalln(v ...interface{}) {
-	l.Logln(LevelFatal, v...)
+func (o *logger) Fatalln(v ...interface{}) {
+	o.Logln(LevelFatal, v...)
 }
 
 func genLogger(flag int) *log.Logger {
