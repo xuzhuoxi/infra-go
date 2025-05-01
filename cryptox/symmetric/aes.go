@@ -23,22 +23,42 @@ type IAESCipher interface {
 	Key() []byte
 	// SetPaddingFunc 设置填充方式
 	SetPaddingFunc(padding cryptox.FuncPadding, unPadding cryptox.FuncUnPadding)
-	// EncryptMode 指定BlockMode加密
+
+	// EncryptMode 指定BlockMode加密, 使用随机IV，并把IV数据放在密文头部
 	EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error)
-	// DecryptMode Decrypt 指定BlockMode解密
+	// EncryptIVMode 指定BlockMode加密, 指定IV
+	EncryptIVMode(plaintext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error)
+	// DecryptMode Decrypt 指定BlockMode解密, 从密文头部提取IV
 	DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error)
-	// EncryptCBC 使用CBC模式加密
+	// DecryptIVMode Decrypt 指定BlockMode解密, 指定IV
+	DecryptIVMode(ciphertext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error)
+
+	// EncryptCBC 使用CBC模式加密, 使用随机IV，并把IV数据放在密文头部
 	EncryptCBC(plaintext []byte) ([]byte, error)
-	// DecryptCBC 使用CBC模式解密
+	// EncryptIVCBC 使用CBC模式加密, 指定IV
+	EncryptIVCBC(plaintext []byte, iv []byte) ([]byte, error)
+	// DecryptCBC 使用CBC模式解密，从密文头部提取IV
 	DecryptCBC(ciphertext []byte) ([]byte, error)
-	// EncryptCTR 使用CTR模式加密
+	// DecryptIVCBC 使用CBC模式解密, 指定IV
+	DecryptIVCBC(ciphertext []byte, iv []byte) ([]byte, error)
+
+	// EncryptCTR 使用CTR模式加密, 使用随机IV，并把IV数据放在密文头部
 	EncryptCTR(plaintext []byte) ([]byte, error)
-	// DecryptCTR 使用CTR模式解密
+	// EncryptIVCTR 使用CTR模式加密, 指定IV
+	EncryptIVCTR(plaintext []byte, iv []byte) ([]byte, error)
+	// DecryptCTR 使用CTR模式解密，从密文头部提取IV
 	DecryptCTR(ciphertext []byte) ([]byte, error)
-	// EncryptGCM 使用GCM模式加密
+	// DecryptIVCTR 使用CTR模式解密, 指定IV
+	DecryptIVCTR(ciphertext []byte, iv []byte) ([]byte, error)
+
+	// EncryptGCM 使用GCM模式加密, 使用随机nonce，并把nonce数据放在密文头部
 	EncryptGCM(plaintext []byte) ([]byte, error)
-	// DecryptGCM 使用GCM模式解密
+	// EncryptNonceGCM 使用GCM模式加密, 指定nonce
+	EncryptNonceGCM(plaintext []byte, nonce []byte) ([]byte, error)
+	// DecryptGCM 使用GCM模式解密，从密文头部提取nonce
 	DecryptGCM(ciphertext []byte) ([]byte, error)
+	// DecryptNonceGCM 使用GCM模式解密, 指定nonce
+	DecryptNonceGCM(ciphertext []byte, nonce []byte) ([]byte, error)
 }
 
 func NewAESCipher(key []byte) IAESCipher {
@@ -89,6 +109,22 @@ func (o *aesCipher) EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) (
 	}
 }
 
+func (o *aesCipher) EncryptIVMode(plaintext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error) {
+	if nil != o.err {
+		return nil, o.err
+	}
+	switch blockMode {
+	case cryptox.CBC:
+		return o.EncryptIVCBC(plaintext, iv)
+	case cryptox.CTR:
+		return o.EncryptIVCTR(plaintext, iv)
+	case cryptox.GCM:
+		return o.EncryptNonceGCM(plaintext, iv)
+	default:
+		return nil, errors.New("Unsupported AES block mode! ")
+	}
+}
+
 func (o *aesCipher) DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
 	if nil != o.err {
 		return nil, o.err
@@ -105,10 +141,38 @@ func (o *aesCipher) DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) 
 	}
 }
 
+func (o *aesCipher) DecryptIVMode(ciphertext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error) {
+	if nil != o.err {
+		return nil, o.err
+	}
+	switch blockMode {
+	case cryptox.CBC:
+		return o.DecryptIVCBC(ciphertext, iv)
+	case cryptox.CTR:
+		return o.DecryptIVCTR(ciphertext, iv)
+	case cryptox.GCM:
+		return o.DecryptNonceGCM(ciphertext, iv)
+	default:
+		return nil, errors.New("Unsupported AES block mode! ")
+	}
+}
+
+// CBC ---------- ---------- ---------- ---------- ----------
+
 func (o *aesCipher) EncryptCBC(plaintext []byte) ([]byte, error) {
 	iv := make([]byte, aes.BlockSize)
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return nil, err
+	}
+	ciphertext, err := o.EncryptIVCBC(plaintext, iv)
+	if nil != err {
+		return nil, err
+	}
+	return append(iv, ciphertext...), nil
+}
+func (o *aesCipher) EncryptIVCBC(plaintext []byte, iv []byte) ([]byte, error) {
+	if len(iv) != aes.BlockSize {
+		return nil, errors.New("iv length must be equal to block size! ")
 	}
 	padded, err := o.padding(plaintext, aes.BlockSize)
 	if nil != err {
@@ -117,7 +181,7 @@ func (o *aesCipher) EncryptCBC(plaintext []byte) ([]byte, error) {
 	ciphertext := make([]byte, len(padded))
 	mode := cipher.NewCBCEncrypter(o.block, iv)
 	mode.CryptBlocks(ciphertext, padded)
-	return append(iv, ciphertext...), nil
+	return ciphertext, nil
 }
 
 func (o *aesCipher) DecryptCBC(ciphertext []byte) ([]byte, error) {
@@ -126,63 +190,105 @@ func (o *aesCipher) DecryptCBC(ciphertext []byte) ([]byte, error) {
 	}
 	iv := ciphertext[:aes.BlockSize]
 	data := ciphertext[aes.BlockSize:]
-	if len(data)%aes.BlockSize != 0 {
+	return o.DecryptIVCBC(data, iv)
+}
+
+func (o *aesCipher) DecryptIVCBC(ciphertext []byte, iv []byte) ([]byte, error) {
+	if len(ciphertext)%aes.BlockSize != 0 {
 		return nil, errors.New("ciphertext not a multiple of block size")
 	}
 	mode := cipher.NewCBCDecrypter(o.block, iv)
-	plainPadded := make([]byte, len(data))
-	mode.CryptBlocks(plainPadded, data)
+	plainPadded := make([]byte, len(ciphertext))
+	mode.CryptBlocks(plainPadded, ciphertext)
 	return o.unPadding(plainPadded)
 }
 
+// CTR ---------- ---------- ---------- ---------- ----------
+
 func (o *aesCipher) EncryptCTR(plaintext []byte) ([]byte, error) {
-	nonce := make([]byte, aes.BlockSize)
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+	iv := make([]byte, aes.BlockSize)
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
 		return nil, err
 	}
-	stream := cipher.NewCTR(o.block, nonce)
-	//fmt.Println("EncryptCTR:", len(plaintext), plaintext)
+	ciphertext, _ := o.EncryptIVCTR(plaintext, iv)
+	return append(iv, ciphertext...), nil
+}
+
+func (o *aesCipher) EncryptIVCTR(plaintext []byte, iv []byte) ([]byte, error) {
+	if len(iv) != aes.BlockSize {
+		return nil, errors.New("iv length must be equal to block size! ")
+	}
+	stream := cipher.NewCTR(o.block, iv)
 	ciphertext := make([]byte, len(plaintext))
 	stream.XORKeyStream(ciphertext, plaintext)
-	return append(nonce, ciphertext...), nil
+	return ciphertext, nil
 }
 
 func (o *aesCipher) DecryptCTR(ciphertext []byte) ([]byte, error) {
-	//fmt.Println("DecryptCTR:", len(ciphertext), ciphertext)
 	if len(ciphertext) < aes.BlockSize {
 		return nil, errors.New("ciphertext too short")
 	}
-	nonce := ciphertext[:aes.BlockSize]
+	iv := ciphertext[:aes.BlockSize]
 	data := ciphertext[aes.BlockSize:]
-	stream := cipher.NewCTR(o.block, nonce)
-	plaintext := make([]byte, len(data))
-	stream.XORKeyStream(plaintext, data)
+	plaintext, _ := o.DecryptIVCTR(data, iv)
 	return plaintext, nil
 }
 
-func (o *aesCipher) EncryptGCM(plaintext []byte) ([]byte, error) {
-	aead, err := cipher.NewGCM(o.block)
-	if err != nil {
-		return nil, err
+func (o *aesCipher) DecryptIVCTR(ciphertext []byte, iv []byte) ([]byte, error) {
+	if len(iv) != aes.BlockSize {
+		return nil, errors.New("iv length must be equal to block size! ")
 	}
-	nonce := make([]byte, aead.NonceSize())
+	stream := cipher.NewCTR(o.block, iv)
+	plaintext := make([]byte, len(ciphertext))
+	stream.XORKeyStream(plaintext, ciphertext)
+	return plaintext, nil
+}
+
+// GCM ---------- ---------- ---------- ---------- ----------
+
+const (
+	GcmStandardNonceSize = 12
+)
+
+func (o *aesCipher) EncryptGCM(plaintext []byte) ([]byte, error) {
+	nonce := make([]byte, GcmStandardNonceSize)
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, err
 	}
-	ciphertext := aead.Seal(nil, nonce, plaintext, nil)
+	ciphertext, err := o.EncryptNonceGCM(plaintext, nonce)
+	if nil != err {
+		return nil, err
+	}
 	return append(nonce, ciphertext...), nil
 }
-
-func (o *aesCipher) DecryptGCM(ciphertext []byte) ([]byte, error) {
+func (o *aesCipher) EncryptNonceGCM(plaintext []byte, nonce []byte) ([]byte, error) {
 	aead, err := cipher.NewGCM(o.block)
 	if err != nil {
 		return nil, err
 	}
-	nonceSize := aead.NonceSize()
+	if len(nonce) != aead.NonceSize() {
+		return nil, errors.New("nonce length must be equal to GcmStandardNonceSize! ")
+	}
+	ciphertext := aead.Seal(nil, nonce, plaintext, nil)
+	return ciphertext, nil
+}
+
+func (o *aesCipher) DecryptGCM(ciphertext []byte) ([]byte, error) {
+	nonceSize := GcmStandardNonceSize
 	if len(ciphertext) < nonceSize {
 		return nil, errors.New("ciphertext too short")
 	}
 	nonce := ciphertext[:nonceSize]
 	data := ciphertext[nonceSize:]
-	return aead.Open(nil, nonce, data, nil)
+	return o.DecryptNonceGCM(data, nonce)
+}
+func (o *aesCipher) DecryptNonceGCM(ciphertext []byte, nonce []byte) ([]byte, error) {
+	if len(nonce) != GcmStandardNonceSize {
+		return nil, errors.New("nonce length must be equal to GcmStandardNonceSize! ")
+	}
+	aead, err := cipher.NewGCM(o.block)
+	if err != nil {
+		return nil, err
+	}
+	return aead.Open(nil, nonce, ciphertext, nil)
 }

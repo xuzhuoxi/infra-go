@@ -7,6 +7,7 @@ package asymmetric
 
 import (
 	"crypto"
+	"fmt"
 	"github.com/xuzhuoxi/infra-go/filex"
 	"testing"
 
@@ -34,7 +35,7 @@ var (
 )
 
 var (
-	contentShort = `abcdabcdabcd`
+	contentShort = `HelloWorld!`
 	contentLong  = `
 abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,
 abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,abcdabcdabcd,
@@ -118,6 +119,18 @@ func TestPemKeyEncrypt(t *testing.T) {
 	testKeyEncrypt(privateCipher, publicCipher, contentLong, t)
 }
 
+func TestHybridEncrypt(t *testing.T) {
+	privateCipher, publicCipher, err := LoadCiphersPEM(
+		filex.Combine(rsaDir, keyDir, privatePkcs8KeyName),
+		filex.Combine(rsaDir, keyDir, publicX509KeyName))
+
+	if nil != err {
+		t.Fatal(err)
+	}
+	testHybrid(privateCipher, publicCipher, contentShort, t)
+	testHybrid(privateCipher, publicCipher, contentLong, t)
+}
+
 func TestRSAKeySign(t *testing.T) {
 	privateCipher, publicCipher, err := LoadCiphersRSA(
 		filex.Combine(rsaDir, keyDir, privateRsaKeyName),
@@ -167,6 +180,8 @@ func TestPemKeySign(t *testing.T) {
 
 func testKeyEncrypt(private IRSAPrivateCipher, public IRSAPublicCipher, content string, t *testing.T) {
 	ciphertext, err := public.Encrypt([]byte(content))
+	fmt.Println("content:", len(content), content)
+	fmt.Println("ciphertext:", len(ciphertext), ciphertext)
 	if nil != err {
 		t.Fatal(err)
 	}
@@ -174,6 +189,26 @@ func testKeyEncrypt(private IRSAPrivateCipher, public IRSAPublicCipher, content 
 	if nil != err {
 		t.Fatal(err)
 	}
+	fmt.Println("plaintext:", len(plaintext), plaintext)
+	fmt.Println("---------- ---------- ---------- ---------- ----------")
+	if string(plaintext) != content {
+		t.Fatal("plaintext != content")
+	}
+}
+
+func testHybrid(private IRSAPrivateCipher, public IRSAPublicCipher, content string, t *testing.T) {
+	ciphertext, err := public.EncryptHybrid([]byte(content))
+	fmt.Println("content:", len(content), []byte(content))
+	fmt.Println("ciphertext:", len(ciphertext), ciphertext)
+	if nil != err {
+		t.Fatal(err)
+	}
+	plaintext, err := private.DecryptHybrid(ciphertext)
+	if nil != err {
+		t.Fatal(err)
+	}
+	fmt.Println("plaintext:", len(plaintext), plaintext)
+	fmt.Println("---------- ---------- ---------- ---------- ----------")
 	if string(plaintext) != content {
 		t.Fatal("plaintext != content")
 	}

@@ -6,10 +6,8 @@ package symmetric
 import (
 	"crypto/cipher"
 	"crypto/des"
-	"crypto/rand"
 	"errors"
 	"github.com/xuzhuoxi/infra-go/cryptox"
-	"io"
 )
 
 // IDESCipher
@@ -21,22 +19,38 @@ type IDESCipher interface {
 	cryptox.ICipher
 	// SetPaddingFunc 设置填充方式
 	SetPaddingFunc(padding cryptox.FuncPadding, unPadding cryptox.FuncUnPadding)
-	// EncryptMode 指定BlockMode加密
+
+	// EncryptMode 指定BlockMode加密, 使用随机IV，并把IV数据放在密文头部
 	EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error)
-	// DecryptMode 指定BlockMode解密
+	// EncryptIVMode 指定BlockMode加密, 指定IV
+	EncryptIVMode(plaintext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error)
+	// DecryptMode 指定BlockMode解密, 从密文头部提取IV
 	DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error)
+	// DecryptIVMode 指定BlockMode解密, 指定IV
+	DecryptIVMode(ciphertext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error)
+
 	// EncryptECB 使用ECB模式加密
 	EncryptECB(plaintext []byte) ([]byte, error)
 	// DecryptECB 使用ECB模式解密
 	DecryptECB(ciphertext []byte) ([]byte, error)
-	// EncryptCBC 使用CBC模式加密
+
+	// EncryptCBC 使用CBC模式加密, 使用随机IV，并把IV数据放在密文头部
 	EncryptCBC(plaintext []byte) ([]byte, error)
-	// DecryptCBC 使用CBC模式解密
+	// EncryptIVCBC 使用CBC模式加密,  指定IV
+	EncryptIVCBC(plaintext []byte, iv []byte) ([]byte, error)
+	// DecryptCBC 使用CBC模式解密, 从密文头部提取IV
 	DecryptCBC(ciphertext []byte) ([]byte, error)
-	// EncryptCTR 使用CTR模式加密
+	// DecryptIVCBC 使用CBC模式解密, 指定IV
+	DecryptIVCBC(ciphertext []byte, iv []byte) ([]byte, error)
+
+	// EncryptCTR 使用CTR模式加密, 使用随机IV，并把IV数据放在密文头部
 	EncryptCTR(plaintext []byte) ([]byte, error)
-	// DecryptCTR 使用CTR模式解密
+	// EncryptIVCTR 使用CTR模式解密, 指定IV
+	EncryptIVCTR(plaintext []byte, iv []byte) ([]byte, error)
+	// DecryptCTR 使用CTR模式解密, 从密文头部提取IV
 	DecryptCTR(ciphertext []byte) ([]byte, error)
+	// DecryptIVCTR 使用CTR模式解密, 指定IV
+	DecryptIVCTR(ciphertext []byte, iv []byte) ([]byte, error)
 }
 
 func NewDESCipher(key []byte) IDESCipher {
@@ -53,6 +67,24 @@ func NewDESCipher(key []byte) IDESCipher {
 		rs.err = errors.New("key must be 8 (DES) or 24 (3DES) bytes")
 		return rs
 	}
+	rs.padding, rs.unPadding = cryptox.PKCS7Padding, cryptox.PKCS7UnPadding
+	return rs
+}
+func NewTripleDESCipher(key []byte) IDESCipher {
+	rs := &desCipher{key: key}
+	keyLen := len(key)
+	var newKey []byte
+	if keyLen == des.BlockSize {
+		newKey = append(append(key, key...), key...)
+	} else if keyLen == 16 {
+		newKey = append(key[:], key[:8]...)
+	} else if keyLen == 24 {
+		newKey = key
+	} else {
+		rs.err = errors.New("key must be 8 (DES) or 24 (3DES) bytes")
+		return rs
+	}
+	rs.block, rs.err = des.NewTripleDESCipher(newKey)
 	rs.padding, rs.unPadding = cryptox.PKCS7Padding, cryptox.PKCS7UnPadding
 	return rs
 }
@@ -92,6 +124,21 @@ func (o *desCipher) EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) (
 		return nil, errors.New("Unsupported DES block mode! ")
 	}
 }
+func (o *desCipher) EncryptIVMode(plaintext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error) {
+	if nil != o.err {
+		return nil, o.err
+	}
+	switch blockMode {
+	case cryptox.ECB:
+		return o.EncryptECB(plaintext)
+	case cryptox.CBC:
+		return o.EncryptIVCBC(plaintext, iv)
+	case cryptox.CTR:
+		return o.EncryptIVCTR(plaintext, iv)
+	default:
+		return nil, errors.New("Unsupported DES block mode! ")
+	}
+}
 
 func (o *desCipher) DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
 	if nil != o.err {
@@ -109,8 +156,24 @@ func (o *desCipher) DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) 
 	}
 }
 
+func (o *desCipher) DecryptIVMode(ciphertext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error) {
+	if nil != o.err {
+		return nil, o.err
+	}
+	switch blockMode {
+	case cryptox.ECB:
+		return o.DecryptECB(ciphertext)
+	case cryptox.CBC:
+		return o.DecryptIVCBC(ciphertext, iv)
+	case cryptox.CTR:
+		return o.DecryptIVCTR(ciphertext, iv)
+	default:
+		return nil, errors.New("Unsupported DES block mode! ")
+	}
+}
+
 func (o *desCipher) EncryptECB(plaintext []byte) ([]byte, error) {
-	blockSize := o.block.BlockSize()
+	blockSize := des.BlockSize
 	padded, err := o.padding(plaintext, blockSize)
 	if nil != err {
 		return nil, err
@@ -123,7 +186,7 @@ func (o *desCipher) EncryptECB(plaintext []byte) ([]byte, error) {
 }
 
 func (o *desCipher) DecryptECB(ciphertext []byte) ([]byte, error) {
-	blockSize := o.block.BlockSize()
+	blockSize := des.BlockSize
 	if len(ciphertext)%blockSize != 0 {
 		return nil, errors.New("invalid ciphertext length")
 	}
@@ -134,59 +197,89 @@ func (o *desCipher) DecryptECB(ciphertext []byte) ([]byte, error) {
 	return o.unPadding(plain)
 }
 
+// CBC ---------- ---------- ---------- ---------- ----------
+
 func (o *desCipher) EncryptCBC(plaintext []byte) ([]byte, error) {
-	blockSize := o.block.BlockSize()
-	iv := make([]byte, blockSize)
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+	iv, e := cryptox.RandomIV(des.BlockSize)
+	if nil != e {
+		return nil, e
+	}
+	ciphertext, err := o.EncryptIVCBC(plaintext, iv)
+	if nil != err {
 		return nil, err
 	}
-	padded, err := o.padding(plaintext, blockSize)
+	return append(iv, ciphertext...), nil
+}
+func (o *desCipher) EncryptIVCBC(plaintext []byte, iv []byte) ([]byte, error) {
+	padded, err := o.padding(plaintext, des.BlockSize)
 	if nil != err {
 		return nil, err
 	}
 	ciphertext := make([]byte, len(padded))
 	mode := cipher.NewCBCEncrypter(o.block, iv)
 	mode.CryptBlocks(ciphertext, padded)
-	return append(iv, ciphertext...), nil
+	return ciphertext, nil
 }
 
 func (o *desCipher) DecryptCBC(ciphertext []byte) ([]byte, error) {
-	blockSize := o.block.BlockSize()
-	if len(ciphertext) < blockSize {
+	if len(ciphertext) < des.BlockSize {
 		return nil, errors.New("ciphertext too short")
 	}
-	iv := ciphertext[:blockSize]
-	data := ciphertext[blockSize:]
-	if len(data)%blockSize != 0 {
+	iv := ciphertext[:des.BlockSize]
+	data := ciphertext[des.BlockSize:]
+	return o.DecryptIVCBC(data, iv)
+}
+
+func (o *desCipher) DecryptIVCBC(ciphertext []byte, iv []byte) ([]byte, error) {
+	if len(iv) < des.BlockSize {
+		return nil, errors.New("iv length must be equal to BlockSize! ")
+	}
+	if len(ciphertext)%des.BlockSize != 0 {
 		return nil, errors.New("invalid CBC ciphertext length")
 	}
 	mode := cipher.NewCBCDecrypter(o.block, iv)
-	plain := make([]byte, len(data))
-	mode.CryptBlocks(plain, data)
+	plain := make([]byte, len(ciphertext))
+	mode.CryptBlocks(plain, ciphertext)
 	return o.unPadding(plain)
 }
 
+// CTR ---------- ---------- ---------- ---------- ----------
+
 func (o *desCipher) EncryptCTR(plaintext []byte) ([]byte, error) {
-	blockSize := o.block.BlockSize()
-	iv := make([]byte, blockSize)
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+	iv, e := cryptox.RandomIV(des.BlockSize)
+	if nil != e {
+		return nil, e
+	}
+	ciphertext, err := o.EncryptIVCTR(plaintext, iv)
+	if nil != err {
 		return nil, err
+	}
+	return append(iv, ciphertext...), nil
+}
+func (o *desCipher) EncryptIVCTR(plaintext []byte, iv []byte) ([]byte, error) {
+	if len(iv) != des.BlockSize {
+		return nil, errors.New("iv length must be equal to BlockSize! ")
 	}
 	stream := cipher.NewCTR(o.block, iv)
 	ciphertext := make([]byte, len(plaintext))
 	stream.XORKeyStream(ciphertext, plaintext)
-	return append(iv, ciphertext...), nil
+	return ciphertext, nil
 }
 
 func (o *desCipher) DecryptCTR(ciphertext []byte) ([]byte, error) {
-	blockSize := o.block.BlockSize()
-	if len(ciphertext) < blockSize {
+	if len(ciphertext) < des.BlockSize {
 		return nil, errors.New("ciphertext too short")
 	}
-	iv := ciphertext[:blockSize]
-	data := ciphertext[blockSize:]
+	iv := ciphertext[:des.BlockSize]
+	data := ciphertext[des.BlockSize:]
+	return o.DecryptIVCTR(data, iv)
+}
+func (o *desCipher) DecryptIVCTR(ciphertext []byte, iv []byte) ([]byte, error) {
+	if len(iv) != des.BlockSize {
+		return nil, errors.New("iv length must be equal to BlockSize! ")
+	}
 	stream := cipher.NewCTR(o.block, iv)
-	plain := make([]byte, len(data))
-	stream.XORKeyStream(plain, data)
+	plain := make([]byte, len(ciphertext))
+	stream.XORKeyStream(plain, ciphertext)
 	return plain, nil
 }

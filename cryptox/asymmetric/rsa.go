@@ -28,7 +28,7 @@ type IRSAPrivateCipher interface {
 	// Decrypt 解密
 	Decrypt(ciphertext []byte) ([]byte, error)
 	// DecryptHybrid 混合解密
-	DecryptHybrid(encryptedKey []byte, ciphertext []byte) (plaintext []byte, err error)
+	DecryptHybrid(ciphertext []byte) (plaintext []byte, err error)
 	// Sign 签名
 	// 使用sha256
 	Sign(origData []byte) ([]byte, error)
@@ -52,7 +52,7 @@ type IRSAPublicCipher interface {
 	// Encrypt 加密(支持分组)
 	Encrypt(plaintext []byte) ([]byte, error)
 	// EncryptHybrid 混合加密
-	EncryptHybrid(plaintext []byte) (encryptedKey []byte, ciphertext []byte, err error)
+	EncryptHybrid(plaintext []byte) (ciphertext []byte, err error)
 	// VerifySign  验签，使用sha256
 	VerifySign(origData, signature []byte) (bool, error)
 	// VerifySignBase64 验签
@@ -82,12 +82,14 @@ func newRsa(private *rsa.PrivateKey, public *rsa.PublicKey) *rsaCipher {
 
 func newPrivateRsa(private *rsa.PrivateKey) *rsaPrivateCipher {
 	decryptPartLen := private.N.BitLen() / 8
+	//fmt.Println("Private: PartLen=", decryptPartLen)
 	return &rsaPrivateCipher{PriKey: private, DecryptPartLen: decryptPartLen}
 }
 
 func newPublicRsa(public *rsa.PublicKey) *rsaPublicCipher {
 	//RSA使用Pkcs进行padding，所以有11个byte被用于padding信息
 	encryptPartLen := public.N.BitLen()/8 - 11
+	//fmt.Println("Public: PartLen=", encryptPartLen)
 	return &rsaPublicCipher{PubKey: public, EncryptPartLen: encryptPartLen}
 }
 
@@ -110,17 +112,17 @@ func (o *rsaPrivateCipher) PrivateKey() *rsa.PrivateKey {
 }
 
 func (o *rsaPrivateCipher) Decrypt(ciphertext []byte) ([]byte, error) {
-	if len(ciphertext) < o.DecryptPartLen {
+	if len(ciphertext) == o.DecryptPartLen {
 		return rsa.DecryptPKCS1v15(rand.Reader, o.PriKey, ciphertext)
 	}
 	chunks := splitGroup(ciphertext, o.DecryptPartLen)
 	buff := bytes.NewBuffer(nil)
 	for _, chunk := range chunks {
-		bytes, err := rsa.DecryptPKCS1v15(rand.Reader, o.PriKey, chunk)
+		bs, err := rsa.DecryptPKCS1v15(rand.Reader, o.PriKey, chunk)
 		if nil != err {
 			return nil, err
 		}
-		buff.Write(bytes)
+		buff.Write(bs)
 	}
 	return buff.Bytes(), nil
 }
@@ -132,19 +134,21 @@ func (o *rsaPrivateCipher) Decrypt(ciphertext []byte) ([]byte, error) {
 //   2.1 对AES密钥密文RSA解密，截取前32位得到AES密钥,余下为IV
 //   2.2 使用AES密钥与IV，使用AES-CTR算法解密明文
 //   2.3 返回明文
-func (o *rsaPrivateCipher) DecryptHybrid(encryptedKey []byte, ciphertext []byte) (plaintext []byte, err error) {
+func (o *rsaPrivateCipher) DecryptHybrid(ciphertext []byte) (plaintext []byte, err error) {
 	if len(ciphertext) < o.DecryptPartLen {
+		return nil, errors.New("invalid rsa ciphertext data")
+	}
+	if len(ciphertext) == o.DecryptPartLen {
 		return rsa.DecryptPKCS1v15(rand.Reader, o.PriKey, ciphertext)
 	}
-	keyData, err := rsa.DecryptPKCS1v15(rand.Reader, o.PriKey, encryptedKey)
+	encryptedKey := ciphertext[:o.DecryptPartLen]
+	ciphertext = ciphertext[o.DecryptPartLen:]
+	encryptedKeyIV, err := rsa.DecryptPKCS1v15(rand.Reader, o.PriKey, encryptedKey)
 	if err != nil {
 		return nil, err
 	}
-	if len(keyData) < hybridAesKeyLen+aes.BlockSize {
-		return nil, errors.New("invalid hybrid key data")
-	}
-	aesKey := keyData[:hybridAesKeyLen]
-	iv := keyData[hybridAesKeyLen:]
+	aesKey := encryptedKeyIV[:hybridAesKeyLen]
+	iv := encryptedKeyIV[hybridAesKeyLen:]
 
 	block, err := aes.NewCipher(aesKey)
 	if err != nil {
@@ -214,11 +218,11 @@ func (o *rsaPublicCipher) Encrypt(plaintext []byte) ([]byte, error) {
 	chunks := splitGroup(plaintext, o.EncryptPartLen)
 	buff := bytes.NewBuffer(nil)
 	for _, chunk := range chunks {
-		bytes, err := rsa.EncryptPKCS1v15(rand.Reader, o.PubKey, chunk)
+		bs, err := rsa.EncryptPKCS1v15(rand.Reader, o.PubKey, chunk)
 		if nil != err {
 			return nil, err
 		}
-		buff.Write(bytes)
+		buff.Write(bs)
 	}
 	return buff.Bytes(), nil
 }
@@ -226,42 +230,39 @@ func (o *rsaPublicCipher) Encrypt(plaintext []byte) ([]byte, error) {
 // EncryptHybrid
 // 步骤:
 // 1. 不足分组长度，不生成随机AES密钥，直接使用RSA加密
-// 2. 长于分组长度的执行以下步骤
+// 2. 长于分组长度的执行以下步骤:
 //   2.1 生成32位随机AES密钥与16位随机IV，
 //   2.2 使用RSA加密AES密钥与IV，得到AES密钥密文
 //   2.3 使用AES密钥与IV，使用AES-CTR算法加密明文
 //   2.4 返回(AES密钥密文, 密文)
-func (o *rsaPublicCipher) EncryptHybrid(plaintext []byte) (encryptedKey []byte, ciphertext []byte, err error) {
-	if len(plaintext) < o.EncryptPartLen {
+func (o *rsaPublicCipher) EncryptHybrid(plaintext []byte) (ciphertext []byte, err error) {
+	if len(plaintext) <= o.EncryptPartLen {
 		ciphertext, err = rsa.EncryptPKCS1v15(rand.Reader, o.PubKey, plaintext)
 		return
 	}
-	aesKey := make([]byte, hybridAesKeyLen) // AES-256
-	_, err = rand.Read(aesKey)
+	aesKeyIV := make([]byte, hybridAesKeyLen+aes.BlockSize) // AES-Key + AES-IV
+	_, err = rand.Read(aesKeyIV)
 	if err != nil {
 		return
 	}
+	aesKey := aesKeyIV[:hybridAesKeyLen]
+	iv := aesKeyIV[hybridAesKeyLen:]
+
 	block, err := aes.NewCipher(aesKey)
 	if err != nil {
-		return nil, nil, err
-	}
-
-	iv := make([]byte, aes.BlockSize)
-	_, err = rand.Read(iv)
-	if err != nil {
-		return
+		return nil, err
 	}
 
 	ciphertext = make([]byte, len(plaintext))
 	stream := cipher.NewCTR(block, iv)
 	stream.XORKeyStream(ciphertext, plaintext)
 
-	encryptedKey, err = rsa.EncryptPKCS1v15(rand.Reader, o.PubKey, append(aesKey, iv...))
+	encryptedKey, err := rsa.EncryptPKCS1v15(rand.Reader, o.PubKey, append(aesKey, iv...))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return encryptedKey, ciphertext, nil
+	return append(encryptedKey, ciphertext...), nil
 }
 
 func (o *rsaPublicCipher) VerifySign(origData, signature []byte) (bool, error) {
@@ -334,12 +335,12 @@ func Encode2RSAPublicPKCS1(public *rsa.PublicKey) ([]byte, error) {
 // 编码为 PKCS8 私钥
 // PEM类型为 PEMTypePKCS8PrivateKey "PRIVATE KEY"
 func Encode2PrivatePKCS8(private *rsa.PrivateKey) ([]byte, error) {
-	bytes, err := x509.MarshalPKCS8PrivateKey(private)
+	bs, err := x509.MarshalPKCS8PrivateKey(private)
 	if err != nil {
 		return nil, err
 	}
 	return pem.EncodeToMemory(&pem.Block{
-		Bytes: bytes,
+		Bytes: bs,
 		Type:  cryptox.PEMTypePKCS8PrivateKey,
 	}), nil
 }
@@ -348,12 +349,12 @@ func Encode2PrivatePKCS8(private *rsa.PrivateKey) ([]byte, error) {
 // 编码为 X.509 公钥
 // 使用PEM类型为 PEMTypePKCS8PublicKey "PUBLIC KEY"
 func Encode2PublicX509(public *rsa.PublicKey) ([]byte, error) {
-	bytes, err := x509.MarshalPKIXPublicKey(public)
+	bs, err := x509.MarshalPKIXPublicKey(public)
 	if err != nil {
 		return nil, err
 	}
 	return pem.EncodeToMemory(&pem.Block{
-		Bytes: bytes,
+		Bytes: bs,
 		Type:  cryptox.PEMTypeX509PublicKey,
 	}), nil
 }
@@ -500,8 +501,8 @@ func saveKeyFiles(private *rsa.PrivateKey, funcEncode funcEncode2KeyPair, privat
 	if nil != err {
 		return err
 	}
-	filex.WriteFile(privateFilePath, privateDer, os.ModePerm)
-	filex.WriteFile(publicFilePath, publicDer, os.ModePerm)
+	_ = filex.WriteFile(privateFilePath, privateDer, os.ModePerm)
+	_ = filex.WriteFile(publicFilePath, publicDer, os.ModePerm)
 	return nil
 }
 

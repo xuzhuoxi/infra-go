@@ -9,18 +9,18 @@ import (
 )
 
 var (
-	plaintext = []byte("Hello, World!")
-	key       = []byte("MySecretKey123456")
+	xorPlaintext = []byte("Hello, World!")
+	xorKey       = []byte("MySecretKey123456")
 
-	bigData = make([]byte, 10*1024*1024)
+	xorBigData = make([]byte, 10*1024*1024)
 )
 
 func TestXOR(t *testing.T) {
-	cipher := NewXORCipher(key)
-	obfuscated, _ := cipher.Encrypt(plaintext)
+	cipher := NewXORCipher(xorKey)
+	obfuscated, _ := cipher.Encrypt(xorPlaintext)
 	deobfuscated, _ := cipher.Decrypt(obfuscated)
-	if !bytes.Equal(plaintext, deobfuscated) {
-		t.Fatal(plaintext, obfuscated, deobfuscated)
+	if !bytes.Equal(xorPlaintext, deobfuscated) {
+		t.Fatal(xorPlaintext, obfuscated, deobfuscated)
 	}
 }
 
@@ -49,12 +49,12 @@ func xorWithCounter(data, key []byte) []byte {
 
 func BenchmarkXORWithMod(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		xorWithMod(bigData, key)
+		xorWithMod(xorBigData, xorKey)
 	}
 }
 
 func BenchmarkXORWithCounter(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		xorWithCounter(bigData, key)
+		xorWithCounter(xorBigData, xorKey)
 	}
 }
