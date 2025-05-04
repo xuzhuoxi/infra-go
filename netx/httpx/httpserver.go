@@ -1,6 +1,7 @@
 package httpx
 
 import (
+	"github.com/xuzhuoxi/Rabbit-Server/engine/server"
 	"github.com/xuzhuoxi/infra-go/netx"
 	"net/http"
 	"time"
@@ -25,9 +26,19 @@ type IHttpServer interface {
 	// MapHandle
 	// 映射请求响应处理器
 	MapHandle(pattern string, handler http.Handler)
+	// MapLimitHandle
+	// 映射请求响应处理器,
+	// post=true, 强制只接受POST请求
+	// post=false, 强制只接受GET请求
+	MapLimitHandle(pattern string, post bool, handler http.Handler)
 	// MapFunc
 	// 映射请求响应函数
 	MapFunc(pattern string, f func(w http.ResponseWriter, r *http.Request))
+	// MapLimitFunc
+	// 映射请求响应函数,
+	// post=true, 强制只接受POST请求
+	// post=false, 强制只接受GET请求
+	MapLimitFunc(pattern string, post bool, f func(w http.ResponseWriter, r *http.Request))
 	// ClearMaps
 	// 清除映射
 	ClearMaps()
@@ -66,11 +77,39 @@ func (s *HttpServer) StopServer() error {
 }
 
 func (s *HttpServer) MapHandle(pattern string, handler http.Handler) {
+	if nil == handler {
+		return
+	}
 	s.ServeMux.Handle(pattern, handler)
 }
 
+func (s *HttpServer) MapLimitHandle(pattern string, post bool, handler http.Handler) {
+	if nil == handler {
+		return
+	}
+	s.ServeMux.HandleFunc(pattern, func(writer http.ResponseWriter, request *http.Request) {
+		if post == ("POST" == request.Method) {
+			handler.ServeHTTP(writer, request)
+		}
+	})
+}
+
 func (s *HttpServer) MapFunc(pattern string, f func(w http.ResponseWriter, r *http.Request)) {
-	s.MapHandle(pattern, http.HandlerFunc(f))
+	if nil == f {
+		return
+	}
+	s.ServeMux.HandleFunc(pattern, f)
+}
+
+func (s *HttpServer) MapLimitFunc(pattern string, post bool, f func(w http.ResponseWriter, r *http.Request)) {
+	if nil == f {
+		return
+	}
+	s.ServeMux.HandleFunc(pattern, func(writer http.ResponseWriter, request *http.Request) {
+		if post == ("POST" == request.Method) {
+			f(writer, request)
+		}
+	})
 }
 
 func (s *HttpServer) ClearMaps() {
@@ -80,4 +119,6 @@ func (s *HttpServer) ClearMaps() {
 func testHandler(w http.ResponseWriter, r *http.Request) {
 	tm := time.Now().Format(time.RFC1123)
 	w.Write([]byte("The time is: " + tm))
+
+	server.CodeSuc
 }
