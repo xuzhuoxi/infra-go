@@ -14,3 +14,11 @@ func TestStartServer(t *testing.T) {
 	})
 	server.StartServer(":9000")
 }
+
+func TestStartTimeoutServer(t *testing.T) {
+	server := NewHttpServer()
+	server.MapFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(time.Second * 5)
+	})
+	server.StartServer(":9000")
+}

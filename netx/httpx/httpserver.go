@@ -1,7 +1,6 @@
 package httpx
 
 import (
-	"github.com/xuzhuoxi/Rabbit-Server/engine/server"
 	"github.com/xuzhuoxi/infra-go/netx"
 	"net/http"
 	"time"
@@ -119,6 +118,4 @@ func (s *HttpServer) ClearMaps() {
 func testHandler(w http.ResponseWriter, r *http.Request) {
 	tm := time.Now().Format(time.RFC1123)
 	w.Write([]byte("The time is: " + tm))
-
-	server.CodeSuc
 }
