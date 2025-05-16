@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-var ReceiverBuffLen = 2048
+var ReceiverBuffLen = 8192
 
 type iPackReceiver interface {
 	IPackHandlerContainerSetter
@@ -96,10 +96,10 @@ func NewPackSendReceiver(connInfo IConnInfo, reader IConnReaderAdapter, writer I
 
 func newPackSRBase(connInfo IConnInfo, reader IConnReaderAdapter, writer IConnWriterAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) packSRBase {
 	return packSRBase{
-		connInfo: connInfo, reader: reader, writer: writer,
+		connInfo:             connInfo, reader: reader, writer: writer,
 		PackHandlerContainer: packHandlerContainer,
 		dataBlockHandler:     dataBlockHandler, toBlockBuff: bytex.NewBuffDataBlock(dataBlockHandler),
-		Logger: logger}
+		Logger:               logger}
 }
 
 type packSRBase struct {
@@ -152,6 +152,9 @@ func (sr *packSRBase) SendPack(msg []byte, connId ...string) (int, error) {
 	}
 	return n, nil
 }
+
+// StartReceiving
+// 开始接收数据入口
 func (sr *packSRBase) StartReceiving() error {
 	funcName := "packSRBase.StartReceiving"
 	//sr.Logger.Debugln(funcName)
@@ -192,12 +195,16 @@ func (sr *packSRBase) IsReceiving() bool {
 	defer sr.mu.RUnlock()
 	return sr.receiving
 }
+
+// handleReceiveBytes
+// 处理接收到的数据
 func (sr *packSRBase) handleReceiveBytes(buff bytex.IBuffToData, data []byte, connInfo IConnInfo) {
 	buff.WriteBytes(data)
 	var unPackData []byte
-	//sr.Logger.Debugln("handleReceiveBytes:", len(data), sr.PackHandlerContainer.Size())
+	//sr.Logger.Debugln("handleReceiveBytes:", len(data), sr.PackHandlerContainer.Size(), data)
 	for {
 		unPackData = buff.ReadDataCopy()
+		//sr.Logger.Debugln("handleReceiveBytes2:", len(unPackData))
 		if nil == unPackData || len(unPackData) == 0 {
 			break
 		}
@@ -224,6 +231,8 @@ type packSendReceiver struct {
 	toDataBuff bytex.IBuffToData
 }
 
+// handleData
+// 一对一接收数据入口
 func (sr *packSendReceiver) handleData(newData []byte, connInfo IConnInfo) {
 	//sr.Logger.Debugln("packSendReceiver.handleData:", newData)
 	sr.mu.Lock()
@@ -246,6 +255,8 @@ type packSendReceiverMulti struct {
 	toDataBuffMap map[string]bytex.IBuffToData
 }
 
+// handleDataMulti
+// 多对一接收数据入口
 func (sr *packSendReceiverMulti) handleDataMulti(newData []byte, connInfo IConnInfo) {
 	fmt.Println("packSendReceiverMulti.handleData:", newData)
 	sr.mu.Lock()
