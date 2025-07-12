@@ -7,5 +7,5 @@ package bytex
 
 import "encoding/binary"
 
-var DefaultOrder binary.ByteOrder = binary.BigEndian
+var DefaultOrder binary.ByteOrder = binary.LittleEndian
 var DefaultDataBlockHandler = NewDefaultDataBlockHandler()
