@@ -42,13 +42,17 @@ type IAESCipher interface {
 	// DecryptIVCBC 使用CBC模式解密, 指定IV
 	DecryptIVCBC(ciphertext []byte, iv []byte) ([]byte, error)
 
-	// EncryptCTR 使用CTR模式加密, 使用随机IV，并把IV数据放在密文头部
+	// EncryptCTR 使用CTR模式加密, 使用随机IV(nonce+counter)，并把IV数据放在密文头部
 	EncryptCTR(plaintext []byte) ([]byte, error)
-	// EncryptIVCTR 使用CTR模式加密, 指定IV
+	// EncryptNonceCTR 使用CTR模式加密, 指定Nonce，并使用默认counter，返回结果不包含IV数据
+	EncryptNonceCTR(plaintext []byte, nonce []byte, counter []byte) ([]byte, error)
+	// EncryptIVCTR 使用CTR模式加密, 指定IV(nonce+counter)，返回结果不包含IV数据
 	EncryptIVCTR(plaintext []byte, iv []byte) ([]byte, error)
 	// DecryptCTR 使用CTR模式解密，从密文头部提取IV
 	DecryptCTR(ciphertext []byte) ([]byte, error)
-	// DecryptIVCTR 使用CTR模式解密, 指定IV
+	// DecryptNonceCTR 使用CTR模式解密, 密文内不包含IV数据, 需要指定Nonce数据，并使用默认的counter
+	DecryptNonceCTR(ciphertext []byte, nonce []byte, counter []byte) ([]byte, error)
+	// DecryptIVCTR  使用CTR模式解密, 密文内不包含IV数据, 需要指定IV(nonce+counter)数据
 	DecryptIVCTR(ciphertext []byte, iv []byte) ([]byte, error)
 
 	// EncryptGCM 使用GCM模式加密, 使用随机nonce，并把nonce数据放在密文头部
@@ -87,10 +91,12 @@ func (o *aesCipher) SetPaddingFunc(padding cryptox.FuncPadding, unPadding crypto
 
 func (o *aesCipher) Encrypt(plaintext []byte) ([]byte, error) {
 	return o.EncryptGCM(plaintext)
+	//return o.EncryptCTR(plaintext)
 }
 
 func (o *aesCipher) Decrypt(ciphertext []byte) ([]byte, error) {
 	return o.DecryptGCM(ciphertext)
+	//return o.DecryptCTR(ciphertext)
 }
 
 func (o *aesCipher) EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error) {
@@ -205,13 +211,21 @@ func (o *aesCipher) DecryptIVCBC(ciphertext []byte, iv []byte) ([]byte, error) {
 
 // CTR ---------- ---------- ---------- ---------- ----------
 
+var ctrCounter = []byte{0, 0, 0, 1}
+
 func (o *aesCipher) EncryptCTR(plaintext []byte) ([]byte, error) {
-	iv := make([]byte, aes.BlockSize)
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+	nonce := make([]byte, aes.BlockSize-4)
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, err
 	}
+	iv := append(nonce, ctrCounter...)
 	ciphertext, _ := o.EncryptIVCTR(plaintext, iv)
 	return append(iv, ciphertext...), nil
+}
+
+func (o *aesCipher) EncryptNonceCTR(plaintext []byte, nonce []byte, counter []byte) ([]byte, error) {
+	iv := append(nonce, counter...)
+	return o.EncryptIVCTR(plaintext, iv)
 }
 
 func (o *aesCipher) EncryptIVCTR(plaintext []byte, iv []byte) ([]byte, error) {
@@ -234,6 +248,11 @@ func (o *aesCipher) DecryptCTR(ciphertext []byte) ([]byte, error) {
 	return plaintext, nil
 }
 
+func (o *aesCipher) DecryptNonceCTR(ciphertext []byte, nonce []byte, counter []byte) ([]byte, error) {
+	iv := append(nonce, counter...)
+	return o.DecryptIVCTR(ciphertext, iv)
+}
+
 func (o *aesCipher) DecryptIVCTR(ciphertext []byte, iv []byte) ([]byte, error) {
 	if len(iv) != aes.BlockSize {
 		return nil, errors.New("iv length must be equal to block size! ")
@@ -247,11 +266,11 @@ func (o *aesCipher) DecryptIVCTR(ciphertext []byte, iv []byte) ([]byte, error) {
 // GCM ---------- ---------- ---------- ---------- ----------
 
 const (
-	GcmStandardNonceSize = 12
+	GcmStdNonceSize = 12
 )
 
 func (o *aesCipher) EncryptGCM(plaintext []byte) ([]byte, error) {
-	nonce := make([]byte, GcmStandardNonceSize)
+	nonce := make([]byte, GcmStdNonceSize)
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, err
 	}
@@ -267,14 +286,14 @@ func (o *aesCipher) EncryptNonceGCM(plaintext []byte, nonce []byte) ([]byte, err
 		return nil, err
 	}
 	if len(nonce) != aead.NonceSize() {
-		return nil, errors.New("nonce length must be equal to GcmStandardNonceSize! ")
+		return nil, errors.New("nonce length must be equal to GcmStdNonceSize! ")
 	}
 	ciphertext := aead.Seal(nil, nonce, plaintext, nil)
 	return ciphertext, nil
 }
 
 func (o *aesCipher) DecryptGCM(ciphertext []byte) ([]byte, error) {
-	nonceSize := GcmStandardNonceSize
+	nonceSize := GcmStdNonceSize
 	if len(ciphertext) < nonceSize {
 		return nil, errors.New("ciphertext too short")
 	}
@@ -283,8 +302,8 @@ func (o *aesCipher) DecryptGCM(ciphertext []byte) ([]byte, error) {
 	return o.DecryptNonceGCM(data, nonce)
 }
 func (o *aesCipher) DecryptNonceGCM(ciphertext []byte, nonce []byte) ([]byte, error) {
-	if len(nonce) != GcmStandardNonceSize {
-		return nil, errors.New("nonce length must be equal to GcmStandardNonceSize! ")
+	if len(nonce) != GcmStdNonceSize {
+		return nil, errors.New("nonce length must be equal to GcmStdNonceSize! ")
 	}
 	aead, err := cipher.NewGCM(o.block)
 	if err != nil {

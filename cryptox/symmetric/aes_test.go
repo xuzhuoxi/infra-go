@@ -20,15 +20,15 @@ type aesValue struct {
 
 	plaintext  []byte
 	ciphertext []byte
-	plaintext2 []byte
+	decrypted  []byte
 }
 
-func (o *aesValue) String() string {
-	return fmt.Sprintf("Key:{bs=%v};\nIV:{bs=%v};\nPlaintext:{bs=%v};\nCiphertext:{bs=%v};\nPlaintext2:{bs=%v}",
-		o.key, o.iv, o.plaintext, o.ciphertext, o.plaintext2)
+func (o aesValue) String() string {
+	return fmt.Sprintf("Key:{bs=%v};\nIV:{bs=%v};\nPlaintext:{bs=%v};\nCiphertext:{bs=%v};\nDecrypted:{bs=%v}",
+		o.key, o.iv, o.plaintext, o.ciphertext, o.decrypted)
 }
 
-var encryptAESTests = []*aesValue{
+var encryptAESTests = []aesValue{
 	{
 		key:        []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 		plaintext:  []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
@@ -145,10 +145,12 @@ func TestSameKey(t *testing.T) {
 	cipher := NewAESCipher(key)
 	for _, value := range encryptAESTests {
 		for _, m := range aesMode {
-			ciphertext, err1 := cipher.EncryptMode(value.plaintext, m)
+			newValue := value
+			newValue.key = key
+			ciphertext, err1 := cipher.EncryptMode(newValue.plaintext, m)
 			plaintext2, err2 := cipher.DecryptMode(ciphertext, m)
-			value.ciphertext, value.plaintext2 = ciphertext, plaintext2
-			compareAesCipherResult(t, string(m), value, err1, err2)
+			newValue.ciphertext, newValue.decrypted = ciphertext, plaintext2
+			compareAesCipherResult(t, string(m), newValue, err1, err2)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
 	}
@@ -166,8 +168,9 @@ func TestAES16(t *testing.T) {
 func TestAES24(t *testing.T) {
 	for _, value := range encryptAESTests {
 		for _, m := range aesMode {
-			value.key = append(value.key, value.key[:8]...)
-			testEncryptDecrypt(t, value, m)
+			newValue := value
+			newValue.key = append(value.key, value.key[:8]...)
+			testEncryptDecrypt(t, newValue, m)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
 	}
@@ -175,56 +178,49 @@ func TestAES24(t *testing.T) {
 func TestAES32(t *testing.T) {
 	for _, value := range encryptAESTests {
 		for _, m := range aesMode {
-			value.key = append(value.key, value.key[:16]...)
-			testEncryptDecrypt(t, value, m)
+			newValue := value
+			newValue.key = append(value.key, value.key[:16]...)
+			testEncryptDecrypt(t, newValue, m)
 		}
 		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
 	}
 }
 
-func testEncryptDecrypt(t *testing.T, value *aesValue, blockMode cryptox.BlockMode) {
+func TestAesCBC(t *testing.T) {
+	value := encryptAESTests[0]
+	value.key = append(value.key, value.key[:16]...)
 	cipher := NewAESCipher(value.key)
-	ciphertext, err1 := cipher.EncryptMode(value.ciphertext, blockMode)
-	plaintext2, err2 := cipher.DecryptMode(ciphertext, blockMode)
-	value.ciphertext, value.plaintext2 = ciphertext, plaintext2
+	ciphertext, err1 := cipher.EncryptCBC(value.plaintext)
+	decrypted, err2 := cipher.DecryptCBC(ciphertext)
+	value.ciphertext, value.decrypted = ciphertext, decrypted
+	compareAesCipherResult(t, string(cryptox.CBC), value, err1, err2)
+}
+
+func testEncryptDecrypt(t *testing.T, value aesValue, blockMode cryptox.BlockMode) {
+	cipher := NewAESCipher(value.key)
+	ciphertext, err1 := cipher.EncryptMode(value.plaintext, blockMode)
+	decrypted, err2 := cipher.DecryptMode(ciphertext, blockMode)
+	value.ciphertext, value.decrypted = ciphertext, decrypted
 	compareAesCipherResult(t, string(blockMode), value, err1, err2)
 }
 
 var (
-	aesIVTests = []*aesValue{
+	aesIVTests = []aesValue{
 		{
-			key: []byte{
-				0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
-				0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
-			},
-			iv:        []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef},
 			plaintext: []byte("Hello World!Hello World!Hello World!"),
-		},
-		{
 			key: []byte{
 				0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 				0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 			},
-			iv:        []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef},
+			iv: []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef},
+		},
+		{
 			plaintext: []byte("Hello World!Hello World!Hello World!666"),
-		},
-	}
-	aesIVGCMTests = []*aesValue{
-		{
 			key: []byte{
 				0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 				0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
 			},
-			iv:        []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67},
-			plaintext: []byte("Hello World!Hello World!Hello World!"),
-		},
-		{
-			key: []byte{
-				0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
-				0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef,
-			},
-			iv:        []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67},
-			plaintext: []byte("Hello World!Hello World!Hello World!666"),
+			iv: []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xcd, 0xef},
 		},
 	}
 )
@@ -237,35 +233,20 @@ func TestIVAES(t *testing.T) {
 	}
 }
 
-func TestIVGcmAES(t *testing.T) {
-	for _, value := range aesIVGCMTests {
-		testIvGcmDecrypt(t, value)
-		fmt.Println("---------- ---------- ---------- ---------- ---------- ----------")
-	}
-}
-
-func testIvDecrypt(t *testing.T, value *aesValue, mode cryptox.BlockMode) {
+func testIvDecrypt(t *testing.T, value aesValue, mode cryptox.BlockMode) {
 	cipher := NewAESCipher(value.key)
 	ciphertext, err1 := cipher.EncryptIVMode(value.plaintext, value.iv, mode)
 	plaintext2, err2 := cipher.DecryptIVMode(ciphertext, value.iv, mode)
-	value.ciphertext, value.plaintext2 = ciphertext, plaintext2
+	value.ciphertext, value.decrypted = ciphertext, plaintext2
 	compareAesCipherResult(t, string(mode), value, err1, err2)
 }
 
-func testIvGcmDecrypt(t *testing.T, value *aesValue) {
-	cipher := NewAESCipher(value.key)
-	ciphertext, err1 := cipher.EncryptNonceGCM(value.plaintext, value.iv)
-	plaintext2, err2 := cipher.DecryptNonceGCM(ciphertext, value.iv)
-	value.ciphertext, value.plaintext2 = ciphertext, plaintext2
-	compareAesCipherResult(t, "GCM", value, err1, err2)
-}
-
-func compareAesCipherResult(t *testing.T, title string, value *aesValue, err1, err2 error) {
+func compareAesCipherResult(t *testing.T, title string, value aesValue, err1, err2 error) {
 	if err1 != nil || err2 != nil {
 		t.Fatal(title, value, err1, err2)
 		return
 	}
-	if !slicex.EqualUint8(value.plaintext, value.plaintext2) {
+	if !slicex.EqualUint8(value.plaintext, value.decrypted) {
 		t.Fatal(title, value)
 		return
 	}
