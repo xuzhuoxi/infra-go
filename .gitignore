@@ -16,6 +16,9 @@
 
 *.log
 
+go.work
+go.work.sum
+
 /.idea/
 /build/debian
 /build/release
