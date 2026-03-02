@@ -1,12 +1,10 @@
 package quicx
 
-import (
-	"github.com/lucas-clemente/quic-go"
-)
+import "io"
 
 type QUICStreamAdapter struct {
-	Reader        quic.ReceiveStream
-	Writer        quic.SendStream
+	Reader        io.Reader
+	Writer        io.Writer
 	remoteAddress string
 }
 

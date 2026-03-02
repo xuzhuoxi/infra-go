@@ -2,11 +2,12 @@ package filterx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/imagex"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image/draw"
 	"reflect"
 	"testing"
+
+	"github.com/xuzhuoxi/infra-go/imagex"
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func TestDilateCVT(t *testing.T) {

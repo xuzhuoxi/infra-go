@@ -5,6 +5,7 @@ package wsx
 
 import (
 	"errors"
+
 	"github.com/xuzhuoxi/infra-go/netx"
 	"golang.org/x/net/websocket"
 )

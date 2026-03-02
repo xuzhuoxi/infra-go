@@ -8,9 +8,10 @@ package bytex
 import (
 	"bytes"
 	"encoding/binary"
+	"sync"
+
 	"github.com/xuzhuoxi/infra-go/binaryx"
 	"github.com/xuzhuoxi/infra-go/slicex"
-	"sync"
 )
 
 func NewDefaultBuffDataBlock() IBuffDataBlock {

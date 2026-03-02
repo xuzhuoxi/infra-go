@@ -8,8 +8,9 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"errors"
-	"github.com/xuzhuoxi/infra-go/cryptox"
 	"io"
+
+	"github.com/xuzhuoxi/infra-go/cryptox"
 )
 
 // IAESCipher

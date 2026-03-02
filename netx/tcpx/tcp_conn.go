@@ -5,8 +5,9 @@ package tcpx
 
 import (
 	"errors"
-	"github.com/xuzhuoxi/infra-go/netx"
 	"net"
+
+	"github.com/xuzhuoxi/infra-go/netx"
 )
 
 var errProxyNil = errors.New("TcpConn.SRProxy is ni")

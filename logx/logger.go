@@ -1,10 +1,11 @@
 package logx
 
 import (
+	"log"
+
 	"github.com/xuzhuoxi/infra-go/filex"
 	"github.com/xuzhuoxi/infra-go/mathx"
 	"github.com/xuzhuoxi/infra-go/osxu"
-	"log"
 )
 
 type LogType uint8

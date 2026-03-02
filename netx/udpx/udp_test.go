@@ -2,11 +2,12 @@ package udpx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/logx"
-	"github.com/xuzhuoxi/infra-go/netx"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 )
 
 func TestUDPServer(t *testing.T) {

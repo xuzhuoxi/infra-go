@@ -1,11 +1,12 @@
 package filex
 
 import (
-	"github.com/xuzhuoxi/infra-go/osxu"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/xuzhuoxi/infra-go/osxu"
 )
 
 const (

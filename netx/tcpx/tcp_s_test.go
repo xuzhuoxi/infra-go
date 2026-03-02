@@ -6,10 +6,11 @@ package tcpx
 import (
 	"encoding/binary"
 	"fmt"
+	"testing"
+
 	"github.com/xuzhuoxi/infra-go/bytex"
 	"github.com/xuzhuoxi/infra-go/encodingx"
 	"github.com/xuzhuoxi/infra-go/netx"
-	"testing"
 )
 
 func TestTCPResponseServer(t *testing.T) {

@@ -2,11 +2,12 @@ package filterx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/imagex"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image/color"
 	"reflect"
 	"testing"
+
+	"github.com/xuzhuoxi/infra-go/imagex"
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func TestGrayRGBAImage(t *testing.T) {

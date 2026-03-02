@@ -1,11 +1,12 @@
 package mgo_v2x
 
 import (
+	"io"
+	"sync"
+
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/storagex/mongox"
 	"gopkg.in/mgo.v2"
-	"io"
-	"sync"
 )
 
 func NewMongoDriverV(maxSessions int) IMongoDriverV {

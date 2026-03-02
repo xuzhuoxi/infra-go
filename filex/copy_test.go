@@ -2,8 +2,9 @@ package filex
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/osxu"
 	"testing"
+
+	"github.com/xuzhuoxi/infra-go/osxu"
 )
 
 func TestCopyToLittle(t *testing.T) {

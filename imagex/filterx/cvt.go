@@ -4,10 +4,11 @@ package filterx
 
 import (
 	"errors"
-	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"image/color"
 	"image/draw"
+
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
 // CVTGray

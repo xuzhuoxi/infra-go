@@ -8,8 +8,9 @@ package gobx
 import (
 	"bytes"
 	"encoding/gob"
-	"github.com/xuzhuoxi/infra-go/encodingx"
 	"sync"
+
+	"github.com/xuzhuoxi/infra-go/encodingx"
 )
 
 // NewGobCodingHandler

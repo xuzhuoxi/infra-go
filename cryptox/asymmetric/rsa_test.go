@@ -8,12 +8,14 @@ package asymmetric
 import (
 	"crypto"
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/filex"
 	"testing"
+
+	"github.com/xuzhuoxi/infra-go/filex"
 
 	_ "crypto/sha1"
 	_ "crypto/sha256"
 	_ "crypto/sha512"
+
 	_ "golang.org/x/crypto/ripemd160"
 )
 

@@ -4,8 +4,9 @@
 package netx
 
 import (
-	"github.com/xuzhuoxi/infra-go/eventx"
 	"sync"
+
+	"github.com/xuzhuoxi/infra-go/eventx"
 )
 
 // IUserConnMapper

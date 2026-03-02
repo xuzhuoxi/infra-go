@@ -1,9 +1,10 @@
 package mgo_v2x
 
 import (
+	"testing"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"testing"
 )
 
 //Using the driver "gopkg.in/mgo.v2"

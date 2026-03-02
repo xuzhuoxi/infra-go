@@ -1,9 +1,11 @@
 package quicx
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"github.com/lucas-clemente/quic-go"
+
+	"github.com/quic-go/quic-go"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
@@ -37,7 +39,7 @@ type QUICServer struct {
 	netx.SockServerBase
 	logFuncNameSend string
 
-	listener quic.Listener
+	listener *quic.Listener
 	mapConn  map[string]netx.IServerConn // [connId:netx.IServerConn]
 }
 
@@ -63,8 +65,9 @@ func (s *QUICServer) StartServer(params netx.SockParams) error {
 	s.ServerMu.Unlock()
 	s.Logger.Infoln(funcName, "()")
 	s.DispatchServerStartedEvent(s)
+	ctx := context.Background()
 	for s.Running {
-		session, err := listener.Accept()
+		session, err := listener.Accept(ctx)
 		if !s.Running || nil != err {
 			return err
 		}
@@ -149,7 +152,7 @@ func (s *QUICServer) SendBytesTo(data []byte, connId ...string) error {
 	return nil
 }
 
-func (s *QUICServer) handlerSession(session quic.Session) {
+func (s *QUICServer) handlerSession(session *quic.Conn) {
 	localAddress := session.LocalAddr().String()
 	remoteAddress := session.RemoteAddr().String()
 	connInfo := netx.NewConnInfo(localAddress, remoteAddress)
@@ -161,9 +164,9 @@ func (s *QUICServer) handlerSession(session quic.Session) {
 	s.endConn(connInfo, session, stream)
 }
 
-func (s *QUICServer) startConn(connInfo netx.IConnInfo, session quic.Session) (stream quic.Stream, proxy netx.IPackSendReceiver) {
+func (s *QUICServer) startConn(connInfo netx.IConnInfo, session *quic.Conn) (stream *quic.Stream, proxy netx.IPackSendReceiver) {
 	s.ServerMu.Lock()
-	stream1, err := session.AcceptStream()
+	stream1, err := session.AcceptStream(context.Background())
 	if nil != err {
 		s.ServerMu.Unlock()
 		s.Logger.Warnln("[QUICServer.startConn]", err)
@@ -179,20 +182,20 @@ func (s *QUICServer) startConn(connInfo netx.IConnInfo, session quic.Session) (s
 	return stream1, proxy
 }
 
-func (s *QUICServer) endConn(connInfo netx.IConnInfo, session quic.Session, stream quic.Stream) {
+func (s *QUICServer) endConn(connInfo netx.IConnInfo, session *quic.Conn, stream *quic.Stream) {
 	s.ServerMu.Lock()
 	delete(s.mapConn, connInfo.GetConnId())
 	s.ServerMu.Unlock()
 	if nil != stream {
-		stream.Close()
+		_ = stream.Close()
 	}
 	if nil != session {
-		session.Close()
+		_ = session.CloseWithError(0, "server conn closed")
 	}
 	s.DispatchServerConnCloseEvent(s, connInfo)
 	s.Logger.Infoln("[QUICServer.endConn] Quic Connection:", connInfo, "Closed!")
 }
 
-func listenQuic(localAddress string) (quic.Listener, error) {
+func listenQuic(localAddress string) (*quic.Listener, error) {
 	return quic.ListenAddr(localAddress, generateTLSConfig(), nil)
 }

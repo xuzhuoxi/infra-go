@@ -9,9 +9,10 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/slicex"
 	"testing"
 	"time"
+
+	"github.com/xuzhuoxi/infra-go/slicex"
 )
 
 type testData1 struct {
@@ -156,11 +157,11 @@ func TestGobDiffBuff(t *testing.T) {
 func TestGobHandler(t *testing.T) {
 	handler := NewGobCodingHandler()
 	for index := 0; index < 3; index++ {
-		bs1 := handler.HandleEncode(data1)
+		bs1, _ := handler.HandleEncode(data1)
 		var rs1 testData1
 		handler.HandleDecode(bs1, &rs1)
 
-		bs2 := handler.HandleEncode(data2)
+		bs2, _ := handler.HandleEncode(data2)
 		var rs2 testData2
 		handler.HandleDecode(bs2, &rs2)
 
@@ -171,8 +172,10 @@ func TestGobHandler(t *testing.T) {
 	//}()
 	//go func() {
 	for index := 0; index < 3; index++ {
-		bs1 := slicex.CopyUint8(handler.HandleEncode(data1))
-		bs2 := slicex.CopyUint8(handler.HandleEncode(data2))
+		bs1, _ := handler.HandleEncode(data1)
+		bs1 = slicex.CopyUint8(bs1)
+		bs2, _ := handler.HandleEncode(data2)
+		bs2 = slicex.CopyUint8(bs2)
 		var rs1 testData1
 		var rs2 testData2
 		handler.HandleDecode(bs1, &rs1)
@@ -188,11 +191,11 @@ func TestGobHandlerSync(t *testing.T) {
 	handler := NewGobCodingHandlerSync()
 	var f1 = func() {
 		for index := 0; index < 3; index++ {
-			bs1 := handler.HandleEncode(data1)
+			bs1, _ := handler.HandleEncode(data1)
 			var rs1 testData1
 			handler.HandleDecode(bs1, &rs1)
 
-			bs2 := handler.HandleEncode(data2)
+			bs2, _ := handler.HandleEncode(data2)
 			var rs2 testData2
 			handler.HandleDecode(bs2, &rs2)
 
@@ -203,8 +206,10 @@ func TestGobHandlerSync(t *testing.T) {
 	}
 	var f2 = func() {
 		for index := 0; index < 3; index++ {
-			bs1 := slicex.CopyUint8(handler.HandleEncode(data1))
-			bs2 := slicex.CopyUint8(handler.HandleEncode(data2))
+			bs1, _ := handler.HandleEncode(data1)
+			bs1 = slicex.CopyUint8(bs1)
+			bs2, _ := handler.HandleEncode(data2)
+			bs2 = slicex.CopyUint8(bs2)
 			var rs1 testData1
 			var rs2 testData2
 			handler.HandleDecode(bs1, &rs1)
@@ -223,11 +228,11 @@ func TestGobHandlerAsync(t *testing.T) {
 	handler := NewGobCodingHandlerAsync()
 	var f1 = func() {
 		for index := 0; index < 3; index++ {
-			bs1 := handler.HandleEncode(data1)
+			bs1, _ := handler.HandleEncode(data1)
 			var rs1 testData1
 			handler.HandleDecode(bs1, &rs1)
 
-			bs2 := handler.HandleEncode(data2)
+			bs2, _ := handler.HandleEncode(data2)
 			var rs2 testData2
 			handler.HandleDecode(bs2, &rs2)
 
@@ -238,8 +243,8 @@ func TestGobHandlerAsync(t *testing.T) {
 	}
 	var f2 = func() {
 		for index := 0; index < 3; index++ {
-			bs1 := handler.HandleEncode(data1)
-			bs2 := handler.HandleEncode(data2)
+			bs1, _ := handler.HandleEncode(data1)
+			bs2, _ := handler.HandleEncode(data2)
 			var rs1 testData1
 			var rs2 testData2
 			handler.HandleDecode(bs1, &rs1)

@@ -6,10 +6,11 @@
 package imagex
 
 import (
-	"github.com/xuzhuoxi/infra-go/filex"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image"
 	"os"
+
+	"github.com/xuzhuoxi/infra-go/filex"
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func SaveImage(img image.Image, fullPath string, format formatx.ImageFormat, options interface{}) error {

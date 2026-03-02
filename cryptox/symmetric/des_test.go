@@ -7,9 +7,10 @@ package symmetric
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/xuzhuoxi/infra-go/cryptox"
 	"github.com/xuzhuoxi/infra-go/slicex"
-	"testing"
 )
 
 var desMode = []cryptox.BlockMode{cryptox.ECB, cryptox.CBC, cryptox.CTR}

@@ -5,7 +5,8 @@ package quicx
 
 import (
 	"errors"
-	"github.com/lucas-clemente/quic-go"
+
+	"github.com/quic-go/quic-go"
 	"github.com/xuzhuoxi/infra-go/netx"
 )
 
@@ -14,8 +15,8 @@ var errProxyNil = errors.New("QuicConn.SRProxy is ni")
 type QuicSockConn struct {
 	QuicConnInfo netx.IConnInfo
 	SRProxy      netx.IPackSendReceiver
-	Session      quic.Session
-	Stream       quic.Stream
+	Session      *quic.Conn
+	Stream       *quic.Stream
 }
 
 func (o *QuicSockConn) ClientAddress() string {
@@ -40,8 +41,13 @@ func (o *QuicSockConn) SendPack(data []byte) error {
 
 func (o *QuicSockConn) CloseConn() error {
 	err1 := o.SRProxy.StopReceiving()
-	err2 := o.Stream.Close()
-	err3 := o.Session.Close()
+	var err2, err3 error
+	if o.Stream != nil {
+		err2 = o.Stream.Close()
+	}
+	if o.Session != nil {
+		err3 = o.Session.CloseWithError(0, "server conn closed")
+	}
 	if nil != err1 {
 		return err1
 	}

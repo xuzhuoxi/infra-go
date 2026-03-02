@@ -1,8 +1,9 @@
 package udpx
 
 import (
-	"github.com/xuzhuoxi/infra-go/netx"
 	"net"
+
+	"github.com/xuzhuoxi/infra-go/netx"
 )
 
 type UDPConnAdapter struct {

@@ -3,12 +3,13 @@ package imagex
 import (
 	"bytes"
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/graphicx/blendx"
-	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"image/color"
 	"image/draw"
 	"math"
+
+	"github.com/xuzhuoxi/infra-go/graphicx/blendx"
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
 // SprintImage

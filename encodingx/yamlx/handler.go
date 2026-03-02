@@ -20,12 +20,8 @@ func NewYamlCodingHandlerSync() encodingx.ICodingHandler {
 
 type yamlHandlerAsync struct{}
 
-func (c yamlHandlerAsync) HandleEncode(data interface{}) []byte {
-	bs, err := yaml.Marshal(data)
-	if nil != err {
-		return nil
-	}
-	return bs
+func (c yamlHandlerAsync) HandleEncode(data interface{}) (bs []byte, err error) {
+	return yaml.Marshal(data)
 }
 
 func (c yamlHandlerAsync) HandleDecode(bs []byte, data interface{}) error {

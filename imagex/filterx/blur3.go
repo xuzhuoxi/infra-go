@@ -3,10 +3,11 @@ package filterx
 import (
 	"errors"
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"image/color"
 	"image/draw"
+
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
 func FastBlur3(srcImg image.Image, dstImg draw.Image, radius int) error {

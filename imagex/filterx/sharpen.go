@@ -4,9 +4,10 @@ package filterx
 
 import (
 	"errors"
-	"github.com/xuzhuoxi/infra-go/imagex"
 	"image"
 	"image/draw"
+
+	"github.com/xuzhuoxi/infra-go/imagex"
 )
 
 // 锐化滤波器

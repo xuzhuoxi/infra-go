@@ -2,10 +2,11 @@ package filterx
 
 import (
 	"errors"
-	"github.com/xuzhuoxi/infra-go/graphicx"
-	"github.com/xuzhuoxi/infra-go/imagex"
 	"image"
 	"image/color"
+
+	"github.com/xuzhuoxi/infra-go/graphicx"
+	"github.com/xuzhuoxi/infra-go/imagex"
 )
 
 // GrayDefaultFromNRGBA

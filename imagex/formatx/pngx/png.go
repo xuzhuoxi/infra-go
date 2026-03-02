@@ -6,10 +6,11 @@
 package pngx
 
 import (
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image"
 	"image/png"
 	"io"
+
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func init() {

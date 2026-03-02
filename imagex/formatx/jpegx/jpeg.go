@@ -6,10 +6,11 @@
 package jpegx
 
 import (
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image"
 	"image/jpeg"
 	"io"
+
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func init() {

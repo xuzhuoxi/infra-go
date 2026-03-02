@@ -6,6 +6,7 @@ package astar
 
 import (
 	"errors"
+
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 

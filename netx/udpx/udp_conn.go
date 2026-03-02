@@ -5,6 +5,7 @@ package udpx
 
 import (
 	"errors"
+
 	"github.com/xuzhuoxi/infra-go/netx"
 )
 

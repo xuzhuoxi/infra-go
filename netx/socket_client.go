@@ -6,9 +6,10 @@
 package netx
 
 import (
+	"sync"
+
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
-	"sync"
 )
 
 type ISockClientSetter interface {

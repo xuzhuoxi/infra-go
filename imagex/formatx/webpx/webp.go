@@ -5,9 +5,10 @@ package webpx
 
 import (
 	"errors"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image"
 	"io"
+
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func init() {

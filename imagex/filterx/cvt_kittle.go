@@ -1,10 +1,11 @@
 package filterx
 
 import (
-	"github.com/xuzhuoxi/infra-go/graphicx"
-	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"image/draw"
+
+	"github.com/xuzhuoxi/infra-go/graphicx"
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
 // CVTGrayImageWithKittle

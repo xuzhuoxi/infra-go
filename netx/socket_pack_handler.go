@@ -8,9 +8,10 @@ package netx
 import (
 	"errors"
 	"fmt"
+	"sync"
+
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
-	"sync"
 )
 
 // FuncPackHandler

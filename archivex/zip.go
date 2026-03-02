@@ -8,9 +8,10 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/filex"
 	"io"
 	"os"
+
+	"github.com/xuzhuoxi/infra-go/filex"
 )
 
 // ArchiveMultiToZipRoot

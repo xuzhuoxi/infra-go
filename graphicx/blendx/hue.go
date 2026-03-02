@@ -6,9 +6,10 @@
 package blendx
 
 import (
-	"github.com/xuzhuoxi/infra-go/graphicx"
 	"image/color"
 	"math"
+
+	"github.com/xuzhuoxi/infra-go/graphicx"
 )
 
 func init() {

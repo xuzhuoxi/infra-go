@@ -2,12 +2,13 @@ package wsx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/logx"
-	"github.com/xuzhuoxi/infra-go/netx"
-	"golang.org/x/net/websocket"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
+	"golang.org/x/net/websocket"
 )
 
 func TestWSServer(t *testing.T) {

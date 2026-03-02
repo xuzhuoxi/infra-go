@@ -2,13 +2,14 @@ package logx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/filex"
 	"log"
 	"math"
 	"os"
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/xuzhuoxi/infra-go/filex"
 )
 
 type logFormats struct {

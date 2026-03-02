@@ -6,8 +6,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/xuzhuoxi/infra-go/bytex"
 	"math/big"
+
+	"github.com/xuzhuoxi/infra-go/bytex"
 )
 
 var QuicDataBlockHandler = bytex.NewDefaultDataBlockHandler()

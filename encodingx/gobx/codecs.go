@@ -1,9 +1,10 @@
 package gobx
 
 import (
+	"sync"
+
 	"github.com/xuzhuoxi/infra-go/bytex"
 	"github.com/xuzhuoxi/infra-go/encodingx"
-	"sync"
 )
 
 func NewGobBuffEncoder(handler bytex.IDataBlockHandler) encodingx.IBuffEncoder {

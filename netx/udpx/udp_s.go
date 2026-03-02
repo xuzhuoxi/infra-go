@@ -2,13 +2,14 @@ package udpx
 
 import (
 	"fmt"
+	"net"
+	"sync"
+
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"github.com/xuzhuoxi/infra-go/netx"
-	"net"
-	"sync"
 )
 
 const (

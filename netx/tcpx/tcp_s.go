@@ -3,12 +3,13 @@ package tcpx
 import (
 	"errors"
 	"fmt"
+	"net"
+
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"github.com/xuzhuoxi/infra-go/netx"
-	"net"
 )
 
 func NewTCPServer() ITCPServer {

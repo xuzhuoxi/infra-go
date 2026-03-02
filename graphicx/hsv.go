@@ -1,8 +1,9 @@
 package graphicx
 
 import (
-	"github.com/xuzhuoxi/infra-go/mathx"
 	"math"
+
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
 // HSV2RGB

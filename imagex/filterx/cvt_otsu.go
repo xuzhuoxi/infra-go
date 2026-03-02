@@ -1,10 +1,11 @@
 package filterx
 
 import (
-	"github.com/xuzhuoxi/infra-go/graphicx"
-	"github.com/xuzhuoxi/infra-go/slicex"
 	"image"
 	"image/draw"
+
+	"github.com/xuzhuoxi/infra-go/graphicx"
+	"github.com/xuzhuoxi/infra-go/slicex"
 )
 
 // CVTWithOTSU

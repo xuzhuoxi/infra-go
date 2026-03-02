@@ -2,10 +2,11 @@ package netx
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/xuzhuoxi/infra-go/bytex"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/logx"
-	"sync"
 )
 
 var ReceiverBuffLen = 8192

@@ -6,9 +6,10 @@
 package imagex
 
 import (
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"image"
 	"os"
+
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func LoadImage(fullPath string, format formatx.ImageFormat) (img image.Image, imgFormat string, err error) {

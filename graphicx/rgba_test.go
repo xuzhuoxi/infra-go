@@ -2,10 +2,11 @@ package graphicx
 
 import (
 	"fmt"
-	"golang.org/x/image/colornames"
 	"image/color"
 	"math"
 	"testing"
+
+	"golang.org/x/image/colornames"
 )
 
 func TestRGBA_2_RGB(t *testing.T) {

@@ -1,10 +1,11 @@
 package imagex
 
 import (
-	"github.com/xuzhuoxi/infra-go/graphicx"
 	"image"
 	"image/color"
 	"image/draw"
+
+	"github.com/xuzhuoxi/infra-go/graphicx"
 )
 
 type PixelImage struct {

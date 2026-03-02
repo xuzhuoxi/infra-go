@@ -7,6 +7,7 @@ package listx
 
 import (
 	"container/list"
+
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/mathx"
 )

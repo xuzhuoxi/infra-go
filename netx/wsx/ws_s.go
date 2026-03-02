@@ -3,13 +3,14 @@ package wsx
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"github.com/xuzhuoxi/infra-go/netx"
 	"golang.org/x/net/websocket"
-	"net/http"
 )
 
 func NewWebSocketServer() IWebSocketServer {

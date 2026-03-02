@@ -6,8 +6,9 @@
 package resizex
 
 import (
-	"github.com/nfnt/resize"
 	"image"
+
+	"github.com/nfnt/resize"
 )
 
 func ResizeImage(source image.Image, width, height uint) (img image.Image, err error) {

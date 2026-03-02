@@ -2,10 +2,11 @@ package quicx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/logx"
-	"github.com/xuzhuoxi/infra-go/netx"
 	"testing"
 	"time"
+
+	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 )
 
 func TestQUICServer(t *testing.T) {

@@ -3,12 +3,13 @@ package filterx
 import (
 	"errors"
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/graphicx"
-	"github.com/xuzhuoxi/infra-go/imagex"
-	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"image/color"
 	"image/draw"
+
+	"github.com/xuzhuoxi/infra-go/graphicx"
+	"github.com/xuzhuoxi/infra-go/imagex"
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
 // FastBlur_Java

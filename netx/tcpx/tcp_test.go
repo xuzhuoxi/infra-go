@@ -2,11 +2,12 @@ package tcpx
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/xuzhuoxi/infra-go/eventx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"github.com/xuzhuoxi/infra-go/netx"
-	"testing"
-	"time"
 )
 
 func TestTCPServer(t *testing.T) {

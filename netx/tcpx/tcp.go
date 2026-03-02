@@ -1,11 +1,12 @@
 package tcpx
 
 import (
-	"github.com/xuzhuoxi/infra-go/bytex"
-	"github.com/xuzhuoxi/infra-go/netx"
 	"log"
 	"net"
 	"sync"
+
+	"github.com/xuzhuoxi/infra-go/bytex"
+	"github.com/xuzhuoxi/infra-go/netx"
 )
 
 var (

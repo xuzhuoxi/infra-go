@@ -1,8 +1,9 @@
 package mgo_v2x
 
 import (
-	"gopkg.in/mgo.v2"
 	"io"
+
+	"gopkg.in/mgo.v2"
 )
 
 type IMongoSessionV interface {

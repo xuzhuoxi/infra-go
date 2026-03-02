@@ -2,17 +2,18 @@ package imagex
 
 import (
 	"fmt"
+	"image"
+	"image/color"
+	"image/draw"
+	"math"
+	"testing"
+
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
 	_ "github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
 	_ "github.com/xuzhuoxi/infra-go/imagex/formatx/pngx"
 	"github.com/xuzhuoxi/infra-go/osxu"
 	"golang.org/x/image/colornames"
-	"image"
-	"image/color"
-	"image/draw"
-	"math"
-	"testing"
 )
 
 var rect = image.Rect(0, 0, 64, 64)

@@ -7,8 +7,9 @@ package gobx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/slicex"
 	"testing"
+
+	"github.com/xuzhuoxi/infra-go/slicex"
 )
 
 type A struct {

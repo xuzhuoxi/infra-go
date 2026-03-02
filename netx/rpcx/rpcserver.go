@@ -1,10 +1,11 @@
 package rpcx
 
 import (
-	"github.com/xuzhuoxi/infra-go/logx"
-	"github.com/xuzhuoxi/infra-go/netx"
 	"net"
 	"net/rpc"
+
+	"github.com/xuzhuoxi/infra-go/logx"
+	"github.com/xuzhuoxi/infra-go/netx"
 )
 
 const (

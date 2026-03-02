@@ -2,10 +2,11 @@ package tcpx
 
 import (
 	"fmt"
+	"net"
+
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"github.com/xuzhuoxi/infra-go/netx"
-	"net"
 )
 
 func NewTCPClient() ITCPClient {

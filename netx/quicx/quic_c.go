@@ -1,8 +1,10 @@
 package quicx
 
 import (
+	"context"
 	"crypto/tls"
-	"github.com/lucas-clemente/quic-go"
+
+	"github.com/quic-go/quic-go"
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"github.com/xuzhuoxi/infra-go/netx"
@@ -29,7 +31,15 @@ type IQuicClient interface {
 
 type QUICClient struct {
 	netx.SockClientBase
-	stream quic.Stream
+	stream *quic.Stream
+}
+
+type quicConnAdapter struct {
+	*quic.Conn
+}
+
+func (a *quicConnAdapter) Close() error {
+	return a.Conn.CloseWithError(0, "client closed")
 }
 
 func (c *QUICClient) OpenClient(params netx.SockParams) error {
@@ -42,13 +52,13 @@ func (c *QUICClient) OpenClient(params netx.SockParams) error {
 	if "" != params.Network {
 		c.Network = params.Network
 	}
-	session, err1 := quic.DialAddr(params.RemoteAddress, &tls.Config{InsecureSkipVerify: true}, nil)
+	session, err1 := quic.DialAddr(context.Background(), params.RemoteAddress, &tls.Config{InsecureSkipVerify: true}, nil)
 	if nil != err1 {
 		c.Logger.Warnln(funcName, err1)
 		return err1
 	}
-	c.Conn = session
-	stream, err2 := session.OpenStreamSync()
+	c.Conn = &quicConnAdapter{Conn: session}
+	stream, err2 := session.OpenStreamSync(context.Background())
 	if nil != err2 {
 		c.Logger.Warnln(funcName, err2)
 		return err2

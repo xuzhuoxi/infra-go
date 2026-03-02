@@ -7,11 +7,12 @@ package mgox
 
 import (
 	"context"
+	"io"
+	"sync"
+
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/storagex/mongox"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"io"
-	"sync"
 )
 
 func NewMongoDriver(maxClient int) IMongoDriver {

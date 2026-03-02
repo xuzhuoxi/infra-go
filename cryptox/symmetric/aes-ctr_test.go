@@ -8,9 +8,10 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/slicex"
 	"math/rand"
 	"testing"
+
+	"github.com/xuzhuoxi/infra-go/slicex"
 )
 
 type aesCtrCaseItem struct {

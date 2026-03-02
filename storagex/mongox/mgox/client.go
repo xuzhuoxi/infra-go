@@ -7,10 +7,11 @@ package mgox
 
 import (
 	"context"
+	"sync"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/x/bsonx"
-	"sync"
 )
 
 func NewIMongoClient(clientName string, options *options.ClientOptions, context context.Context) IMongoClient {

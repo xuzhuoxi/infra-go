@@ -2,10 +2,11 @@ package filterx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/imagex"
-	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 	"reflect"
 	"testing"
+
+	"github.com/xuzhuoxi/infra-go/imagex"
+	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
 func TestCVTGray16WithKittle(t *testing.T) {

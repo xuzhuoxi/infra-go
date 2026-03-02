@@ -1,10 +1,11 @@
 package udpx
 
 import (
+	"net"
+
 	"github.com/xuzhuoxi/infra-go/errorsx"
 	"github.com/xuzhuoxi/infra-go/logx"
 	"github.com/xuzhuoxi/infra-go/netx"
-	"net"
 )
 
 func NewUDPDialClient() IUDPClient {

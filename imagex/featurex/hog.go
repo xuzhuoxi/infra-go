@@ -1,13 +1,16 @@
+// Package featurex
 // histogram of Oriented Gradient
 // 方向梯度直方图
 package featurex
 
 import (
-	"github.com/xuzhuoxi/infra-go/mathx"
 	"image"
 	"math"
+
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
+// HogRed
 // 计算红色直方图
 func HogRed(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
@@ -26,6 +29,7 @@ func HogRed(img image.Image, k, l float64) []int {
 	return rs
 }
 
+// HogRed64
 // 计算红色直方图
 func HogRed64(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
@@ -44,6 +48,7 @@ func HogRed64(img image.Image, k, l float64) []int {
 	return rs
 }
 
+// HogGreen
 // 计算绿色直方图
 func HogGreen(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
@@ -62,6 +67,7 @@ func HogGreen(img image.Image, k, l float64) []int {
 	return rs
 }
 
+// HogGreen64
 // 计算绿色直方图
 func HogGreen64(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
@@ -80,6 +86,7 @@ func HogGreen64(img image.Image, k, l float64) []int {
 	return rs
 }
 
+// HogBlue
 // 计算蓝色直方图
 func HogBlue(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
@@ -98,6 +105,7 @@ func HogBlue(img image.Image, k, l float64) []int {
 	return rs
 }
 
+// HogBlue64
 // 计算蓝色直方图
 func HogBlue64(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
@@ -116,6 +124,7 @@ func HogBlue64(img image.Image, k, l float64) []int {
 	return rs
 }
 
+// HogAlpha
 // 计算透明直方图
 func HogAlpha(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
@@ -134,6 +143,7 @@ func HogAlpha(img image.Image, k, l float64) []int {
 	return rs
 }
 
+// HogAlpha64
 // 计算透明直方图
 func HogAlpha64(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
@@ -152,6 +162,7 @@ func HogAlpha64(img image.Image, k, l float64) []int {
 	return rs
 }
 
+// HogRGBA
 // 计算透明直方图
 func HogRGBA(img image.Image, k, l float64) (RHog, GHog, BHog, AHog []int) {
 	size := img.Bounds().Size()
@@ -179,6 +190,7 @@ func HogRGBA(img image.Image, k, l float64) (RHog, GHog, BHog, AHog []int) {
 	return
 }
 
+// HogRGBA64
 // 计算透明直方图
 func HogRGBA64(img image.Image, k, l float64) (RHog, GHog, BHog, AHog []int) {
 	size := img.Bounds().Size()
@@ -206,6 +218,7 @@ func HogRGBA64(img image.Image, k, l float64) (RHog, GHog, BHog, AHog []int) {
 	return
 }
 
+// HogRGB
 // 计算透明直方图
 func HogRGB(img image.Image, k, l float64) (RHog, GHog, BHog []int) {
 	size := img.Bounds().Size()
@@ -230,6 +243,7 @@ func HogRGB(img image.Image, k, l float64) (RHog, GHog, BHog []int) {
 	return
 }
 
+// HogRGB64
 // 计算透明直方图
 func HogRGB64(img image.Image, k, l float64) (RHog, GHog, BHog []int) {
 	size := img.Bounds().Size()

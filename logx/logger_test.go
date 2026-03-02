@@ -2,8 +2,9 @@ package logx
 
 import (
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/mathx"
 	"testing"
+
+	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
 func TestLogger(t *testing.T) {

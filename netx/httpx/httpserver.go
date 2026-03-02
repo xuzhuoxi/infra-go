@@ -1,9 +1,10 @@
 package httpx
 
 import (
-	"github.com/xuzhuoxi/infra-go/netx"
 	"net/http"
 	"time"
+
+	"github.com/xuzhuoxi/infra-go/netx"
 )
 
 func NewHttpServer() IHttpServer {

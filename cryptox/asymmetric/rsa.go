@@ -17,10 +17,11 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
+	"os"
+
 	"github.com/xuzhuoxi/infra-go/cryptox"
 	"github.com/xuzhuoxi/infra-go/filex"
 	"golang.org/x/crypto/ssh"
-	"os"
 )
 
 type IRSAPrivateCipher interface {
