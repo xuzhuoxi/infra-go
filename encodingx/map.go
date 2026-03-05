@@ -8,10 +8,11 @@ package encodingx
 import (
 	"bytes"
 	"fmt"
-	"github.com/xuzhuoxi/infra-go/binaryx"
-	"github.com/xuzhuoxi/infra-go/lang"
 	"sort"
 	"strings"
+
+	"github.com/xuzhuoxi/infra-go/binaryx"
+	"github.com/xuzhuoxi/infra-go/lang"
 )
 
 type IKeyValue interface {

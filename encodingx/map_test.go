@@ -22,8 +22,8 @@ func TestCoding(t *testing.T) {
 	cm.Set("key7", []int{222, 333})
 	cm.Set("key8", []string{"", "o只"})
 
-	bs := cm.EncodeToBytes()
-	fmt.Println("序列化：", bs)
+	bs, err := cm.EncodeToBytes()
+	fmt.Println("序列化：", bs, err)
 
 	var cm2 = NewCodingMap()
 	cm2.DecodeFromBytes(bs)

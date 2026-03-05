@@ -7,6 +7,7 @@ package encodingx
 
 import (
 	"encoding/binary"
+
 	"github.com/xuzhuoxi/infra-go/bytex"
 )
 

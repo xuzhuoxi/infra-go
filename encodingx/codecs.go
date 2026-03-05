@@ -6,8 +6,9 @@
 package encodingx
 
 import (
-	"github.com/xuzhuoxi/infra-go/bytex"
 	"sync"
+
+	"github.com/xuzhuoxi/infra-go/bytex"
 )
 
 func NewBuffEncoder(handler bytex.IDataBlockHandler, encodeHandler IEncodeHandler) IBuffEncoder {
