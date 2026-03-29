@@ -15,7 +15,7 @@ type IUserConnMapper interface {
 	eventx.IEventDispatcher
 	// GetUserId
 	// 通过 用户id 找 连接id
-	GetUserId(connId string) (UserId string, ok bool)
+	GetUserId(connId string) (userId string, ok bool)
 	// GetConnId
 	// 通过 连接id 找 用户id
 	GetConnId(userId string) (connId string, ok bool)
@@ -71,10 +71,10 @@ type UserConnMapper struct {
 	lock      sync.RWMutex
 }
 
-func (o *UserConnMapper) GetUserId(connId string) (UserId string, ok bool) {
+func (o *UserConnMapper) GetUserId(connId string) (userId string, ok bool) {
 	o.lock.RLock()
 	defer o.lock.RUnlock()
-	connId, ok = o.conn2user[connId]
+	userId, ok = o.conn2user[connId]
 	return
 }
 
