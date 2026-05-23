@@ -1,8 +1,3 @@
-// Package bytex
-// Created by xuzhuoxi
-// on 2019-03-23.
-// @author xuzhuoxi
-//
 package bytex
 
 import (
@@ -10,13 +5,19 @@ import (
 )
 
 var (
+	// DefaultPoolBuffDataBlock is the default pool for IBuffDataBlock instances.
+	// DefaultPoolBuffDataBlock 是 IBuffDataBlock 实例的默认对象池。
 	DefaultPoolBuffDataBlock = NewPoolBuffDataBlock(NewDefaultBuffDataBlock)
-	DefaultPoolBuffToData    = NewPoolBuffToData(NewDefaultBuffToData)
-	DefaultPoolBuffToBlock   = NewPoolBuffToBlock(NewDefaultBuffToBlock)
+	// DefaultPoolBuffToData is the default pool for IBuffToData instances.
+	// DefaultPoolBuffToData 是 IBuffToData 实例的默认对象池。
+	DefaultPoolBuffToData = NewPoolBuffToData(NewDefaultBuffToData)
+	// DefaultPoolBuffToBlock is the default pool for IBuffToBlock instances.
+	// DefaultPoolBuffToBlock 是 IBuffToBlock 实例的默认对象池。
+	DefaultPoolBuffToBlock = NewPoolBuffToBlock(NewDefaultBuffToBlock)
 )
 
-// IPoolBuffDataBlock ---------- ---------- ---------- ---------- ----------
-
+// NewPoolBuffDataBlock creates a sync.Pool for IBuffDataBlock using newFunc.
+// NewPoolBuffDataBlock 使用 newFunc 创建 IBuffDataBlock 的对象池。
 func NewPoolBuffDataBlock(newFunc func() IBuffDataBlock) IPoolBuffDataBlock {
 	return &poolBuffDataBlock{pool: &sync.Pool{
 		New: func() interface{} {
@@ -25,8 +26,14 @@ func NewPoolBuffDataBlock(newFunc func() IBuffDataBlock) IPoolBuffDataBlock {
 	}}
 }
 
+// IPoolBuffDataBlock pools reusable IBuffDataBlock instances.
+// IPoolBuffDataBlock 复用 IBuffDataBlock 实例的对象池。
 type IPoolBuffDataBlock interface {
+	// GetInstance acquires a buffer from the pool.
+	// GetInstance 从池中获取一个缓冲实例。
 	GetInstance() IBuffDataBlock
+	// Recycle returns instance to the pool after Reset.
+	// Recycle 在 Reset 后将实例归还到池中。
 	Recycle(instance IBuffDataBlock)
 }
 
@@ -46,8 +53,8 @@ func (p *poolBuffDataBlock) Recycle(instance IBuffDataBlock) {
 	p.pool.Put(instance)
 }
 
-// IPoolBuffToData ---------- ---------- ---------- ---------- ----------
-
+// NewPoolBuffToData creates a sync.Pool for IBuffToData using newFunc.
+// NewPoolBuffToData 使用 newFunc 创建 IBuffToData 的对象池。
 func NewPoolBuffToData(newFunc func() IBuffToData) IPoolBuffToData {
 	return &poolBuffToData{pool: &sync.Pool{
 		New: func() interface{} {
@@ -56,8 +63,14 @@ func NewPoolBuffToData(newFunc func() IBuffToData) IPoolBuffToData {
 	}}
 }
 
+// IPoolBuffToData pools reusable IBuffToData instances.
+// IPoolBuffToData 复用 IBuffToData 实例的对象池。
 type IPoolBuffToData interface {
+	// GetInstance acquires a buffer from the pool.
+	// GetInstance 从池中获取一个缓冲实例。
 	GetInstance() IBuffToData
+	// Recycle returns instance to the pool after Reset.
+	// Recycle 在 Reset 后将实例归还到池中。
 	Recycle(instance IBuffToData)
 }
 
@@ -77,8 +90,8 @@ func (p *poolBuffToData) Recycle(instance IBuffToData) {
 	p.pool.Put(instance)
 }
 
-// IPoolBuffToBlock ---------- ---------- ---------- ---------- ----------
-
+// NewPoolBuffToBlock creates a sync.Pool for IBuffToBlock using newFunc.
+// NewPoolBuffToBlock 使用 newFunc 创建 IBuffToBlock 的对象池。
 func NewPoolBuffToBlock(newFunc func() IBuffToBlock) IPoolBuffToBlock {
 	return &poolBuffToBlock{pool: &sync.Pool{
 		New: func() interface{} {
@@ -87,8 +100,14 @@ func NewPoolBuffToBlock(newFunc func() IBuffToBlock) IPoolBuffToBlock {
 	}}
 }
 
+// IPoolBuffToBlock pools reusable IBuffToBlock instances.
+// IPoolBuffToBlock 复用 IBuffToBlock 实例的对象池。
 type IPoolBuffToBlock interface {
+	// GetInstance acquires a buffer from the pool.
+	// GetInstance 从池中获取一个缓冲实例。
 	GetInstance() IBuffToBlock
+	// Recycle returns instance to the pool after Reset.
+	// Recycle 在 Reset 后将实例归还到池中。
 	Recycle(instance IBuffToBlock)
 }
 

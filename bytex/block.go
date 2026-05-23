@@ -1,16 +1,11 @@
-// Package bytex
-// Created by xuzhuoxi
-// on 2019-02-11.
-// @author xuzhuoxi
-//
 package bytex
 
 import (
 	"encoding/binary"
 )
 
-// DefaultDataToBlockHandler
-// block是安全的
+// DefaultDataToBlockHandler encodes data as a uint16-length-prefixed block; the returned block is safe to retain.
+// DefaultDataToBlockHandler 将数据编码为 uint16 长度前缀块；返回的 block 可安全持有。
 func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byte) {
 	l := uint16(len(data))
 	if 0 == l {
@@ -22,8 +17,8 @@ func DefaultDataToBlockHandler(data []byte, order binary.ByteOrder) (block []byt
 	return rs
 }
 
-// DefaultBlockToDataHandler
-// data为共享切片，非安全
+// DefaultBlockToDataHandler decodes one block; data references a sub-slice of block and is not safe to retain.
+// DefaultBlockToDataHandler 从块中解码一个数据包；data 为 block 的共享子切片，非安全持有。
 func DefaultBlockToDataHandler(block []byte, order binary.ByteOrder) (data []byte, length int, ok bool) {
 	totalLen := len(block)
 	if totalLen < BlockSizeLen {
@@ -42,18 +37,26 @@ func DefaultBlockToDataHandler(block []byte, order binary.ByteOrder) (data []byt
 
 //----------------------------------------------------------
 
+// NewDefaultDataBlockHandler returns a handler using DefaultOrder and the default encode/decode functions.
+// NewDefaultDataBlockHandler 使用 DefaultOrder 与默认编解码函数创建处理器。
 func NewDefaultDataBlockHandler() IDataBlockHandler {
 	return newDataBlockHandler(DefaultOrder, DefaultDataToBlockHandler, DefaultBlockToDataHandler)
 }
 
+// NewDataBlockHandler returns a handler with custom byte order and encode/decode functions.
+// NewDataBlockHandler 使用自定义字节序与编解码函数创建处理器。
 func NewDataBlockHandler(order binary.ByteOrder, data2block HandlerDataToBlock, block2data HandlerBlockToData) IDataBlockHandler {
 	return newDataBlockHandler(order, data2block, block2data)
 }
 
+// NewDataToBlockHandler returns an encode-only handler.
+// NewDataToBlockHandler 创建仅编码方向的处理器。
 func NewDataToBlockHandler(order binary.ByteOrder, data2block HandlerDataToBlock) IDataToBlockHandler {
 	return newDataBlockHandler(order, data2block, nil)
 }
 
+// NewBlockToDataHandler returns a decode-only handler.
+// NewBlockToDataHandler 创建仅解码方向的处理器。
 func NewBlockToDataHandler(order binary.ByteOrder, block2data HandlerBlockToData) IBlockToDataHandler {
 	return newDataBlockHandler(order, nil, block2data)
 }

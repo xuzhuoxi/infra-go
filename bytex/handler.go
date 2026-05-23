@@ -5,12 +5,16 @@ import (
 	"errors"
 )
 
-// BytesHandlerType 字节数组处理类型
+// BytesHandlerType identifies byte array processing kind.
+// BytesHandlerType 字节数组处理类型。
 type BytesHandlerType int
 
-// BytesHandler 字节数组处理函数
+// BytesHandler transforms an input byte slice into an output byte slice.
+// BytesHandler 字节数组处理函数。
 type BytesHandler func(in []byte) (out []byte, err error)
 
+// Predefined BytesHandlerType values for block/unblock and base64 operations.
+// 预定义的 BytesHandlerType 值，用于封包/解包及 base64 操作。
 const (
 	LittleBlock BytesHandlerType = iota + 1
 	LittleUnblock
@@ -29,32 +33,40 @@ const (
 )
 
 var (
+	// ErrTypeUnregister is returned when a handler type is not registered.
+	// ErrTypeUnregister 在 handler 类型未注册时返回。
 	ErrTypeUnregister = errors.New("Type Unregister! ")
 
+	// ErrLittleUnblock is returned when little-endian unblock fails.
+	// ErrLittleUnblock 在小端解包失败时返回。
 	ErrLittleUnblock = errors.New("LittleUnblock Error! ")
-	ErrBigUnblock    = errors.New("BigUnblock Error! ")
+	// ErrBigUnblock is returned when big-endian unblock fails.
+	// ErrBigUnblock 在大端解包失败时返回。
+	ErrBigUnblock = errors.New("BigUnblock Error! ")
 )
 
 var t2handler = make([]BytesHandler, 128, 128)
 
-// IBytesProcessor
-// 字节数组处理器
+// IBytesProcessor runs a chain of byte handlers in sequence.
+// IBytesProcessor 字节数组处理器。
 type IBytesProcessor interface {
-	// AppendHandler
-	// 追加处理函数
+	// AppendHandler appends a custom handler to the pipeline.
+	// AppendHandler 追加处理函数。
 	AppendHandler(process BytesHandler)
-	// AppendHandlerType
-	// 追加处理类型
+	// AppendHandlerType appends a registered predefined handler type.
+	// AppendHandlerType 追加处理类型。
 	AppendHandlerType(t BytesHandlerType) error
-	// ClearHandlers
-	// 清除全部处理
+	// ClearHandlers removes all handlers from the pipeline.
+	// ClearHandlers 清除全部处理函数。
 	ClearHandlers()
 
-	// Handle
-	// 数据处理
+	// Handle runs all handlers on in and returns the result, failing index, and error.
+	// Handle 依次处理数据。
 	Handle(in []byte) (out []byte, errIdx int, err error)
 }
 
+// BytesProcessor is the default IBytesProcessor implementation.
+// BytesProcessor 是 IBytesProcessor 的默认实现。
 type BytesProcessor struct {
 	handlers []BytesHandler
 }
@@ -93,14 +105,20 @@ func (p *BytesProcessor) Handle(in []byte) (out []byte, errIdx int, err error) {
 
 // ----------------------------
 
+// RegisterBytesProcess registers a handler for the given BytesHandlerType.
+// RegisterBytesProcess 为指定 BytesHandlerType 注册处理函数。
 func RegisterBytesProcess(t BytesHandlerType, process BytesHandler) {
 	t2handler[t] = process
 }
 
+// LittleBlockHandler encodes in as a little-endian uint16-length-prefixed block.
+// LittleBlockHandler 将小端 uint16 长度前缀块编码应用到输入数据。
 func LittleBlockHandler(in []byte) (out []byte, err error) {
 	return blockHandler(in, binary.LittleEndian)
 }
 
+// LittleUnblockProcess decodes one little-endian length-prefixed block from in.
+// LittleUnblockProcess 从输入中解码一个小端长度前缀块。
 func LittleUnblockProcess(in []byte) (out []byte, err error) {
 	o, _, ok := unblockHandler(in, binary.LittleEndian)
 	if ok {
@@ -109,10 +127,14 @@ func LittleUnblockProcess(in []byte) (out []byte, err error) {
 	return nil, ErrLittleUnblock
 }
 
+// BigBlockHandler encodes in as a big-endian uint16-length-prefixed block.
+// BigBlockHandler 将大端 uint16 长度前缀块编码应用到输入数据。
 func BigBlockHandler(in []byte) (out []byte, err error) {
 	return blockHandler(in, binary.BigEndian)
 }
 
+// BigUnblockProcess decodes one big-endian length-prefixed block from in.
+// BigUnblockProcess 从输入中解码一个大端长度前缀块。
 func BigUnblockProcess(in []byte) (out []byte, err error) {
 	o, _, ok := unblockHandler(in, binary.BigEndian)
 	if ok {

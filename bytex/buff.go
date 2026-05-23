@@ -1,8 +1,3 @@
-// Package bytex
-// Created by xuzhuoxi
-// on 2019-02-11.
-// @author xuzhuoxi
-//
 package bytex
 
 import (
@@ -14,31 +9,43 @@ import (
 	"github.com/xuzhuoxi/infra-go/slicex"
 )
 
+// NewDefaultBuffDataBlock returns a full-duplex buffer with DefaultDataBlockHandler.
+// NewDefaultBuffDataBlock 使用 DefaultDataBlockHandler 创建全双工缓冲。
 func NewDefaultBuffDataBlock() IBuffDataBlock {
 	rs := newBuffDataBlock(DefaultDataBlockHandler)
 	return rs
 }
 
+// NewDefaultBuffToBlock returns a buffer that writes framed blocks and reads raw bytes.
+// NewDefaultBuffToBlock 创建写入分帧块、读取原始字节的缓冲。
 func NewDefaultBuffToBlock() IBuffToBlock {
 	rs := newBuffDataBlock(DefaultDataBlockHandler)
 	return rs
 }
 
+// NewDefaultBuffToData returns a buffer that reads framed blocks and writes raw bytes.
+// NewDefaultBuffToData 创建读取分帧块、写入原始字节的缓冲。
 func NewDefaultBuffToData() IBuffToData {
 	rs := newBuffDataBlock(DefaultDataBlockHandler)
 	return rs
 }
 
+// NewBuffDataBlock returns a full-duplex buffer with the given handler.
+// NewBuffDataBlock 使用指定 handler 创建全双工缓冲。
 func NewBuffDataBlock(handler IDataBlockHandler) IBuffDataBlock {
 	rs := newBuffDataBlock(handler)
 	return rs
 }
 
+// NewBuffToBlock returns a to-block buffer with the given handler.
+// NewBuffToBlock 使用指定 handler 创建写入分帧块的缓冲。
 func NewBuffToBlock(handler IDataBlockHandler) IBuffToBlock {
 	rs := newBuffDataBlock(handler)
 	return rs
 }
 
+// NewBuffToData returns a to-data buffer with the given handler.
+// NewBuffToData 使用指定 handler 创建读取分帧块的缓冲。
 func NewBuffToData(handler IDataBlockHandler) IBuffToData {
 	rs := newBuffDataBlock(handler)
 	return rs
@@ -72,9 +79,6 @@ func (b *buffDataBlock) Bytes() []byte {
 	return b.buff.Bytes()
 }
 
-// ReadBytes
-// 返回：buff缓存中的切片
-// 安全：共享数据，非安全，如果要保存使用，请先进行复制
 func (b *buffDataBlock) ReadBytes() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -93,9 +97,6 @@ func (b *buffDataBlock) ReadBytesTo(dst []byte) (n int, rs []byte) {
 	return
 }
 
-// ReadBytesCopy
-// 返回：buff缓存中的切片的克隆
-// 触发Reset
 func (b *buffDataBlock) ReadBytesCopy() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
@@ -140,9 +141,6 @@ func (b *buffDataBlock) Len() int {
 	return b.buff.Len()
 }
 
-// ReadData
-// 把数据编码为[]byte
-// 注意：数据安全性视handler行为而定，如果返回的是共享切片，应该马上处理
 func (b *buffDataBlock) ReadData() []byte {
 	b.lock.Lock()
 	defer b.lock.Unlock()
