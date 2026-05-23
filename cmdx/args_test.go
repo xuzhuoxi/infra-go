@@ -1,6 +1,3 @@
-// Package cmdx
-// Create on 2023/8/28
-// @author xuzhuoxi
 package cmdx
 
 import (

@@ -1,6 +1,3 @@
-// Package cmdx
-// Create on 2023/8/27
-// @author xuzhuoxi
 package cmdx
 
 import (
@@ -10,10 +7,14 @@ import (
 	"time"
 )
 
+// ArgSet stores key=value arguments parsed from -key=value or --key=value syntax.
+// ArgSet 存储从 -key=value 或 --key=value 语法解析出的键值参数。
 type ArgSet struct {
 	kv map[string]string
 }
 
+// Len returns the number of parsed key=value arguments.
+// Len 返回已解析的 key=value 参数数量。
 func (o *ArgSet) Len() int {
 	if nil == o.kv {
 		return 0
@@ -21,6 +22,8 @@ func (o *ArgSet) Len() int {
 	return len(o.kv)
 }
 
+// Get returns the string value for the given key, or an empty string if not found.
+// Get 返回给定键的字符串值；未找到时返回空字符串。
 func (o *ArgSet) Get(key string) string {
 	v, ok := o.getValue(key)
 	if !ok {
@@ -29,6 +32,8 @@ func (o *ArgSet) Get(key string) string {
 	return v
 }
 
+// ParseArgs parses a slice of -key=value or --key=value argument strings.
+// ParseArgs 解析一组 -key=value 或 --key=value 参数字符串。
 func (o *ArgSet) ParseArgs(args []string) error {
 	o.kv = make(map[string]string)
 	if len(args) == 0 {
@@ -47,11 +52,15 @@ func (o *ArgSet) ParseArgs(args []string) error {
 	return nil
 }
 
+// CheckKey reports whether the given key exists in parsed arguments.
+// CheckKey 检查给定键是否存在于已解析参数中。
 func (o *ArgSet) CheckKey(key string) bool {
 	_, ok := o.getValue(key)
 	return ok
 }
 
+// GetBool returns a bool value for the given key; "0" and "false" are treated as false.
+// GetBool 返回给定键的 bool 值；"0" 与 "false" 视为 false。
 func (o *ArgSet) GetBool(key string) (val bool, ok bool) {
 	v, ok1 := o.getValue(key)
 	if !ok1 {
@@ -61,10 +70,14 @@ func (o *ArgSet) GetBool(key string) (val bool, ok bool) {
 	return v != "0" && v != "false", true
 }
 
+// GetString returns the string value for the given key.
+// GetString 返回给定键的 string 值。
 func (o *ArgSet) GetString(key string) (val string, ok bool) {
 	return o.getValue(key)
 }
 
+// GetDuration returns a time.Duration value parsed from the given key's string value.
+// GetDuration 从给定键的字符串值解析并返回 time.Duration。
 func (o *ArgSet) GetDuration(key string) (val time.Duration, ok bool) {
 	v, ok1 := o.getValue(key)
 	if !ok1 {
@@ -77,6 +90,8 @@ func (o *ArgSet) GetDuration(key string) (val time.Duration, ok bool) {
 	return d, true
 }
 
+// GetInt returns an int value parsed from the given key's string value.
+// GetInt 从给定键的字符串值解析并返回 int。
 func (o *ArgSet) GetInt(key string) (val int, ok bool) {
 	i, ok1 := o.GetInt64(key)
 	if !ok1 {
@@ -85,6 +100,8 @@ func (o *ArgSet) GetInt(key string) (val int, ok bool) {
 	return int(i), true
 }
 
+// GetUint returns a uint value parsed from the given key's string value.
+// GetUint 从给定键的字符串值解析并返回 uint。
 func (o *ArgSet) GetUint(key string) (val uint, ok bool) {
 	i, ok1 := o.GetUint64(key)
 	if !ok1 {
@@ -93,6 +110,8 @@ func (o *ArgSet) GetUint(key string) (val uint, ok bool) {
 	return uint(i), true
 }
 
+// GetFloat64 returns a float64 value parsed from the given key's string value.
+// GetFloat64 从给定键的字符串值解析并返回 float64。
 func (o *ArgSet) GetFloat64(key string) (val float64, ok bool) {
 	v, ok1 := o.getValue(key)
 	if !ok1 {
@@ -105,6 +124,8 @@ func (o *ArgSet) GetFloat64(key string) (val float64, ok bool) {
 	return i, true
 }
 
+// GetInt64 returns an int64 value parsed from the given key's string value.
+// GetInt64 从给定键的字符串值解析并返回 int64。
 func (o *ArgSet) GetInt64(key string) (val int64, ok bool) {
 	v, ok1 := o.getValue(key)
 	if !ok1 {
@@ -117,6 +138,8 @@ func (o *ArgSet) GetInt64(key string) (val int64, ok bool) {
 	return i, true
 }
 
+// GetUint64 returns a uint64 value parsed from the given key's string value.
+// GetUint64 从给定键的字符串值解析并返回 uint64。
 func (o *ArgSet) GetUint64(key string) (val uint64, ok bool) {
 	v, ok1 := o.getValue(key)
 	if !ok1 {
