@@ -1,6 +1,3 @@
-// Package archivex
-// Create on 2022/7/12
-// @author xuzhuoxi
 package archivex
 
 import (
@@ -14,14 +11,14 @@ import (
 	"github.com/xuzhuoxi/infra-go/filex"
 )
 
-// ArchiveMultiToZipRoot
-// 把多个路径同时归档, 归档目录为根目录
+// ArchiveMultiToZipRoot archives multiple paths into a zip using the archive root as the base path.
+// ArchiveMultiToZipRoot 把多个路径同时归档，归档目录为根目录。
 func ArchiveMultiToZipRoot(filePaths []string, archPath string) error {
 	return ArchiveMultiToZip(filePaths, archPath, "")
 }
 
-// ArchiveMultiToZip
-// 把多个路径同时归档, 并指定归档目录
+// ArchiveMultiToZip archives multiple paths into a zip under dirHeaderName.
+// ArchiveMultiToZip 把多个路径同时归档，并指定归档目录。
 func ArchiveMultiToZip(filePaths []string, archPath string, dirHeaderName string) error {
 	if len(filePaths) == 0 {
 		return errors.New(fmt.Sprintf("ArchiveMultiToZip: filepaths is empty! "))
@@ -52,22 +49,21 @@ func ArchiveMultiToZip(filePaths []string, archPath string, dirHeaderName string
 	return nil
 }
 
-// ArchiveChildrenToZip
-// 把目录内容进行归档
+// ArchiveChildrenToZip archives all files under dirPath without the parent directory entry.
+// ArchiveChildrenToZip 把目录内容进行归档。
 func ArchiveChildrenToZip(dirPath string, archPath string) error {
 	return ArchiveToZip(dirPath, archPath, "")
 }
 
-// ArchiveToZipDefault
-// 把文件或目录归档，使用原文件名或目录名代为HeaderName
+// ArchiveToZipDefault archives a file or directory using its original name as the zip entry header.
+// ArchiveToZipDefault 把文件或目录归档，使用原文件名或目录名作为 HeaderName。
 func ArchiveToZipDefault(filePath string, archPath string) error {
 	_, headerName := filex.Split(filePath)
 	return ArchiveToZip(filePath, archPath, headerName)
 }
 
-// ArchiveToZip
-// 把文件或目录归档，并指定新的HeaderName
-// 可用于定制目录结构
+// ArchiveToZip archives a file or directory with a custom entry header name.
+// ArchiveToZip 把文件或目录归档并指定新的 HeaderName，可用于定制目录结构。
 func ArchiveToZip(filePath string, archPath string, newHeaderName string) error {
 	if !filex.IsExist(filePath) {
 		return errors.New(fmt.Sprintf("ArchiveToZip: filepath[%s] is not exist! ", filePath))
@@ -86,50 +82,40 @@ func ArchiveToZip(filePath string, archPath string, newHeaderName string) error 
 	}
 }
 
-// AppendDirToZipRoot
-// 追加目录到zip文件中
-// 使用目录名作为HeaderName
-// 保持目录内容结构不变
+// AppendDirToZipRoot appends a directory to zip using the directory name as the entry header.
+// AppendDirToZipRoot 追加目录到 zip 文件，使用目录名作为 HeaderName，保持目录内容结构不变。
 func AppendDirToZipRoot(filePath string, zipWriter *zip.Writer) error {
 	_, newHeaderName := filex.Split(filePath)
 	return appendDirToZip(filePath, newHeaderName, zipWriter)
 }
 
-// AppendDirToZip
-// 追加目录到zip文件中
-// 为目录指定新的HeaderName
-// 保持目录内容结构不变
+// AppendDirToZip appends a directory to zip with a custom entry header name.
+// AppendDirToZip 追加目录到 zip 文件并为目录指定新的 HeaderName，保持目录内容结构不变。
 func AppendDirToZip(filePath string, newHeaderName string, zipWriter *zip.Writer) error {
 	return appendDirToZip(filePath, newHeaderName, zipWriter)
 }
 
-// AppendChildrenToZipRoot
-// 追加目录下列表zip文件中
-// 不使用目录HeaderName
-// 保持目录内容结构不变
+// AppendChildrenToZipRoot appends directory contents to zip without a parent directory header.
+// AppendChildrenToZipRoot 追加目录下内容到 zip，不使用目录 HeaderName，保持目录内容结构不变。
 func AppendChildrenToZipRoot(filePath string, zipWriter *zip.Writer) error {
 	return appendChildrenToZip(filePath, "", zipWriter)
 }
 
-// AppendChildrenToZip
-// 追加目录下列表zip文件中
-// 为目录指定新的HeaderName
-// 保持目录内容结构不变
+// AppendChildrenToZip appends directory contents to zip under dirHeaderName.
+// AppendChildrenToZip 追加目录下内容到 zip 并为目录指定新的 HeaderName，保持目录内容结构不变。
 func AppendChildrenToZip(dirPath string, dirHeaderName string, zipWriter *zip.Writer) error {
 	return appendChildrenToZip(dirPath, dirHeaderName, zipWriter)
 }
 
-// AppendFileToZipRoot
-// 追加文件到zip文件中
-// 使用文件名作为HeaderName
+// AppendFileToZipRoot appends a file to zip using the file name as the entry header.
+// AppendFileToZipRoot 追加文件到 zip，使用文件名作为 HeaderName。
 func AppendFileToZipRoot(filePath string, zipWriter *zip.Writer) error {
 	_, newHeaderName := filex.Split(filePath)
 	return appendFileToZip(filePath, newHeaderName, zipWriter)
 }
 
-// AppendFileToZip
-// 追加文件到zip文件中
-// 为文件指定新的HeaderName
+// AppendFileToZip appends a file to zip with a custom entry header name.
+// AppendFileToZip 追加文件到 zip 并为文件指定新的 HeaderName。
 func AppendFileToZip(filePath string, newHeaderName string, zipWriter *zip.Writer) error {
 	return appendFileToZip(filePath, newHeaderName, zipWriter)
 }
