@@ -1,17 +1,15 @@
-// Package binaryx
-// Created by xuzhuoxi
-// on 2019-03-18.
-// @author xuzhuoxi
-//
 package binaryx
 
 import (
 	"strconv"
 )
 
+// ValueKind identifies primitive and slice value types for binary serialization.
+// ValueKind 标识用于二进制序列化的基本类型与切片类型。
 type ValueKind uint8
 
-// 简单类型定义
+// Simple type definitions.
+// 简单类型定义。
 const (
 	KindNone ValueKind = iota
 	KindBool
@@ -32,7 +30,8 @@ const (
 	KindString
 )
 
-//简单数组类型定义
+// Simple slice type definitions.
+// 简单数组类型定义。
 const (
 	KindSliceNone ValueKind = iota + 128
 	KindSliceBool
@@ -53,26 +52,26 @@ const (
 	KindSliceString
 )
 
-// IsForbidKind
-// 判断是否为不可用的类型
+// IsForbidKind reports whether kind is unusable (KindNone or KindSliceNone).
+// IsForbidKind 判断是否为不可用的类型。
 func IsForbidKind(kind ValueKind) bool {
 	return kind == KindNone || kind == KindSliceNone
 }
 
-// IsSimpleKind
-// 判断是否为简单类型
+// IsSimpleKind reports whether kind is a primitive (non-slice) type.
+// IsSimpleKind 判断是否为简单类型。
 func IsSimpleKind(kind ValueKind) bool {
 	return kind > KindNone && kind < KindSliceNone
 }
 
-// IsSliceKind
-// 判断是否为简单数组类型
+// IsSliceKind reports whether kind is a slice type.
+// IsSliceKind 判断是否为简单数组类型。
 func IsSliceKind(kind ValueKind) bool {
 	return kind > KindSliceNone
 }
 
-// GetKindValue
-// 取定义的默认值
+// GetKindValue returns the default zero value for kind; for slice kinds ln is the slice length.
+// GetKindValue 取定义的默认值。
 func GetKindValue(kind ValueKind, ln int) interface{} {
 	if value := getKindValue(kind, ln); nil != value {
 		return value
@@ -80,15 +79,15 @@ func GetKindValue(kind ValueKind, ln int) interface{} {
 	panic("No ValueKind Define:" + strconv.Itoa(int(kind)))
 }
 
-// CheckValue
-// 检查值是为合法
+// CheckValue reports whether value is a supported type.
+// CheckValue 检查值是否合法。
 func CheckValue(value interface{}) bool {
 	kind, _ := getValueKind(value)
 	return kind != KindNone
 }
 
-// GetValueKind
-// 取值对应的定义
+// GetValueKind returns the ValueKind and element size (or slice length) for value.
+// GetValueKind 取值对应的定义。
 func GetValueKind(value interface{}) (ValueKind, int) {
 	return getValueKind(value)
 }

@@ -1,8 +1,3 @@
-// Package binaryx
-// Created by xuzhuoxi
-// on 2019-03-20.
-// @author xuzhuoxi
-//
 package binaryx
 
 import (

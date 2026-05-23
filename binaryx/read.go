@@ -1,6 +1,3 @@
-// Package binaryx
-// Create on 2023/7/18
-// @author xuzhuoxi
 package binaryx
 
 import (
@@ -8,60 +5,72 @@ import (
 	"io"
 )
 
-// ReadBool
-// 从一个Reader中读取一个bool数据
-// r: Reader
-// order: 大小端设定
+// ReadBool reads a bool value from r.
+// ReadBool 从一个 Reader 中读取一个 bool 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadBool(r io.Reader, order binary.ByteOrder) (bool, error) {
 	var rs bool
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadInt8
-//从一个Reader中读取一个Int8数据
-// r: Reader
-// order: 大小端设定
+// ReadInt8 reads an int8 value from r.
+// ReadInt8 从一个 Reader 中读取一个 Int8 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadInt8(r io.Reader, order binary.ByteOrder) (int8, error) {
 	var rs int8
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadInt16
-//从一个Reader中读取一个Int16数据
-// r: Reader
-// order: 大小端设定
+// ReadInt16 reads an int16 value from r.
+// ReadInt16 从一个 Reader 中读取一个 Int16 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadInt16(r io.Reader, order binary.ByteOrder) (int16, error) {
 	var rs int16
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadInt32
-// 从一个Reader中读取一个Int32数据
-// r: Reader
-// order: 大小端设定
+// ReadInt32 reads an int32 value from r.
+// ReadInt32 从一个 Reader 中读取一个 Int32 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadInt32(r io.Reader, order binary.ByteOrder) (int32, error) {
 	var rs int32
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadInt64
-// 从一个Reader中读取一个Int64数据
-// r: Reader
-// order: 大小端设定
+// ReadInt64 reads an int64 value from r.
+// ReadInt64 从一个 Reader 中读取一个 Int64 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadInt64(r io.Reader, order binary.ByteOrder) (int64, error) {
 	var rs int64
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadInt
-// 从一个Reader中读取一个Int数据, 32位则读取int32,64位则读取int64
-// r: Reader
-// order: 大小端设定
+// ReadInt reads an int value from r; uses int32 on 32-bit platforms and int64 on 64-bit platforms.
+// ReadInt 从一个 Reader 中读取一个 Int 数据，32 位则读取 int32，64 位则读取 int64。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadInt(r io.Reader, order binary.ByteOrder) (int, error) {
 	if bit32 {
 		val, err := ReadInt32(r, order)
@@ -72,50 +81,60 @@ func ReadInt(r io.Reader, order binary.ByteOrder) (int, error) {
 	}
 }
 
-// ReadUInt8
-// 从一个Reader中读取一个Uint8数据
-// r: Reader
-// order: 大小端设定
+// ReadUInt8 reads a uint8 value from r.
+// ReadUInt8 从一个 Reader 中读取一个 Uint8 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadUInt8(r io.Reader, order binary.ByteOrder) (uint8, error) {
 	var rs uint8
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadUInt16
-// 从一个Reader中读取一个Uint16数据
-// r: Reader
-// order: 大小端设定
+// ReadUInt16 reads a uint16 value from r.
+// ReadUInt16 从一个 Reader 中读取一个 Uint16 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadUInt16(r io.Reader, order binary.ByteOrder) (uint16, error) {
 	var rs uint16
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadUInt32
-//从一个Reader中读取一个Uint32数据
-// r: Reader
-// order: 大小端设定
+// ReadUInt32 reads a uint32 value from r.
+// ReadUInt32 从一个 Reader 中读取一个 Uint32 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadUInt32(r io.Reader, order binary.ByteOrder) (uint32, error) {
 	var rs uint32
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadUInt64
-// 从一个Reader中读取一个Uint64数据
-// r: Reader
-// order: 大小端设定
+// ReadUInt64 reads a uint64 value from r.
+// ReadUInt64 从一个 Reader 中读取一个 Uint64 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadUInt64(r io.Reader, order binary.ByteOrder) (uint64, error) {
 	var rs uint64
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadUInt
-// 从一个Reader中读取一个Uint数据, 32位则读取unt32,64位则读取unt64
-// r: Reader
-// order: 大小端设定
+// ReadUInt reads a uint value from r; uses uint32 on 32-bit platforms and uint64 on 64-bit platforms.
+// ReadUInt 从一个 Reader 中读取一个 Uint 数据，32 位则读取 uint32，64 位则读取 uint64。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadUInt(r io.Reader, order binary.ByteOrder) (uint, error) {
 	if bit32 {
 		val, err := ReadUInt32(r, order)
@@ -126,50 +145,60 @@ func ReadUInt(r io.Reader, order binary.ByteOrder) (uint, error) {
 	}
 }
 
-// ReadFloat32
-// 从一个Reader中读取一个Float32数据
-// r: Reader
-// order: 大小端设定
+// ReadFloat32 reads a float32 value from r.
+// ReadFloat32 从一个 Reader 中读取一个 Float32 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadFloat32(r io.Reader, order binary.ByteOrder) (float32, error) {
 	var rs float32
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadFloat64
-// 从一个Reader中读取一个Float64数据
-// r: Reader
-// order: 大小端设定
+// ReadFloat64 reads a float64 value from r.
+// ReadFloat64 从一个 Reader 中读取一个 Float64 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadFloat64(r io.Reader, order binary.ByteOrder) (float64, error) {
 	var rs float64
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadComplex64
-// 从一个Reader中读取一个Complex64数据
-// r: Reader
-// order: 大小端设定
+// ReadComplex64 reads a complex64 value from r.
+// ReadComplex64 从一个 Reader 中读取一个 Complex64 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadComplex64(r io.Reader, order binary.ByteOrder) (complex64, error) {
 	var rs complex64
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadComplex128
-// 从一个Reader中读取一个Complex128数据
-// r: Reader
-// order: 大小端设定
+// ReadComplex128 reads a complex128 value from r.
+// ReadComplex128 从一个 Reader 中读取一个 Complex128 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadComplex128(r io.Reader, order binary.ByteOrder) (complex128, error) {
 	var rs complex128
 	err := binary.Read(r, order, &rs)
 	return rs, err
 }
 
-// ReadString
-// 从一个Reader中读取一个string数据
-// r: Reader
-// order: 大小端设定
+// ReadString reads a length-prefixed string from r.
+// ReadString 从一个 Reader 中读取一个 string 数据。
+// r: Reader.
+// r: 读取源。
+// order: byte order setting.
+// order: 大小端设定。
 func ReadString(r io.Reader, order binary.ByteOrder) (string, error) {
 	var ln int
 	var err error
@@ -183,9 +212,10 @@ func ReadString(r io.Reader, order binary.ByteOrder) (string, error) {
 	return string(bs), nil
 }
 
-// Read
-// 从Reader中读取数据，
-// 目前data支持的类型为*bool,*int,*int8,*int16,*int32,*int64,*uint,*uint8,*uint16,*uint32,*uint64,*float32,*float64,*complex64,*complex128,*string
+// Read reads a value from r into data.
+// Read 从 Reader 中读取数据。
+// Currently supported types for data: *bool, *int, *int8, *int16, *int32, *int64, *uint, *uint8, *uint16, *uint32, *uint64, *float32, *float64, *complex64, *complex128, *string.
+// 目前 data 支持的类型为 *bool、*int、*int8、*int16、*int32、*int64、*uint、*uint8、*uint16、*uint32、*uint64、*float32、*float64、*complex64、*complex128、*string。
 func Read(r io.Reader, order binary.ByteOrder, data interface{}) (err error) {
 	if dataPtr, ok := data.(*interface{}); ok {
 		isCatch := true

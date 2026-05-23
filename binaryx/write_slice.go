@@ -1,6 +1,3 @@
-// Package binaryx
-// Create on 2023/7/18
-// @author xuzhuoxi
 package binaryx
 
 import (
@@ -10,10 +7,10 @@ import (
 	"reflect"
 )
 
-// WriteSliceStringWithLen
-// 向Writer中写入一组string数据[长度+数据]
-// 格式：长度 + [长度+数据]...
-// 长度格式默认为uint16
+// WriteSliceStringWithLen writes the slice length followed by length-prefixed strings to w.
+// WriteSliceStringWithLen 向 Writer 中写入一组 string 数据 [长度 + 数据]。
+// Format: count + [length + payload]...; length fields use uint16 by default.
+// 格式：长度 + [长度 + 数据]...；长度格式默认为 uint16。
 func WriteSliceStringWithLen(w io.Writer, order binary.ByteOrder, str []string) error {
 	if err := writeLen(w, order, str); nil != err {
 		return err
@@ -21,10 +18,10 @@ func WriteSliceStringWithLen(w io.Writer, order binary.ByteOrder, str []string) 
 	return WriteSliceString(w, order, str)
 }
 
-// WriteSliceString
-// 向Writer中写入一组string数据[长度+数据]
-// 格式：长度 + [长度+数据]...
-// 长度格式默认为uint16
+// WriteSliceString writes length-prefixed strings to w without a leading slice length.
+// WriteSliceString 向 Writer 中写入一组 string 数据 [长度 + 数据]。
+// Format: [length + payload] for each element; length fields use uint16 by default.
+// 格式：[长度 + 数据]...；长度格式默认为 uint16。
 func WriteSliceString(w io.Writer, order binary.ByteOrder, str []string) error {
 	for index := 0; index < len(str); index++ {
 		if err := WriteString(w, order, str[index]); nil != err {
@@ -34,6 +31,8 @@ func WriteSliceString(w io.Writer, order binary.ByteOrder, str []string) error {
 	return nil
 }
 
+// WriteSliceWithLen writes the slice length followed by slice payload to w.
+// WriteSliceWithLen 向 Writer 中写入一组数据，先写入长度再写入元素。
 func WriteSliceWithLen(w io.Writer, order binary.ByteOrder, data interface{}) error {
 	if err := writeLen(w, order, data); nil != err {
 		return err
@@ -41,10 +40,10 @@ func WriteSliceWithLen(w io.Writer, order binary.ByteOrder, data interface{}) er
 	return WriteSlice(w, order, data)
 }
 
-// WriteSlice
-// 向Writer中写入一组数据
-// 目前data支持的类型为[]bool,[]int,[]int8,[]int16,[]int32,[]int64,[]uint,[]uint8,[]uint16,[]uint32,[]uint64,[]float32,[]float64,[]complex64,[]complex128,[]string及相应指针类型
-// int,uint类型会根据bit32值进行选择为int32,int64,uint32,uint64中一个
+// WriteSlice writes slice data to w without a leading slice length.
+// WriteSlice 向 Writer 中写入一组数据。
+// Currently supported types for data: []bool, []int, []int8, []int16, []int32, []int64, []uint, []uint8, []uint16, []uint32, []uint64, []float32, []float64, []complex64, []complex128, []string and their pointer types; []int and []uint follow bit32 (int32/int64 or uint32/uint64).
+// 目前 data 支持的类型为 []bool、[]int、[]int8、[]int16、[]int32、[]int64、[]uint、[]uint8、[]uint16、[]uint32、[]uint64、[]float32、[]float64、[]complex64、[]complex128、[]string 及相应指针类型；[]int、[]uint 类型会根据 bit32 值选择 int32/int64 或 uint32/uint64。
 func WriteSlice(w io.Writer, order binary.ByteOrder, data interface{}) error {
 	tempData := data
 	if dataPtr, ok := data.(*interface{}); ok {
