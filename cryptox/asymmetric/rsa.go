@@ -1,8 +1,3 @@
-// Package asymmetric
-// Created by xuzhuoxi
-// on 2019-02-03.
-// @author xuzhuoxi
-//
 package asymmetric
 
 import (
@@ -24,51 +19,62 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// IRSAPrivateCipher defines RSA private-key decrypt and sign operations.
+// IRSAPrivateCipher 定义 RSA 私钥解密与签名操作。
 type IRSAPrivateCipher interface {
+	// PrivateKey returns the underlying RSA private key.
+	// PrivateKey 返回底层 RSA 私钥。
 	PrivateKey() *rsa.PrivateKey
-	// Decrypt 解密
+	// Decrypt decrypts ciphertext with PKCS#1 v15 (supports chunked input).
+	// Decrypt 使用 PKCS#1 v15 解密（支持分块）。
 	Decrypt(ciphertext []byte) ([]byte, error)
-	// DecryptHybrid 混合解密
+	// DecryptHybrid hybrid-decrypts: RSA for key material, AES-CTR for bulk data.
+	// DecryptHybrid 混合解密：RSA 解密密钥材料，AES-CTR 解密主体数据。
 	DecryptHybrid(ciphertext []byte) (plaintext []byte, err error)
-	// Sign 签名
-	// 使用sha256
+	// Sign signs origData with SHA-256 and PKCS#1 v15.
+	// Sign 使用 SHA-256 与 PKCS#1 v15 对 origData 签名。
 	Sign(origData []byte) ([]byte, error)
-	// SignBase64 签名
-	// 使用sha256
-	// 签名结果转化为Base64编码字符串
+	// SignBase64 signs with SHA-256 and returns a Base64-encoded signature.
+	// SignBase64 使用 SHA-256 签名，并将结果编码为 Base64 字符串。
 	SignBase64(origData []byte, base64Encoding *base64.Encoding) (string, error)
-	// SignHash 指定Hash算法进行签名
-	// 注意：MD5SHA1不可用
-	// 各个Hash算法，可能要引用指定的包，详细请看crypto/crypto.go中的常量定义说明
+	// SignHash signs origData with the given hash (MD5SHA1 not supported).
+	// SignHash 使用指定 Hash 算法签名（不支持 MD5SHA1）。
+	// Some hash algorithms require importing their packages; see crypto.Hash constants.
+	// 部分 Hash 算法需引入对应包，详见 crypto.Hash 常量说明。
 	SignHash(origData []byte, hash crypto.Hash) ([]byte, error)
-	// SignHashBase64 指定Hash算法进行签名
-	// 注意：MD5SHA1不可用
-	// 各个Hash算法，可能要引用指定的包，详细请看crypto/crypto.go中的常量定义说明
-	// 签名结果转化为Base64编码字符串
+	// SignHashBase64 signs with the given hash and returns Base64-encoded signature.
+	// SignHashBase64 使用指定 Hash 签名，并返回 Base64 编码结果。
 	SignHashBase64(origData []byte, hash crypto.Hash, base64Encoding *base64.Encoding) (string, error)
 }
 
+// IRSAPublicCipher defines RSA public-key encrypt and verify operations.
+// IRSAPublicCipher 定义 RSA 公钥加密与验签操作。
 type IRSAPublicCipher interface {
+	// PublicKey returns the underlying RSA public key.
+	// PublicKey 返回底层 RSA 公钥。
 	PublicKey() *rsa.PublicKey
-	// Encrypt 加密(支持分组)
+	// Encrypt encrypts plaintext with PKCS#1 v15 (chunks when needed).
+	// Encrypt 使用 PKCS#1 v15 加密（必要时按块加密）。
 	Encrypt(plaintext []byte) ([]byte, error)
-	// EncryptHybrid 混合加密
+	// EncryptHybrid hybrid-encrypts: RSA for key material, AES-CTR for bulk data.
+	// EncryptHybrid 混合加密：RSA 加密密钥材料，AES-CTR 加密主体数据。
 	EncryptHybrid(plaintext []byte) (ciphertext []byte, err error)
-	// VerifySign  验签，使用sha256
+	// VerifySign verifies a SHA-256 PKCS#1 v15 signature.
+	// VerifySign 使用 SHA-256 验证 PKCS#1 v15 签名。
 	VerifySign(origData, signature []byte) (bool, error)
-	// VerifySignBase64 验签
-	// 使用sha256
-	// 签名数据为Base64编码字符串
+	// VerifySignBase64 verifies a Base64-encoded SHA-256 signature.
+	// VerifySignBase64 验签，签名为 Base64 编码字符串，使用 SHA-256。
 	VerifySignBase64(origData []byte, base64Signature string, base64Encoding *base64.Encoding) (bool, error)
-	// VerifySignHash 指定Hash算法验签
-	// 注意：MD5SHA1不可用
-	// 各个Hash算法，可能要引用指定的包，详细请看crypto/crypto.go中的常量定义说明
+	// VerifySignHash verifies a signature for the given hash (MD5SHA1 not supported).
+	// VerifySignHash 使用指定 Hash 算法验签（不支持 MD5SHA1）。
 	VerifySignHash(origData, signature []byte, hash crypto.Hash) (bool, error)
-	// VerifySignHashBase64 验签
-	// 签名数据为Base64编码字符串
+	// VerifySignHashBase64 verifies a Base64-encoded signature for the given hash.
+	// VerifySignHashBase64 验签，签名为 Base64 编码字符串。
 	VerifySignHashBase64(origData []byte, base64Signature string, hash crypto.Hash, base64Encoding *base64.Encoding) (bool, error)
 }
 
+// IRSACipher combines private and public RSA cipher operations.
+// IRSACipher 组合 RSA 私钥与公钥加解密、签名验签能力。
 type IRSACipher interface {
 	IRSAPrivateCipher
 	IRSAPublicCipher
@@ -128,13 +134,17 @@ func (o *rsaPrivateCipher) Decrypt(ciphertext []byte) ([]byte, error) {
 	return buff.Bytes(), nil
 }
 
-// DecryptHybrid
+// DecryptHybrid hybrid-decrypts per package scheme (see asymmetric doc).
+// DecryptHybrid 混合解密。
+// Steps:
+//  1. If shorter than one RSA block, PKCS#1 decrypt only (no AES key).
+//  2. Otherwise: RSA-decrypt leading block → 32-byte AES key + IV; AES-CTR decrypt remainder.
 // 步骤:
-//  1. 不足分组长度，直接使用RSA解密, 忽略随机密钥
-//  2. 长于分组长度的执行以下步骤
-//   2.1 对AES密钥密文RSA解密，截取前32位得到AES密钥,余下为IV
-//   2.2 使用AES密钥与IV，使用AES-CTR算法解密明文
-//   2.3 返回明文
+//  1. 不足分组长度，直接使用 RSA 解密，忽略随机密钥。
+//  2. 长于分组长度的执行以下步骤：
+//   2.1 对 AES 密钥密文 RSA 解密，截取前 32 字节为 AES 密钥，余下为 IV。
+//   2.2 使用 AES 密钥与 IV，AES-CTR 解密明文。
+//   2.3 返回明文。
 func (o *rsaPrivateCipher) DecryptHybrid(ciphertext []byte) (plaintext []byte, err error) {
 	if len(ciphertext) < o.DecryptPartLen {
 		return nil, errors.New("invalid rsa ciphertext data")
@@ -228,14 +238,18 @@ func (o *rsaPublicCipher) Encrypt(plaintext []byte) ([]byte, error) {
 	return buff.Bytes(), nil
 }
 
-// EncryptHybrid
+// EncryptHybrid hybrid-encrypts per package scheme (see asymmetric doc).
+// EncryptHybrid 混合加密。
+// Steps:
+//  1. If plaintext fits one RSA block, PKCS#1 encrypt only.
+//  2. Otherwise: random 32-byte AES key + 16-byte IV → RSA-encrypt key||IV → AES-CTR encrypt body → prepend RSA block.
 // 步骤:
-// 1. 不足分组长度，不生成随机AES密钥，直接使用RSA加密
-// 2. 长于分组长度的执行以下步骤:
-//   2.1 生成32位随机AES密钥与16位随机IV，
-//   2.2 使用RSA加密AES密钥与IV，得到AES密钥密文
-//   2.3 使用AES密钥与IV，使用AES-CTR算法加密明文
-//   2.4 返回(AES密钥密文, 密文)
+//  1. 不足分组长度，不生成随机 AES 密钥，直接使用 RSA 加密。
+//  2. 长于分组长度的执行以下步骤：
+//   2.1 生成 32 字节随机 AES 密钥与 16 字节随机 IV。
+//   2.2 使用 RSA 加密 AES 密钥与 IV，得到 AES 密钥密文。
+//   2.3 使用 AES 密钥与 IV，AES-CTR 加密明文。
+//   2.4 返回（AES 密钥密文 || 密文）。
 func (o *rsaPublicCipher) EncryptHybrid(plaintext []byte) (ciphertext []byte, err error) {
 	if len(plaintext) <= o.EncryptPartLen {
 		ciphertext, err = rsa.EncryptPKCS1v15(rand.Reader, o.PubKey, plaintext)
@@ -297,11 +311,10 @@ func (o *rsaPublicCipher) VerifySignHashBase64(origData []byte, base64Signature 
 	return o.VerifySignHash(origData, sig, hash)
 }
 
-// 生成Key ---------- ---------- ---------- ---------- ----------
-
-// GenerateRSAKeyPair
-// 生成RSA密钥对
-// bits:密钥长度
+// GenerateRSAKeyPair generates an RSA private/public key pair.
+// GenerateRSAKeyPair 生成 RSA 密钥对。
+// bits: key size in bits.
+// bits：密钥长度（位）。
 func GenerateRSAKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
 	if nil != err {
@@ -310,31 +323,24 @@ func GenerateRSAKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	return privateKey, &privateKey.PublicKey, nil
 }
 
-// 编码为不懂格式的密钥数据 ---------- ---------- ---------- ---------- ----------
-
-// Encode2RSAPrivatePKCS1
-// 编码为 RSA专用私钥
-// 执行 PKCS1 标准
-// PEM类型为 PEMTypeRSAPrivateKey "RSA PRIVATE KEY"
+// Encode2RSAPrivatePKCS1 encodes a private key as PKCS#1 PEM (RSA PRIVATE KEY).
+// Encode2RSAPrivatePKCS1 编码为 PKCS#1 RSA 专用私钥 PEM（PEMTypeRSAPrivateKey）。
 func Encode2RSAPrivatePKCS1(private *rsa.PrivateKey) ([]byte, error) {
 	return pem.EncodeToMemory(&pem.Block{
 		Bytes: x509.MarshalPKCS1PrivateKey(private),
 		Type:  cryptox.PEMTypeRSAPrivateKey}), nil
 }
 
-// Encode2RSAPublicPKCS1
-// 编码为 RSA专用公钥
-// 执行 PKCS1 标准
-// PEM类型为 PEMTypeRSAPublicKey "RSA PUBLIC KEY"
+// Encode2RSAPublicPKCS1 encodes a public key as PKCS#1 PEM (RSA PUBLIC KEY).
+// Encode2RSAPublicPKCS1 编码为 PKCS#1 RSA 专用公钥 PEM（PEMTypeRSAPublicKey）。
 func Encode2RSAPublicPKCS1(public *rsa.PublicKey) ([]byte, error) {
 	return pem.EncodeToMemory(&pem.Block{
 		Bytes: x509.MarshalPKCS1PublicKey(public),
 		Type:  cryptox.PEMTypeRSAPublicKey}), nil
 }
 
-// Encode2PrivatePKCS8
-// 编码为 PKCS8 私钥
-// PEM类型为 PEMTypePKCS8PrivateKey "PRIVATE KEY"
+// Encode2PrivatePKCS8 encodes a private key as PKCS#8 PEM (PRIVATE KEY).
+// Encode2PrivatePKCS8 编码为 PKCS#8 私钥 PEM（PEMTypePKCS8PrivateKey）。
 func Encode2PrivatePKCS8(private *rsa.PrivateKey) ([]byte, error) {
 	bs, err := x509.MarshalPKCS8PrivateKey(private)
 	if err != nil {
@@ -346,9 +352,8 @@ func Encode2PrivatePKCS8(private *rsa.PrivateKey) ([]byte, error) {
 	}), nil
 }
 
-// Encode2PublicX509
-// 编码为 X.509 公钥
-// 使用PEM类型为 PEMTypePKCS8PublicKey "PUBLIC KEY"
+// Encode2PublicX509 encodes a public key as X.509 SubjectPublicKeyInfo PEM (PUBLIC KEY).
+// Encode2PublicX509 编码为 X.509 公钥 PEM（PEMTypeX509PublicKey）。
 func Encode2PublicX509(public *rsa.PublicKey) ([]byte, error) {
 	bs, err := x509.MarshalPKIXPublicKey(public)
 	if err != nil {
@@ -360,9 +365,8 @@ func Encode2PublicX509(public *rsa.PublicKey) ([]byte, error) {
 	}), nil
 }
 
-// Encode2PublicOpenSSH
-// 编码为 OpenSSL 公钥
-// 并非Pem标准
+// Encode2PublicOpenSSH encodes a public key in OpenSSH authorized_keys format (not PEM).
+// Encode2PublicOpenSSH 编码为 OpenSSH 公钥格式（非 PEM 标准）。
 func Encode2PublicOpenSSH(public *rsa.PublicKey) ([]byte, error) {
 	sshPublicKey, err := ssh.NewPublicKey(public)
 	if err != nil {
@@ -371,18 +375,16 @@ func Encode2PublicOpenSSH(public *rsa.PublicKey) ([]byte, error) {
 	return ssh.MarshalAuthorizedKey(sshPublicKey), nil
 }
 
-// Encode2PrivateOpenSSH
-// go 1.16 官方库不支持直接导出
+// Encode2PrivateOpenSSH is not supported by the Go standard library as of Go 1.16+.
+// Encode2PrivateOpenSSH Go 1.16+ 标准库不支持直接导出 OpenSSH 私钥。
 func Encode2PrivateOpenSSH(private *rsa.PrivateKey) ([]byte, error) {
 	return nil, nil
 }
 
 type funcEncode2KeyPair = func(privateKey *rsa.PrivateKey) (private []byte, public []byte, err error)
 
-// Encode2OpenSSHPair
-// 编码为 OpenSSH适用的公私钥数据
-// 私钥格式: RSA私钥
-// 公钥格式: OpenSSH格式
+// Encode2OpenSSHPair encodes PKCS#1 private key and OpenSSH public key bytes.
+// Encode2OpenSSHPair 编码为 OpenSSH 适用的公私钥：私钥 PKCS#1，公钥 OpenSSH 格式。
 func Encode2OpenSSHPair(privateKey *rsa.PrivateKey) (private []byte, public []byte, err error) {
 	private, err = Encode2RSAPrivatePKCS1(privateKey)
 	if err != nil {
@@ -395,10 +397,8 @@ func Encode2OpenSSHPair(privateKey *rsa.PrivateKey) (private []byte, public []by
 	return
 }
 
-// Encode2RSAPair
-// 编码为 RSA专用的公私钥数据
-// 私钥格式: RSA私钥
-// 公钥格式: RSA公钥
+// Encode2RSAPair encodes PKCS#1 RSA private and public key PEM bytes.
+// Encode2RSAPair 编码为 RSA 专用 PKCS#1 公私钥 PEM。
 func Encode2RSAPair(privateKey *rsa.PrivateKey) (private []byte, public []byte, err error) {
 	private, err = Encode2RSAPrivatePKCS1(privateKey)
 	if err != nil {
@@ -411,10 +411,8 @@ func Encode2RSAPair(privateKey *rsa.PrivateKey) (private []byte, public []byte, 
 	return
 }
 
-// Encode2PKCS8Pair
-// 编码为 PEM通用的公私钥数据
-// 私钥格式: PKCS8私钥
-// 公钥格式: X509公钥
+// Encode2PKCS8Pair encodes PKCS#8 private and X.509 public key PEM bytes.
+// Encode2PKCS8Pair 编码为通用 PEM：私钥 PKCS#8，公钥 X.509。
 func Encode2PKCS8Pair(privateKey *rsa.PrivateKey) (private []byte, public []byte, err error) {
 	private, err = Encode2PrivatePKCS8(privateKey)
 	if err != nil {
@@ -427,64 +425,44 @@ func Encode2PKCS8Pair(privateKey *rsa.PrivateKey) (private []byte, public []byte
 	return
 }
 
-// 生成不同格式的密钥文件 ---------- ---------- ---------- ---------- ----------
-
-// GenerateOpenSSHKeyFiles
-// 生成OpenSSH格式的密钥对文件
-// bits:密钥长度
-// privateFilePath, publicFilePath: 私钥、公钥文件路径
-// 私钥文件格式: PKCS1格式
-// 公钥文件格式: OpenSSH格式
+// GenerateOpenSSHKeyFiles generates and writes an OpenSSH-style key pair to disk.
+// GenerateOpenSSHKeyFiles 生成 OpenSSH 格式密钥对文件。
+// bits: key size; privateFilePath/publicFilePath: output paths; private PKCS#1, public OpenSSH.
+// bits：密钥长度；privateFilePath/publicFilePath：输出路径；私钥 PKCS#1，公钥 OpenSSH。
 func GenerateOpenSSHKeyFiles(bits int, privateFilePath, publicFilePath string) error {
 	return generateKeyFiles(bits, Encode2OpenSSHPair, privateFilePath, publicFilePath)
 }
 
-// SaveOpenSSHKeyFiles
-// 保存OpenSSH格式的密钥对文件
-// privateKey: 私钥
-// privateFilePath, publicFilePath: 私钥、公钥文件路径
-// 私钥文件格式: PKCS1格式
-// 公钥文件格式: OpenSSH格式
+// SaveOpenSSHKeyFiles writes an existing key as OpenSSH-style pair files.
+// SaveOpenSSHKeyFiles 保存 OpenSSH 格式密钥对文件。
+// privateKey: private key; paths as above; private PKCS#1, public OpenSSH.
+// privateKey：私钥；路径同上；私钥 PKCS#1，公钥 OpenSSH。
 func SaveOpenSSHKeyFiles(privateKey *rsa.PrivateKey, privateFilePath, publicFilePath string) error {
 	return saveKeyFiles(privateKey, Encode2OpenSSHPair, privateFilePath, publicFilePath)
 }
 
-// GenerateRSAKeyFiles
-// 生成RSA专用的密钥对文件
-// bits:密钥长度
-// privateFilePath, publicFilePath: 私钥、公钥文件路径
-// 私钥文件格式: PKCS1格式
-// 公钥文件格式: PKCS1格式
+// GenerateRSAKeyFiles generates and writes a PKCS#1 RSA key pair to disk.
+// GenerateRSAKeyFiles 生成 RSA 专用 PKCS#1 密钥对文件。
+// bits: key size; both keys PKCS#1 PEM.
+// bits：密钥长度；公私钥均为 PKCS#1 PEM。
 func GenerateRSAKeyFiles(bits int, privateFilePath, publicFilePath string) error {
 	return generateKeyFiles(bits, Encode2RSAPair, privateFilePath, publicFilePath)
 }
 
-// SaveRSAKeyFiles
-// 保存RSA专用的密钥对文件
-// privateKey: 私钥
-// privateFilePath, publicFilePath: 私钥、公钥文件路径
-// 私钥文件格式: PKCS1格式
-// 公钥文件格式: PKCS1格式
+// SaveRSAKeyFiles writes an existing key as PKCS#1 RSA pair files.
+// SaveRSAKeyFiles 保存 RSA 专用 PKCS#1 密钥对文件。
 func SaveRSAKeyFiles(privateKey *rsa.PrivateKey, privateFilePath, publicFilePath string) error {
 	return saveKeyFiles(privateKey, Encode2RSAPair, privateFilePath, publicFilePath)
 }
 
-// GeneratePemKeyFiles
-// 生成PEM通用的密钥对文件
-// bits:密钥长度
-// privateFilePath, publicFilePath: 私钥、公钥文件路径
-// 私钥文件格式: PKCS8格式
-// 公钥文件格式: X509格式
+// GeneratePemKeyFiles generates and writes a generic PEM key pair (PKCS#8 + X.509).
+// GeneratePemKeyFiles 生成通用 PEM 密钥对文件（私钥 PKCS#8，公钥 X.509）。
 func GeneratePemKeyFiles(bits int, privateFilePath, publicFilePath string) error {
 	return generateKeyFiles(bits, Encode2PKCS8Pair, privateFilePath, publicFilePath)
 }
 
-// SavePemKeyFiles
-// 保存PEM通用的密钥对文件
-// privateKey: 私钥
-// privateFilePath, publicFilePath: 私钥、公钥文件路径
-// 私钥文件格式: PKCS8格式
-// 公钥文件格式: X509格式
+// SavePemKeyFiles writes an existing key as generic PEM pair files.
+// SavePemKeyFiles 保存通用 PEM 密钥对文件（私钥 PKCS#8，公钥 X.509）。
 func SavePemKeyFiles(privateKey *rsa.PrivateKey, privateFilePath, publicFilePath string) error {
 	return saveKeyFiles(privateKey, Encode2PKCS8Pair, privateFilePath, publicFilePath)
 }
@@ -507,16 +485,17 @@ func saveKeyFiles(private *rsa.PrivateKey, funcEncode funcEncode2KeyPair, privat
 	return nil
 }
 
-// load public keys ---------- ---------- ---------- ---------- ----------
-
 var (
-	ErrKeyPath   = errors.New("path is not exist")
+	// ErrKeyPath is returned when a key file path does not exist.
+	// ErrKeyPath 在密钥文件路径不存在时返回。
+	ErrKeyPath = errors.New("path is not exist")
+	// ErrKeyFormat is returned when key PEM/DER content cannot be parsed.
+	// ErrKeyFormat 在密钥内容格式错误时返回。
 	ErrKeyFormat = errors.New("key content format error")
 )
 
-// LoadPublicCipherSSH
-// 加载SSH专用公钥
-// 公钥格式: SSH格式
+// LoadPublicCipherSSH loads an SSH-format public key file into IRSAPublicCipher.
+// LoadPublicCipherSSH 从文件加载 SSH 格式公钥。
 func LoadPublicCipherSSH(path string) (IRSAPublicCipher, error) {
 	if !filex.IsExist(path) {
 		return nil, ErrKeyPath
@@ -528,9 +507,8 @@ func LoadPublicCipherSSH(path string) (IRSAPublicCipher, error) {
 	return NewPublicCipherBySSH(data)
 }
 
-// LoadPrivateCipherRSA
-// 加载RSA专用私钥
-// 私钥格式: PKCS1格式
+// LoadPrivateCipherRSA loads a PKCS#1 RSA private key file.
+// LoadPrivateCipherRSA 从文件加载 PKCS#1 RSA 私钥。
 func LoadPrivateCipherRSA(path string) (IRSAPrivateCipher, error) {
 	if !filex.IsExist(path) {
 		return nil, ErrKeyPath
@@ -542,9 +520,8 @@ func LoadPrivateCipherRSA(path string) (IRSAPrivateCipher, error) {
 	return NewPrivateCipherByRSA(data)
 }
 
-// LoadPublicCipherRSA
-// 加载RSA专用公钥
-// 公钥格式: PKCS1格式
+// LoadPublicCipherRSA loads a PKCS#1 RSA public key file.
+// LoadPublicCipherRSA 从文件加载 PKCS#1 RSA 公钥。
 func LoadPublicCipherRSA(path string) (IRSAPublicCipher, error) {
 	if !filex.IsExist(path) {
 		return nil, ErrKeyPath
@@ -556,9 +533,8 @@ func LoadPublicCipherRSA(path string) (IRSAPublicCipher, error) {
 	return NewPublicCipherByRSA(data)
 }
 
-// LoadPrivateCipherPEM
-// 加载PEM通用私钥
-// 私钥格式: PKCS8格式
+// LoadPrivateCipherPEM loads a PKCS#8 private key file.
+// LoadPrivateCipherPEM 从文件加载 PKCS#8 私钥。
 func LoadPrivateCipherPEM(path string) (IRSAPrivateCipher, error) {
 	if !filex.IsExist(path) {
 		return nil, ErrKeyPath
@@ -570,9 +546,8 @@ func LoadPrivateCipherPEM(path string) (IRSAPrivateCipher, error) {
 	return NewPrivateCipherByPEM(data)
 }
 
-// LoadPublicCipherPEM
-// 加载PEM通用公钥
-// 公钥格式: X509格式
+// LoadPublicCipherPEM loads an X.509 public key file.
+// LoadPublicCipherPEM 从文件加载 X.509 公钥。
 func LoadPublicCipherPEM(path string) (IRSAPublicCipher, error) {
 	if !filex.IsExist(path) {
 		return nil, ErrKeyPath
@@ -584,10 +559,8 @@ func LoadPublicCipherPEM(path string) (IRSAPublicCipher, error) {
 	return NewPublicCipherByPEM(data)
 }
 
-// LoadCiphersSSH
-// 加载SSH密钥对
-// 私钥格式: PKCS1格式
-// 公钥格式: SSH格式
+// LoadCiphersSSH loads a key pair: private PKCS#1, public SSH.
+// LoadCiphersSSH 加载密钥对：私钥 PKCS#1，公钥 SSH。
 func LoadCiphersSSH(privatePath string, publicPath string) (IRSAPrivateCipher, IRSAPublicCipher, error) {
 	if !filex.IsExist(privatePath) || !filex.IsExist(publicPath) {
 		return nil, nil, ErrKeyPath
@@ -603,10 +576,8 @@ func LoadCiphersSSH(privatePath string, publicPath string) (IRSAPrivateCipher, I
 	return NewCiphersBySSH(privateData, publicData)
 }
 
-// LoadCiphersRSA
-// 加载RSA专用密钥对
-// 私钥格式: PKCS1格式
-// 公钥格式: PKCS1格式
+// LoadCiphersRSA loads a PKCS#1 RSA key pair from files.
+// LoadCiphersRSA 从文件加载 PKCS#1 RSA 密钥对。
 func LoadCiphersRSA(privatePath string, publicPath string) (IRSAPrivateCipher, IRSAPublicCipher, error) {
 	if !filex.IsExist(privatePath) || !filex.IsExist(publicPath) {
 		return nil, nil, ErrKeyPath
@@ -622,10 +593,8 @@ func LoadCiphersRSA(privatePath string, publicPath string) (IRSAPrivateCipher, I
 	return NewCiphersByRSA(privateData, publicData)
 }
 
-// LoadCiphersPEM
-// 加载PEM封装的通用密钥对
-// 私钥格式: PKCS8格式
-// 公钥格式: x.509格式
+// LoadCiphersPEM loads a generic PEM pair: private PKCS#8, public X.509.
+// LoadCiphersPEM 加载通用 PEM 密钥对：私钥 PKCS#8，公钥 X.509。
 func LoadCiphersPEM(privatePath string, publicPath string) (IRSAPrivateCipher, IRSAPublicCipher, error) {
 	if !filex.IsExist(privatePath) || !filex.IsExist(publicPath) {
 		return nil, nil, ErrKeyPath
@@ -641,9 +610,10 @@ func LoadCiphersPEM(privatePath string, publicPath string) (IRSAPrivateCipher, I
 	return NewCiphersByPEM(privateData, publicData)
 }
 
-// NewPrivateCipherByRSA
-// 根据pkcs1(RSA专用)私钥数据生成私钥处理器
-// publicPkcs1DerData PKCS1格式的私钥内容
+// NewPrivateCipherByRSA builds IRSAPrivateCipher from PKCS#1 private key PEM/DER bytes.
+// NewPrivateCipherByRSA 根据 PKCS#1（RSA 专用）私钥数据生成私钥处理器。
+// privatePkcs1DerData: PKCS#1 private key content.
+// privatePkcs1DerData：PKCS#1 格式私钥内容。
 func NewPrivateCipherByRSA(privatePkcs1DerData []byte) (IRSAPrivateCipher, error) {
 	privateKey, err := ParsePrivateKeyFromPKCS1(privatePkcs1DerData)
 	if nil != err {
@@ -652,8 +622,8 @@ func NewPrivateCipherByRSA(privatePkcs1DerData []byte) (IRSAPrivateCipher, error
 	return newPrivateRsa(privateKey), nil
 }
 
-// NewPublicCipherByRSA
-// 根据pkcs1(RSA专用)公钥数据生成公钥处理器
+// NewPublicCipherByRSA builds IRSAPublicCipher from PKCS#1 public key PEM/DER bytes.
+// NewPublicCipherByRSA 根据 PKCS#1（RSA 专用）公钥数据生成公钥处理器。
 func NewPublicCipherByRSA(publicPkcs1DerData []byte) (IRSAPublicCipher, error) {
 	publicKey, err := ParsePublicKeyFromPKCS1(publicPkcs1DerData)
 	if nil != err {
@@ -662,8 +632,8 @@ func NewPublicCipherByRSA(publicPkcs1DerData []byte) (IRSAPublicCipher, error) {
 	return newPublicRsa(publicKey), nil
 }
 
-// NewPublicCipherBySSH
-// 根据SSH公钥数据生成公钥处理器
+// NewPublicCipherBySSH builds IRSAPublicCipher from OpenSSH authorized_keys bytes.
+// NewPublicCipherBySSH 根据 SSH 公钥数据生成公钥处理器。
 func NewPublicCipherBySSH(publicSSHData []byte) (IRSAPublicCipher, error) {
 	publicKey, err := ParsePublicKeyFromSSH(publicSSHData)
 	if nil != err {
@@ -672,8 +642,8 @@ func NewPublicCipherBySSH(publicSSHData []byte) (IRSAPublicCipher, error) {
 	return newPublicRsa(publicKey), nil
 }
 
-// NewPrivateCipherByPEM
-// 根据pkcs8私钥数据生成私钥处理器
+// NewPrivateCipherByPEM builds IRSAPrivateCipher from PKCS#8 private key PEM/DER bytes.
+// NewPrivateCipherByPEM 根据 PKCS#8 私钥数据生成私钥处理器。
 func NewPrivateCipherByPEM(pkcs8DerData []byte) (IRSAPrivateCipher, error) {
 	privateKey, err := ParsePrivateKeyFromPKCS8(pkcs8DerData)
 	if nil != err {
@@ -682,8 +652,8 @@ func NewPrivateCipherByPEM(pkcs8DerData []byte) (IRSAPrivateCipher, error) {
 	return newPrivateRsa(privateKey), nil
 }
 
-// NewPublicCipherByPEM
-// 根据x.509公钥数据生成公钥处理器
+// NewPublicCipherByPEM builds IRSAPublicCipher from X.509 public key PEM/DER bytes.
+// NewPublicCipherByPEM 根据 X.509 公钥数据生成公钥处理器。
 func NewPublicCipherByPEM(x509DerData []byte) (IRSAPublicCipher, error) {
 	publicKey, err := ParsePublicKeyFromX509(x509DerData)
 	if nil != err {
@@ -692,10 +662,8 @@ func NewPublicCipherByPEM(x509DerData []byte) (IRSAPublicCipher, error) {
 	return newPublicRsa(publicKey), nil
 }
 
-// NewCiphersBySSH
-// 根据密钥对数据生成密钥对处理器
-// 私钥：PKCS1格式
-// 公钥：SSH格式
+// NewCiphersBySSH builds ciphers from PKCS#1 private and SSH public key bytes.
+// NewCiphersBySSH 根据密钥对数据生成处理器：私钥 PKCS#1，公钥 SSH。
 func NewCiphersBySSH(privatePkcs1DerData []byte, publicSSHData []byte) (IRSAPrivateCipher, IRSAPublicCipher, error) {
 	privateKey, err := ParsePrivateKeyFromPKCS1(privatePkcs1DerData)
 	if nil != err {
@@ -708,10 +676,8 @@ func NewCiphersBySSH(privatePkcs1DerData []byte, publicSSHData []byte) (IRSAPriv
 	return newPrivateRsa(privateKey), newPublicRsa(publicKey), nil
 }
 
-// NewCiphersByRSA
-// 根据密钥对数据生成密钥对处理器
-// 私钥：PKCS1格式
-// 公钥：PKCS1格式
+// NewCiphersByRSA builds ciphers from PKCS#1 private and public key bytes.
+// NewCiphersByRSA 根据密钥对数据生成处理器：私钥与公钥均为 PKCS#1。
 func NewCiphersByRSA(privatePkcs1DerData []byte, publicPkcs1DerData []byte) (IRSAPrivateCipher, IRSAPublicCipher, error) {
 	privateKey, err := ParsePrivateKeyFromPKCS1(privatePkcs1DerData)
 	if nil != err {
@@ -724,10 +690,8 @@ func NewCiphersByRSA(privatePkcs1DerData []byte, publicPkcs1DerData []byte) (IRS
 	return newPrivateRsa(privateKey), newPublicRsa(publicKey), nil
 }
 
-// NewCiphersByPEM
-// 根据密钥对数据生成密钥对处理器
-// 私钥：PKCS8格式
-// 公钥：X509格式
+// NewCiphersByPEM builds ciphers from PKCS#8 private and X.509 public key bytes.
+// NewCiphersByPEM 根据密钥对数据生成处理器：私钥 PKCS#8，公钥 X.509。
 func NewCiphersByPEM(pkcs8DerData []byte, x509DerData []byte) (IRSAPrivateCipher, IRSAPublicCipher, error) {
 	privateKey, err := ParsePrivateKeyFromPKCS8(pkcs8DerData)
 	if nil != err {
@@ -740,11 +704,8 @@ func NewCiphersByPEM(pkcs8DerData []byte, x509DerData []byte) (IRSAPrivateCipher
 	return newPrivateRsa(privateKey), newPublicRsa(publicKey), nil
 }
 
-// 解释Key ---------- ---------- ---------- ---------- ----------
-
-// ParsePrivateKeyFromPKCS1
-// 解释PKCS1(RSA专用)格式的私钥
-// return *rsa.PrivateKey
+// ParsePrivateKeyFromPKCS1 parses a PKCS#1 RSA private key from PEM/DER bytes.
+// ParsePrivateKeyFromPKCS1 解析 PKCS#1（RSA 专用）格式私钥，返回 *rsa.PrivateKey。
 func ParsePrivateKeyFromPKCS1(privatePkcs1DerData []byte) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode(privatePkcs1DerData)
 	if block == nil {
@@ -753,9 +714,8 @@ func ParsePrivateKeyFromPKCS1(privatePkcs1DerData []byte) (*rsa.PrivateKey, erro
 	return x509.ParsePKCS1PrivateKey(block.Bytes)
 }
 
-// ParsePublicKeyFromPKCS1
-// 解释PKCS1(RSA专用)格式的公钥
-// return *rsa.PublicKey
+// ParsePublicKeyFromPKCS1 parses a PKCS#1 RSA public key from PEM/DER bytes.
+// ParsePublicKeyFromPKCS1 解析 PKCS#1（RSA 专用）格式公钥，返回 *rsa.PublicKey。
 func ParsePublicKeyFromPKCS1(publicPkcs1DerData []byte) (*rsa.PublicKey, error) {
 	block, _ := pem.Decode(publicPkcs1DerData)
 	if block == nil {
@@ -764,11 +724,9 @@ func ParsePublicKeyFromPKCS1(publicPkcs1DerData []byte) (*rsa.PublicKey, error) 
 	return x509.ParsePKCS1PublicKey(block.Bytes)
 }
 
-// ParsePublicKeyFromSSH
-// 把OpenSSH格式的公钥解释为rsa.PublicKey
-// return *rsa.PublicKey
+// ParsePublicKeyFromSSH parses an OpenSSH authorized_keys line into *rsa.PublicKey.
+// ParsePublicKeyFromSSH 将 OpenSSH 格式公钥解析为 *rsa.PublicKey。
 func ParsePublicKeyFromSSH(sshPublicData []byte) (*rsa.PublicKey, error) {
-	// 注意，使用ParsePublicKey来解释的话，要手动去掉ssh-rsa后，使用base64进行解码后传入
 	sshPublicKey, _, _, _, err := ssh.ParseAuthorizedKey(sshPublicData)
 	if nil != err {
 		return nil, err
@@ -780,8 +738,8 @@ func ParsePublicKeyFromSSH(sshPublicData []byte) (*rsa.PublicKey, error) {
 	return rsaPublicKey, nil
 }
 
-// ParsePrivateKeyFromPKCS8
-// 把PKCS8格式的私钥解释为rsa.PrivateKey
+// ParsePrivateKeyFromPKCS8 parses a PKCS#8 private key into *rsa.PrivateKey.
+// ParsePrivateKeyFromPKCS8 将 PKCS#8 格式私钥解析为 *rsa.PrivateKey。
 func ParsePrivateKeyFromPKCS8(pkcs8DerData []byte) (*rsa.PrivateKey, error) {
 	block, _ := pem.Decode(pkcs8DerData)
 	if block == nil {
@@ -799,8 +757,8 @@ func ParsePrivateKeyFromPKCS8(pkcs8DerData []byte) (*rsa.PrivateKey, error) {
 	return private, err
 }
 
-// ParsePublicKeyFromX509
-// 把X509格式的公钥解释为rsa.PublicKey
+// ParsePublicKeyFromX509 parses an X.509 SubjectPublicKeyInfo key into *rsa.PublicKey.
+// ParsePublicKeyFromX509 将 X.509 格式公钥解析为 *rsa.PublicKey。
 func ParsePublicKeyFromX509(x509DerData []byte) (*rsa.PublicKey, error) {
 	block, _ := pem.Decode(x509DerData)
 	if block == nil {
@@ -818,8 +776,8 @@ func ParsePublicKeyFromX509(x509DerData []byte) (*rsa.PublicKey, error) {
 	return pub, nil
 }
 
-// ConvertPublicPkcs1ToX509
-// 把 PKCS1格式的公钥内容 转换为 X509格式的公钥内容
+// ConvertPublicPkcs1ToX509 converts PKCS#1 public key PEM/DER to X.509 SPKI PEM.
+// ConvertPublicPkcs1ToX509 将 PKCS#1 公钥内容转换为 X.509 公钥内容。
 func ConvertPublicPkcs1ToX509(pkcs1DerData []byte) ([]byte, error) {
 	publicKey, err := ParsePublicKeyFromPKCS1(pkcs1DerData)
 	if nil != err {
@@ -828,8 +786,8 @@ func ConvertPublicPkcs1ToX509(pkcs1DerData []byte) ([]byte, error) {
 	return Encode2PublicX509(publicKey)
 }
 
-// ConvertPublicX509ToPkcs1
-// 把 X509格式的公钥内容 转换为 PKCS1格式的公钥内容
+// ConvertPublicX509ToPkcs1 converts X.509 public key PEM/DER to PKCS#1 PEM.
+// ConvertPublicX509ToPkcs1 将 X.509 公钥内容转换为 PKCS#1 公钥内容。
 func ConvertPublicX509ToPkcs1(x509DerData []byte) ([]byte, error) {
 	publicKey, err := ParsePublicKeyFromX509(x509DerData)
 	if nil != err {
@@ -838,8 +796,8 @@ func ConvertPublicX509ToPkcs1(x509DerData []byte) ([]byte, error) {
 	return Encode2PublicX509(publicKey)
 }
 
-// ConvertPrivatePkcs1ToPkcs8
-// 把 PKCS1格式的私钥内容 转换为 PKCS8格式的私钥内容
+// ConvertPrivatePkcs1ToPkcs8 converts PKCS#1 private key PEM/DER to PKCS#8 PEM.
+// ConvertPrivatePkcs1ToPkcs8 将 PKCS#1 私钥内容转换为 PKCS#8 私钥内容。
 func ConvertPrivatePkcs1ToPkcs8(pkcs1DerData []byte) ([]byte, error) {
 	privateKey, err := ParsePrivateKeyFromPKCS1(pkcs1DerData)
 	if nil != err {
@@ -848,8 +806,8 @@ func ConvertPrivatePkcs1ToPkcs8(pkcs1DerData []byte) ([]byte, error) {
 	return Encode2PrivatePKCS8(privateKey)
 }
 
-// ConvertPrivatePkcs8ToPkcs1
-// 把 PKCS8格式的私钥内容 转换为 PKCS1格式的私钥内容
+// ConvertPrivatePkcs8ToPkcs1 converts PKCS#8 private key PEM/DER to PKCS#1 PEM.
+// ConvertPrivatePkcs8ToPkcs1 将 PKCS#8 私钥内容转换为 PKCS#1 私钥内容。
 func ConvertPrivatePkcs8ToPkcs1(pkcs8DerData []byte) ([]byte, error) {
 	privateKey, err := ParsePrivateKeyFromPKCS8(pkcs8DerData)
 	if nil != err {

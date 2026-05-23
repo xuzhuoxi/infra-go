@@ -1,6 +1,3 @@
-// Package symmetric
-// Create on 2025/4/6
-// @author xuzhuoxi
 package symmetric
 
 import (
@@ -11,49 +8,65 @@ import (
 	"github.com/xuzhuoxi/infra-go/cryptox"
 )
 
-// IDESCipher
-// DES：Data Encrytion Standard（数据加密标准），对应算法是DEA
-// 特点：
-//  1. 对称加密
-//  2. 同一个SK
+// IDESCipher is the DES / triple-DES cipher API (DEA algorithm).
+// IDESCipher 是数据加密标准 DES（DEA 算法）的加解密接口。
+// Features: symmetric; single key schedule (or triple-DES keying).
+// 特点：1. 对称加密；2. 同一个 SK（或 3DES 密钥编排）。
 type IDESCipher interface {
 	cryptox.ICipher
-	// SetPaddingFunc 设置填充方式
+	// SetPaddingFunc sets padding and unpadding functions.
+	// SetPaddingFunc 设置填充方式。
 	SetPaddingFunc(padding cryptox.FuncPadding, unPadding cryptox.FuncUnPadding)
 
-	// EncryptMode 指定BlockMode加密, 使用随机IV，并把IV数据放在密文头部
+	// EncryptMode encrypts with blockMode using a random IV prepended when applicable.
+	// EncryptMode 指定 BlockMode 加密，适用时使用随机 IV 并放在密文头部。
 	EncryptMode(plaintext []byte, blockMode cryptox.BlockMode) ([]byte, error)
-	// EncryptIVMode 指定BlockMode加密, 指定IV
+	// EncryptIVMode encrypts with blockMode using the given IV.
+	// EncryptIVMode 指定 BlockMode 加密，使用指定 IV。
 	EncryptIVMode(plaintext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error)
-	// DecryptMode 指定BlockMode解密, 从密文头部提取IV
+	// DecryptMode decrypts with blockMode; IV is taken from the ciphertext prefix when applicable.
+	// DecryptMode 指定 BlockMode 解密，适用时从密文头部提取 IV。
 	DecryptMode(ciphertext []byte, blockMode cryptox.BlockMode) ([]byte, error)
-	// DecryptIVMode 指定BlockMode解密, 指定IV
+	// DecryptIVMode decrypts with blockMode using the given IV.
+	// DecryptIVMode 指定 BlockMode 解密，使用指定 IV。
 	DecryptIVMode(ciphertext []byte, iv []byte, blockMode cryptox.BlockMode) ([]byte, error)
 
-	// EncryptECB 使用ECB模式加密
+	// EncryptECB encrypts in ECB mode.
+	// EncryptECB 使用 ECB 模式加密。
 	EncryptECB(plaintext []byte) ([]byte, error)
-	// DecryptECB 使用ECB模式解密
+	// DecryptECB decrypts in ECB mode.
+	// DecryptECB 使用 ECB 模式解密。
 	DecryptECB(ciphertext []byte) ([]byte, error)
 
-	// EncryptCBC 使用CBC模式加密, 使用随机IV，并把IV数据放在密文头部
+	// EncryptCBC encrypts in CBC mode with a random IV prepended.
+	// EncryptCBC 使用 CBC 模式加密，随机 IV 放在密文头部。
 	EncryptCBC(plaintext []byte) ([]byte, error)
-	// EncryptIVCBC 使用CBC模式加密,  指定IV
+	// EncryptIVCBC encrypts in CBC mode with the given IV.
+	// EncryptIVCBC 使用 CBC 模式加密，指定 IV。
 	EncryptIVCBC(plaintext []byte, iv []byte) ([]byte, error)
-	// DecryptCBC 使用CBC模式解密, 从密文头部提取IV
+	// DecryptCBC decrypts in CBC mode; IV is taken from the ciphertext prefix.
+	// DecryptCBC 使用 CBC 模式解密，从密文头部提取 IV。
 	DecryptCBC(ciphertext []byte) ([]byte, error)
-	// DecryptIVCBC 使用CBC模式解密, 指定IV
+	// DecryptIVCBC decrypts in CBC mode with the given IV.
+	// DecryptIVCBC 使用 CBC 模式解密，指定 IV。
 	DecryptIVCBC(ciphertext []byte, iv []byte) ([]byte, error)
 
-	// EncryptCTR 使用CTR模式加密, 使用随机IV，并把IV数据放在密文头部
+	// EncryptCTR encrypts in CTR mode with a random IV prepended.
+	// EncryptCTR 使用 CTR 模式加密，随机 IV 放在密文头部。
 	EncryptCTR(plaintext []byte) ([]byte, error)
-	// EncryptIVCTR 使用CTR模式解密, 指定IV
+	// EncryptIVCTR encrypts in CTR mode with the given IV.
+	// EncryptIVCTR 使用 CTR 模式加密，指定 IV。
 	EncryptIVCTR(plaintext []byte, iv []byte) ([]byte, error)
-	// DecryptCTR 使用CTR模式解密, 从密文头部提取IV
+	// DecryptCTR decrypts in CTR mode; IV is taken from the ciphertext prefix.
+	// DecryptCTR 使用 CTR 模式解密，从密文头部提取 IV。
 	DecryptCTR(ciphertext []byte) ([]byte, error)
-	// DecryptIVCTR 使用CTR模式解密, 指定IV
+	// DecryptIVCTR decrypts in CTR mode with the given IV.
+	// DecryptIVCTR 使用 CTR 模式解密，指定 IV。
 	DecryptIVCTR(ciphertext []byte, iv []byte) ([]byte, error)
 }
 
+// NewDESCipher creates DES or triple-DES from an 8-, 16-, or 24-byte key; default mode is CBC.
+// NewDESCipher 根据 8/16/24 字节密钥创建 DES 或 3DES；默认加解密模式为 CBC。
 func NewDESCipher(key []byte) IDESCipher {
 	rs := &desCipher{key: key}
 	keyLen := len(key)
@@ -71,6 +84,9 @@ func NewDESCipher(key []byte) IDESCipher {
 	rs.padding, rs.unPadding = cryptox.PKCS7Padding, cryptox.PKCS7UnPadding
 	return rs
 }
+
+// NewTripleDESCipher always uses triple-DES (expands 8- or 16-byte keys to 24 bytes).
+// NewTripleDESCipher 始终使用 3DES（8 或 16 字节密钥会扩展为 24 字节）。
 func NewTripleDESCipher(key []byte) IDESCipher {
 	rs := &desCipher{key: key}
 	keyLen := len(key)

@@ -1,21 +1,19 @@
-// Package symmetric
-// Create on 2025/4/18
-// @author xuzhuoxi
 package symmetric
 
 import (
 	"github.com/xuzhuoxi/infra-go/cryptox"
 )
 
-// IXORCipher
-// 异常混淆器：
-// 特点：
-//  1. 快
-//  2. 不安全
+// IXORCipher is a fast XOR stream obfuscator (not cryptographically secure).
+// IXORCipher 是快速 XOR 流混淆器（不具备密码学安全性）。
+// Features: fast; not secure for sensitive data.
+// 特点：1. 快；2. 不安全。
 type IXORCipher interface {
 	cryptox.ICipher
 }
 
+// NewXORCipher creates an XOR cipher with the given repeating key.
+// NewXORCipher 使用给定循环密钥创建 XOR 混淆器。
 func NewXORCipher(key []byte) IXORCipher {
 	rs := &xorCipher{key: key, keyLen: len(key)}
 	return rs

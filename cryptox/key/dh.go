@@ -1,6 +1,3 @@
-// Package key
-// Create on 2025/4/6
-// @author xuzhuoxi
 package key
 
 import (
@@ -22,13 +19,15 @@ var (
 	g    = big.NewInt(2)
 )
 
-// DHKeyPair 表示 DH 密钥对
+// DHKeyPair holds a Diffie-Hellman private and public value.
+// DHKeyPair 表示 DH 密钥对。
 type DHKeyPair struct {
-	Private *big.Int // 私钥
-	Public  *big.Int // 公钥 A = g^a mod p
+	Private *big.Int // private exponent / 私钥
+	Public  *big.Int // public value A = g^a mod p / 公钥 A = g^a mod p
 }
 
-// GenerateDHKeyPair 生成一对 DH 密钥
+// GenerateDHKeyPair generates a new DH key pair for RFC 3526 group 14.
+// GenerateDHKeyPair 生成一对 DH 密钥。
 func GenerateDHKeyPair() (*DHKeyPair, error) {
 	private, err := rand.Int(rand.Reader, p)
 	if err != nil {
@@ -38,7 +37,8 @@ func GenerateDHKeyPair() (*DHKeyPair, error) {
 	return &DHKeyPair{Private: private, Public: public}, nil
 }
 
-// ComputeDHSharedK 计算共享密钥 K = B^a mod p
+// ComputeDHSharedK computes the shared secret K = B^a mod p.
+// ComputeDHSharedK 计算共享密钥 K = B^a mod p。
 func ComputeDHSharedK(theirPublic *big.Int, myPrivate *big.Int) *big.Int {
 	return new(big.Int).Exp(theirPublic, myPrivate, p)
 }
