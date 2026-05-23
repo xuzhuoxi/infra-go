@@ -4,46 +4,38 @@ import (
 	"os"
 )
 
-// Move
-// 移动文件或目录
-// 文件移动：保留原有属性
-// 目录移动：保留原有属性，同时移动目录包含的文件及子目录
-// 旧路径无效：忽略
-// 新路径无效：忽略
-// 新路径已存在：覆盖
+// Move renames or moves srcPath to dstPath, overwriting dstPath if it exists.
+// Move 将 srcPath 移动/重命名为 dstPath；目标已存在时覆盖。
+//
+// Invalid srcPath is ignored; invalid dstPath is ignored; directory moves include all contents.
+// 源路径无效时忽略；目标路径无效时忽略；移动目录时包含其全部内容。
 func Move(srcPath string, dstPath string) error {
 	return move(FormatPath(srcPath), FormatPath(dstPath))
 }
 
-// MoveAuto
-// 移动文件或目录
-// 文件移动：保留原有属性
-// 目录移动：保留原有属性，同时移动目录包含的文件及子目录
-// 旧路径无效：忽略
-// 新路径无效：补全
-// 新路径已存在：覆盖
+// MoveAuto moves srcPath to dstPath and creates missing parent directories with autoPerm.
+// MoveAuto 移动 srcPath 到 dstPath；目标父目录不存在时按 autoPerm 补全。
+//
+// Invalid srcPath is ignored; invalid dstPath is completed; directory moves include all contents.
+// 源路径无效时忽略；目标路径无效时补全；移动目录时包含其全部内容。
 func MoveAuto(srcPath string, dstPath string, autoPerm os.FileMode) error {
 	return moveFileAuto(FormatPath(srcPath), FormatPath(dstPath), autoPerm)
 }
 
-// MoveTo
-// 移动文件或目录到指定目录
-// 文件移动：保留原有属性
-// 目录移动：保留原有属性，同时移动目录包含的文件及子目录
-// 旧路径无效：忽略
-// 目标路径无效：忽略
-// 目标已存在：覆盖
+// MoveTo moves srcPath into dstDir using the base name of srcPath.
+// MoveTo 将 srcPath 移动到 dstDir，保留源路径的文件名。
+//
+// Invalid srcPath is ignored; invalid dstDir is ignored; existing destination is overwritten.
+// 源路径无效时忽略；目标目录无效时忽略；目标已存在时覆盖。
 func MoveTo(srcPath string, dstDir string) error {
 	return moveTo(srcPath, dstDir)
 }
 
-// MoveToAuto
-// 移动文件或目录
-// 文件移动：保留原有属性
-// 目录移动：保留原有属性，同时移动目录包含的文件及子目录
-// 旧路径无效：忽略
-// 目标路径为文件：忽略
-// 目标路径无效：自动补全
+// MoveToAuto moves srcPath into dstDir and creates dstDir with autoPerm when missing.
+// MoveToAuto 将 srcPath 移动到 dstDir；目标目录不存在时按 autoPerm 创建。
+//
+// Invalid srcPath is ignored; if dstDir is a file, the move is ignored.
+// 源路径无效时忽略；若 dstDir 为文件则忽略。
 func MoveToAuto(srcPath string, dstDir string, autoPerm os.FileMode) error {
 	return moveToDirAuto(srcPath, dstDir, autoPerm)
 }

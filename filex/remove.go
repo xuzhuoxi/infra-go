@@ -5,34 +5,32 @@ import (
 	"os"
 )
 
-// RemoveAll
-// 删除全部
-// 路径为文件时，删除文件
-// 路径为目录时，删除目录
+// RemoveAll removes the file or directory tree at path.
+// RemoveAll 删除 path 处的文件或整个目录树。
 func RemoveAll(path string) error {
 	path = FormatPath(path)
 	return removeAll(path)
 }
 
-// Remove
-// 删除文件 或 删除空目录
+// Remove deletes a file or an empty directory.
+// Remove 删除文件或空目录。
 func Remove(path string) error {
 	path = FormatPath(path)
 	return remove(path)
 }
 
-// RemoveChildren
-// 清空目录内容
-// 保留当前目录
+// RemoveChildren clears all entries inside dir but keeps dir itself.
+// RemoveChildren 清空 dir 内的全部内容，但保留 dir 目录本身。
 func RemoveChildren(dir string) error {
 	dir = FormatPath(dir)
 	return clearDir(dir)
 }
 
-// RemoveEmptyDir
-// 清除空目录
-// 如果当前路径也为空目录，清除之
-// 返回清除数量与错误
+// RemoveEmptyDir removes empty subdirectories under dir; also removes dir if it becomes empty.
+// RemoveEmptyDir 清除 dir 下的空子目录；若 dir 自身也为空则一并删除。
+//
+// It returns the number of removed directories and any error encountered.
+// 返回已删除的空目录数量及遇到的错误。
 func RemoveEmptyDir(dir string) (count int, err error) {
 	dir = FormatPath(dir)
 	var paths []string
@@ -64,17 +62,16 @@ func RemoveEmptyDir(dir string) (count int, err error) {
 	return count, nil
 }
 
-// RemoveFiles
-// 清空目录中全部文件
-// 保留目录结构
+// RemoveFiles deletes all files under dir while preserving the directory structure.
+// RemoveFiles 删除 dir 下的全部文件，但保留目录结构。
 func RemoveFiles(dir string) (count int, err error) {
 	return RemoveByFilter(dir, func(path string, info os.FileInfo) bool {
 		return !info.IsDir()
 	})
 }
 
-// RemoveByFilter
-// 使用PathFilter进行可选删除
+// RemoveByFilter deletes paths under dir that match filter.
+// RemoveByFilter 按 filter 删除 dir 下匹配的路径。
 func RemoveByFilter(dir string, filter PathFilter) (count int, err error) {
 	paths, err := GetPathsAll(dir, filter)
 	if nil != err {

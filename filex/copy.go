@@ -7,14 +7,12 @@ import (
 )
 
 const (
-	LittleFile = 32 * 1024
-	MiddleFile = 256 * 1024
+	LittleFile = 32 * 1024  // LittleFile is the small-file copy threshold (32 KiB). 小文件复制阈值（32 KiB）.
+	MiddleFile = 256 * 1024 // MiddleFile is the medium-file copy threshold (256 KiB). 中等文件复制阈值（256 KiB）.
 )
 
-// Copy
-// 复制文件
-// 根据文件大小选择不同的复制算法
-// 要求目录路径的父目录存在
+// Copy copies srcFile to dstFile using a size-based strategy; the destination parent directory must exist.
+// Copy 按文件大小选择策略复制 srcFile 到 dstFile；要求目标路径的父目录已存在。
 func Copy(srcFile string, dstFile string) (written int64, err error) {
 	srcFile = FormatPath(srcFile)
 	stat, err := os.Stat(srcFile)
@@ -25,10 +23,8 @@ func Copy(srcFile string, dstFile string) (written int64, err error) {
 	return copy(srcFile, dstFile, stat, stat.Mode())
 }
 
-// CopyAuto
-// 复制文件
-// 根据文件大小选择不同的复制算法
-// 如果目录路径的父目录不存在，自动补全
+// CopyAuto copies srcFile to dstFile and creates missing parent directories with autoPerm.
+// CopyAuto 复制 srcFile 到 dstFile；若父目录不存在则按 autoPerm 自动补全。
 func CopyAuto(srcFile string, dstFile string, autoPerm os.FileMode) (written int64, err error) {
 	srcFile = FormatPath(srcFile)
 	stat, err := os.Stat(srcFile)
@@ -43,29 +39,24 @@ func CopyAuto(srcFile string, dstFile string, autoPerm os.FileMode) (written int
 	return copy(srcFile, dstFile, stat, stat.Mode())
 }
 
-// CopyTo
-// 复制文件到指定目录
-// 根据文件大小选择不同的复制算法
+// CopyTo copies srcFile into targetDir using the base file name.
+// CopyTo 将 srcFile 复制到 targetDir，保留源文件名。
 func CopyTo(srcFile string, targetDir string) (written int64, err error) {
 	var _, name = Split(srcFile)
 	var newPath = Combine(targetDir, name)
 	return Copy(srcFile, newPath)
 }
 
-// CopyToAuto
-// 复制文件到指定目录
-// 根据文件大小选择不同的复制算法
-// 如果目录路径的父目录不存在，自动补全
+// CopyToAuto copies srcFile into targetDir and creates missing parent directories with autoPerm.
+// CopyToAuto 将 srcFile 复制到 targetDir；若父目录不存在则按 autoPerm 自动补全。
 func CopyToAuto(srcFile string, targetDir string, autoPerm os.FileMode) (written int64, err error) {
 	var _, name = Split(srcFile)
 	var newPath = Combine(targetDir, name)
 	return CopyAuto(srcFile, newPath, autoPerm)
 }
 
-// CopyMod
-// 复制文件
-// 根据文件大小选择不同的复制算法
-// 同时设置新的FileMode
+// CopyMod copies srcFile to dstFile and sets the destination permission to filePerm.
+// CopyMod 复制 srcFile 到 dstFile，并将目标权限设为 filePerm。
 func CopyMod(srcFile string, dstFile string, filePerm os.FileMode) (written int64, err error) {
 	srcFile = FormatPath(srcFile)
 	stat, err := os.Stat(srcFile)
@@ -75,11 +66,8 @@ func CopyMod(srcFile string, dstFile string, filePerm os.FileMode) (written int6
 	return copy(srcFile, dstFile, stat, filePerm)
 }
 
-// CopyModAuto
-// 复制文件
-// 根据文件大小选择不同的复制算法
-// 同时设置新的FileMode
-// 如果目录路径的父目录不存在，自动补全
+// CopyModAuto copies srcFile to dstFile with filePerm and creates missing parents with autoPerm.
+// CopyModAuto 复制并设置 filePerm；若父目录不存在则按 autoPerm 自动补全。
 func CopyModAuto(srcFile string, dstFile string, filePerm os.FileMode, autoPerm os.FileMode) (written int64, err error) {
 	srcFile = FormatPath(srcFile)
 	stat, err := os.Stat(srcFile)
@@ -94,21 +82,16 @@ func CopyModAuto(srcFile string, dstFile string, filePerm os.FileMode, autoPerm 
 	return copy(srcFile, dstFile, stat, filePerm)
 }
 
-// CopyModTo
-// 复制文件到指定目录
-// 根据文件大小选择不同的复制算法
-// 同时设置新的FileMode
+// CopyModTo copies srcFile into targetDir with filePerm.
+// CopyModTo 将 srcFile 复制到 targetDir，并将目标权限设为 filePerm。
 func CopyModTo(srcFile string, targetDir string, filePerm os.FileMode) (written int64, err error) {
 	var _, name = Split(srcFile)
 	var newPath = Combine(targetDir, name)
 	return CopyMod(srcFile, newPath, filePerm)
 }
 
-// CopyModToAuto
-// 复制文件到指定目录
-// 根据文件大小选择不同的复制算法
-// 同时设置新的FileMode
-// 如果目录路径的父目录不存在，自动补全
+// CopyModToAuto copies srcFile into targetDir with filePerm and creates missing parents with autoPerm.
+// CopyModToAuto 将 srcFile 复制到 targetDir 并设置 filePerm；若父目录不存在则按 autoPerm 自动补全。
 func CopyModToAuto(srcFile string, targetDir string, filePerm os.FileMode, autoPerm os.FileMode) (written int64, err error) {
 	var _, name = Split(srcFile)
 	var newPath = Combine(targetDir, name)

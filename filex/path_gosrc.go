@@ -1,11 +1,7 @@
-// Package filex
-// Create on 2022/7/8
-// @author xuzhuoxi
 package filex
 
 import "strings"
 
-// IsAbs reports whether the path is absolute.
 func isUnixAbs(path string) bool {
 	return strings.HasPrefix(path, "/")
 }
@@ -37,7 +33,6 @@ func isReservedName(path string) bool {
 	return false
 }
 
-// IsAbs reports whether the path is absolute.
 func isWinAbs(path string) (b bool) {
 	if isReservedName(path) {
 		return true
