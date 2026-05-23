@@ -1,7 +1,3 @@
-// Package astar
-// Created by xuzhuoxi
-// on 2019-04-03.
-// @author xuzhuoxi
 package astar
 
 import (
@@ -11,56 +7,69 @@ import (
 )
 
 const (
-	DEFAULT_MASK_ADD = 1048576
+	DEFAULT_MASK_ADD = 1048576 // Mask increment per search pass / 每次寻路的掩码增量
 	//DEFAULT_MASK_ADD = 10
-	MAX_MASK = 2000000000
+	MAX_MASK = 2000000000 // Upper bound for path masks / 路径掩码上限
 )
 
-// FuncHn
-// 估值函数Hn
-// 下一点到终点的估算代价
+// FuncHn estimates the cost from a cell to the goal (heuristic Hn).
+// FuncHn 估值函数 Hn，表示下一点到终点的估算代价。
 type FuncHn func(cx, cy, cz, ex, ey, ez int) int
 
-// DefaultFuncHn
-// 默认估值函数
+// DefaultFuncHn returns the default Manhattan-distance heuristic.
+// DefaultFuncHn 返回默认的曼哈顿距离估值函数。
 func DefaultFuncHn(cx, cy, cz, ex, ey, ez int) int {
 	return mathx.AbsInt(cx-ex) + mathx.AbsInt(cy-ey) + mathx.AbsInt(cz-ez)
 }
 
+// IAStarAlg defines the A* pathfinding algorithm API.
+// IAStarAlg 定义 A* 寻路算法接口。
 type IAStarAlg interface {
-	// SetAllowedDirections
-	// 设置禁止检索的方向(可用于特殊地图)
+	// SetAllowedDirections sets which directions may be explored (for special maps).
+	// SetAllowedDirections 设置允许检索的方向（可用于特殊地图）。
 	SetAllowedDirections(direction []Direction)
-	// SetCustomFuncHn
-	// 设置自定义的估值函数
+	// SetCustomFuncHn sets a custom heuristic function.
+	// SetCustomFuncHn 设置自定义的估值函数。
 	SetCustomFuncHn(hn FuncHn)
 
-	// InitMapSize 初始化地图Size
+	// InitMapSize initializes the map size for 3D grids.
+	// InitMapSize 初始化三维地图尺寸。
 	InitMapSize(width, height, depth int)
-	// InitMapSize2D 初始化地图Size
+	// InitMapSize2D initializes the map size for 2D grids.
+	// InitMapSize2D 初始化二维地图尺寸。
 	InitMapSize2D(width, height int)
-	// SetData 设置地图数据
+	// SetData loads flat map cell data.
+	// SetData 设置一维展开的地图数据。
 	SetData(data []int) (sourceData [][][]int, err error)
-	// SetData2D 设置地图数据
+	// SetData2D loads 2D map cell data.
+	// SetData2D 设置二维地图数据。
 	SetData2D(data [][]int) (sourceData [][][]int, err error)
-	// SetData3D 设置地图数据
+	// SetData3D loads 3D map cell data.
+	// SetData3D 设置三维地图数据。
 	SetData3D(data [][][]int) (sourceData [][][]int, err error)
-	// Search2D 寻路
-	// sx:StartX; sy:StartY
-	// ex:EndX; ey:EndY
+	// Search2D searches a path on a 2D grid.
+	// Search2D 在二维网格上寻路。
+	// sx is StartX; sy is StartY; ex is EndX; ey is EndY.
+	// sx 为起点 X；sy 为起点 Y；ex 为终点 X；ey 为终点 Y。
 	Search2D(sx, sy, ex, ey int) (path []Position, ok bool)
-	// Search 寻路
-	// sx:StartX; sy:StartY; sz:StartZ
-	// ex:EndX; ey:EndY; ez:EndZ
+	// Search searches a path on a 3D grid.
+	// Search 在三维网格上寻路。
+	// sx is StartX; sy is StartY; sz is StartZ; ex is EndX; ey is EndY; ez is EndZ.
+	// sx 为起点 X；sy 为起点 Y；sz 为起点 Z；ex 为终点 X；ey 为终点 Y；ez 为终点 Z。
 	Search(sx, sy, sz, ex, ey, ez int) (path []Position, ok bool)
-	// SearchPosition 寻路
+	// SearchPosition searches a path between two positions.
+	// SearchPosition 在两点之间寻路。
 	SearchPosition(startPos, endPos Position) (path []Position, ok bool)
 }
 
+// NewIAStartAlg returns a new IAStarAlg implementation.
+// NewIAStartAlg 创建 IAStarAlg 实现实例。
 func NewIAStartAlg() IAStarAlg {
 	return NewAStartAlg()
 }
 
+// NewAStartAlg constructs a new AStarAlg.
+// NewAStartAlg 创建 AStarAlg 实例。
 func NewAStartAlg() *AStarAlg {
 	return &AStarAlg{openQueue: newSortedQueue()}
 }
@@ -119,6 +128,8 @@ func (h history) getLastPositionIndex(pos Position) int {
 	return -1
 }
 
+// AStarAlg implements the A* pathfinding algorithm on grid maps.
+// AStarAlg 在网格地图上实现 A* 寻路算法。
 type AStarAlg struct {
 	// 地图的大小
 	size *Size
@@ -139,24 +150,34 @@ type AStarAlg struct {
 	history   history
 }
 
+// SetAllowedDirections sets which directions may be explored.
+// SetAllowedDirections 设置允许检索的方向。
 func (alg *AStarAlg) SetAllowedDirections(direction []Direction) {
 	cp := make([]Direction, len(direction))
 	copy(cp, direction)
 	alg.nextDirs = cp
 }
 
+// SetCustomFuncHn sets a custom heuristic function.
+// SetCustomFuncHn 设置自定义估值函数。
 func (alg *AStarAlg) SetCustomFuncHn(hn FuncHn) {
 	alg.customFuncHn = hn
 }
 
+// InitMapSize initializes the map size for 3D grids.
+// InitMapSize 初始化三维地图尺寸。
 func (alg *AStarAlg) InitMapSize(width, height, depth int) {
 	alg.size = &Size{Width: width, Height: height, Depth: depth}
 }
 
+// InitMapSize2D initializes the map size for 2D grids.
+// InitMapSize2D 初始化二维地图尺寸。
 func (alg *AStarAlg) InitMapSize2D(width, height int) {
 	alg.size = &Size{Width: width, Height: height, Depth: 1}
 }
 
+// SetData loads flat map cell data.
+// SetData 设置一维展开的地图数据。
 func (alg *AStarAlg) SetData(data []int) (sourceData [][][]int, err error) {
 	if len(data) != alg.size.Area() {
 		return nil, errors.New("Data Error. ")
@@ -167,6 +188,8 @@ func (alg *AStarAlg) SetData(data []int) (sourceData [][][]int, err error) {
 	return alg.sourceMap, nil
 }
 
+// SetData2D loads 2D map cell data.
+// SetData2D 设置二维地图数据。
 func (alg *AStarAlg) SetData2D(data [][]int) (sourceData [][][]int, err error) {
 	if nil == data || len(data) == 0 {
 		return nil, errors.New("Data Error. ")
@@ -182,6 +205,8 @@ func (alg *AStarAlg) SetData2D(data [][]int) (sourceData [][][]int, err error) {
 	return data3d, nil
 }
 
+// SetData3D loads 3D map cell data.
+// SetData3D 设置三维地图数据。
 func (alg *AStarAlg) SetData3D(data [][][]int) (sourceData [][][]int, err error) {
 	if nil == data || len(data) == 0 {
 		return nil, errors.New("Data Error. ")
@@ -197,16 +222,26 @@ func (alg *AStarAlg) SetData3D(data [][][]int) (sourceData [][][]int, err error)
 	return data3d, nil
 }
 
+// Search2D searches a path on a 2D grid.
+// Search2D 在二维网格上寻路。
+// sx is StartX; sy is StartY; ex is EndX; ey is EndY.
+// sx 为起点 X；sy 为起点 Y；ex 为终点 X；ey 为终点 Y。
 func (alg *AStarAlg) Search2D(sx, sy, ex, ey int) (path []Position, ok bool) {
 	startPos, endPos := Position{sx, sy, 0}, Position{ex, ey, 0}
 	return alg.SearchPosition(startPos, endPos)
 }
 
+// Search searches a path on a 3D grid.
+// Search 在三维网格上寻路。
+// sx is StartX; sy is StartY; sz is StartZ; ex is EndX; ey is EndY; ez is EndZ.
+// sx 为起点 X；sy 为起点 Y；sz 为起点 Z；ex 为终点 X；ey 为终点 Y；ez 为终点 Z。
 func (alg *AStarAlg) Search(sx, sy, sz, ex, ey, ez int) (path []Position, ok bool) {
 	startPos, endPos := Position{sx, sy, sz}, Position{ex, ey, ez}
 	return alg.SearchPosition(startPos, endPos)
 }
 
+// SearchPosition searches a path between two positions.
+// SearchPosition 在两点之间寻路。
 func (alg *AStarAlg) SearchPosition(startPos, endPos Position) (path []Position, ok bool) {
 	if ok, s, e := alg.history.checkSubPath(startPos, endPos); ok {
 		return alg.history.getSubPath(s, e), ok
@@ -354,12 +389,12 @@ func (alg *AStarAlg) isOutOfMap2(x, y, z int) bool {
 	return x < 0 || y < 0 || z < 0 || x >= alg.size.Width || y >= alg.size.Height || z >= alg.size.Depth
 }
 
-//重置检索地图
+// 重置检索地图
 func (alg *AStarAlg) updateSearchMapFromSource() {
 	alg.searchMap, _ = alg.copyData3D(alg.sourceMap)
 }
 
-//清除历史记录
+// 清除历史记录
 func (alg *AStarAlg) clearHistory() {
 	alg.history = history{}
 }

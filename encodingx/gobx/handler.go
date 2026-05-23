@@ -50,11 +50,15 @@ type gobHandler struct {
 // 把数据编码为[]byte
 // 注意：返回的数据应该马上使用
 // 因为：[]byte来源于buff的切片，再次执行会覆盖数据，导致上次的返回数据被修改
-func (c *gobHandler) HandleEncode(data interface{}) []byte {
+func (c *gobHandler) HandleEncode(data interface{}) (bs []byte, err error) {
 	c.encoderBuff.Reset()
-	c.encoder.Encode(data)
+	err = c.encoder.Encode(data)
+	if err != nil {
+		return nil, err
+	}
 	//return slicex.CopyUint8(c.encoderBuff.Bytes())
-	return c.encoderBuff.Bytes()
+	bs = c.encoderBuff.Bytes()
+	return
 }
 
 func (c *gobHandler) HandleDecode(bs []byte, data interface{}) error {
@@ -78,13 +82,17 @@ type gobHandlerSync struct {
 // 把数据编码为[]byte
 // 注意：返回的数据应该马上使用
 // 因为：[]byte来源于buff的切片，再次执行会覆盖数据，导致上次的返回数据被修改
-func (c *gobHandlerSync) HandleEncode(data interface{}) []byte {
+func (c *gobHandlerSync) HandleEncode(data interface{}) (bs []byte, err error) {
 	c.eMu.Lock()
 	defer c.eMu.Unlock()
 	c.encoderBuff.Reset()
-	c.encoder.Encode(data)
+	err = c.encoder.Encode(data)
+	if err != nil {
+		return nil, err
+	}
 	//return slicex.CopyUint8(c.encoderBuff.Bytes())
-	return c.encoderBuff.Bytes()
+	bs = c.encoderBuff.Bytes()
+	return
 }
 
 func (c *gobHandlerSync) HandleDecode(bs []byte, data interface{}) error {
@@ -102,11 +110,15 @@ func (c *gobHandlerSync) HandleDecode(bs []byte, data interface{}) error {
 
 type gobHandlerAsync struct{}
 
-func (c gobHandlerAsync) HandleEncode(data interface{}) []byte {
+func (c gobHandlerAsync) HandleEncode(data interface{}) (bs []byte, err error) {
 	buff := bytes.NewBuffer(nil)
 	enc := gob.NewEncoder(buff)
-	enc.Encode(data)
-	return buff.Bytes()
+	err = enc.Encode(data)
+	if err != nil {
+		return nil, err
+	}
+	bs = buff.Bytes()
+	return
 }
 
 func (c gobHandlerAsync) HandleDecode(bs []byte, data interface{}) error {

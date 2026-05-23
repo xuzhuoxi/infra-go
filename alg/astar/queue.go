@@ -1,8 +1,3 @@
-// Package astar
-// Created by xuzhuoxi
-// on 2019-04-03.
-// @author xuzhuoxi
-//
 package astar
 
 import "github.com/xuzhuoxi/infra-go/lang/listx"
