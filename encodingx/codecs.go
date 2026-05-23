@@ -1,8 +1,3 @@
-// Package encodingx
-// Created by xuzhuoxi
-// on 2019-02-11.
-// @author xuzhuoxi
-//
 package encodingx
 
 import (
@@ -11,14 +6,20 @@ import (
 	"github.com/xuzhuoxi/infra-go/bytex"
 )
 
+// NewBuffEncoder returns a buffer encoder using handler and encodeHandler.
+// NewBuffEncoder 使用 handler 与 encodeHandler 创建缓冲编码器。
 func NewBuffEncoder(handler bytex.IDataBlockHandler, encodeHandler IEncodeHandler) IBuffEncoder {
 	return newBuffCodecs(handler, encodeHandler, nil)
 }
 
+// NewBuffDecoder returns a buffer decoder using handler and decodeHandler.
+// NewBuffDecoder 使用 handler 与 decodeHandler 创建缓冲解码器。
 func NewBuffDecoder(handler bytex.IDataBlockHandler, decodeHandler IDecodeHandler) IBuffDecoder {
 	return newBuffCodecs(handler, nil, decodeHandler)
 }
 
+// NewBuffCodecs returns a combined buffer encoder and decoder.
+// NewBuffCodecs 创建同时具备编码与解码能力的缓冲编解码器。
 func NewBuffCodecs(handler bytex.IDataBlockHandler, codingHandler ICodingHandler) IBuffCodecs {
 	return newBuffCodecs(handler, codingHandler, codingHandler)
 }

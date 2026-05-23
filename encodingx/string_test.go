@@ -1,8 +1,3 @@
-// Package encodingx
-// Created by xuzhuoxi
-// on 2019-02-16.
-// @author xuzhuoxi
-//
 package encodingx
 
 //func TestStringHandler(t *testing.T) {

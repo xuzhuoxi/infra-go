@@ -1,8 +1,3 @@
-// Package gobx
-// Created by xuzhuoxi
-// on 2019-02-16.
-// @author xuzhuoxi
-//
 package gobx
 
 import (

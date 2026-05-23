@@ -1,8 +1,3 @@
-// Package encodingx
-// Created by xuzhuoxi
-// on 2019-03-20.
-// @author xuzhuoxi
-//
 package encodingx
 
 import (
@@ -15,46 +10,64 @@ import (
 	"github.com/xuzhuoxi/infra-go/lang"
 )
 
+// IKeyValue is a string-keyed map with binary encode/decode and map operations.
+// IKeyValue 是支持二进制编解码与常用映射操作的字符串键值容器。
 type IKeyValue interface {
-	// ICodingData
-	// 序列化接口
 	ICodingData
 
-	// Len 键值对数量
+	// Len returns the number of key-value pairs.
+	// Len 返回键值对数量。
 	Len() int
-	// Clear 清理全部键值对
+	// Clear removes all key-value pairs.
+	// Clear 清理全部键值对。
 	Clear()
-	// Set 设置键值
+	// Set stores value under key and returns the previous value if replaced.
+	// Set 设置键值，若发生替换则返回旧值。
 	Set(key string, value interface{}) (old interface{}, ok bool)
-	// Get 取值
+	// Get returns the value for key.
+	// Get 根据键取值。
 	Get(key string) (interface{}, bool)
-	// Delete 删除键值
+	// Delete removes the key and returns its former value.
+	// Delete 删除键值。
 	Delete(key string) (interface{}, bool)
-	// Check 检查键值是否存在
+	// Check reports whether key exists.
+	// Check 检查键是否存在。
 	Check(key string) bool
 
-	// Merge 合并
+	// Merge merges entries from vs; nil values delete keys; returns updated keys.
+	// Merge 合并 vs 中的条目；值为 nil 时删除键；返回发生更新的键列表。
 	Merge(vs IKeyValue, ignoreSame bool) (updated []string)
-	// MergeArray 合并
+	// MergeArray merges parallel keys and vals; nil values delete keys.
+	// MergeArray 按 keys/vals 并行合并；值为 nil 时删除键。
 	MergeArray(keys []string, vals []interface{}, ignoreSame bool) (updated []string)
-	// ForEach 遍历
+	// ForEach invokes handler for each key-value pair.
+	// ForEach 遍历所有键值对。
 	ForEach(handler func(key string, value interface{}))
-	// Clone 克隆
+	// Clone returns a shallow copy of the map.
+	// Clone 克隆当前映射。
 	Clone() IKeyValue
-	// CloneEmpty 克隆空
+	// CloneEmpty returns a new empty map of the same concrete type.
+	// CloneEmpty 克隆一个同类型的空映射。
 	CloneEmpty() IKeyValue
-	// CopyFrom 复制部分
+	// CopyFrom copies selected keys from from into the receiver.
+	// CopyFrom 从 from 复制指定键到当前映射。
 	CopyFrom(from IKeyValue, keys []string) (n int)
 }
 
 //-------------------------
 
+// NewCodingMap returns an empty CodingMap.
+// NewCodingMap 创建空的 CodingMap。
 func NewCodingMap() CodingMap {
 	return make(map[string]interface{})
 }
 
+// CodingMap is a string-keyed map with binaryx wire encoding.
+// CodingMap 是基于 binaryx 线格式的 string 键值映射。
 type CodingMap map[string]interface{}
 
+// String returns a sorted debug representation of the map.
+// String 返回按键排序的调试字符串。
 func (v CodingMap) String() string {
 	if len(v) == 0 {
 		return "{}"
@@ -77,13 +90,22 @@ func (v CodingMap) String() string {
 	return builder.String()
 }
 
-// EncodeToBytes
-// 序列化
-// 格式:
-// 	Key + Value
-//	Key : string(uint16+[]byte)
-//	Value: Kind [+ Len] + Other
-//	Other: []byte... 或 string(uint16+[]byte)...
+// EncodeToBytes serializes the map to bytes.
+// EncodeToBytes 将映射序列化为字节。
+//
+// Format:
+//
+//	Key + Value per entry
+//	Key: string (uint16 length + []byte)
+//	Value: Kind [+ Len] + payload
+//	Other: []byte... or string (uint16+[]byte)...
+//
+// 格式：
+//
+//	每项为 Key + Value
+//	Key：string（uint16 长度 + []byte）
+//	Value：Kind [+ Len] + 载荷
+//	Other：[]byte... 或 string（uint16+[]byte）...
 func (v CodingMap) EncodeToBytes() (bs []byte, err error) {
 	buff := bytes.NewBuffer(nil)
 	err = binaryx.WriteLen(buff, DefaultOrder, len(v))
@@ -123,6 +145,8 @@ func (v CodingMap) EncodeToBytes() (bs []byte, err error) {
 	return buff.Bytes(), nil
 }
 
+// DecodeFromBytes deserializes bytes into the map.
+// DecodeFromBytes 从字节反序列化并更新映射。
 func (v CodingMap) DecodeFromBytes(bs []byte) error {
 	buff := bytes.NewBuffer(bs)
 	ln, err := binaryx.ReadLen(buff, DefaultOrder)
@@ -162,16 +186,22 @@ func (v CodingMap) DecodeFromBytes(bs []byte) error {
 	return nil
 }
 
+// Clear removes all entries.
+// Clear 清理全部键值对。
 func (v CodingMap) Clear() {
 	for key := range v {
 		delete(v, key)
 	}
 }
 
+// Len returns the number of entries.
+// Len 返回键值对数量。
 func (v CodingMap) Len() int {
 	return len(v)
 }
 
+// Set stores value under key.
+// Set 设置键值。
 func (v CodingMap) Set(key string, value interface{}) (old interface{}, ok bool) {
 	old, ok = v[key]
 	if !ok && nil == value {
@@ -184,11 +214,15 @@ func (v CodingMap) Set(key string, value interface{}) (old interface{}, ok bool)
 	return old, true
 }
 
+// Get returns the value for key.
+// Get 根据键取值。
 func (v CodingMap) Get(key string) (interface{}, bool) {
 	value, ok := v[key]
 	return value, ok
 }
 
+// Delete removes key and returns its former value.
+// Delete 删除键值。
 func (v CodingMap) Delete(key string) (interface{}, bool) {
 	if v.Check(key) {
 		rs, ok := v.Get(key)
@@ -198,11 +232,15 @@ func (v CodingMap) Delete(key string) (interface{}, bool) {
 	return nil, false
 }
 
+// Check reports whether key exists.
+// Check 检查键是否存在。
 func (v CodingMap) Check(key string) bool {
 	_, ok := v[key]
 	return ok
 }
 
+// Merge merges entries from vs.
+// Merge 合并 vs 中的条目。
 func (v CodingMap) Merge(vs IKeyValue, ignoreSame bool) (updated []string) {
 	if nil == vs {
 		return
@@ -221,6 +259,8 @@ func (v CodingMap) Merge(vs IKeyValue, ignoreSame bool) (updated []string) {
 	return
 }
 
+// MergeArray merges parallel keys and vals.
+// MergeArray 按 keys/vals 并行合并。
 func (v CodingMap) MergeArray(keys []string, vals []interface{}, ignoreSame bool) (updated []string) {
 	for index := range keys {
 		if vals[index] == nil {
@@ -236,12 +276,16 @@ func (v CodingMap) MergeArray(keys []string, vals []interface{}, ignoreSame bool
 	return
 }
 
+// ForEach invokes handler for each entry.
+// ForEach 遍历所有键值对。
 func (v CodingMap) ForEach(handler func(key string, value interface{})) {
 	for key, value := range v {
 		handler(key, value)
 	}
 }
 
+// Clone returns a shallow copy.
+// Clone 克隆当前映射。
 func (v CodingMap) Clone() IKeyValue {
 	rs := make(CodingMap)
 	for key, val := range v {
@@ -250,10 +294,14 @@ func (v CodingMap) Clone() IKeyValue {
 	return rs
 }
 
+// CloneEmpty returns a new empty CodingMap.
+// CloneEmpty 克隆一个空的 CodingMap。
 func (v CodingMap) CloneEmpty() IKeyValue {
 	return make(CodingMap)
 }
 
+// CopyFrom copies selected keys from from.
+// CopyFrom 从 from 复制指定键。
 func (v CodingMap) CopyFrom(from IKeyValue, keys []string) (n int) {
 	for index := range keys {
 		if val, ok := from.Get(keys[index]); ok {
