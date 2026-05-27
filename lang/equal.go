@@ -5,6 +5,8 @@ import (
 	"reflect"
 )
 
+// Equal reports whether a and b are equal for supported reflect kinds.
+// Equal 判断 a 与 b 在支持的 reflect 类型下是否相等。
 func Equal(a, b interface{}) bool {
 	if &a == &b {
 		return true
@@ -41,6 +43,8 @@ func Equal(a, b interface{}) bool {
 	return false
 }
 
+// TypeEqual reports whether a and b share the same reflect.Type.
+// TypeEqual 判断 a 与 b 是否具有相同的 reflect.Type。
 func TypeEqual(a, b interface{}) (bool, reflect.Type) {
 	t1 := reflect.TypeOf(a)
 	t2 := reflect.TypeOf(b)

@@ -1,88 +1,85 @@
-// Package listx
-// Created by xuzhuoxi
-// on 2019-04-03.
-// @author xuzhuoxi
-//
 package listx
 
+// IList is a Java-style ordered list of interface{} values.
+// IList 是面向 interface{} 的类 Java 有序列表接口。
 type IList interface {
-	// Len
-	//the number of elements in the collection.
+	// Len returns the number of elements in the list.
+	// Len 返回列表中的元素个数。
 	Len() int
-	// Swap
-	// swaps the elements with indexes i and j.
+	// Swap swaps the elements at indexes i and j.
+	// Swap 交换索引 i 与 j 处的元素。
 	Swap(i, j int)
-	// Clear
-	// Removes all of the elements from this list (optional operation).
+	// Clear removes all elements from the list.
+	// Clear 移除列表中的全部元素。
 	Clear()
 
-	// Add
-	// Appends the elements to the end of this list (optional operation).
+	// Add appends elements to the end of the list.
+	// Add 在列表末尾追加元素。
 	Add(ele ...interface{}) (suc bool)
-	// AddAt
-	// Inserts the specified elements at the specified position in this list (optional operation).
+	// AddAt inserts elements at the specified index.
+	// AddAt 在指定索引处插入元素。
 	AddAt(index int, ele ...interface{}) (suc bool)
-	// AddAll
-	// Appends all of the elements in the specified collection to the end of this list, in the order that they are returned by the specified collection's iterator (optional operation)
+	// AddAll inserts all elements from list starting at index.
+	// AddAll 从 index 起插入 list 中的全部元素。
 	AddAll(index int, list IList) (suc bool)
 
-	// RemoveAt
-	// Removes the element at the specified position in this list (optional operation).
+	// RemoveAt removes the element at the specified index.
+	// RemoveAt 移除指定索引处的元素。
 	RemoveAt(index int) (ele interface{}, suc bool)
-	// RemoveMultiAt
-	// Removes some elements at the specified position in this list (optional operation).
+	// RemoveMultiAt removes amount elements starting at index.
+	// RemoveMultiAt 从 index 起移除 amount 个元素。
 	RemoveMultiAt(index int, amount int) (ele []interface{}, suc bool)
-	// RemoveLast
-	// Removes the last element at from this list (optional operation).
+	// RemoveLast removes the last element.
+	// RemoveLast 移除最后一个元素。
 	RemoveLast() (ele interface{}, suc bool)
-	// RemoveLastMulti
-	// Removes some elements from this list started at the last position.
+	// RemoveLastMulti removes amount elements from the end.
+	// RemoveLastMulti 从末尾起移除 amount 个元素。
 	RemoveLastMulti(amount int) (ele []interface{}, suc bool)
-	// RemoveFirst
-	// Removes the first element at from this list (optional operation).
+	// RemoveFirst removes the first element.
+	// RemoveFirst 移除第一个元素。
 	RemoveFirst() (ele interface{}, suc bool)
-	// RemoveFirstMulti
-	// Removes some elements from this list started at the first position.
+	// RemoveFirstMulti removes amount elements from the front.
+	// RemoveFirstMulti 从开头起移除 amount 个元素。
 	RemoveFirstMulti(amount int) (ele []interface{}, suc bool)
 
-	// Get
-	// Returns the element at the specified position in this list.
+	// Get returns the element at the specified index.
+	// Get 返回指定索引处的元素。
 	Get(index int) (ele interface{}, ok bool)
-	// GetMulti
-	// Returns some elements in this list started at the specified position.
+	// GetMulti returns amount elements starting at index.
+	// GetMulti 从 index 起返回 amount 个元素。
 	GetMulti(index int, amount int) (ele []interface{}, ok bool)
-	// GetMultiLast
-	// Returns some elements in this list started at the specified position.
+	// GetMultiLast returns amount elements ending at lastIndex.
+	// GetMultiLast 以 lastIndex 为终点返回 amount 个元素。
 	GetMultiLast(lastIndex int, amount int) (ele []interface{}, ok bool)
-	// GetAll
-	// Returns all elements in this list.
+	// GetAll returns all elements in the list.
+	// GetAll 返回列表中的全部元素。
 	GetAll() []interface{}
-	// First
-	// Returns the first element of this list.
+	// First returns the first element.
+	// First 返回第一个元素。
 	First() (ele interface{}, ok bool)
-	// FirstMulti
-	// Returns some elements in this list started at the first position.
+	// FirstMulti returns amount elements from the front.
+	// FirstMulti 从开头返回 amount 个元素。
 	FirstMulti(amount int) (ele []interface{}, ok bool)
-	// Last
-	// Returns the last element of this list.
+	// Last returns the last element.
+	// Last 返回最后一个元素。
 	Last() (ele interface{}, ok bool)
-	// LastMulti
-	// Returns some elements in this list started at the last position.
+	// LastMulti returns amount elements from the end.
+	// LastMulti 从末尾返回 amount 个元素。
 	LastMulti(amount int) (ele []interface{}, ok bool)
 
-	// IndexOf
-	// Returns the index of the first occurrence of the specified element in this list, or -1 if this list does not contain the element.
+	// IndexOf returns the index of the first matching element.
+	// IndexOf 返回首个匹配元素的索引。
 	IndexOf(ele interface{}) (index int, ok bool)
-	// LastIndexOf
-	// Returns the index of the last occurrence of the specified element in this list, or -1 if this list does not contain the element.
+	// LastIndexOf returns the index of the last matching element.
+	// LastIndexOf 返回最后一个匹配元素的索引。
 	LastIndexOf(ele interface{}) (index int, ok bool)
-	// Contains
-	// Returns true if this list contains the specified element.
+	// Contains reports whether the list contains ele.
+	// Contains 判断列表是否包含 ele。
 	Contains(ele interface{}) (contains bool)
-	// ForEach
-	// Performs the given action for each element of the list
+	// ForEach iterates elements from front to back until stop is true.
+	// ForEach 从前向后遍历元素，stop 为 true 时停止。
 	ForEach(each func(index int, ele interface{}) (stop bool))
-	// ForEachLast
-	// Performs the given action for each element of the list
+	// ForEachLast iterates elements from back to front until stop is true.
+	// ForEachLast 从后向前遍历元素，stop 为 true 时停止。
 	ForEachLast(each func(index int, ele interface{}) (stop bool))
 }
