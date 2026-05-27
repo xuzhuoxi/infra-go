@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,9 +8,8 @@ func init() {
 	RegisterBlendFunc(LinearLight, BlendLinearLightColor, BlendLinearLightRGBA)
 }
 
-// BlendLinearLightColor
-// 线性光模式
-// 根据绘图色通过增加或降低“亮度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过增加亮度被照亮，如果绘图色比50%的灰暗，图像通过降低亮度变暗。
+// BlendLinearLightColor applies linear light blend.
+// BlendLinearLightColor 应用线性光（Linear Light）混合。
 // R = S + 2*D - 1
 // R = S + 2*D - 255
 // R = S + 2*D - 65535
@@ -26,9 +20,8 @@ func BlendLinearLightColor(S, D color.Color, _ float64, destinationAlpha bool) c
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendLinearLightRGBA
-// 线性光模式
-// 根据绘图色通过增加或降低“亮度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过增加亮度被照亮，如果绘图色比50%的灰暗，图像通过降低亮度变暗。
+// BlendLinearLightRGBA applies linear light on RGBA64 channels.
+// BlendLinearLightRGBA 对 RGBA64 通道应用线性光混合。
 // R = S + 2*D - 1
 // R = S + 2*D - 255
 // R = S + 2*D - 65535

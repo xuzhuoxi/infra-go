@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -15,9 +10,8 @@ func init() {
 	RegisterBlendFunc(Color, BlendColorColor, BlendColorRGBA)
 }
 
-// BlendColorColor
-// 颜色模式
-// 是采用底色的亮度以及绘图色的色相、饱和度来创建最终色。它可保护原图的灰阶层次，对于图像的色彩微调、给单色和彩色图像着色都非常有用。
+// BlendColorColor uses destination luminance and source hue/saturation.
+// BlendColorColor 采用目标亮度与源色相/饱和度（颜色模式）。
 // HSV = Dh, Ds, Sv
 func BlendColorColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
 	Sr, Sg, Sb, Sa := S.RGBA()
@@ -26,9 +20,8 @@ func BlendColorColor(S, D color.Color, _ float64, destinationAlpha bool) color.C
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendColorRGBA
-// 颜色模式
-// 是采用底色的亮度以及绘图色的色相、饱和度来创建最终色。它可保护原图的灰阶层次，对于图像的色彩微调、给单色和彩色图像着色都非常有用。
+// BlendColorRGBA applies color blend on RGBA64 channels.
+// BlendColorRGBA 对 RGBA64 通道应用颜色混合。
 // HSV = Dh, Ds, Sv
 func BlendColorRGBA(Sr, Sg, Sb, _ uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
 	R, G, B = colorUnit(Sr, Sg, Sb, Dr, Dg, Db)

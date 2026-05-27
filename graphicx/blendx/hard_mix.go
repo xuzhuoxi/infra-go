@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,11 +8,8 @@ func init() {
 	RegisterBlendFunc(HardMix, BlendHardMixColor, BlendHardMixRGBA)
 }
 
-// BlendHardMixColor
-// 实色混合模式
-// 根据绘图颜色与底图颜色的颜色数值相加，当相加的颜色数值大于该颜色模式颜色数值的最大值，混合颜色为最大值；
-// 当相加的颜色数值小于该颜色模式颜色数值的最大值，混合颜色为0；
-// 当相加的颜色数值等于该颜色模式颜色数值的最大值，混合颜色由底图颜色决定，底图颜色值比绘图颜色的颜色值大，则混合颜色为最大值，相反则为0.实色混合能产生颜色较少、边缘较硬的图像效果。
+// BlendHardMixColor applies hard mix blend.
+// BlendHardMixColor 应用实色混合（Hard Mix）模式。
 // R = S+D>=1 ? 1 : 0
 // R = S+D>=255 ? 255 : 0
 // R = S+D>=65535 ? 65535 : 0
@@ -28,11 +20,8 @@ func BlendHardMixColor(S, D color.Color, _ float64, destinationAlpha bool) color
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendHardMixRGBA
-// 实色混合模式
-// 根据绘图颜色与底图颜色的颜色数值相加，当相加的颜色数值大于该颜色模式颜色数值的最大值，混合颜色为最大值；
-// 当相加的颜色数值小于该颜色模式颜色数值的最大值，混合颜色为0；
-// 当相加的颜色数值等于该颜色模式颜色数值的最大值，混合颜色由底图颜色决定，底图颜色值比绘图颜色的颜色值大，则混合颜色为最大值，相反则为0.实色混合能产生颜色较少、边缘较硬的图像效果。
+// BlendHardMixRGBA applies hard mix on RGBA64 channels.
+// BlendHardMixRGBA 对 RGBA64 通道应用实色混合。
 // R = S+D>=1 ? 1 : 0
 // R = S+D>=255 ? 255 : 0
 // R = S+D>=65535 ? 65535 : 0

@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,9 +8,8 @@ func init() {
 	RegisterBlendFunc(Exclusion, BlendExclusionColor, BlendExclusionRGBA)
 }
 
-// BlendExclusionColor
-// 排除模式
-// 可生成和差值模式相似的效果，但比差值模式生成的颜色对比度较小，因而颜色较柔和。与白色混合将使底色反相；与黑色混合则不产生变化。
+// BlendExclusionColor applies exclusion blend.
+// BlendExclusionColor 应用排除（Exclusion）混合。
 // R = S + D - 2*S*D [0,1]
 // R = S + D - S*D/128 [0,255]
 // R = S + D - S*D/32768 [0,65535]
@@ -26,9 +20,8 @@ func BlendExclusionColor(S, D color.Color, _ float64, destinationAlpha bool) col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendExclusionRGBA
-// 排除模式
-// 可生成和差值模式相似的效果，但比差值模式生成的颜色对比度较小，因而颜色较柔和。与白色混合将使底色反相；与黑色混合则不产生变化。
+// BlendExclusionRGBA applies exclusion on RGBA64 channels.
+// BlendExclusionRGBA 对 RGBA64 通道应用排除混合。
 // R = S + D - 2*S*D [0,1]
 // R = S + D - S*D/128 [0,255]
 // R = S + D - S*D/32768 [0,65535]

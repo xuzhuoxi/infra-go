@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,19 +8,15 @@ func init() {
 	RegisterBlendFunc(Clear, BlendClearColor, BlendClearRGBA)
 }
 
-// BlendClearColor
-// 清除模式
-// 同背后模式一样，当在图层上操作时，清除模式才会出现。利用清除模式可将图层中有像素的部分清除掉。当有图层时，利用清除模式，使用喷漆桶工具可以将图层中的颜色相近的区域清除掉。
-// 可在喷漆桶工具的选项栏中设定“预值”以确定喷漆桶工具所清除的范围。工具选项栏中的“用于所有图层”选项在清除模式下无效。
+// BlendClearColor clears to transparent black (R = 0).
+// BlendClearColor 清除为透明黑色（R = 0）。
 // R = 0
 func BlendClearColor(S, D color.Color, _ float64, _ bool) color.Color {
 	return &color.RGBA64{}
 }
 
-// BlendClearRGBA
-// 清除模式
-// 同背后模式一样，当在图层上操作时，清除模式才会出现。利用清除模式可将图层中有像素的部分清除掉。当有图层时，利用清除模式，使用喷漆桶工具可以将图层中的颜色相近的区域清除掉。
-// 可在喷漆桶工具的选项栏中设定“预值”以确定喷漆桶工具所清除的范围。工具选项栏中的“用于所有图层”选项在清除模式下无效。
+// BlendClearRGBA clears to transparent black on RGBA64 channels (R = 0).
+// BlendClearRGBA 对 RGBA64 通道清除为透明黑色（R = 0）。
 // R = 0
 func BlendClearRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, _ bool) (R, G, B, A uint32) {
 	return 0, 0, 0, 0

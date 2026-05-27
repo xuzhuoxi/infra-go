@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,7 +8,8 @@ func init() {
 	RegisterBlendFunc(PlusLighter, BlendPlusLighterColor, BlendPlusLighterRGBA)
 }
 
-// BlendPlusLighterColor
+// BlendPlusLighterColor applies plus lighter blend.
+// BlendPlusLighterColor 应用高级浅色（Plus Lighter）混合。
 // R = MIN(1, S + D) [0,1]
 // R = MIN(255, S + D) [0,255]
 // R = MIN(65535, S + D) [0,65535]
@@ -24,7 +20,8 @@ func BlendPlusLighterColor(S, D color.Color, _ float64, destinationAlpha bool) c
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendPlusLighterRGBA
+// BlendPlusLighterRGBA applies plus lighter on RGBA64 channels.
+// BlendPlusLighterRGBA 对 RGBA64 通道应用高级浅色混合。
 // R = MIN(1, S + D) [0,1]
 // R = MIN(255, S + D) [0,255]
 // R = MIN(65535, S + D) [0,65535]

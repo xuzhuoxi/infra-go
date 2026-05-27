@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,7 +8,8 @@ func init() {
 	RegisterBlendFunc(DestinationOut, BlendDestinationOutColor, BlendDestinationOutRGBA)
 }
 
-// BlendDestinationOutColor
+// BlendDestinationOutColor applies destination out Porter-Duff compositing.
+// BlendDestinationOutColor 应用 DestinationOut Porter-Duff 合成。
 // R = D*(1 - Sa) [0,1]
 // R = D*(255 - Sa)/255 [0,255]
 // R = D*(65535 - Sa)/65535 [0,65535]
@@ -24,7 +20,8 @@ func BlendDestinationOutColor(S, D color.Color, _ float64, destinationAlpha bool
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendDestinationOutRGBA
+// BlendDestinationOutRGBA applies destination out on RGBA64 channels.
+// BlendDestinationOutRGBA 对 RGBA64 通道应用 DestinationOut 合成。
 // R = D*(1 - Sa) [0,1]
 // R = D*(255 - Sa)/255 [0,255]
 // R = D*(65535 - Sa)/65535 [0,65535]

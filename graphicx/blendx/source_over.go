@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,7 +8,8 @@ func init() {
 	RegisterBlendFunc(SourceOver, BlendSourceOverColor, BlendSourceOverRGBA)
 }
 
-// BlendSourceOverColor
+// BlendSourceOverColor applies source over Porter-Duff compositing.
+// BlendSourceOverColor 应用 SourceOver Porter-Duff 合成。
 // R = D*(1 - Sa) + S
 // R = D*(1 - Sa)/255 + S
 // R = D*(1 - Sa)/65535 + S
@@ -24,7 +20,8 @@ func BlendSourceOverColor(S, D color.Color, _ float64, destinationAlpha bool) co
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendSourceOverRGBA
+// BlendSourceOverRGBA applies source over on RGBA64 channels.
+// BlendSourceOverRGBA 对 RGBA64 通道应用 SourceOver 合成。
 // R = D*(1 - Sa) + S
 // R = D*(1 - Sa)/255 + S
 // R = D*(1 - Sa)/65535 + S

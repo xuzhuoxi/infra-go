@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,7 +8,8 @@ func init() {
 	RegisterBlendFunc(DestinationOver, BlendDestinationOverColor, BlendDestinationOverRGBA)
 }
 
-// BlendDestinationOverColor
+// BlendDestinationOverColor applies destination over Porter-Duff compositing.
+// BlendDestinationOverColor 应用 DestinationOver Porter-Duff 合成。
 // R = S*(1 - Da) + D
 // R = S*(255 - Da)/255 + D
 // R = S*(65535 - Da)/65535 + D
@@ -24,7 +20,8 @@ func BlendDestinationOverColor(S, D color.Color, _ float64, destinationAlpha boo
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendDestinationOverRGBA
+// BlendDestinationOverRGBA applies destination over on RGBA64 channels.
+// BlendDestinationOverRGBA 对 RGBA64 通道应用 DestinationOver 合成。
 // R = S*(1 - Da) + D
 // R = S*(255 - Da)/255 + D
 // R = S*(65535 - Da)/65535 + D

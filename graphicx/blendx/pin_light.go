@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,9 +8,8 @@ func init() {
 	RegisterBlendFunc(PinLight, BlendPinLightColor, BlendPinLightRGBA)
 }
 
-// BlendPinLightColor
-// 点光模式
-// 根据绘图色替换颜色。如果绘图色比50%的灰要亮，绘图色被替换，比绘图色亮的像素不变化。如果绘图色比50%的灰要暗比绘图色亮的像素被替换，比绘图色暗的像素不变化，点光模式对图像增加特殊效果非常有用。
+// BlendPinLightColor applies pin light blend.
+// BlendPinLightColor 应用点光（Pin Light）混合。
 // R = D>0.5 ? Min(S, 2*D-1) : S
 // R = D>128 ? Min(S, 2*D-255) : S
 // R = D>32768 ? Min(S, 2*D-65535) : S
@@ -26,9 +20,8 @@ func BlendPinLightColor(S, D color.Color, _ float64, destinationAlpha bool) colo
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendPinLightRGBA
-// 点光模式
-// 根据绘图色替换颜色。如果绘图色比50%的灰要亮，绘图色被替换，比绘图色亮的像素不变化。如果绘图色比50%的灰要暗比绘图色亮的像素被替换，比绘图色暗的像素不变化，点光模式对图像增加特殊效果非常有用。
+// BlendPinLightRGBA applies pin light on RGBA64 channels.
+// BlendPinLightRGBA 对 RGBA64 通道应用点光混合。
 // R = D>0.5 ? Min(S, 2*D-1) : S
 // R = D>128 ? Min(S, 2*D-255) : S
 // R = D>32768 ? Min(S, 2*D-65535) : S

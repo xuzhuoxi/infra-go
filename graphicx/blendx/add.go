@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,9 +8,8 @@ func init() {
 	RegisterBlendFunc(Add, BlendAddColor, BlendAddRGBA)
 }
 
-// BlendAddColor
-// 增加模式
-// 是将原始图像及混合图像的对应像素取出来并加在一起；
+// BlendAddColor adds source and destination channels.
+// BlendAddColor 将源色与目标色相加（增加模式）。
 // R = Min(1, S+D))
 // R = Min(255, S+D)
 // R = Min(65535, S+D)
@@ -26,9 +20,8 @@ func BlendAddColor(S, D color.Color, _ float64, destinationAlpha bool) color.Col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendAddRGBA
-// 增加模式
-// 是将原始图像及混合图像的对应像素取出来并加在一起；
+// BlendAddRGBA adds RGBA64 channels.
+// BlendAddRGBA 对 RGBA64 通道相加（增加模式）。
 // R = Min(1, S+D))
 // R = Min(255, S+D)
 // R = Min(65535, S+D)

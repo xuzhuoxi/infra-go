@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,14 +8,8 @@ func init() {
 	RegisterBlendFunc(VividLight, BlendVividLightColor, BlendVividLightRGBA)
 }
 
-// BlendVividLightColor
-// 亮光模式
-// 根据绘图色通过增加或降低“对比度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过降低对比度被照亮，如果绘图色比50%的灰暗，图像通过增加对比度变暗。
-// (D<=128): R = S - (255-S)*(255-2*D) / (2*D)
-// (D>128): R = S + S*(2*D-255)/(2*(255-D))
-//
-// (D<=32768): R = S - (65535-S)*(65535-2*D) / (2*D)
-// (D>32768): R = S + S*(2*D-65535)/(2*(6553-D))
+// BlendVividLightColor applies vivid light blend.
+// BlendVividLightColor 应用亮光（Vivid Light）混合。
 func BlendVividLightColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
 	Sr, Sg, Sb, Sa := S.RGBA()
 	Dr, Dg, Db, Da := D.RGBA()
@@ -28,14 +17,8 @@ func BlendVividLightColor(S, D color.Color, _ float64, destinationAlpha bool) co
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendVividLightRGBA
-// 亮光模式
-// 根据绘图色通过增加或降低“对比度”，加深或减淡颜色。如果绘图色比50%的灰亮，图像通过降低对比度被照亮，如果绘图色比50%的灰暗，图像通过增加对比度变暗。
-// (D<=128): R = S - (255-S)*(255-2*D) / (2*D)
-// (D>128): R = S + S*(2*D-255)/(2*(255-D))
-//
-// (D<=32768): R = S - (65535-S)*(65535-2*D) / (2*D)
-// (D>32768): R = S + S*(2*D-65535)/(2*(6553-D))
+// BlendVividLightRGBA applies vivid light on RGBA64 channels.
+// BlendVividLightRGBA 对 RGBA64 通道应用亮光混合。
 func BlendVividLightRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
 	R = vividLight(Sr, Dr)
 	G = vividLight(Sg, Dg)

@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,10 +8,8 @@ func init() {
 	RegisterBlendFunc(LighterColor, BlendLighterColor, BlendLighterColorRGBA)
 }
 
-// BlendLighterColor
-// 浅色模式
-// 公式：Dr+Dg+Db+Da >= Sr+Sg+Sb+Sa 则 R=D
-// 比较混合色和基色的所有通道值的总和并显示值较大的颜色。“浅色”不会生成第三种颜色（可以通过“变亮”混合获得），因为它将从基色和混合色中选取最大的通道值来创建结果色。
+// BlendLighterColor keeps the lighter RGB tuple of source and destination.
+// BlendLighterColor 保留源色与目标色中较亮的 RGB（浅色模式）。
 func BlendLighterColor(foreColor, backColor color.Color, _ float64, _ bool) color.Color {
 	fR, fG, fB, fA := foreColor.RGBA()
 	bR, bG, bB, bA := backColor.RGBA()
@@ -27,10 +20,8 @@ func BlendLighterColor(foreColor, backColor color.Color, _ float64, _ bool) colo
 	}
 }
 
-// BlendLighterColorRGBA
-// 浅色模式
-// 公式：Dr+Dg+Db+Da >= Sr+Sg+Sb+Sa 则 R=D
-// 比较混合色和基色的所有通道值的总和并显示值较大的颜色。“浅色”不会生成第三种颜色（可以通过“变亮”混合获得），因为它将从基色和混合色中选取最大的通道值来创建结果色。
+// BlendLighterColorRGBA keeps the lighter RGB tuple on RGBA64 channels.
+// BlendLighterColorRGBA 对 RGBA64 通道保留较亮 RGB（浅色模式）。
 func BlendLighterColorRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, _ bool) (R, G, B, A uint32) {
 	if Dr+Dg+Db+Da >= Sr+Sg+Sb+Sa {
 		return Dr, Dg, Db, Da

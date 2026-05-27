@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,10 +8,8 @@ func init() {
 	RegisterBlendFunc(Subtract, BlendSubtractColor, BlendSubtractRGBA)
 }
 
-// BlendSubtractColor
-// 减去模式
-// 是将原始图像与混合图像相对应的像素提取出来并将它们相减。
-// C = Max(0,S-D)
+// BlendSubtractColor subtracts source from destination.
+// BlendSubtractColor 从目标色减去源色（减去模式）。
 func BlendSubtractColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
 	Sr, Sg, Sb, Sa := S.RGBA()
 	Dr, Dg, Db, Da := D.RGBA()
@@ -24,10 +17,8 @@ func BlendSubtractColor(S, D color.Color, _ float64, destinationAlpha bool) colo
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendSubtractRGBA
-// 减去模式
-// 是将原始图像与混合图像相对应的像素提取出来并将它们相减。
-// C = Max(0,S-D)
+// BlendSubtractRGBA subtracts RGBA64 channels.
+// BlendSubtractRGBA 对 RGBA64 通道执行减去混合。
 func BlendSubtractRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
 	R = subtract(Sr, Dr)
 	G = subtract(Sg, Dg)

@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -11,13 +6,22 @@ import (
 	"image/color"
 )
 
+// BlendMode identifies a registered image blend mode.
+// BlendMode 标识已注册的图像混合模式。
 type BlendMode int
 
-// FuncBlendColor
-// resultColor		: 结果色
-// sourceColor		: 源颜色/背景色/混合色(ps概念)
-// destinationColor	：目标色/前景色/基色(ps概念)
+// FuncBlendColor blends two color.Color values.
+// FuncBlendColor 混合两个 color.Color 值。
+// resultColor is the blended result.
+// resultColor 为混合结果色。
+// source is the source/background/blend color (Photoshop terminology).
+// source 为源颜色/背景色/混合色（Photoshop 概念）。
+// destination is the destination/foreground/base color (Photoshop terminology).
+// destination 为目标色/前景色/基色（Photoshop 概念）。
 type FuncBlendColor func(source, destination color.Color, factor float64, destinationAlpha bool) (resultColor color.Color)
+
+// FuncBlendRGBA blends two RGBA64 channel tuples (16-bit per channel).
+// FuncBlendRGBA 混合两组 RGBA64 通道（每通道 16 位）。
 type FuncBlendRGBA func(sourceR, sourceG, sourceB, sourceA uint32, destinationR, destinationG, destinationB, destinationA uint32,
 	factor float64, destinationAlpha bool) (R, G, B, A uint32)
 
@@ -26,6 +30,8 @@ var (
 	funcBlendRGBAArr  = make([]FuncBlendRGBA, 128, 128)
 )
 
+// BlendColor applies blend mode m to source and destination colors.
+// BlendColor 对源色与目标色应用混合模式 m。
 func (m BlendMode) BlendColor(source, destination color.Color, factor float64, destinationAlpha bool) (c color.Color, err error) {
 	if funcBlendColor := funcBlendColorArr[m]; nil != funcBlendColor {
 		c = funcBlendColor(source, destination, factor, destinationAlpha)
@@ -35,6 +41,8 @@ func (m BlendMode) BlendColor(source, destination color.Color, factor float64, d
 	return
 }
 
+// BlendRGBA applies blend mode m to source and destination RGBA64 channels.
+// BlendRGBA 对源与目标 RGBA64 通道应用混合模式 m。
 func (m BlendMode) BlendRGBA(sourceR, sourceG, sourceB, sourceA uint32, destinationR, destinationG, destinationB, destinationA uint32,
 	factor float64, destinationAlpha bool) (R, G, B, A uint32, err error) {
 	if funcBlendRGB := funcBlendRGBAArr[m]; nil != funcBlendRGB {
@@ -46,117 +54,163 @@ func (m BlendMode) BlendRGBA(sourceR, sourceG, sourceB, sourceA uint32, destinat
 }
 
 const (
-	// None 无
+	// None indicates no blend mode.
+	// None 表示无混合模式。
 	None BlendMode = iota
 
 	//-----------------------------------
 
-	// Normal 正常模式(已实现)
+	// Normal is normal blend mode (implemented).
+	// Normal 正常模式（已实现）。
 	Normal
-	// NormalThreshold 阈值模式(已实现)
+	// NormalThreshold is threshold blend mode (implemented).
+	// NormalThreshold 阈值模式（已实现）。
 	NormalThreshold
-	// Dissolve 溶解模式(已实现)
+	// Dissolve is dissolve blend mode (implemented).
+	// Dissolve 溶解模式（已实现）。
 	Dissolve
-	// Behind 背后模式(已实现)
+	// Behind is behind blend mode (implemented).
+	// Behind 背后模式（已实现）。
 	Behind
-	// Clear 清除模式(已实现)
+	// Clear is clear blend mode (implemented).
+	// Clear 清除模式（已实现）。
 	Clear
-	// Copy 覆盖模式(已实现)
+	// Copy is copy blend mode (implemented).
+	// Copy 覆盖模式（已实现）。
 	Copy
 
 	//-----------------------------------
 
-	// Darken 变暗模式(已实现)
+	// Darken is darken blend mode (implemented).
+	// Darken 变暗模式（已实现）。
 	Darken
-	// Multiply 正片叠底(已实现)
+	// Multiply is multiply blend mode (implemented).
+	// Multiply 正片叠底（已实现）。
 	Multiply
-	// ColorBurn 颜色加深模式(已实现)
+	// ColorBurn is color burn blend mode (implemented).
+	// ColorBurn 颜色加深模式（已实现）。
 	ColorBurn
-	// LinearBurn 线性加深模式(已实现)
+	// LinearBurn is linear burn blend mode (implemented).
+	// LinearBurn 线性加深模式（已实现）。
 	LinearBurn
-	// DarkerColor 深色模式----------------------------------------
+	// DarkerColor is darker color blend mode.
+	// DarkerColor 深色模式。
 	DarkerColor
 
 	//-----------------------------------
 
-	// Add 增加模式(已实现)
+	// Add is add blend mode (implemented).
+	// Add 增加模式（已实现）。
 	Add
-	// Lighten 变亮模式(已实现)
+	// Lighten is lighten blend mode (implemented).
+	// Lighten 变亮模式（已实现）。
 	Lighten
-	// Screen 滤色模式(已实现)
+	// Screen is screen blend mode (implemented).
+	// Screen 滤色模式（已实现）。
 	Screen
-	// ColorDodge 颜色减淡模式(已实现)
+	// ColorDodge is color dodge blend mode (implemented).
+	// ColorDodge 颜色减淡模式（已实现）。
 	ColorDodge
-	// LinearDodge 线性减淡模式(已实现)
+	// LinearDodge is linear dodge blend mode (implemented).
+	// LinearDodge 线性减淡模式（已实现）。
 	LinearDodge
-	// LighterColor 浅色模式----------------------------------
+	// LighterColor is lighter color blend mode.
+	// LighterColor 浅色模式。
 	LighterColor
 
 	//-----------------------------------
 
-	// Overlay 叠加模式(已实现)
+	// Overlay is overlay blend mode (implemented).
+	// Overlay 叠加模式（已实现）。
 	Overlay
-	// SoftLight 柔光模式(已实现)
+	// SoftLight is soft light blend mode (implemented).
+	// SoftLight 柔光模式（已实现）。
 	SoftLight
-	// HardLight 强光模式(已实现)
+	// HardLight is hard light blend mode (implemented).
+	// HardLight 强光模式（已实现）。
 	HardLight
-	// VividLight 亮光模式(已实现)
+	// VividLight is vivid light blend mode (implemented).
+	// VividLight 亮光模式（已实现）。
 	VividLight
-	// LinearLight 线性光模式(已实现)
+	// LinearLight is linear light blend mode (implemented).
+	// LinearLight 线性光模式（已实现）。
 	LinearLight
-	// PinLight 点光模式(已实现)
+	// PinLight is pin light blend mode (implemented).
+	// PinLight 点光模式（已实现）。
 	PinLight
-	// HardMix 实色混合模式(已实现)
+	// HardMix is hard mix blend mode (implemented).
+	// HardMix 实色混合模式（已实现）。
 	HardMix
 
 	//-----------------------------------
 
-	// Difference 差值模式(已实现)
+	// Difference is difference blend mode (implemented).
+	// Difference 差值模式（已实现）。
 	Difference
-	// Exclusion 排除模式(已实现)
+	// Exclusion is exclusion blend mode (implemented).
+	// Exclusion 排除模式（已实现）。
 	Exclusion
-	// Subtract 减去模式(已实现)
+	// Subtract is subtract blend mode (implemented).
+	// Subtract 减去模式（已实现）。
 	Subtract
-	// Divide 划分模式(已实现)
+	// Divide is divide blend mode (implemented).
+	// Divide 划分模式（已实现）。
 	Divide
 
 	//-----------------------------------
 
-	// Hue 色相模式
+	// Hue is hue blend mode.
+	// Hue 色相模式。
 	Hue
-	// Saturation 饱和度模式
+	// Saturation is saturation blend mode.
+	// Saturation 饱和度模式。
 	Saturation
-	// Color 颜色模式
+	// Color is color blend mode.
+	// Color 颜色模式。
 	Color
-	// Luminosity 亮度模式
+	// Luminosity is luminosity blend mode.
+	// Luminosity 亮度模式。
 	Luminosity
 
 	//-----------------------------------
 
-	// DestinationAtop (已实现)
+	// DestinationAtop is destination atop Porter-Duff mode (implemented).
+	// DestinationAtop 目标色在上混合（已实现）。
 	DestinationAtop
-	// DestinationIn (已实现)
+	// DestinationIn is destination in Porter-Duff mode (implemented).
+	// DestinationIn 目标色在内混合（已实现）。
 	DestinationIn
-	// DestinationOut (已实现)
+	// DestinationOut is destination out Porter-Duff mode (implemented).
+	// DestinationOut 目标色在外混合（已实现）。
 	DestinationOut
-	// DestinationOver (已实现)
+	// DestinationOver is destination over Porter-Duff mode (implemented).
+	// DestinationOver 目标色覆盖混合（已实现）。
 	DestinationOver
-	// PlusDarker 高级深色(已实现)
+	// PlusDarker is plus darker blend mode (implemented).
+	// PlusDarker 高级深色（已实现）。
 	PlusDarker
-	// PlusLighter 高级浅色(已实现)
+	// PlusLighter is plus lighter blend mode (implemented).
+	// PlusLighter 高级浅色（已实现）。
 	PlusLighter
-	// SourceAtop (已实现)
+	// SourceAtop is source atop Porter-Duff mode (implemented).
+	// SourceAtop 源色在上混合（已实现）。
 	SourceAtop
-	// SourceIn (已实现)
+	// SourceIn is source in Porter-Duff mode (implemented).
+	// SourceIn 源色在内混合（已实现）。
 	SourceIn
-	// SourceOut (已实现)
+	// SourceOut is source out Porter-Duff mode (implemented).
+	// SourceOut 源色在外混合（已实现）。
 	SourceOut
-	// SourceOver (已实现)
+	// SourceOver is source over Porter-Duff mode (implemented).
+	// SourceOver 源色覆盖混合（已实现）。
 	SourceOver
-	// Xor 异或模式(已实现)
+	// Xor is XOR Porter-Duff mode (implemented).
+	// Xor 异或模式（已实现）。
 	Xor
 )
 
+// RegisterBlendFunc registers color and RGBA blend callbacks for blendMode.
+// RegisterBlendFunc 为 blendMode 注册 color 与 RGBA 混合回调。
 func RegisterBlendFunc(blendMode BlendMode, funcBlendColor FuncBlendColor, funcBlendRGBA FuncBlendRGBA) {
 	funcBlendColorArr[blendMode] = funcBlendColor
 	funcBlendRGBAArr[blendMode] = funcBlendRGBA

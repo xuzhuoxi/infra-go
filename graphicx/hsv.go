@@ -6,11 +6,14 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// HSV2RGB
-// 求RGB 64位
-// H: 色调(色相) [0,360]
-// S: 饱和度 [0,1]
-// V: 明度(亮度) [0,1]
+// HSV2RGB converts HSV to 16-bit RGB channel values.
+// HSV2RGB 将 HSV 转换为 16 位 RGB 通道值。
+// H: hue in [0, 360].
+// H：色调（色相），范围 [0, 360]。
+// S: saturation in [0, 1].
+// S：饱和度，范围 [0, 1]。
+// V: value (brightness) in [0, 1].
+// V：明度（亮度），范围 [0, 1]。
 func HSV2RGB(H, S, V float64) (R, G, B uint32) {
 	if 0 == S {
 		return 0, 0, 0
@@ -40,11 +43,14 @@ func HSV2RGB(H, S, V float64) (R, G, B uint32) {
 	return
 }
 
-// RGB2HSV
-// 取HSV
-// H: 色调(色相) [0,360]
-// S: 饱和度 [0,1]
-// V: 明度(亮度) [0,1]
+// RGB2HSV converts 16-bit RGB channel values to HSV.
+// RGB2HSV 将 16 位 RGB 通道值转换为 HSV。
+// H: hue in [0, 360].
+// H：色调（色相），范围 [0, 360]。
+// S: saturation in [0, 1].
+// S：饱和度，范围 [0, 1]。
+// V: value (brightness) in [0, 1].
+// V：明度（亮度），范围 [0, 1]。
 func RGB2HSV(R, G, B uint32) (H, S, V float64) {
 	fr, fg, fb := float64(R), float64(G), float64(B)
 	max := mathx.Max3Float64(fr, fg, fb)
@@ -71,8 +77,8 @@ func RGB2HSV(R, G, B uint32) (H, S, V float64) {
 	return
 }
 
-// Hue
-// 色调 H [0,360]
+// Hue returns the hue component H in [0, 360] from 16-bit RGB channels.
+// Hue 从 16 位 RGB 通道计算色相 H，范围 [0, 360]。
 func Hue(R, G, B uint32) (H float64) {
 	fr, fg, fb := float64(R), float64(G), float64(B)
 	max := mathx.Max3Float64(fr, fg, fb)
@@ -95,8 +101,8 @@ func Hue(R, G, B uint32) (H float64) {
 	return
 }
 
-// Saturation
-// 饱和度 S [0,1]
+// Saturation returns the saturation S in [0, 1] from 16-bit RGB channels.
+// Saturation 从 16 位 RGB 通道计算饱和度 S，范围 [0, 1]。
 func Saturation(R, G, B uint32) (S float64) {
 	fr, fg, fb := float64(R), float64(G), float64(B)
 	max := mathx.Max3Float64(fr, fg, fb)
@@ -104,8 +110,8 @@ func Saturation(R, G, B uint32) (S float64) {
 	return 1 - min/max
 }
 
-// Value
-// 明度 [0,1]
+// Value returns the value (brightness) V in [0, 1] from 16-bit RGB channels.
+// Value 从 16 位 RGB 通道计算明度 V，范围 [0, 1]。
 func Value(R, G, B uint32) (V float64) {
 	fr, fg, fb := float64(R), float64(G), float64(B)
 	max := mathx.Max3Float64(fr, fg, fb)

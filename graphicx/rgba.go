@@ -1,40 +1,36 @@
-// Package graphicx
-// Created by xuzhuoxi
-// on 2019-05-29.
-// @author xuzhuoxi
-//
 package graphicx
 
 import (
 	"math"
 )
 
-// Inverse 反相
+// Inverse inverts RGBA channels (65535 - channel).
+// Inverse 对 RGBA 各通道取反（65535 - 通道值）。
 func Inverse(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB, targetA uint32) {
 	max := uint32(math.MaxUint16)
 	targetR, targetG, targetB, targetA = max-pixelR, max-pixelG, max-pixelB, max-pixelA
 	return
 }
 
-// ToNRGBA_White
-// RGBA颜色转NRGBA，使用白色作底
+// ToNRGBA_White converts premultiplied RGBA to NRGBA using white as the background.
+// ToNRGBA_White 以白色为底色将预乘 RGBA 转换为 NRGBA。
 func ToNRGBA_White(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB uint32) {
 	targetR, targetG, targetB = BlendRGBANormal(pixelR, pixelG, pixelB, pixelA, 65535)
 	return
 }
 
-// ToNRGBA_Black
-// RGBA颜色转NRGBA，使用黑色作底
+// ToNRGBA_Black converts premultiplied RGBA to NRGBA using black as the background.
+// ToNRGBA_Black 以黑色为底色将预乘 RGBA 转换为 NRGBA。
 func ToNRGBA_Black(pixelR, pixelG, pixelB, pixelA uint32) (targetR, targetG, targetB uint32) {
 	targetR, targetG, targetB = BlendRGBANormal(pixelR, pixelG, pixelB, pixelA, 0)
 	return
 }
 
-// BlendRGBANormal
-// 混全两个像素，使用normal模式
-// 使用纯黑或纯白作背景色，可实现去除前景Alpha通道功能
-// 使用64位图像数据，R,G,B的值范围为uint16
-// R ＝ D*Da + S*(1-Da)
+// BlendRGBANormal blends foreground (Dr,Dg,Db,Da) over solid background S using normal alpha compositing.
+// BlendRGBANormal 以正常模式将前景 (Dr,Dg,Db,Da) 与纯色背景 S 混合。
+// With 16-bit image data, R,G,B are in uint16 range. White or black S removes foreground alpha when Da is partial.
+// 使用 16 位图像数据时 R、G、B 为 uint16 范围；背景为纯白或纯黑且 Da 非全不透明时可去除前景 Alpha。
+// R = D*Da + S*(1-Da)
 func BlendRGBANormal(Dr, Dg, Db, Da uint32, S uint32) (targetR, targetG, targetB uint32) {
 	if math.MaxUint16 == Da { //前景不透明
 		return Dr, Dg, Db

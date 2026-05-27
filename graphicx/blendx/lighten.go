@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -13,10 +8,8 @@ func init() {
 	RegisterBlendFunc(Lighten, BlendLightenColor, BlendLightenRGBA)
 }
 
-// BlendLightenColor
-// 变亮模式
-// 与Darken相反，取两个像素中更亮的作为结果。
-// 查看每个通道的颜色信息，并按照像素对比两个颜色，那个更亮，便以这种颜色作为此像素最终的颜色，也就是取两个颜色中的亮色作为最终色。绘图色中亮于底色的颜色被保留，暗于底色的颜色被替换。
+// BlendLightenColor takes the lighter of source and destination per channel.
+// BlendLightenColor 逐通道取较亮者（变亮模式）。
 // R = Max(S, D)
 func BlendLightenColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
 	Sr, Sg, Sb, Sa := S.RGBA()
@@ -25,10 +18,8 @@ func BlendLightenColor(S, D color.Color, _ float64, destinationAlpha bool) color
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendLightenRGBA
-// 变亮模式
-// 与Darken相反，取两个像素中更亮的作为结果。
-// 查看每个通道的颜色信息，并按照像素对比两个颜色，那个更亮，便以这种颜色作为此像素最终的颜色，也就是取两个颜色中的亮色作为最终色。绘图色中亮于底色的颜色被保留，暗于底色的颜色被替换。
+// BlendLightenRGBA takes the lighter channel values (R = max(S, D)).
+// BlendLightenRGBA 逐通道取较亮值（R = max(S, D)）。
 // R = Max(S, D)
 func BlendLightenRGBA(Sr, Sg, Sb, Sa uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
 	R = lighten(Sr, Dr)

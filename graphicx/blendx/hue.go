@@ -1,8 +1,3 @@
-// Package blendx
-// Created by xuzhuoxi
-// on 2019-05-25.
-// @author xuzhuoxi
-//
 package blendx
 
 import (
@@ -16,9 +11,8 @@ func init() {
 	RegisterBlendFunc(Hue, BlendHueColor, BlendHueRGBA)
 }
 
-// BlendHueColor
-// 色相模式
-// 是采用底色的亮度、饱和度以及绘图色的色相来创建最终色。
+// BlendHueColor uses destination luminance/saturation and source hue.
+// BlendHueColor 采用目标亮度/饱和度与源色相（色相模式）。
 // HSV = Dh, Ss, Sv
 func BlendHueColor(S, D color.Color, _ float64, destinationAlpha bool) color.Color {
 	Sr, Sg, Sb, Sa := S.RGBA()
@@ -27,9 +21,8 @@ func BlendHueColor(S, D color.Color, _ float64, destinationAlpha bool) color.Col
 	return &color.RGBA64{R: uint16(R), G: uint16(G), B: uint16(B), A: uint16(A)}
 }
 
-// BlendHueRGBA
-// 色相模式
-// 是采用底色的亮度、饱和度以及绘图色的色相来创建最终色。
+// BlendHueRGBA applies hue blend on RGBA64 channels (HSV = Dh, Ss, Sv).
+// BlendHueRGBA 对 RGBA64 通道应用色相混合（HSV = Dh, Ss, Sv）。
 // HSV = Dh, Ss, Sv
 func BlendHueRGBA(Sr, Sg, Sb, _ uint32, Dr, Dg, Db, Da uint32, _ float64, destinationAlpha bool) (R, G, B, A uint32) {
 	R, G, B = hueUnit(Sr, Sg, Sb, Dr, Dg, Db)
