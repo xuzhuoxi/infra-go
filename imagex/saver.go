@@ -1,8 +1,3 @@
-// Package imagex
-// Created by xuzhuoxi
-// on 2019-05-31.
-// @author xuzhuoxi
-//
 package imagex
 
 import (
@@ -13,6 +8,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
+// SaveImage encodes img to fullPath using format (Auto selects format from file extension).
+// SaveImage 将 img 编码保存到 fullPath；format 为 Auto 时按扩展名选择格式。
 func SaveImage(img image.Image, fullPath string, format formatx.ImageFormat, options interface{}) error {
 	os.Open(fullPath)
 	file, err := os.Create(fullPath)

@@ -1,5 +1,3 @@
-// Package filterx
-// 腐蚀
 package filterx
 
 import (
@@ -13,20 +11,24 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// ErodeCVT 腐蚀二值图
+// ErodeCVT erodes a binarized image.
+// ErodeCVT 腐蚀二值图。
 func ErodeCVT(cvtSrcImg image.Image, cvtDstImg draw.Image, directions imagex.PixelDirection) error {
 	return ErodeGray(cvtSrcImg, cvtDstImg, directions, 65535, 0)
 }
 
-// ErodeGray
-// 腐蚀灰度图像
-// 腐蚀阈值erodeThreshold (0,65535]
-// 		>=erodeThreshold像素的点才具有腐蚀性
-// 		erodeThreshold=1时只要不是纯黑都具有腐蚀性，erodeThreshold=65535时只有纯白具有腐蚀性
-// 抗腐蚀阈值antiErodeThreshold [0, 65535)
-// 		<antiErodeThreshold的像素点不会被腐蚀,
-// 		antiErodeThreshold=0时不抗腐蚀
-// 要求 erodeThreshold > antiErodeThreshold
+// ErodeGray erodes a grayscale image.
+// ErodeGray 腐蚀灰度图像。
+// erodeThreshold: erosion threshold in (0, 65535]; pixels >= erodeThreshold are erosive.
+// erodeThreshold：腐蚀阈值 (0,65535]；>= erodeThreshold 的像素点才具有腐蚀性。
+// erodeThreshold=1 means all non-black pixels are erosive; erodeThreshold=65535 means only pure white is erosive.
+// erodeThreshold=1 时只要不是纯黑都具有腐蚀性，erodeThreshold=65535 时只有纯白具有腐蚀性。
+// antiErodeThreshold: anti-erosion threshold in [0, 65535); pixels < antiErodeThreshold are not eroded.
+// antiErodeThreshold：抗腐蚀阈值 [0,65535)；< antiErodeThreshold 的像素点不会被腐蚀。
+// antiErodeThreshold=0 means no anti-erosion protection.
+// antiErodeThreshold=0 时不抗腐蚀。
+// Requires erodeThreshold > antiErodeThreshold.
+// 要求 erodeThreshold > antiErodeThreshold。
 func ErodeGray(graySrcImg image.Image, grayDstImg draw.Image, directions imagex.PixelDirection, erodeThreshold uint32, antiErodeThreshold uint32) error {
 	if nil == graySrcImg || nil == grayDstImg {
 		return errors.New("SrcImg or grayDstImg is nil. ")

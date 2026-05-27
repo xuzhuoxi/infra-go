@@ -9,22 +9,20 @@ import (
 	"github.com/xuzhuoxi/infra-go/imagex"
 )
 
-// GrayDefaultFromNRGBA
-// 转制NRGBA图像为Gray16灰度图
-// 使用默认灰度计算算法
+// GrayDefaultFromNRGBA converts an NRGBA image to Gray16 using the default gray algorithm.
+// GrayDefaultFromNRGBA 将 NRGBA 图像转换为 Gray16 灰度图，使用默认灰度计算算法。
 func GrayDefaultFromNRGBA(src image.Image) (resultImage image.Image, err error) {
 	return GrayFromNRGBA(src, graphicx.DefaultAlgMode)
 }
 
-// GrayDefaultFromRGBA
-// 转制RGBA图像为Gray16灰度图
-// 使用默认灰度计算算法
+// GrayDefaultFromRGBA converts an RGBA image to Gray16 using the default gray algorithm.
+// GrayDefaultFromRGBA 将 RGBA 图像转换为 Gray16 灰度图，使用默认灰度计算算法。
 func GrayDefaultFromRGBA(src image.Image, backgroundColor color.Color) (resultImage image.Image, err error) {
 	return GrayFromRGBA(src, backgroundColor, graphicx.DefaultAlgMode)
 }
 
-// GrayFromNRGBA
-// 转制NRGBA图像为Gray16灰度图
+// GrayFromNRGBA converts an NRGBA image to Gray16.
+// GrayFromNRGBA 将 NRGBA 图像转换为 Gray16 灰度图。
 func GrayFromNRGBA(rgbImg image.Image, algMode graphicx.GrayAlgMode) (resultImage image.Image, err error) {
 	if nil == rgbImg {
 		return nil, errors.New("RgbImg is nil! ")
@@ -43,8 +41,8 @@ func GrayFromNRGBA(rgbImg image.Image, algMode graphicx.GrayAlgMode) (resultImag
 	return grayImg, nil
 }
 
-// GrayFromRGBA
-// 转制RGBA图像为Gray16灰度图
+// GrayFromRGBA converts an RGBA image to Gray16.
+// GrayFromRGBA 将 RGBA 图像转换为 Gray16 灰度图。
 func GrayFromRGBA(rgbaImg image.Image, background color.Color, algMode graphicx.GrayAlgMode) (resultImage image.Image, err error) {
 	if nil == rgbaImg {
 		return nil, errors.New("RgbaImg is nil! ")
@@ -55,6 +53,8 @@ func GrayFromRGBA(rgbaImg image.Image, background color.Color, algMode graphicx.
 	return GrayFromNRGBA(copyImg, algMode)
 }
 
+// GetGrayPixel extracts Gray image pixel rows as a 2D slice.
+// GetGrayPixel 提取 Gray 图像像素行为二维切片。
 func GetGrayPixel(grayImg *image.Gray) (pixel [][]uint8) {
 	size := grayImg.Rect.Size()
 	pixel = make([][]uint8, size.Y, size.Y)
@@ -64,6 +64,8 @@ func GetGrayPixel(grayImg *image.Gray) (pixel [][]uint8) {
 	return
 }
 
+// GetGray16Pixel extracts Gray16 image pixel values as a 2D slice.
+// GetGray16Pixel 提取 Gray16 图像像素值为二维切片。
 func GetGray16Pixel(grayImg *image.Gray16) (pixel [][]uint16) {
 	size := grayImg.Rect.Size()
 	pixel = make([][]uint16, size.Y, size.Y)

@@ -1,5 +1,3 @@
-// Package projectionx
-// 投影： 按水平或垂直方向统计色素有效性
 package projectionx
 
 import (
@@ -7,19 +5,24 @@ import (
 	"image/color"
 )
 
-// ProjectDirection 投影模式
+// ProjectDirection selects horizontal or vertical projection mode.
+// ProjectDirection 选择水平或垂直投影模式。
 type ProjectDirection int32
 
 const (
-	// ModeNone 无效
+	// ModeNone is an invalid projection mode.
+	// ModeNone 无效投影模式。
 	ModeNone ProjectDirection = iota
-	// ModeVertical 垂直模式
+	// ModeVertical projects along the vertical axis (per column).
+	// ModeVertical 垂直模式（按列统计）。
 	ModeVertical
-	// ModeHorizontal 水平模式
+	// ModeHorizontal projects along the horizontal axis (per row).
+	// ModeHorizontal 水平模式（按行统计）。
 	ModeHorizontal
 )
 
-// Result 投影结果
+// Result holds per-axis valid-pixel counts from a projection.
+// Result 保存投影各轴上的有效像素计数。
 type Result struct {
 	// 数据
 	Data []uint32
@@ -27,6 +30,8 @@ type Result struct {
 	Mode ProjectDirection
 }
 
+// MaxData returns the maximum count in Data.
+// MaxData 返回 Data 中的最大计数值。
 func (r *Result) MaxData() uint32 {
 	var max uint32 = 0
 	for _, d := range r.Data {
@@ -37,16 +42,18 @@ func (r *Result) MaxData() uint32 {
 	return max
 }
 
+// Length returns len(Data).
+// Length 返回 len(Data)。
 func (r *Result) Length() int {
 	return len(r.Data)
 }
 
-// ValidFunc
-// 投影有效性函数
+// ValidFunc decides whether a pixel counts toward the projection.
+// ValidFunc 判断像素是否计入投影统计。
 type ValidFunc func(color color.Color) bool
 
-// ProjectHorizontal
-// 水平投影
+// ProjectHorizontal counts valid pixels per row.
+// ProjectHorizontal 按行统计有效像素（水平投影）。
 func ProjectHorizontal(src image.Image, validFunc ValidFunc) *Result {
 	size := src.Bounds().Size()
 	w, h := size.X, size.Y
@@ -62,8 +69,8 @@ func ProjectHorizontal(src image.Image, validFunc ValidFunc) *Result {
 	return &Result{Data: rs, Mode: ModeHorizontal}
 }
 
-// ProjectVertical
-// 垂直投影
+// ProjectVertical counts valid pixels per column.
+// ProjectVertical 按列统计有效像素（垂直投影）。
 func ProjectVertical(src image.Image, validFunc ValidFunc) *Result {
 	size := src.Bounds().Size()
 	w, h := size.X, size.Y
@@ -79,8 +86,8 @@ func ProjectVertical(src image.Image, validFunc ValidFunc) *Result {
 	return &Result{Data: rs, Mode: ModeVertical}
 }
 
-// Project
-// 投影
+// Project dispatches to horizontal or vertical projection by direction.
+// Project 按 direction 分发到水平或垂直投影。
 func Project(src image.Image, validFunc ValidFunc, direction ProjectDirection) *Result {
 	switch direction {
 	case ModeHorizontal:
@@ -92,8 +99,8 @@ func Project(src image.Image, validFunc ValidFunc, direction ProjectDirection) *
 	}
 }
 
-// Project2D
-// 二维投影
+// Project2D returns vertical and horizontal projections of src.
+// Project2D 同时返回 src 的垂直与水平投影。
 func Project2D(src image.Image, validFunc ValidFunc) (v *Result, h *Result) {
 	v = ProjectVertical(src, validFunc)
 	h = ProjectHorizontal(src, validFunc)

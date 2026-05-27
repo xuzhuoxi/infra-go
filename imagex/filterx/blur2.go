@@ -9,6 +9,10 @@ import (
 	"image/draw"
 )
 
+// FastBlur2 applies stack blur (variant 2, ARGB pixel layout).
+// FastBlur2 应用堆栈模糊（变体 2，ARGB 像素布局）。
+// radius: blur radius, must be >= 1.
+// radius：模糊半径，须 >= 1。
 func FastBlur2(srcImg image.Image, dstImg draw.Image, radius int) error {
 	if nil == srcImg {
 		return errors.New("SrcImg is nil! ")

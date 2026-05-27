@@ -7,8 +7,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// CopyImage
-// 复制图像
+// CopyImage deep-copies srcImg into a new draw.Image of the same concrete type.
+// CopyImage 深拷贝 srcImg 为同类型的 draw.Image。
 func CopyImage(srcImg image.Image) draw.Image {
 	copyImg := CopyImageStruct(srcImg)
 	if nil == copyImg {
@@ -18,8 +18,8 @@ func CopyImage(srcImg image.Image) draw.Image {
 	return copyImg
 }
 
-// XCopyImage
-// 复制图像
+// XCopyImage deep-copies srcImg using draw.Draw with Over compositing.
+// XCopyImage 使用 draw.Draw（Over 模式）深拷贝 srcImg。
 func XCopyImage(srcImg image.Image) draw.Image {
 	copyImg := CopyImageStruct(srcImg)
 	if nil == copyImg {
@@ -29,8 +29,8 @@ func XCopyImage(srcImg image.Image) draw.Image {
 	return copyImg
 }
 
-// CopyImageTo
-// 把源图像复制到目标图像
+// CopyImageTo copies overlapping pixels from srcImg into dstImg via Set/At.
+// CopyImageTo 将 srcImg 重叠区域像素复制到 dstImg。
 func CopyImageTo(srcImg image.Image, dstImg draw.Image) {
 	srcRect := srcImg.Bounds()
 	dstRect := dstImg.Bounds()
@@ -45,14 +45,14 @@ func CopyImageTo(srcImg image.Image, dstImg draw.Image) {
 	}
 }
 
-// XCopyImageTo
-// 把源图像复制到目标图像
+// XCopyImageTo copies srcImg into dstImg using draw.Draw with Over compositing.
+// XCopyImageTo 使用 draw.Draw（Over 模式）将 srcImg 复制到 dstImg。
 func XCopyImageTo(srcImg image.Image, dstImg draw.Image) {
 	draw.Draw(dstImg, srcImg.Bounds(), srcImg, image.Pt(0, 0), draw.Over)
 }
 
-// CopyImageStruct
-// 复制图像
+// CopyImageStruct allocates an empty draw.Image matching the concrete type of srcImg.
+// CopyImageStruct 分配与 srcImg 同类型的空 draw.Image 结构体。
 func CopyImageStruct(srcImg image.Image) draw.Image {
 	rect := srcImg.Bounds()
 	var clone draw.Image

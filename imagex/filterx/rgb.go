@@ -1,5 +1,3 @@
-// Package filterx
-// RGBA转RGB
 package filterx
 
 import (
@@ -14,26 +12,26 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-// NRGBAAtGreen
-// 以绿色(Green)作底转换RGBA图像为RGB图像(去Alpha通道)
+// NRGBAAtGreen converts an RGBA image to NRGBA using green as the background.
+// NRGBAAtGreen 以绿色（Green）作底将 RGBA 图像转换为 NRGBA 图像（去除 Alpha 通道）。
 func NRGBAAtGreen(rgbaImg image.Image, nrgbaImg draw.Image) error {
 	return NRGBAAt(rgbaImg, nrgbaImg, colornames.Green)
 }
 
-// NRGBAAtBlack
-// 以黑色(Black)作底转换RGBA图像为RGB图像(去Alpha通道)
+// NRGBAAtBlack converts an RGBA image to NRGBA using black as the background.
+// NRGBAAtBlack 以黑色（Black）作底将 RGBA 图像转换为 NRGBA 图像（去除 Alpha 通道）。
 func NRGBAAtBlack(rgbaImg image.Image, nrgbaImg draw.Image) error {
 	return NRGBAAt(rgbaImg, nrgbaImg, color.Black)
 }
 
-// NRGBAAtWhite
-// 以白色(White)作底转换RGBA图像为RGB图像(去Alpha通道)
+// NRGBAAtWhite converts an RGBA image to NRGBA using white as the background.
+// NRGBAAtWhite 以白色（White）作底将 RGBA 图像转换为 NRGBA 图像（去除 Alpha 通道）。
 func NRGBAAtWhite(rgbaImg image.Image, nrgbaImg draw.Image) error {
 	return NRGBAAt(rgbaImg, nrgbaImg, color.White)
 }
 
-// NRGBAAt
-// 以某个背景色作底转换RGBA图像为NRGBA图像(去Alpha通道)
+// NRGBAAt converts an RGBA image to NRGBA composited over a background color.
+// NRGBAAt 以指定背景色作底将 RGBA 图像转换为 NRGBA 图像（去除 Alpha 通道）。
 func NRGBAAt(rgbaImg image.Image, nrgbaImg draw.Image, backgroundColor color.Color) error {
 	if nil == rgbaImg {
 		return errors.New("SrcImg is nil! ")

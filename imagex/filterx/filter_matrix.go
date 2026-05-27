@@ -11,8 +11,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// FilterMatrix
-// 滤波器
+// FilterMatrix holds a sparse convolution kernel and scaling metadata.
+// FilterMatrix 保存稀疏卷积核及缩放元数据。
 type FilterMatrix struct {
 	// 滤波器卷积核
 	Kernel FilterKernel
@@ -26,14 +26,14 @@ type FilterMatrix struct {
 	ResultOffset int
 }
 
-// IsScaleMatrix
-// 是否为倍率滤波器
+// IsScaleMatrix reports whether the kernel applies a scale divisor.
+// IsScaleMatrix 判断是否为倍率（需除法缩放）滤波器。
 func (fm FilterMatrix) IsScaleMatrix() bool {
 	return fm.KernelScale != 0 && fm.KernelScale != 1
 }
 
-// IsPixelUnsafe
-// 运算结果是否可能超出像素范围(非安全像素值)
+// IsPixelUnsafe reports whether results may fall outside the valid pixel range.
+// IsPixelUnsafe 判断运算结果是否可能超出像素有效范围（非安全像素值）。
 func (fm FilterMatrix) IsPixelUnsafe() bool {
 	if fm.ResultOffset != 0 {
 		return true
@@ -46,8 +46,8 @@ func (fm FilterMatrix) IsPixelUnsafe() bool {
 	return false
 }
 
-// FlipUD
-// 上下翻转
+// FlipUD returns a copy flipped vertically (up-down).
+// FlipUD 返回上下翻转后的副本。
 func (fm FilterMatrix) FlipUD() FilterMatrix {
 	rs := fm
 	rs.Kernel = fm.Kernel.FlipUD()
@@ -55,8 +55,8 @@ func (fm FilterMatrix) FlipUD() FilterMatrix {
 	return rs
 }
 
-// FlipLR
-// 左右翻转
+// FlipLR returns a copy flipped horizontally (left-right).
+// FlipLR 返回左右翻转后的副本。
 func (fm FilterMatrix) FlipLR() FilterMatrix {
 	rs := fm
 	rs.Kernel = fm.Kernel.FlipLR()
@@ -64,8 +64,8 @@ func (fm FilterMatrix) FlipLR() FilterMatrix {
 	return rs
 }
 
-// Rotate
-// 顺时针旋转90度
+// Rotate returns a copy rotated by count90 quarter-turns.
+// Rotate 返回顺时针或逆时针旋转 count90 个 90° 后的副本。
 func (fm FilterMatrix) Rotate(clockwise bool, count90 int) FilterMatrix {
 	rs := fm
 	rs.Kernel = fm.Kernel.Rotate(clockwise, count90)
@@ -73,8 +73,8 @@ func (fm FilterMatrix) Rotate(clockwise bool, count90 int) FilterMatrix {
 	return rs
 }
 
-// CheckValidity
-// 滤波模板有效性
+// CheckValidity verifies kernel radius, scale sum, and non-negative scale.
+// CheckValidity 校验卷积核半径、权重和与倍率有效性。
 func (fm FilterMatrix) CheckValidity() error {
 	if fm.KernelRadius < 1 {
 		return errors.New("KernelRadius < 1. ")
@@ -92,8 +92,8 @@ func (fm FilterMatrix) CheckValidity() error {
 	return nil
 }
 
-// FilterImageWithMatrix
-// 使用滤波器
+// FilterImageWithMatrix convolves srcImg with m and writes into dstImg.
+// FilterImageWithMatrix 使用滤波器 m 对 srcImg 卷积并写入 dstImg。
 func FilterImageWithMatrix(srcImg image.Image, dstImg draw.Image, m FilterMatrix) error {
 	if nil == srcImg || nil == dstImg {
 		return errors.New("SrcImg or dstImg is nil! ")

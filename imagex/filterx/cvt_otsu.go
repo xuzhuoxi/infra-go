@@ -8,25 +8,26 @@ import (
 	"github.com/xuzhuoxi/infra-go/slicex"
 )
 
-// CVTWithOTSU
-// OTSU二值化算法(大津法)
+// CVTWithOTSU binarizes an image using Otsu's method (8-bit histogram).
+// CVTWithOTSU 使用 OTSU 算法（大津法）对图像进行二值化。
 func CVTWithOTSU(srcImg image.Image, dstImg draw.Image) error {
 	threshold := GetOtsuThreshold(srcImg)
 	return CVTGray(srcImg, dstImg, threshold)
 }
 
-// CVTWithOTSU64
-// OTSU二值化算法(大津法)
+// CVTWithOTSU64 binarizes an image using Otsu's method (16-bit histogram).
+// CVTWithOTSU64 使用 OTSU 算法（大津法）对图像进行二值化（16 位直方图）。
 func CVTWithOTSU64(srcImg image.Image, dstImg draw.Image) error {
 	threshold := GetOtsuThreshold64(srcImg)
 	return CVTGray(srcImg, dstImg, threshold)
 }
 
-// GetOtsuThreshold
-// 计算灰度图的OTSU算法的阈值
-// 64位像素强制转为32位像素参与计算
-// 结果返回64位图像级阈值
-// threshold [0， 65535]
+// GetOtsuThreshold computes the Otsu threshold for a grayscale image.
+// GetOtsuThreshold 计算灰度图的 OTSU 算法阈值。
+// 64-bit pixels are downscaled to 8-bit for histogram computation.
+// 64 位像素强制转为 8 位参与计算。
+// Returns a 16-bit image-level threshold in [0, 65535].
+// 结果返回 64 位图像级阈值 [0，65535]。
 func GetOtsuThreshold(grayImg image.Image) (threshold uint32) {
 	min := grayImg.Bounds().Min
 	max := grayImg.Bounds().Max
@@ -43,10 +44,10 @@ func GetOtsuThreshold(grayImg image.Image) (threshold uint32) {
 	return
 }
 
-// GetOtsuThreshold64
-// 计算灰度图的OTSU算法的阈值
-// 结果返回64位图像级阈值
-// threshold [0， 65535]
+// GetOtsuThreshold64 computes the Otsu threshold using a full 16-bit histogram.
+// GetOtsuThreshold64 计算灰度图的 OTSU 算法阈值（16 位直方图）。
+// Returns a 16-bit image-level threshold in [0, 65535].
+// 结果返回 64 位图像级阈值 [0，65535]。
 func GetOtsuThreshold64(grayImg image.Image) (threshold uint32) {
 	min := grayImg.Bounds().Min
 	max := grayImg.Bounds().Max

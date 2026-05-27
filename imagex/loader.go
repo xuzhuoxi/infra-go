@@ -1,8 +1,3 @@
-// Package imagex
-// Created by xuzhuoxi
-// on 2019-05-31.
-// @author xuzhuoxi
-//
 package imagex
 
 import (
@@ -12,6 +7,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/imagex/formatx"
 )
 
+// LoadImage loads an image from fullPath using the given format (Auto detects from content or extension).
+// LoadImage 从 fullPath 加载图像；format 为 Auto 时自动识别格式。
 func LoadImage(fullPath string, format formatx.ImageFormat) (img image.Image, imgFormat string, err error) {
 	file, e := os.Open(fullPath)
 	defer file.Close()

@@ -1,5 +1,3 @@
-// Package filterx
-// 二值化
 package filterx
 
 import (
@@ -11,9 +9,10 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// CVTGray
-// 二值化灰度图
-// threshold [0， 65535]
+// CVTGray binarizes a grayscale image.
+// CVTGray 对灰度图进行二值化。
+// threshold: binarization threshold in [0, 65535].
+// threshold：二值化阈值 [0，65535]。
 func CVTGray(graySrcImg image.Image, grayDstImg draw.Image, threshold uint32) error {
 	if nil == graySrcImg || nil == grayDstImg {
 		return errors.New("SrcImg or grayDstImg is nil. ")

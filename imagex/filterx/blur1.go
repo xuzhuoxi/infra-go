@@ -1,5 +1,3 @@
-// Package filterx
-// 模糊
 package filterx
 
 import (
@@ -18,8 +16,10 @@ func (rgb _RGB) Pixel() int {
 	return (rgb.R&0x0000ff)<<16 | (rgb.R&0x0000ff)<<8 | rgb.R&0x0000ff
 }
 
-// FastBlur64
-// 模糊
+// FastBlur64 applies stack blur using 64-bit RGB channel values.
+// FastBlur64 对图像应用基于 64 位 RGB 通道的堆栈模糊。
+// radius: blur radius, must be >= 1.
+// radius：模糊半径，须 >= 1。
 func FastBlur64(srcImg image.Image, dstImg draw.Image, radius int) error {
 	if nil == srcImg {
 		return errors.New("SrcImg is nil! ")

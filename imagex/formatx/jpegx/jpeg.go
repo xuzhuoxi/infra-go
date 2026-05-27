@@ -1,8 +1,3 @@
-// Package jpegx
-// Created by xuzhuoxi
-// on 2019-04-27.
-// @author xuzhuoxi
-//
 package jpegx
 
 import (
@@ -25,6 +20,8 @@ func init() {
 	formatx.RegisterFormatExt(string(formatx.JPS), "jps")
 }
 
+// EncodeJPEG encodes m as JPEG to w; options may be *jpeg.Options or nil.
+// EncodeJPEG 将 m 以 JPEG 格式编码写入 w；options 可为 *jpeg.Options 或 nil。
 func EncodeJPEG(w io.Writer, m image.Image, options interface{}) error {
 	if nil == options {
 		return jpeg.Encode(w, m, nil)
@@ -33,6 +30,8 @@ func EncodeJPEG(w io.Writer, m image.Image, options interface{}) error {
 	}
 }
 
+// DecodeJPEG decodes a JPEG image from r.
+// DecodeJPEG 从 r 解码 JPEG 图像。
 func DecodeJPEG(r io.Reader) (image.Image, error) {
 	return jpeg.Decode(r)
 }

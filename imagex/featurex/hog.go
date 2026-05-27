@@ -1,6 +1,3 @@
-// Package featurex
-// histogram of Oriented Gradient
-// 方向梯度直方图
 package featurex
 
 import (
@@ -10,8 +7,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// HogRed
-// 计算红色直方图
+// HogRed builds an 8-bit histogram of the red channel with range mapping k*O+l.
+// HogRed 对红色通道构建 8 位直方图，范围映射为 k*O+l。
 func HogRed(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
 	ln := hog(256, k, l)
@@ -29,8 +26,8 @@ func HogRed(img image.Image, k, l float64) []int {
 	return rs
 }
 
-// HogRed64
-// 计算红色直方图
+// HogRed64 builds a 16-bit histogram of the red channel with range mapping k*O+l.
+// HogRed64 对红色通道构建 16 位直方图，范围映射为 k*O+l。
 func HogRed64(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
 	ln := hog(65536, k, l)
@@ -48,8 +45,8 @@ func HogRed64(img image.Image, k, l float64) []int {
 	return rs
 }
 
-// HogGreen
-// 计算绿色直方图
+// HogGreen builds an 8-bit histogram of the green channel with range mapping k*O+l.
+// HogGreen 对绿色通道构建 8 位直方图，范围映射为 k*O+l。
 func HogGreen(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
 	ln := hog(256, k, l)
@@ -67,8 +64,8 @@ func HogGreen(img image.Image, k, l float64) []int {
 	return rs
 }
 
-// HogGreen64
-// 计算绿色直方图
+// HogGreen64 builds a 16-bit histogram of the green channel with range mapping k*O+l.
+// HogGreen64 对绿色通道构建 16 位直方图，范围映射为 k*O+l。
 func HogGreen64(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
 	ln := hog(65536, k, l)
@@ -86,8 +83,8 @@ func HogGreen64(img image.Image, k, l float64) []int {
 	return rs
 }
 
-// HogBlue
-// 计算蓝色直方图
+// HogBlue builds an 8-bit histogram of the blue channel with range mapping k*O+l.
+// HogBlue 对蓝色通道构建 8 位直方图，范围映射为 k*O+l。
 func HogBlue(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
 	ln := hog(256, k, l)
@@ -105,8 +102,8 @@ func HogBlue(img image.Image, k, l float64) []int {
 	return rs
 }
 
-// HogBlue64
-// 计算蓝色直方图
+// HogBlue64 builds a 16-bit histogram of the blue channel with range mapping k*O+l.
+// HogBlue64 对蓝色通道构建 16 位直方图，范围映射为 k*O+l。
 func HogBlue64(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
 	ln := hog(65536, k, l)
@@ -124,8 +121,8 @@ func HogBlue64(img image.Image, k, l float64) []int {
 	return rs
 }
 
-// HogAlpha
-// 计算透明直方图
+// HogAlpha builds an 8-bit histogram of the alpha channel with range mapping k*O+l.
+// HogAlpha 对 Alpha 通道构建 8 位直方图，范围映射为 k*O+l。
 func HogAlpha(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
 	ln := hog(256, k, l)
@@ -143,8 +140,8 @@ func HogAlpha(img image.Image, k, l float64) []int {
 	return rs
 }
 
-// HogAlpha64
-// 计算透明直方图
+// HogAlpha64 builds a 16-bit histogram of the alpha channel with range mapping k*O+l.
+// HogAlpha64 对 Alpha 通道构建 16 位直方图，范围映射为 k*O+l。
 func HogAlpha64(img image.Image, k, l float64) []int {
 	size := img.Bounds().Size()
 	ln := hog(65536, k, l)
@@ -162,8 +159,8 @@ func HogAlpha64(img image.Image, k, l float64) []int {
 	return rs
 }
 
-// HogRGBA
-// 计算透明直方图
+// HogRGBA builds 8-bit histograms for R, G, B, and A channels.
+// HogRGBA 对 R、G、B、A 通道分别构建 8 位直方图。
 func HogRGBA(img image.Image, k, l float64) (RHog, GHog, BHog, AHog []int) {
 	size := img.Bounds().Size()
 	ln := hog(256, k, l)
@@ -190,8 +187,8 @@ func HogRGBA(img image.Image, k, l float64) (RHog, GHog, BHog, AHog []int) {
 	return
 }
 
-// HogRGBA64
-// 计算透明直方图
+// HogRGBA64 builds 16-bit histograms for R, G, B, and A channels.
+// HogRGBA64 对 R、G、B、A 通道分别构建 16 位直方图。
 func HogRGBA64(img image.Image, k, l float64) (RHog, GHog, BHog, AHog []int) {
 	size := img.Bounds().Size()
 	ln := hog(65536, k, l)
@@ -218,8 +215,8 @@ func HogRGBA64(img image.Image, k, l float64) (RHog, GHog, BHog, AHog []int) {
 	return
 }
 
-// HogRGB
-// 计算透明直方图
+// HogRGB builds 8-bit histograms for R, G, and B channels.
+// HogRGB 对 R、G、B 通道分别构建 8 位直方图。
 func HogRGB(img image.Image, k, l float64) (RHog, GHog, BHog []int) {
 	size := img.Bounds().Size()
 	ln := hog(256, k, l)
@@ -243,8 +240,8 @@ func HogRGB(img image.Image, k, l float64) (RHog, GHog, BHog []int) {
 	return
 }
 
-// HogRGB64
-// 计算透明直方图
+// HogRGB64 builds 16-bit histograms for R, G, and B channels.
+// HogRGB64 对 R、G、B 通道分别构建 16 位直方图。
 func HogRGB64(img image.Image, k, l float64) (RHog, GHog, BHog []int) {
 	size := img.Bounds().Size()
 	ln := hog(65536, k, l)

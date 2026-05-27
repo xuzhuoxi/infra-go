@@ -12,8 +12,10 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// FastBlur_Java
-// FastBlur.java
+// FastBlur_Java applies the Java port of the stack blur algorithm.
+// FastBlur_Java 应用 Java 版堆栈模糊算法（FastBlur.java）。
+// radius: blur radius, must be >= 1.
+// radius：模糊半径，须 >= 1。
 func FastBlur_Java(srcImg image.Image, dstImg draw.Image, radius int) error {
 	// Stack Blur v1.0 from
 	// http://www.quasimondo.com/StackBlurForCanvas/StackBlurDemo.html
@@ -227,6 +229,10 @@ func FastBlur_Java(srcImg image.Image, dstImg draw.Image, radius int) error {
 	return nil
 }
 
+// FastBlur applies stack blur to an image.
+// FastBlur 对图像应用堆栈模糊。
+// radius: blur radius, must be >= 1.
+// radius：模糊半径，须 >= 1。
 func FastBlur(srcImg image.Image, dstImg draw.Image, radius int) error {
 	if nil == srcImg || nil == dstImg {
 		return errors.New("SrcImg or dstImg is nil! ")
@@ -331,10 +337,12 @@ func FastBlur(srcImg image.Image, dstImg draw.Image, radius int) error {
 	return nil
 }
 
-// FastBlurARGB8888
-// 堆模糊(快速模糊)
-// https://www.cnblogs.com/Darksun/p/4681476.html
-// FastBlurDemo.zip
+// FastBlurARGB8888 applies stack blur for ARGB8888 pixel format.
+// FastBlurARGB8888 对 ARGB8888 像素格式应用堆栈模糊（快速模糊）。
+// See https://www.cnblogs.com/Darksun/p/4681476.html and FastBlurDemo.zip.
+// 参考 https://www.cnblogs.com/Darksun/p/4681476.html 与 FastBlurDemo.zip。
+// radius: blur radius, must be >= 1.
+// radius：模糊半径，须 >= 1。
 func FastBlurARGB8888(srcImg image.Image, dstImg draw.Image, radius int) error {
 	if nil == srcImg || nil == dstImg {
 		return errors.New("SrcImg or dstImg is nil! ")

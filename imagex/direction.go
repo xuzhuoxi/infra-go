@@ -2,17 +2,24 @@ package imagex
 
 import "errors"
 
+// PixelDirection is a bitmask of eight neighbor directions for morphological and convolution ops.
+// PixelDirection 表示八邻域方向的位掩码，用于形态学与卷积运算。
 type PixelDirection int
 
-// IncludeDirection 包含方向
+// IncludeDirection reports whether d includes the given single direction bit.
+// IncludeDirection 判断 d 是否包含指定单一方向位。
 func (d PixelDirection) IncludeDirection(direction PixelDirection) bool {
 	return d&direction > 0
 }
 
+// String returns the direction name for godoc and debugging.
+// String 返回方向名称，供 godoc 与调试使用。
 func (d PixelDirection) String() string {
 	return d.Name()
 }
 
+// Name returns "None", a single direction name, or "Multi".
+// Name 返回 "None"、单一方向名或 "Multi"。
 func (d PixelDirection) Name() string {
 	if d == 0 {
 		return "None"
@@ -23,12 +30,14 @@ func (d PixelDirection) Name() string {
 	return "Multi"
 }
 
-// IsNone 无方向
+// IsNone reports whether d has no direction bits set.
+// IsNone 判断是否为无方向。
 func (d PixelDirection) IsNone() bool {
 	return 0 == d
 }
 
-// IsMulti 多方向
+// IsMulti reports whether d combines more than one direction bit.
+// IsMulti 判断是否为多方向组合。
 func (d PixelDirection) IsMulti() bool {
 	if d.IsNone() {
 		return false
@@ -39,7 +48,8 @@ func (d PixelDirection) IsMulti() bool {
 	return false
 }
 
-// IsSingle 单方向
+// IsSingle reports whether d is exactly one direction bit.
+// IsSingle 判断是否为单一方向。
 func (d PixelDirection) IsSingle() bool {
 	if d.IsNone() {
 		return false
@@ -47,7 +57,8 @@ func (d PixelDirection) IsSingle() bool {
 	return len(DecomposeDirection(d)) == 1
 }
 
-// ReverseDirection 取反方向
+// ReverseDirection returns the opposite direction bits in d.
+// ReverseDirection 返回 d 中各方向的反向组合。
 func (d PixelDirection) ReverseDirection() PixelDirection {
 	var rs PixelDirection
 	halfLn := len(dirs) / 2
@@ -66,40 +77,45 @@ func (d PixelDirection) ReverseDirection() PixelDirection {
 	return rs
 }
 
-// PixelDirectionAdd 方向偏移量
+// PixelDirectionAdd holds integer (X, Y) offsets for a single direction step.
+// PixelDirectionAdd 表示单一方向的整数 (X, Y) 偏移量。
 type PixelDirectionAdd struct{ X, Y int }
 
 const (
-	Left PixelDirection = 1 << iota
-	LeftUp
-	Up
-	RightUp
-	Right
-	RightDown
-	Down
-	LeftDown
+	Left PixelDirection = 1 << iota // Left neighbor direction. // 左邻方向。
+	LeftUp                          // Upper-left neighbor direction. // 左上邻方向。
+	Up                              // Up neighbor direction. // 上邻方向。
+	RightUp                         // Upper-right neighbor direction. // 右上邻方向。
+	Right                           // Right neighbor direction. // 右邻方向。
+	RightDown                       // Lower-right neighbor direction. // 右下邻方向。
+	Down                            // Down neighbor direction. // 下邻方向。
+	LeftDown                        // Lower-left neighbor direction. // 左下邻方向。
 )
 
 const (
-	// Horizontal 水平方向，包含Left,Right
+	// Horizontal is Left | Right.
+	// Horizontal 水平方向，包含 Left、Right。
 	Horizontal = Left | Right
-	// Vertical 垂直方向，包含Up,down
+	// Vertical is Up | Down.
+	// Vertical 垂直方向，包含 Up、Down。
 	Vertical = Up | Down
-	// Oblique 斜方向，包含LeftDown,LeftUp,RightDown,RightUp
+	// Oblique is the four diagonal directions.
+	// Oblique 斜方向，包含 LeftDown、LeftUp、RightDown、RightUp。
 	Oblique = LeftDown | LeftUp | RightDown | RightUp
-	// AllDirection 全部八个方向
+	// AllDirection is all eight neighbor directions.
+	// AllDirection 全部八个方向。
 	AllDirection = Horizontal | Vertical | Oblique
 )
 
 var (
-	LeftDirAdd      = PixelDirectionAdd{-1, 0}
-	LeftUpDirAdd    = PixelDirectionAdd{-1, -1}
-	UpDirAdd        = PixelDirectionAdd{0, -1}
-	RightUpDirAdd   = PixelDirectionAdd{1, -1}
-	RightDirAdd     = PixelDirectionAdd{1, 0}
-	RightDownDirAdd = PixelDirectionAdd{1, 1}
-	DownDirAdd      = PixelDirectionAdd{0, 1}
-	LeftDownDirAdd  = PixelDirectionAdd{-1, 1}
+	LeftDirAdd      = PixelDirectionAdd{-1, 0}  // Offset for Left. // Left 方向偏移。
+	LeftUpDirAdd    = PixelDirectionAdd{-1, -1} // Offset for LeftUp. // LeftUp 方向偏移。
+	UpDirAdd        = PixelDirectionAdd{0, -1}  // Offset for Up. // Up 方向偏移。
+	RightUpDirAdd   = PixelDirectionAdd{1, -1}  // Offset for RightUp. // RightUp 方向偏移。
+	RightDirAdd     = PixelDirectionAdd{1, 0}   // Offset for Right. // Right 方向偏移。
+	RightDownDirAdd = PixelDirectionAdd{1, 1}   // Offset for RightDown. // RightDown 方向偏移。
+	DownDirAdd      = PixelDirectionAdd{0, 1}   // Offset for Down. // Down 方向偏移。
+	LeftDownDirAdd  = PixelDirectionAdd{-1, 1}  // Offset for LeftDown. // LeftDown 方向偏移。
 )
 
 var (
@@ -130,8 +146,8 @@ func init() {
 	dirNameMap[LeftDown] = "LeftDown"
 }
 
-// GetPixelDirectionAdd
-// 取方向坐标增加值
+// GetPixelDirectionAdd returns the offset for a single direction bit.
+// GetPixelDirectionAdd 返回单一方向位对应的坐标偏移量。
 func GetPixelDirectionAdd(direction PixelDirection) (PixelDirectionAdd, error) {
 	rs, ok := dirMap[direction]
 	if ok {
@@ -141,8 +157,8 @@ func GetPixelDirectionAdd(direction PixelDirection) (PixelDirectionAdd, error) {
 	}
 }
 
-// GetPixelDirectionAdds
-// 取多方向坐标增加值
+// GetPixelDirectionAdds returns offsets for all bits set in directions.
+// GetPixelDirectionAdds 返回 directions 中各方向位对应的坐标偏移量列表。
 func GetPixelDirectionAdds(directions PixelDirection) []PixelDirectionAdd {
 	if directions <= 0 {
 		return nil
@@ -156,8 +172,8 @@ func GetPixelDirectionAdds(directions PixelDirection) []PixelDirectionAdd {
 	return rs
 }
 
-// DecomposeDirection
-// 分解方向
+// DecomposeDirection splits directions into individual direction bits.
+// DecomposeDirection 将 directions 分解为单一方向位列表。
 func DecomposeDirection(directions PixelDirection) []PixelDirection {
 	if directions <= 0 {
 		return nil

@@ -8,8 +8,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// CVTGrayImageWithKittle
-// Kittle二值化算法(灰度拉伸)
+// CVTGrayImageWithKittle binarizes an image using Kittler's method (gray stretch).
+// CVTGrayImageWithKittle 使用 Kittler 算法（灰度拉伸）对图像进行二值化。
 func CVTGrayImageWithKittle(srcImg image.Image, dstImg draw.Image) error {
 	threshold := GetKittleThresholdAtGreen(srcImg)
 	return CVTGray(srcImg, dstImg, uint32(threshold))
@@ -17,10 +17,10 @@ func CVTGrayImageWithKittle(srcImg image.Image, dstImg draw.Image) error {
 
 //---------------------------------------------
 
-// GetKittleThresholdAtGreen
-// 计算Kittler算法的阈值
-// 64位图像阈值
-// threshold [0， 65535]
+// GetKittleThresholdAtGreen computes the Kittler threshold from the green channel.
+// GetKittleThresholdAtGreen 计算 Kittler 算法的阈值。
+// Returns a 16-bit image-level threshold in [0, 65535].
+// 结果返回 64 位图像级阈值 [0，65535]。
 func GetKittleThresholdAtGreen(grayImg image.Image) (threshold uint32) {
 	min := grayImg.Bounds().Min
 	max := grayImg.Bounds().Max

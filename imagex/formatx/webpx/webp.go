@@ -1,6 +1,3 @@
-// Package webpx
-// Create on 2023/5/3
-// @author xuzhuoxi
 package webpx
 
 import (
@@ -16,10 +13,14 @@ func init() {
 	formatx.RegisterFormatExt(string(formatx.WEBP), "webp")
 }
 
+// EncodeWEBP encodes m as WebP to w (not implemented).
+// EncodeWEBP 将 m 以 WebP 格式编码写入 w（尚未实现）。
 func EncodeWEBP(w io.Writer, m image.Image, options interface{}) error {
 	return errors.New("EncodeWEBP is not implemented")
 }
 
+// DecodeWEBP decodes a WebP image from r (not implemented).
+// DecodeWEBP 从 r 解码 WebP 图像（尚未实现）。
 func DecodeWEBP(r io.Reader) (image.Image, error) {
 	return nil, errors.New("DecodeWEBP is not implemented")
 }

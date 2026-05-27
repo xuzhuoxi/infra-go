@@ -12,8 +12,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
-// SprintImage
-// 图像字符串化
+// SprintImage formats an image as a string of pixel color values, one row per line.
+// SprintImage 将图像格式化为像素颜色值字符串，每行对应一行像素。
 func SprintImage(img image.Image) string {
 	bs := bytes.NewBufferString("")
 	rect := img.Bounds()
@@ -26,23 +26,24 @@ func SprintImage(img image.Image) string {
 	return bs.String()
 }
 
-// NewGray 新建灰度图像
+// NewGray creates a Gray image filled with grayY over rect.
+// NewGray 创建指定矩形区域、以 grayY 填充的 Gray 图像。
 func NewGray(rect image.Rectangle, grayY uint8) *image.Gray {
 	rs := image.NewGray(rect)
 	FillImage(rs, &color.Gray{Y: grayY})
 	return rs
 }
 
-// NewGray16
-// 新建灰度图像
+// NewGray16 creates a Gray16 image filled with grayY over rect.
+// NewGray16 创建指定矩形区域、以 grayY 填充的 Gray16 图像。
 func NewGray16(rect image.Rectangle, grayY uint16) *image.Gray16 {
 	rs := image.NewGray16(rect)
 	FillImage(rs, &color.Gray16{Y: grayY})
 	return rs
 }
 
-// NewRGBA
-// 新建RGBA图像
+// NewRGBA creates an RGBA image over rect, optionally filled with defaultColor.
+// NewRGBA 创建指定矩形区域的 RGBA 图像，可选 defaultColor 填充。
 func NewRGBA(rect image.Rectangle, defaultColor color.Color) *image.RGBA {
 	rs := image.NewRGBA(rect)
 	if nil != defaultColor {
@@ -51,8 +52,8 @@ func NewRGBA(rect image.Rectangle, defaultColor color.Color) *image.RGBA {
 	return rs
 }
 
-// NewNRGBA
-// 新建NRGBA图像
+// NewNRGBA creates an NRGBA image over rect, optionally filled with defaultColor.
+// NewNRGBA 创建指定矩形区域的 NRGBA 图像，可选 defaultColor 填充。
 func NewNRGBA(rect image.Rectangle, defaultColor color.Color) *image.NRGBA {
 	rs := image.NewNRGBA(rect)
 	if nil != defaultColor {
@@ -61,8 +62,8 @@ func NewNRGBA(rect image.Rectangle, defaultColor color.Color) *image.NRGBA {
 	return rs
 }
 
-// NewRGBA64
-// 新建RGBA64图像
+// NewRGBA64 creates an RGBA64 image over rect, optionally filled with cdefaultColor.
+// NewRGBA64 创建指定矩形区域的 RGBA64 图像，可选 cdefaultColor 填充。
 func NewRGBA64(rect image.Rectangle, cdefaultColor color.Color) *image.RGBA64 {
 	rs := image.NewRGBA64(rect)
 	if nil != cdefaultColor {
@@ -71,8 +72,8 @@ func NewRGBA64(rect image.Rectangle, cdefaultColor color.Color) *image.RGBA64 {
 	return rs
 }
 
-// NewNRGBA64
-// 新建RGBA64图像
+// NewNRGBA64 creates an NRGBA64 image over rect, optionally filled with defaultColor.
+// NewNRGBA64 创建指定矩形区域的 NRGBA64 图像，可选 defaultColor 填充。
 func NewNRGBA64(rect image.Rectangle, defaultColor color.Color) *image.NRGBA64 {
 	rs := image.NewNRGBA64(rect)
 	if nil != defaultColor {
@@ -81,8 +82,8 @@ func NewNRGBA64(rect image.Rectangle, defaultColor color.Color) *image.NRGBA64 {
 	return rs
 }
 
-// FillImage
-// 使用颜色填充图像
+// FillImage fills every pixel of img with color.
+// FillImage 使用 color 填充 img 的全部像素。
 func FillImage(img draw.Image, color color.Color) {
 	rect := img.Bounds()
 	setColor := img.ColorModel().Convert(color)
@@ -93,8 +94,8 @@ func FillImage(img draw.Image, color color.Color) {
 	}
 }
 
-// FillImageAt
-// 使用颜色填充图像部分区域
+// FillImageAt fills the intersection of img and rect with color.
+// FillImageAt 使用 color 填充 img 与 rect 交集区域。
 func FillImageAt(img draw.Image, color color.Color, rect image.Rectangle) {
 	rect2 := img.Bounds()
 	minX := mathx.MaxInt(rect.Min.X, rect2.Min.X)
@@ -108,9 +109,10 @@ func FillImageAt(img draw.Image, color color.Color, rect image.Rectangle) {
 	}
 }
 
-// BlendSourceNormal
-// 增加背景色
-// 背景色的透明通道会被忽略
+// BlendSourceNormal composites a solid background color onto destination pixels using normal blend.
+// BlendSourceNormal 使用正常混合模式将纯色背景合成到目标图像像素上。
+// Background alpha is ignored.
+// 背景色的透明通道会被忽略。
 // R = S*(1-Da) + D*Da [0,1]
 func BlendSourceNormal(destinationImg draw.Image, sourceColor color.Color) {
 	rect := destinationImg.Bounds()
@@ -135,6 +137,8 @@ func BlendSourceNormal(destinationImg draw.Image, sourceColor color.Color) {
 	}
 }
 
+// ForEachLoc invokes eachFunc for every pixel coordinate in img.
+// ForEachLoc 遍历 img 的每个像素坐标并调用 eachFunc。
 func ForEachLoc(img image.Image, eachFunc func(x, y int)) {
 	min, max := img.Bounds().Min, img.Bounds().Max
 	for y := min.Y; y < max.Y; y++ {

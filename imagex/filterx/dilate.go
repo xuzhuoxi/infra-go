@@ -1,5 +1,3 @@
-// Package filterx
-// 膨胀
 package filterx
 
 import (
@@ -11,19 +9,24 @@ import (
 	"github.com/xuzhuoxi/infra-go/imagex"
 )
 
-// DilateCVT
-// 膨胀二值图
-// 只要不是纯白，都会发生膨胀
-// directions为允许膨胀的方向
+// DilateCVT dilates a binarized image.
+// DilateCVT 膨胀二值图。
+// Any pixel that is not pure white will dilate.
+// 只要不是纯白，都会发生膨胀。
+// directions: allowed dilation directions.
+// directions：允许膨胀的方向。
 func DilateCVT(cvtSrcImg image.Image, cvtDstImg draw.Image, directions imagex.PixelDirection) error {
 	return DilateGray(cvtSrcImg, cvtDstImg, directions, 254)
 }
 
-// DilateGray
-// 膨胀灰度图像(用于普通灰度图意义不太，二值图的效果不错)
-// 阈值threshold, 只有<=threshold的像素点才会向外发生膨胀
-// 阈值threshold范围[0,65535]
-// directions为允许膨胀的方向
+// DilateGray dilates a grayscale image.
+// DilateGray 膨胀灰度图像（用于普通灰度图意义不大，二值图效果较好）。
+// threshold: only pixels <= threshold will dilate outward.
+// threshold：只有 <= threshold 的像素点才会向外发生膨胀。
+// threshold range: [0, 65535].
+// threshold 范围 [0,65535]。
+// directions: allowed dilation directions.
+// directions：允许膨胀的方向。
 func DilateGray(graySrcImg image.Image, grayDstImg draw.Image, directions imagex.PixelDirection, threshold uint32) error {
 	if nil == graySrcImg || nil == grayDstImg {
 		return errors.New("SrcImg or grayDstImg is nil. ")

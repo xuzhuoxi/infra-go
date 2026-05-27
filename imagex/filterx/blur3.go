@@ -10,6 +10,10 @@ import (
 	"github.com/xuzhuoxi/infra-go/mathx"
 )
 
+// FastBlur3 applies stack blur (variant 3, separated RGB channels).
+// FastBlur3 应用堆栈模糊（变体 3，分离 RGB 通道）。
+// radius: blur radius, must be >= 1.
+// radius：模糊半径，须 >= 1。
 func FastBlur3(srcImg image.Image, dstImg draw.Image, radius int) error {
 	if nil == srcImg {
 		return errors.New("SrcImg is nil! ")
