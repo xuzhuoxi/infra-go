@@ -1,6 +1,3 @@
-// Package wsx
-// Create on 2023/8/5
-// @author xuzhuoxi
 package wsx
 
 import (
@@ -12,16 +9,22 @@ import (
 
 var errProxyNil = errors.New("WsConn.SRProxy is ni")
 
+// WsSockConn is a WebSocket IServerConn implementation.
+// WsSockConn 是 WebSocket 的 IServerConn 实现。
 type WsSockConn struct {
 	WsConnInfo netx.IConnInfo
 	SRProxy    netx.IPackSendReceiver
 	Conn       *websocket.Conn
 }
 
+// ClientAddress returns the remote client address.
+// ClientAddress 返回客户端连接地址。
 func (o *WsSockConn) ClientAddress() string {
 	return o.WsConnInfo.GetRemoteAddress()
 }
 
+// SendBytes sends raw bytes on the WebSocket connection.
+// SendBytes 在 WebSocket 连接上发送二进制数据。
 func (o *WsSockConn) SendBytes(bytes []byte) error {
 	if nil == o.SRProxy {
 		return errProxyNil
@@ -30,6 +33,8 @@ func (o *WsSockConn) SendBytes(bytes []byte) error {
 	return err
 }
 
+// SendPack sends a framed pack on the WebSocket connection.
+// SendPack 在 WebSocket 连接上发送二进制消息包。
 func (o *WsSockConn) SendPack(data []byte) error {
 	if nil == o.SRProxy {
 		return errProxyNil
@@ -38,6 +43,8 @@ func (o *WsSockConn) SendPack(data []byte) error {
 	return err
 }
 
+// CloseConn stops receiving and closes the WebSocket connection.
+// CloseConn 停止接收并关闭 WebSocket 连接。
 func (o *WsSockConn) CloseConn() error {
 	var err1 error
 	var err2 error

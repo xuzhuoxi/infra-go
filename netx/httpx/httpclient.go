@@ -8,9 +8,13 @@ import (
 	"time"
 )
 
+// ReqCallBack is invoked with the HTTP response and response body bytes.
+// ReqCallBack 在收到 HTTP 响应时被调用，并传入响应体字节。
 type ReqCallBack func(res *http.Response, body *[]byte)
 
 const (
+	// DefaultTimeout default request timeout (20 seconds)
+	// DefaultTimeout 默认20秒超时
 	DefaultTimeout = 20 * time.Second // 默认20秒超时
 )
 
@@ -18,16 +22,20 @@ var (
 	DefaultClient = NewHttpClient()
 )
 
+// NewHttpClient creates an HttpClient with the default timeout.
+// NewHttpClient 创建使用默认超时的 HttpClient。
 func NewHttpClient() *HttpClient {
 	return &HttpClient{Client: &http.Client{Timeout: DefaultTimeout}}
 }
 
+// HttpClient wraps http.Client with convenience request methods.
+// HttpClient 封装 http.Client 并提供便捷的请求方法。
 type HttpClient struct {
 	Client *http.Client
 }
 
-// SetTimeout
-// 设置超时时间
+// SetTimeout sets the request timeout.
+// SetTimeout 设置超时时间。
 func (o *HttpClient) SetTimeout(timeout time.Duration) {
 	if nil == o.Client {
 		return
@@ -35,8 +43,8 @@ func (o *HttpClient) SetTimeout(timeout time.Duration) {
 	o.Client.Timeout = timeout
 }
 
-// HttpGet
-// 发送Get请求
+// HttpGet sends a GET request and invokes cb with the response.
+// HttpGet 发送 Get 请求。
 func (o *HttpClient) HttpGet(url string, cb ReqCallBack) error {
 	resp, err := o.Client.Get(url)
 	if err != nil {
@@ -47,8 +55,8 @@ func (o *HttpClient) HttpGet(url string, cb ReqCallBack) error {
 	return handleResponse(resp, cb)
 }
 
-// HttpPost
-// 发送Post请求
+// HttpPost sends a POST request with the given content type and body.
+// HttpPost 发送 Post 请求。
 func (o *HttpClient) HttpPost(url, contentType string, body io.Reader, cb ReqCallBack) error {
 	resp, err := o.Client.Post(url, contentType, body)
 	if err != nil {
@@ -59,8 +67,8 @@ func (o *HttpClient) HttpPost(url, contentType string, body io.Reader, cb ReqCal
 	return handleResponse(resp, cb)
 }
 
-// HttpPostForm
-// 发送Post请求
+// HttpPostForm sends a POST request with form-encoded data.
+// HttpPostForm 发送 Post 表单请求。
 func (o *HttpClient) HttpPostForm(url string, data url.Values, cb ReqCallBack) error {
 	resp, err := o.Client.PostForm(url, data)
 	if err != nil {
@@ -75,45 +83,38 @@ func (o *HttpClient) HttpPostForm(url string, data url.Values, cb ReqCallBack) e
 	return nil
 }
 
-// HttpPostString
-// 发送Post请求
-// 内容为字符串
+// HttpPostString sends a POST request with a string body.
+// HttpPostString 发送内容为字符串的 Post 请求。
 func (o *HttpClient) HttpPostString(url, body string, cb ReqCallBack) error {
 	return o.HttpPost(url, "application/x-www-form-urlencoded", strings.NewReader(body), cb)
 }
 
-// SetTimeout
-// 设置超时时间
-// 使用默认的HttpClient
+// SetTimeout sets the timeout on the default HttpClient.
+// SetTimeout 设置默认 HttpClient 的超时时间。
 func SetTimeout(timeout time.Duration) {
 	DefaultClient.SetTimeout(timeout)
 }
 
-// HttpGet
-// 发送Get请求
-// 使用默认的HttpClient
+// HttpGet sends a GET request using the default HttpClient.
+// HttpGet 使用默认 HttpClient 发送 Get 请求。
 func HttpGet(url string, cb ReqCallBack) error {
 	return DefaultClient.HttpGet(url, cb)
 }
 
-// HttpPost
-// 发送Post请求
-// 使用默认的HttpClient
+// HttpPost sends a POST request using the default HttpClient.
+// HttpPost 使用默认 HttpClient 发送 Post 请求。
 func HttpPost(url, contentType string, body io.Reader, cb ReqCallBack) error {
 	return DefaultClient.HttpPost(url, contentType, body, cb)
 }
 
-// HttpPostString
-// 发送Post请求
-// 内容为字符串
-// 使用默认的HttpClient
+// HttpPostString sends a POST request with a string body using the default HttpClient.
+// HttpPostString 使用默认 HttpClient 发送内容为字符串的 Post 请求。
 func HttpPostString(url, body string, cb ReqCallBack) error {
 	return DefaultClient.HttpPostString(url, body, cb)
 }
 
-// HttpPostForm
-// 发送Post请求
-// 使用默认的HttpClient
+// HttpPostForm sends a POST form request using the default HttpClient.
+// HttpPostForm 使用默认 HttpClient 发送 Post 表单请求。
 func HttpPostForm(url string, data url.Values, cb ReqCallBack) error {
 	return DefaultClient.HttpPostForm(url, data, cb)
 }

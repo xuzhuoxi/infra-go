@@ -9,14 +9,20 @@ import (
 	"github.com/xuzhuoxi/infra-go/netx"
 )
 
+// NewTCPClient creates a TCP client.
+// NewTCPClient 创建 TCP 客户端。
 func NewTCPClient() ITCPClient {
 	return newTCPClient().(ITCPClient)
 }
 
+// NewTCP4Client creates an IPv4 TCP client.
+// NewTCP4Client 创建 IPv4 TCP 客户端。
 func NewTCP4Client() ITCPClient {
 	return newTCP4Client().(ITCPClient)
 }
 
+// NewTCP6Client creates an IPv6 TCP client.
+// NewTCP6Client 创建 IPv6 TCP 客户端。
 func NewTCP6Client() ITCPClient {
 	return newTCP6Client().(ITCPClient)
 }
@@ -44,14 +50,20 @@ func newTcpC(name string, network netx.SockNetwork) netx.ISockClient {
 
 //----------------------------
 
+// ITCPClient is a TCP-specific ISockClient.
+// ITCPClient 是 TCP 专用的 ISockClient。
 type ITCPClient interface {
 	netx.ISockClient
 }
 
+// TCPClient implements ITCPClient over TCP connections.
+// TCPClient 是基于 TCP 连接的 ITCPClient 实现。
 type TCPClient struct {
 	netx.SockClientBase
 }
 
+// OpenClient dials the remote TCP endpoint and starts pack I/O.
+// OpenClient 拨号连接远程 TCP 端点并启动封包读写。
 func (c *TCPClient) OpenClient(params netx.SockParams) error {
 	funcName := fmt.Sprintf("[TCPClient(%s).OpenClient]", c.Name)
 	c.ClientMu.Lock()
@@ -72,6 +84,8 @@ func (c *TCPClient) OpenClient(params netx.SockParams) error {
 	return nil
 }
 
+// CloseClient closes the TCP connection.
+// CloseClient 关闭 TCP 连接。
 func (c *TCPClient) CloseClient() error {
 	funcName := fmt.Sprintf("[TCPClient(%s).CloseClient]", c.Name)
 	c.ClientMu.Lock()

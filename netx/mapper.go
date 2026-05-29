@@ -1,6 +1,3 @@
-// Package netx
-// Create on 2025/2/15
-// @author xuzhuoxi
 package netx
 
 import (
@@ -9,53 +6,65 @@ import (
 	"github.com/xuzhuoxi/infra-go/eventx"
 )
 
-// IUserConnMapper
-// 用户Id与连接id的双向映射
+// IUserConnMapper maintains bidirectional mapping between user id and connection id.
+// IUserConnMapper 维护用户 ID 与连接 ID 的双向映射。
 type IUserConnMapper interface {
 	eventx.IEventDispatcher
-	// GetUserId
-	// 通过 用户id 找 连接id
+	// GetUserId returns the user id for the given connection id.
+	// GetUserId 通过连接 id 查找用户 id。
 	GetUserId(connId string) (userId string, ok bool)
-	// GetConnId
-	// 通过 连接id 找 用户id
+	// GetConnId returns the connection id for the given user id.
+	// GetConnId 通过用户 id 查找连接 id。
 	GetConnId(userId string) (connId string, ok bool)
-	// MapInto
-	// 把用户id和连接Id加入映射表
+	// MapInto adds or updates a user id and connection id pair.
+	// MapInto 把用户 id 和连接 id 加入映射表。
 	MapInto(userId string, connId string)
-	// RemoveByUserId
-	// 移除用户id相关映射
+	// RemoveByUserId removes mapping by user id.
+	// RemoveByUserId 移除用户 id 相关映射。
 	RemoveByUserId(userId string) (suc bool, connId string)
-	// RemoveByConnId
-	// 移除连接id相关映射
+	// RemoveByConnId removes mapping by connection id.
+	// RemoveByConnId 移除连接 id 相关映射。
 	RemoveByConnId(connId string) (suc bool, userId string)
-	// Size
-	// 获取映射表大小
+	// Size returns the number of mappings.
+	// Size 获取映射表大小。
 	Size() int
-	// Reset
-	// 重置
+	// Reset clears all mappings.
+	// Reset 重置映射表。
 	Reset()
 }
 
+// IUserConnMapperSetter injects an IUserConnMapper.
+// IUserConnMapperSetter 注入 IUserConnMapper。
 type IUserConnMapperSetter interface {
 	SetUserConnMapper(mapper IUserConnMapper)
 }
 
+// IUserConnMapperGetter returns the bound IUserConnMapper.
+// IUserConnMapperGetter 返回已绑定的 IUserConnMapper。
 type IUserConnMapperGetter interface {
 	GetUserConnMapper() IUserConnMapper
 }
 
+// NewIUserConnMapper creates a default IUserConnMapper.
+// NewIUserConnMapper 创建默认的 IUserConnMapper。
 func NewIUserConnMapper() IUserConnMapper {
 	return NewUserConnMapper()
 }
 
+// NewUserConnMapper creates a UserConnMapper named "default".
+// NewUserConnMapper 创建名为 "default" 的 UserConnMapper。
 func NewUserConnMapper() *UserConnMapper {
 	return NewUserConnMapperWithName("default")
 }
 
+// NewIUserConnMapperWithName creates an IUserConnMapper with the given name.
+// NewIUserConnMapperWithName 创建指定名称的 IUserConnMapper。
 func NewIUserConnMapperWithName(name string) IUserConnMapper {
 	return NewUserConnMapperWithName(name)
 }
 
+// NewUserConnMapperWithName creates a UserConnMapper with the given name.
+// NewUserConnMapperWithName 创建指定名称的 UserConnMapper。
 func NewUserConnMapperWithName(name string) *UserConnMapper {
 	return &UserConnMapper{
 		name:      name,
@@ -63,6 +72,8 @@ func NewUserConnMapperWithName(name string) *UserConnMapper {
 		conn2user: make(map[string]string)}
 }
 
+// UserConnMapper is the default IUserConnMapper implementation.
+// UserConnMapper 是 IUserConnMapper 的默认实现。
 type UserConnMapper struct {
 	eventx.EventDispatcher
 	name      string
@@ -71,6 +82,8 @@ type UserConnMapper struct {
 	lock      sync.RWMutex
 }
 
+// GetUserId returns the user id for the given connection id.
+// GetUserId 通过连接 id 查找用户 id。
 func (o *UserConnMapper) GetUserId(connId string) (userId string, ok bool) {
 	o.lock.RLock()
 	defer o.lock.RUnlock()
@@ -78,6 +91,8 @@ func (o *UserConnMapper) GetUserId(connId string) (userId string, ok bool) {
 	return
 }
 
+// GetConnId returns the connection id for the given user id.
+// GetConnId 通过用户 id 查找连接 id。
 func (o *UserConnMapper) GetConnId(userId string) (connId string, ok bool) {
 	o.lock.RLock()
 	defer o.lock.RUnlock()
@@ -85,6 +100,8 @@ func (o *UserConnMapper) GetConnId(userId string) (connId string, ok bool) {
 	return
 }
 
+// MapInto adds or updates a user id and connection id pair.
+// MapInto 把用户 id 和连接 id 加入映射表。
 func (o *UserConnMapper) MapInto(userId string, connId string) {
 	o.lock.Lock()
 	if o.checkMapping(userId, connId) {
@@ -98,6 +115,8 @@ func (o *UserConnMapper) MapInto(userId string, connId string) {
 	o.DispatchEvent(EventUserConnMappingAdded, o, UserConnMapperEventInfo{UserID: userId, ConnId: connId})
 }
 
+// RemoveByUserId removes mapping by user id.
+// RemoveByUserId 移除用户 id 相关映射。
 func (o *UserConnMapper) RemoveByUserId(userId string) (suc bool, connId string) {
 	o.lock.Lock()
 	connId, suc = o.removeUserId(userId)
@@ -108,6 +127,8 @@ func (o *UserConnMapper) RemoveByUserId(userId string) (suc bool, connId string)
 	return
 }
 
+// RemoveByConnId removes mapping by connection id.
+// RemoveByConnId 移除连接 id 相关映射。
 func (o *UserConnMapper) RemoveByConnId(connId string) (suc bool, userId string) {
 	o.lock.Lock()
 	userId, suc = o.removeConnId(connId)
@@ -118,12 +139,16 @@ func (o *UserConnMapper) RemoveByConnId(connId string) (suc bool, userId string)
 	return
 }
 
+// Size returns the number of mappings.
+// Size 获取映射表大小。
 func (o *UserConnMapper) Size() int {
 	o.lock.RLock()
 	defer o.lock.RUnlock()
 	return len(o.conn2user)
 }
 
+// Reset clears all mappings.
+// Reset 重置映射表。
 func (o *UserConnMapper) Reset() {
 	o.lock.Lock()
 	defer o.lock.Unlock()
@@ -165,53 +190,65 @@ func (o *UserConnMapper) checkMapping(userId string, connId string) bool {
 
 // ————————————————————————————————————————————————————————————————————————————————————————————
 
-// IUserAddressMapper
-// 用户id 与 通信地址 的双向映射
+// IUserAddressMapper maintains bidirectional mapping between user id and network address.
+// IUserAddressMapper 维护用户 id 与通信地址的双向映射。
 type IUserAddressMapper interface {
 	eventx.IEventDispatcher
-	// GetUserId
-	// 通过过地址找id
+	// GetUserId returns the user id for the given address.
+	// GetUserId 通过地址查找用户 id。
 	GetUserId(address string) (id string, ok bool)
-	// GetAddress
-	// 通过id找地址
+	// GetAddress returns the address for the given user id.
+	// GetAddress 通过用户 id 查找地址。
 	GetAddress(id string) (address string, ok bool)
-	// MapInto
-	// 把id和地址加入映射表
+	// MapInto adds or updates a user id and address pair.
+	// MapInto 把 id 和地址加入映射表。
 	MapInto(id string, address string)
-	// RemoveByUserId
-	// 移除id相关映射
+	// RemoveByUserId removes mapping by user id.
+	// RemoveByUserId 移除 id 相关映射。
 	RemoveByUserId(id string)
-	// RemoveByAddress
-	// 移除地址相关映射
+	// RemoveByAddress removes mapping by address.
+	// RemoveByAddress 移除地址相关映射。
 	RemoveByAddress(address string)
-	// Size
-	// 获取映射表大小
+	// Size returns the number of mappings.
+	// Size 获取映射表大小。
 	Size() int
-	// Reset
-	// 重置
+	// Reset clears all mappings.
+	// Reset 重置映射表。
 	Reset()
 }
 
+// IUserAddressMapperSetter injects an IUserAddressMapper.
+// IUserAddressMapperSetter 注入 IUserAddressMapper。
 type IUserAddressMapperSetter interface {
 	SetUserAddressMapper(proxy IUserAddressMapper)
 }
 
+// IUserAddressMapperGetter returns the bound IUserAddressMapper.
+// IUserAddressMapperGetter 返回已绑定的 IUserAddressMapper。
 type IUserAddressMapperGetter interface {
 	GetUserAddressMapper() IUserAddressMapper
 }
 
+// NewIUserAddressMapper creates a default IUserAddressMapper.
+// NewIUserAddressMapper 创建默认的 IUserAddressMapper。
 func NewIUserAddressMapper() IUserAddressMapper {
 	return NewUserAddressMapper()
 }
 
+// NewUserAddressMapper creates a UserAddressMapper named "default".
+// NewUserAddressMapper 创建名为 "default" 的 UserAddressMapper。
 func NewUserAddressMapper() *UserAddressMapper {
 	return NewUserAddressMapperWithName("default")
 }
 
+// NewIUserAddressMapperWithName creates an IUserAddressMapper with the given name.
+// NewIUserAddressMapperWithName 创建指定名称的 IUserAddressMapper。
 func NewIUserAddressMapperWithName(name string) IUserAddressMapper {
-	return NewIUserAddressMapperWithName(name)
+	return NewUserAddressMapperWithName(name)
 }
 
+// NewUserAddressMapperWithName creates a UserAddressMapper with the given name.
+// NewUserAddressMapperWithName 创建指定名称的 UserAddressMapper。
 func NewUserAddressMapperWithName(name string) *UserAddressMapper {
 	return &UserAddressMapper{
 		name:         name,
@@ -219,6 +256,8 @@ func NewUserAddressMapperWithName(name string) *UserAddressMapper {
 		address2user: make(map[string]string)}
 }
 
+// UserAddressMapper is the default IUserAddressMapper implementation.
+// UserAddressMapper 是 IUserAddressMapper 的默认实现。
 type UserAddressMapper struct {
 	eventx.EventDispatcher
 	name         string
@@ -227,6 +266,8 @@ type UserAddressMapper struct {
 	lock         sync.RWMutex
 }
 
+// GetUserId returns the user id for the given address.
+// GetUserId 通过地址查找用户 id。
 func (o *UserAddressMapper) GetUserId(address string) (id string, ok bool) {
 	o.lock.RLock()
 	defer o.lock.RUnlock()
@@ -234,6 +275,8 @@ func (o *UserAddressMapper) GetUserId(address string) (id string, ok bool) {
 	return
 }
 
+// GetAddress returns the address for the given user id.
+// GetAddress 通过用户 id 查找地址。
 func (o *UserAddressMapper) GetAddress(id string) (address string, ok bool) {
 	o.lock.RLock()
 	defer o.lock.RUnlock()
@@ -241,6 +284,8 @@ func (o *UserAddressMapper) GetAddress(id string) (address string, ok bool) {
 	return
 }
 
+// MapInto adds or updates a user id and address pair.
+// MapInto 把 id 和地址加入映射表。
 func (o *UserAddressMapper) MapInto(id string, address string) {
 	//fmt.Println(fmt.Sprintf("UserAddressMapper[%s].MapInto:", p.name), id, address)
 	o.lock.Lock()
@@ -255,6 +300,8 @@ func (o *UserAddressMapper) MapInto(id string, address string) {
 	o.DispatchEvent(EventUserAddressMappingAdded, o, UserAddressMapperEventInfo{UserId: id, Address: address})
 }
 
+// RemoveByUserId removes mapping by user id.
+// RemoveByUserId 移除 id 相关映射。
 func (o *UserAddressMapper) RemoveByUserId(id string) {
 	//fmt.Println(fmt.Sprintf("UserAddressMapper[%s].RemoveByUserId:", o.name), id)
 	o.lock.Lock()
@@ -265,6 +312,8 @@ func (o *UserAddressMapper) RemoveByUserId(id string) {
 	}
 }
 
+// RemoveByAddress removes mapping by address.
+// RemoveByAddress 移除地址相关映射。
 func (o *UserAddressMapper) RemoveByAddress(address string) {
 	//fmt.Println(fmt.Sprintf("UserAddressMapper[%s].RemoveByAddress:", o.name), address)
 	o.lock.Lock()
@@ -275,12 +324,16 @@ func (o *UserAddressMapper) RemoveByAddress(address string) {
 	}
 }
 
+// Size returns the number of mappings.
+// Size 获取映射表大小。
 func (o *UserAddressMapper) Size() int {
 	o.lock.RLock()
 	defer o.lock.RUnlock()
 	return len(o.user2address)
 }
 
+// Reset clears all mappings.
+// Reset 重置映射表。
 func (o *UserAddressMapper) Reset() {
 	o.lock.Lock()
 	defer o.lock.Unlock()

@@ -13,6 +13,8 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+// NewWebSocketServer creates a WebSocket server.
+// NewWebSocketServer 创建 WebSocket 服务端。
 func NewWebSocketServer() IWebSocketServer {
 	return newWebSocketServer().(IWebSocketServer)
 }
@@ -30,11 +32,15 @@ func newWebSocketServer() netx.ISockServer {
 
 //-------------------------
 
+// IWebSocketServer is a WebSocket-specific ISockServer with event dispatch.
+// IWebSocketServer 是支持事件分发的 WebSocket 专用 ISockServer。
 type IWebSocketServer interface {
 	netx.ISockServer
 	eventx.IEventDispatcher
 }
 
+// WebSocketServer implements IWebSocketServer over HTTP WebSocket upgrade.
+// WebSocketServer 基于 HTTP WebSocket 升级实现 IWebSocketServer。
 type WebSocketServer struct {
 	eventx.EventDispatcher
 	netx.SockServerBase
@@ -45,6 +51,8 @@ type WebSocketServer struct {
 	mapConn      map[string]netx.IServerConn // [connId:netx.IServerConn]
 }
 
+// StartServer starts the HTTP server and accepts WebSocket connections.
+// StartServer 启动 HTTP 服务并接受 WebSocket 连接。
 func (s *WebSocketServer) StartServer(params netx.SockParams) error {
 	funcName := fmt.Sprintf("[WebSocketServer(%s).StartServer]", s.Name)
 	s.ServerMu.Lock()
@@ -70,6 +78,8 @@ func (s *WebSocketServer) StartServer(params netx.SockParams) error {
 	return nil
 }
 
+// StopServer stops the HTTP server and closes all WebSocket connections.
+// StopServer 停止 HTTP 服务并关闭所有 WebSocket 连接。
 func (s *WebSocketServer) StopServer() error {
 	funcName := fmt.Sprintf("[WebSocketServer(%s).StopServer]", s.Name)
 	s.ServerMu.Lock()
@@ -95,16 +105,22 @@ func (s *WebSocketServer) StopServer() error {
 	return nil
 }
 
+// SetMaxConn sets the maximum number of concurrent WebSocket connections.
+// SetMaxConn 设置最大 WebSocket 连接数量。
 func (s *WebSocketServer) SetMaxConn(max int) {
 	s.channelLimit.SetMax(max)
 }
 
+// Connections returns the current connection count.
+// Connections 返回当前连接数。
 func (s *WebSocketServer) Connections() int {
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
 	return len(s.mapConn)
 }
 
+// CloseConnection closes the connection identified by connId.
+// CloseConnection 关闭指定连接。
 func (s *WebSocketServer) CloseConnection(connId string) (err error, ok bool) {
 	s.ServerMu.Lock()
 	defer s.ServerMu.Unlock()
@@ -116,6 +132,8 @@ func (s *WebSocketServer) CloseConnection(connId string) (err error, ok bool) {
 	return errors.New("WebSocketServer: No Connection At " + connId), false
 }
 
+// FindConnection looks up a connection by connId.
+// FindConnection 查找连接。
 func (s *WebSocketServer) FindConnection(connId string) (conn netx.IServerConn, ok bool) {
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
@@ -123,11 +141,15 @@ func (s *WebSocketServer) FindConnection(connId string) (conn netx.IServerConn, 
 	return
 }
 
+// SendPackTo sends a framed pack to the given connection ids.
+// SendPackTo 向指定连接发送二进制消息包。
 func (s *WebSocketServer) SendPackTo(pack []byte, connId ...string) error {
 	bytes := WsDataBlockHandler.DataToBlock(pack)
 	return s.SendBytesTo(bytes, connId...)
 }
 
+// SendBytesTo sends raw bytes to the given connection ids.
+// SendBytesTo 向指定连接发送二进制数据。
 func (s *WebSocketServer) SendBytesTo(bytes []byte, connId ...string) error {
 	funcName := s.logFuncNameSend
 	s.ServerMu.RLock()

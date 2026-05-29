@@ -9,58 +9,73 @@ import (
 	"github.com/xuzhuoxi/infra-go/logx"
 )
 
+// ReceiverBuffLen is the default receive buffer size in bytes.
+// ReceiverBuffLen 是默认接收缓冲区大小（字节）。
 var ReceiverBuffLen = 8192
 
 type iPackReceiver interface {
 	IPackHandlerContainerSetter
 	IPackHandlerContainerGetter
-	// StartReceiving
-	// 开始接收数据
-	// 这里一般会阻塞，应该使用协程进行调用
+	// StartReceiving starts receiving data; usually call from a goroutine because it blocks.
+	// StartReceiving 开始接收数据；这里一般会阻塞，应该使用协程进行调用。
 	StartReceiving() error
-	// StopReceiving
-	// 停止接收数据
+	// StopReceiving stops receiving data.
+	// StopReceiving 停止接收数据。
 	StopReceiving() error
-	// IsReceiving
-	// 是否为数据接收中
+	// IsReceiving reports whether receiving is active.
+	// IsReceiving 是否为数据接收中。
 	IsReceiving() bool
 }
 
 type iPackSender interface {
-	// SendBytes
-	// 发送字节数据，不作任何处理
+	// SendBytes sends raw bytes without framing.
+	// SendBytes 发送字节数据，不作任何处理。
 	SendBytes(bytes []byte, connId ...string) (int, error)
-	// SendPack
-	// 发送数据包，把数据进行打包
+	// SendPack sends a framed data pack.
+	// SendPack 发送数据包，把数据进行打包。
 	SendPack(pack []byte, connId ...string) (int, error)
 }
 
+// IPackReceiver receives and unpacks framed messages.
+// IPackReceiver 接收并解包分帧消息。
 type IPackReceiver interface {
 	iPackReceiver
 	logx.ILoggerSupport
 }
 
+// IPackReceiverSetter injects an IPackReceiver implementation.
+// IPackReceiverSetter 注入 IPackReceiver 实现。
 type IPackReceiverSetter interface {
 	SetPackReceiver(receiver IPackReceiver)
 }
 
+// IPackReceiverGetter returns the bound IPackReceiver.
+// IPackReceiverGetter 返回已绑定的 IPackReceiver。
 type IPackReceiverGetter interface {
 	GetPackReceiver() IPackReceiver
 }
 
+// IPackSender sends raw bytes or framed packs.
+// IPackSender 发送原始字节或已封包数据。
 type IPackSender interface {
 	iPackSender
 	logx.ILoggerSupport
 }
 
+// IPackSenderSetter injects an IPackSender implementation.
+// IPackSenderSetter 注入 IPackSender 实现。
 type IPackSenderSetter interface {
 	SetPackSender(sender IPackSender)
 }
 
+// IPackSenderGetter returns the bound IPackSender.
+// IPackSenderGetter 返回已绑定的 IPackSender。
 type IPackSenderGetter interface {
 	GetPackSender() IPackSender
 }
 
+// IPackSendReceiver combines pack send and receive.
+// IPackSendReceiver 组合消息包发送与接收能力。
 type IPackSendReceiver interface {
 	iPackSender
 	iPackReceiver
@@ -69,18 +84,26 @@ type IPackSendReceiver interface {
 
 //--------------------------------------------------------------------------
 
+// NewPackSender creates a send-only pack handler.
+// NewPackSender 创建仅发送的消息包处理器。
 func NewPackSender(connInfo IConnInfo, writer IConnWriterAdapter, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackSender {
 	return NewPackSendReceiver(connInfo, nil, writer, nil, dataBlockHandler, logger, false)
 }
 
+// NewPackReceiver creates a one-to-one receive-only pack handler.
+// NewPackReceiver 创建一对一仅接收的消息包处理器。
 func NewPackReceiver(connInfo IConnInfo, reader IConnReaderAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
 	return NewPackSendReceiver(connInfo, reader, nil, packHandlerContainer, dataBlockHandler, logger, false)
 }
 
+// NewPackMultiReceiver creates a one-to-many receive-only pack handler.
+// NewPackMultiReceiver 创建一对多仅接收的消息包处理器。
 func NewPackMultiReceiver(connInfo IConnInfo, reader IConnReaderAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger) IPackReceiver {
 	return NewPackSendReceiver(connInfo, reader, nil, packHandlerContainer, dataBlockHandler, logger, true)
 }
 
+// NewPackSendReceiver creates a full pack send/receive handler.
+// NewPackSendReceiver 创建完整的消息包收发处理器。
 func NewPackSendReceiver(connInfo IConnInfo, reader IConnReaderAdapter, writer IConnWriterAdapter, packHandlerContainer IPackHandlerContainer, dataBlockHandler bytex.IDataBlockHandler, logger logx.ILogger, multiReceive bool) IPackSendReceiver {
 	if multiReceive {
 		rs := newPackSendReceiverMulti(connInfo, reader, writer, packHandlerContainer, dataBlockHandler, logger)

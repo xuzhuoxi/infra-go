@@ -12,6 +12,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/netx"
 )
 
+// NewQuicServer creates a QUIC server.
+// NewQuicServer 创建 QUIC 服务端。
 func NewQuicServer() IQUICServer {
 	return newQuicServer().(IQUICServer)
 }
@@ -29,11 +31,15 @@ func newQuicServer() netx.ISockServer {
 
 //----------------------------
 
+// IQUICServer is a QUIC-specific ISockServer with event dispatch.
+// IQUICServer 是支持事件分发的 QUIC 专用 ISockServer。
 type IQUICServer interface {
 	netx.ISockServer
 	eventx.IEventDispatcher
 }
 
+// QUICServer implements IQUICServer over QUIC listeners.
+// QUICServer 是基于 QUIC 监听器的 IQUICServer 实现。
 type QUICServer struct {
 	eventx.EventDispatcher
 	netx.SockServerBase
@@ -43,6 +49,8 @@ type QUICServer struct {
 	mapConn  map[string]netx.IServerConn // [connId:netx.IServerConn]
 }
 
+// StartServer listens on the local QUIC address and accepts sessions.
+// StartServer 在本地 QUIC 地址监听并接受会话。
 func (s *QUICServer) StartServer(params netx.SockParams) error {
 	funcName := fmt.Sprintf("[QUICServer[%s].StartServer]", s.Name)
 	s.ServerMu.Lock()
@@ -76,6 +84,8 @@ func (s *QUICServer) StartServer(params netx.SockParams) error {
 	return nil
 }
 
+// StopServer stops listening and closes all QUIC connections.
+// StopServer 停止监听并关闭所有 QUIC 连接。
 func (s *QUICServer) StopServer() error {
 	funcName := fmt.Sprintf("[QUICServer[%s].StopServer]", s.Name)
 	s.ServerMu.Lock()
@@ -100,16 +110,22 @@ func (s *QUICServer) StopServer() error {
 	return nil
 }
 
+// SetMaxConn is currently a no-op for QUIC server.
+// SetMaxConn 当前对 QUIC 服务端无操作。
 func (s *QUICServer) SetMaxConn(max int) {
 	return
 }
 
+// Connections returns the current connection count.
+// Connections 返回当前连接数。
 func (s *QUICServer) Connections() int {
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
 	return len(s.mapConn)
 }
 
+// CloseConnection closes the connection identified by connId.
+// CloseConnection 关闭指定连接。
 func (s *QUICServer) CloseConnection(connId string) (err error, ok bool) {
 	s.ServerMu.Lock()
 	defer s.ServerMu.Unlock()
@@ -121,6 +137,8 @@ func (s *QUICServer) CloseConnection(connId string) (err error, ok bool) {
 	return errors.New("QUICServer: No Connection At " + connId), false
 }
 
+// FindConnection looks up a connection by connId.
+// FindConnection 查找连接。
 func (s *QUICServer) FindConnection(connId string) (conn netx.IServerConn, ok bool) {
 	s.ServerMu.RLock()
 	defer s.ServerMu.RUnlock()
@@ -128,11 +146,15 @@ func (s *QUICServer) FindConnection(connId string) (conn netx.IServerConn, ok bo
 	return
 }
 
+// SendPackTo sends a framed pack to the given connection ids.
+// SendPackTo 向指定连接发送二进制消息包。
 func (s *QUICServer) SendPackTo(pack []byte, connId ...string) error {
 	bytes := QuicDataBlockHandler.DataToBlock(pack)
 	return s.SendBytesTo(bytes, connId...)
 }
 
+// SendBytesTo sends raw bytes to the given connection ids.
+// SendBytesTo 向指定连接发送二进制数据。
 func (s *QUICServer) SendBytesTo(data []byte, connId ...string) error {
 	funcName := s.logFuncNameSend
 	s.ServerMu.RLock()

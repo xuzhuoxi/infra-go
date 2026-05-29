@@ -11,6 +11,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/bytex"
 )
 
+// QuicDataBlockHandler is the default data block handler for QUIC pack framing.
+// QuicDataBlockHandler 是 QUIC 封包默认的数据块处理器。
 var QuicDataBlockHandler = bytex.NewDefaultDataBlockHandler()
 
 func generateTLSConfig() *tls.Config {

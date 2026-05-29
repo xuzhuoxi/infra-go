@@ -1,6 +1,3 @@
-// Package netx
-// Create on 2025/2/13
-// @author xuzhuoxi
 package netx
 
 import (
@@ -21,7 +18,7 @@ const (
 	UDP4Network SockNetwork = "udp4" // "udp4" — IPv4 的 UDP 协议
 	UDP6Network SockNetwork = "udp6" // "udp6" — IPv6 的 UDP 协议
 
-	WSNetwork SockNetwork = "websocket"
+	WSNetwork SockNetwork = "websocket" // "websocket" — WebSocket 协议
 )
 
 var (
@@ -33,12 +30,18 @@ var (
 	errNetworkRegister = errors.New("Network is not registered. ")
 )
 
+// SockNetwork identifies a registered socket protocol.
+// SockNetwork 标识已注册的套接字协议。
 type SockNetwork string
 
+// String returns the network name.
+// String 返回网络协议名称。
 func (n SockNetwork) String() string {
 	return string(n)
 }
 
+// NewServer creates a new server for this network.
+// NewServer 为该网络协议创建服务端实例。
 func (n SockNetwork) NewServer() (server ISockServer, err error) {
 	if f, ok := networkServerMap[n]; ok {
 		return f(), nil
@@ -46,6 +49,8 @@ func (n SockNetwork) NewServer() (server ISockServer, err error) {
 	return nil, errNetworkRegister
 }
 
+// NewClient creates a new client for this network.
+// NewClient 为该网络协议创建客户端实例。
 func (n SockNetwork) NewClient() (server ISockClient, err error) {
 	if f, ok := networkClientMap[n]; ok {
 		return f(), nil
@@ -53,6 +58,8 @@ func (n SockNetwork) NewClient() (server ISockClient, err error) {
 	return nil, errNetworkRegister
 }
 
+// NewClient2 creates an alternate client implementation for this network.
+// NewClient2 为该网络协议创建备用客户端实例。
 func (n SockNetwork) NewClient2() (server ISockClient, err error) {
 	if f, ok := networkClient2Map[n]; ok {
 		return f(), nil
@@ -60,7 +67,8 @@ func (n SockNetwork) NewClient2() (server ISockClient, err error) {
 	return nil, errNetworkRegister
 }
 
-// ParseSockNetwork 字符串转 SockNetwork
+// ParseSockNetwork parses a string into SockNetwork.
+// ParseSockNetwork 将字符串解析为 SockNetwork。
 func ParseSockNetwork(str string) SockNetwork {
 	if "" == str {
 		return Undefined
@@ -88,6 +96,8 @@ func ParseSockNetwork(str string) SockNetwork {
 	}
 }
 
+// RegisterNetwork registers server and client factories for a network.
+// RegisterNetwork 为指定网络协议注册服务端与客户端工厂函数。
 func RegisterNetwork(network SockNetwork, newServer func() ISockServer, newClient func() ISockClient, newClient2 func() ISockClient) {
 	networkServerMap[network] = newServer
 	networkClientMap[network] = newClient

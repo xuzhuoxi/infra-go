@@ -14,8 +14,12 @@ var (
 	mapUDPLock sync.RWMutex
 )
 
+// UdpDataBlockHandler is the default data block handler for UDP pack framing.
+// UdpDataBlockHandler 是 UDP 封包默认的数据块处理器。
 var UdpDataBlockHandler = bytex.NewDefaultDataBlockHandler()
 
+// UDPAddrEqual reports whether two UDP addresses are equal.
+// UDPAddrEqual 判断两个 UDP 地址是否相等。
 func UDPAddrEqual(addr1 *net.UDPAddr, addr2 *net.UDPAddr) bool {
 	if addr1 == addr2 {
 		return true
@@ -23,6 +27,8 @@ func UDPAddrEqual(addr1 *net.UDPAddr, addr2 *net.UDPAddr) bool {
 	return addr1.IP.Equal(addr2.IP) && addr1.Port == addr2.Port && addr1.Zone == addr2.Zone
 }
 
+// GetUDPAddr resolves and caches a UDP address for the given network and address string.
+// GetUDPAddr 解析并缓存指定网络与地址字符串对应的 UDP 地址。
 func GetUDPAddr(network string, address string) (*net.UDPAddr, error) {
 	mapUDPLock.Lock()
 	defer mapUDPLock.Unlock()

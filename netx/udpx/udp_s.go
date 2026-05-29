@@ -13,17 +13,24 @@ import (
 )
 
 const (
+	// UDPBuffLength default UDP read buffer size
 	UDPBuffLength = 4096
 )
 
+// NewUDPServer creates a UDP server.
+// NewUDPServer 创建 UDP 服务端。
 func NewUDPServer() IUDPServer {
 	return newUDPServer().(IUDPServer)
 }
 
+// NewUDP4Server creates an IPv4 UDP server.
+// NewUDP4Server 创建 IPv4 UDP 服务端。
 func NewUDP4Server() IUDPServer {
 	return newUDP4Server().(IUDPServer)
 }
 
+// NewUDP6Server creates an IPv6 UDP server.
+// NewUDP6Server 创建 IPv6 UDP 服务端。
 func NewUDP6Server() IUDPServer {
 	return newUDP6Server().(IUDPServer)
 }
@@ -53,11 +60,15 @@ func newUdpS(name string, network netx.SockNetwork) netx.ISockServer {
 
 //---------------------------
 
+// IUDPServer is a UDP-specific ISockServer with event dispatch.
+// IUDPServer 是支持事件分发的 UDP 专用 ISockServer。
 type IUDPServer interface {
 	netx.ISockServer
 	eventx.IEventDispatcher
 }
 
+// UDPServer implements IUDPServer on a single UDP socket.
+// UDPServer 在单个 UDP 套接字上实现 IUDPServer。
 type UDPServer struct {
 	eventx.EventDispatcher
 	netx.SockServerBase
@@ -69,6 +80,8 @@ type UDPServer struct {
 	serverMu     sync.RWMutex
 }
 
+// StartServer listens on the local UDP address and receives datagrams.
+// StartServer 在本地 UDP 地址监听并接收数据报。
 func (s *UDPServer) StartServer(params netx.SockParams) error {
 	funcName := fmt.Sprintf("[UDPServer(%s).StartServer]", s.Name)
 	s.serverMu.Lock()
@@ -97,6 +110,8 @@ func (s *UDPServer) StartServer(params netx.SockParams) error {
 	return err2
 }
 
+// StopServer closes the UDP socket and stops receiving.
+// StopServer 关闭 UDP 套接字并停止接收。
 func (s *UDPServer) StopServer() error {
 	funcName := fmt.Sprintf("[UDPServer(%s).StopServer]", s.Name)
 	s.serverMu.Lock()
@@ -116,34 +131,46 @@ func (s *UDPServer) StopServer() error {
 	return nil
 }
 
+// SetMaxConn is a no-op for UDP; connection count is not tracked.
+// SetMaxConn 对 UDP 无操作；不跟踪连接数。
 func (s *UDPServer) SetMaxConn(max int) {
 	return
 }
 
+// Connections always returns 0 for UDP.
+// Connections 对 UDP 始终返回 0。
 func (s *UDPServer) Connections() int {
 	return 0
 }
 
+// CloseConnection is unsupported for UDP.
+// CloseConnection 对 UDP 不支持关闭指定连接。
 func (s *UDPServer) CloseConnection(connId string) (err error, ok bool) {
 	return nil, false
 }
 
-// FindConnection
-// connId: RemoteAddress
+// FindConnection returns a virtual connection for the remote address connId.
+// FindConnection 按远程地址 connId 返回虚拟连接。
+//   connId: remote address
+//   connId: 远程地址
 func (s *UDPServer) FindConnection(connId string) (conn netx.IServerConn, ok bool) {
 	// Udp没有实际连接，也不保证NAT端口利用情况下的数据准确性，因此使用远程地址作为连接id
 	return &UdpSockConn{ConnId: connId, RemoteAddress: connId, SRProxy: s.messageProxy}, true
 }
 
-// SendPackTo
-// connId : Use RemoteAddress
+// SendPackTo sends a framed pack to remote addresses identified by connId.
+// SendPackTo 向 connId 指定的远程地址发送二进制消息包。
+//   connId: remote address
+//   connId: 远程地址
 func (s *UDPServer) SendPackTo(pack []byte, connId ...string) error {
 	bytes := UdpDataBlockHandler.DataToBlock(pack)
 	return s.SendBytesTo(bytes, connId...)
 }
 
-// SendBytesTo
-// connId : Use RemoteAddress
+// SendBytesTo sends raw bytes to remote addresses identified by connId.
+// SendBytesTo 向 connId 指定的远程地址发送二进制数据。
+//   connId: remote address
+//   connId: 远程地址
 func (s *UDPServer) SendBytesTo(bytes []byte, connId ...string) error {
 	funcName := s.logFuncNameSend
 	s.serverMu.RLock()
