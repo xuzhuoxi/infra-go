@@ -1,10 +1,7 @@
-// Package mathx
-// Create on 2023/7/23
-// @author xuzhuoxi
 package mathx
 
-// PowInt
-// 定义一个函数，计算x的y次方
+// PowInt returns x raised to the power y using repeated multiplication.
+// PowInt 通过重复乘法计算 x 的 y 次方。
 func PowInt(x, y int) int {
 	// 如果y为0，直接返回1
 	if y == 0 {

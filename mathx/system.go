@@ -1,15 +1,11 @@
-// Package mathx
-// Create on 2023/7/23
-// @author xuzhuoxi
 package mathx
 
 import "strings"
 
-// SystemTo
-// 十进制转换不确定进制
-// value:十进制数值
-// system:不确定进制数组
-// return;由十进制数据组成的数组
+// SystemTo decomposes a decimal value into mixed-radix digits using system.
+// SystemTo 将十进制数值按 system 各进制分解为余数数组。
+// value is the decimal number; system holds each digit's radix.
+// value 为十进制数值；system 为各位的不确定进制数组。
 func SystemTo(value int, system []int) []int {
 	rs := make([]int, len(system))
 	temp := value
@@ -20,8 +16,8 @@ func SystemTo(value int, system []int) []int {
 	return rs
 }
 
-// System10To26
-// 十进制数 转为 26进制字符表示
+// System10To26 converts a decimal number to a base-26 letter string (A=1, Z=26).
+// System10To26 将十进制数转为 26 进制字母表示。
 func System10To26(n int) string {
 	if 0 == n {
 		return ""
@@ -38,8 +34,8 @@ func System10To26(n int) string {
 	return s
 }
 
-// System26To10
-// 26进制字符 转为 十进制数
+// System26To10 converts a base-26 letter string to a decimal number.
+// System26To10 将 26 进制字母转为十进制数。
 func System26To10(s string) int {
 	if s == "" {
 		return 0
@@ -61,8 +57,8 @@ func System26To10(s string) int {
 
 const base36 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-// System10To36
-// 十进制数 转为 36进制字符表示
+// System10To36 converts a decimal number to a base-36 string.
+// System10To36 将十进制数转为 36 进制字符表示。
 func System10To36(n int) string {
 	// 如果n为0，直接返回"0"
 	if n == 0 {
@@ -85,8 +81,8 @@ func System10To36(n int) string {
 	return strings.Join(res, "")
 }
 
-// System36To10
-// 36进制字符 转为 十进制数
+// System36To10 converts a base-36 string to a decimal number.
+// System36To10 将 36 进制字符转为十进制数。
 func System36To10(s string) int {
 	// 如果s为空，直接返回0
 	if s == "" {

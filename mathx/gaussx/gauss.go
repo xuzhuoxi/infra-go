@@ -4,17 +4,16 @@ import (
 	"math"
 )
 
-// GaussFunc2
-// 二维高斯函数
-// sigma: 标准差
+// GaussFunc2 evaluates the 2D Gaussian PDF at offset (x, y) with standard deviation sigma.
+// GaussFunc2 在偏移 (x, y) 处计算标准差为 sigma 的二维高斯函数值。
 func GaussFunc2(x, y int, sigma float64) float64 {
 	return (1.0 / (2.0 * math.Pi * sigma * sigma)) * math.Exp(-(float64(x*x+y*y) / (2.0 * sigma * sigma)))
 }
 
-// CreateGaussKernel
-// 计算高斯卷积核(二维数据)
-// radius： 半径
-// sigma： 	标准差
+// CreateGaussKernel builds a normalized 2D Gaussian convolution kernel matrix.
+// CreateGaussKernel 构造归一化的二维高斯卷积核矩阵。
+// radius is the kernel radius; sigma is the standard deviation.
+// radius 为卷积核半径；sigma 为标准差。
 func CreateGaussKernel(radius int, sigma float64) [][]float64 {
 	kSize := radius + radius + 1
 	center := kSize / 2
@@ -72,10 +71,10 @@ func CreateGaussKernel(radius int, sigma float64) [][]float64 {
 //	return arr
 //}
 
-// CreateGaussKernel2
-// 计算高斯卷积核(一维数据)
-// radius： 半径
-// sigma： 	标准差
+// CreateGaussKernel2 builds a normalized 1D flattened Gaussian convolution kernel.
+// CreateGaussKernel2 构造归一化的一维展平高斯卷积核。
+// radius is the kernel radius; sigma is the standard deviation.
+// radius 为卷积核半径；sigma 为标准差。
 func CreateGaussKernel2(radius int, sigma float64) []float64 {
 	kSize := radius + radius + 1
 	center := kSize / 2
@@ -95,12 +94,10 @@ func CreateGaussKernel2(radius int, sigma float64) []float64 {
 	return rs
 }
 
-// CreateGaussKernelInt
-// 计算高斯卷积核(二维数据)
-// 整数值卷积核
-// radius： 	半径
-// sigma： 		标准差
-// scale： 		整数乘数, =0时使用默认放大模式
+// CreateGaussKernelInt builds an integer-scaled 2D Gaussian convolution kernel.
+// CreateGaussKernelInt 构造整数放大的二维高斯卷积核。
+// radius is the kernel radius; sigma is the standard deviation; scale is the integer multiplier (auto when <= 0).
+// radius 为卷积核半径；sigma 为标准差；scale 为整数乘数，<= 0 时使用默认放大模式。
 func CreateGaussKernelInt(radius int, sigma float64, scale float64) [][]int {
 	kernel := CreateGaussKernel(radius, sigma)
 	kSize := radius + radius + 1
@@ -117,12 +114,10 @@ func CreateGaussKernelInt(radius int, sigma float64, scale float64) [][]int {
 	return rs
 }
 
-// CreateGaussKernelInt2
-// 计算高斯卷积核(一维数据)
-// 整数值卷积核
-// radius： 	半径
-// sigma： 		标准差
-// scale： 		整数乘数, =0时使用默认放大模式
+// CreateGaussKernelInt2 builds an integer-scaled 1D flattened Gaussian convolution kernel.
+// CreateGaussKernelInt2 构造整数放大的一维展平高斯卷积核。
+// radius is the kernel radius; sigma is the standard deviation; scale is the integer multiplier (auto when <= 0).
+// radius 为卷积核半径；sigma 为标准差；scale 为整数乘数，<= 0 时使用默认放大模式。
 func CreateGaussKernelInt2(radius int, sigma float64, scale float64) []int {
 	kernel := CreateGaussKernel2(radius, sigma)
 	kSize := radius + radius + 1

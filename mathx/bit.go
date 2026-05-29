@@ -2,27 +2,24 @@ package mathx
 
 import "fmt"
 
-// BitString
-// 二进制输出位信息
+// BitString returns the binary string representation of value.
+// BitString 以二进制字符串形式输出位信息。
 func BitString(value int) string {
 	return fmt.Sprintf("%b", value)
 }
 
-// BitValid
-// <summary>
-/// 是否有效，1为效，0为无效
-/// </summary>
-/// <returns><c>true</c>, if valid was ised, <c>false</c> otherwise.</returns>
-/// <param name="value">Value.</param>
-/// <param name="bitIndex">从低位开始，第1位为0</param>
+// BitValid reports whether the bit at bitIndex is set (1 = valid, 0 = invalid).
+// BitValid 判断指定位是否有效，1 为有效，0 为无效。
+// bitIndex counts from the least significant bit; the first bit is index 0.
+// bitIndex 从低位开始计数，第 1 位为 0。
 func BitValid(value int, bitIndex uint) bool {
 	return 0 != ((1 << bitIndex) & value)
 }
 
-// BitFit
-// 检查位值重复
-// isValid=true时，检查有效的重复位
-// isValid=false时，检查无效的重复位
+// BitFit checks for overlapping bits between value and checkingValue.
+// BitFit 检查位值是否重复。
+// When isValid is true, checks for overlapping valid (set) bits; when false, checks invalid bits.
+// isValid 为 true 时检查有效位的重复；为 false 时检查无效位的重复。
 func BitFit(value int, checkingValue int, isValid bool) bool {
 	if isValid {
 		return value&checkingValue != 0
@@ -31,8 +28,8 @@ func BitFit(value int, checkingValue int, isValid bool) bool {
 	}
 }
 
-// BitValidAnd
-// 全部有效
+// BitValidAnd reports whether all listed bits are set in value.
+// BitValidAnd 判断所列位是否全部有效。
 func BitValidAnd(value int, bitIndex ...uint) bool {
 	for _, index := range bitIndex {
 		if !BitValid(value, index) {
@@ -42,8 +39,8 @@ func BitValidAnd(value int, bitIndex ...uint) bool {
 	return true
 }
 
-// BitValidOr
-// 单个有效
+// BitValidOr reports whether any listed bit is set in value.
+// BitValidOr 判断所列位是否至少有一位有效。
 func BitValidOr(value int, bitIndex ...uint) bool {
 	for _, index := range bitIndex {
 		if BitValid(value, index) {
@@ -53,8 +50,8 @@ func BitValidOr(value int, bitIndex ...uint) bool {
 	return false
 }
 
-// BitSet
-// 设置位
+// BitSet sets or clears the bit at bitIndex and returns the updated value.
+// BitSet 设置或清除指定位并返回更新后的值。
 func BitSet(value int, bitIndex uint, isValid bool) int {
 	v := 1 << bitIndex
 	if isValid {

@@ -5,18 +5,36 @@ import (
 	"strings"
 )
 
+// SizeUnit represents a byte count using binary (1024-based) units.
+// SizeUnit 表示以 1024 为基数的字节大小单位。
 type SizeUnit uint64
 
 const (
+	// Byte is one byte.
+	// Byte 为 1 字节。
 	Byte SizeUnit = 1
-	KB            = 1024 * Byte
-	MB            = 1024 * KB
-	GB            = 1024 * MB
-	TB            = 1024 * GB
-	PB            = 1024 * TB
-	EB            = 1024 * PB
+	// KB is 1024 bytes.
+	// KB 为 1024 字节。
+	KB = 1024 * Byte
+	// MB is 1024 kilobytes.
+	// MB 为 1024 KB。
+	MB = 1024 * KB
+	// GB is 1024 megabytes.
+	// GB 为 1024 MB。
+	GB = 1024 * MB
+	// TB is 1024 gigabytes.
+	// TB 为 1024 GB。
+	TB = 1024 * GB
+	// PB is 1024 terabytes.
+	// PB 为 1024 TB。
+	PB = 1024 * TB
+	// EB is 1024 petabytes.
+	// EB 为 1024 PB。
+	EB = 1024 * PB
 )
 
+// ParseSize parses a human-readable size string (e.g. "10MB", "1.5GB") into SizeUnit.
+// ParseSize 将可读大小字符串（如 "10MB"、"1.5GB"）解析为 SizeUnit。
 func ParseSize(sizeStr string) SizeUnit {
 	sizeStr = strings.ToUpper(strings.TrimSpace(sizeStr))
 	if len(sizeStr) == 0 {
