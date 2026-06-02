@@ -1,7 +1,7 @@
 package slicex
 
-// MergeUint32
-// 合并
+// MergeUint32 merges multiple slices into one.
+// MergeUint32 合并多个切片为一个。
 func MergeUint32(slices ...[]uint32) []uint32 {
 	ln := len(slices)
 	index := 0
@@ -19,8 +19,8 @@ func MergeUint32(slices ...[]uint32) []uint32 {
 	return rs
 }
 
-// InsertUint32
-// 按位置插入
+// InsertUint32 inserts elements at the specified position.
+// InsertUint32 按位置插入元素。
 func InsertUint32(slice []uint32, pos int, target ...uint32) []uint32 {
 	ln := len(slice)
 	if pos < 0 {
@@ -39,20 +39,20 @@ Start:
 	return rs
 }
 
-// InsertHeadUint32
-// 头插入
+// InsertHeadUint32 inserts elements at the head.
+// InsertHeadUint32 在头部插入元素。
 func InsertHeadUint32(slice []uint32, target ...uint32) []uint32 {
 	return InsertUint32(slice, 0, target...)
 }
 
-// InsertTailUint32
-// 尾插入
+// InsertTailUint32 inserts elements at the tail.
+// InsertTailUint32 在尾部插入元素。
 func InsertTailUint32(slice []uint32, target ...uint32) []uint32 {
 	return InsertUint32(slice, len(slice), target...)
 }
 
-// RemoveValueUint32
-// 按值删除
+// RemoveValueUint32 removes the first element equal to target.
+// RemoveValueUint32 按值删除第一个匹配元素。
 func RemoveValueUint32(slice []uint32, target uint32) ([]uint32, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -68,8 +68,8 @@ func RemoveValueUint32(slice []uint32, target uint32) ([]uint32, bool) {
 	return nil, false
 }
 
-// RemoveAllValueUint32
-// 按值删除
+// RemoveAllValueUint32 removes all elements equal to target.
+// RemoveAllValueUint32 按值删除所有匹配元素。
 func RemoveAllValueUint32(slice []uint32, target uint32) ([]uint32, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -86,8 +86,8 @@ func RemoveAllValueUint32(slice []uint32, target uint32) ([]uint32, bool) {
 	return cp[:index], true
 }
 
-// RemoveAtUint32
-// 按点删除
+// RemoveAtUint32 removes the element at the specified index.
+// RemoveAtUint32 按索引删除元素。
 func RemoveAtUint32(slice []uint32, pos int) ([]uint32, uint32, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -100,27 +100,27 @@ func RemoveAtUint32(slice []uint32, pos int) ([]uint32, uint32, bool) {
 	return rs, obj, true
 }
 
-// RemoveHeadUint32
-// 删除头
+// RemoveHeadUint32 removes the first element.
+// RemoveHeadUint32 删除头部元素。
 func RemoveHeadUint32(slice []uint32) ([]uint32, uint32, bool) {
 	return RemoveAtUint32(slice, 0)
 }
 
-// RemoveTailUint32
-// 删除尾
+// RemoveTailUint32 removes the last element.
+// RemoveTailUint32 删除尾部元素。
 func RemoveTailUint32(slice []uint32) ([]uint32, uint32, bool) {
 	return RemoveAtUint32(slice, len(slice)-1)
 }
 
-// RemoveFromUint32
-// 删除区间
+// RemoveFromUint32 removes length elements starting at startPos.
+// RemoveFromUint32 从 startPos 起删除 length 个元素。
 func RemoveFromUint32(slice []uint32, startPos int, length int) (result []uint32, removed []uint32, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeUint32(slice, startPos, endPos)
 }
 
-// RemoveRangeUint32
-// 删除区间
+// RemoveRangeUint32 removes elements in [startPos, endPos).
+// RemoveRangeUint32 删除 [startPos, endPos) 区间内的元素。
 func RemoveRangeUint32(slice []uint32, startPos int, endPos int) (result []uint32, removed []uint32, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -135,15 +135,15 @@ func RemoveRangeUint32(slice []uint32, startPos int, endPos int) (result []uint3
 	return rs, slice[startPos:endPos], true
 }
 
-// ContainsUint32
-// 包含
+// ContainsUint32 reports whether slice contains target.
+// ContainsUint32 判断切片是否包含目标值。
 func ContainsUint32(slice []uint32, target uint32) bool {
 	_, ok := IndexUint32(slice, target)
 	return ok
 }
 
-// IndexUint32
-// 从头部查找
+// IndexUint32 returns the index of the first matching element.
+// IndexUint32 从头部查找第一个匹配元素的索引。
 func IndexUint32(slice []uint32, target uint32) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,8 +156,8 @@ func IndexUint32(slice []uint32, target uint32) (int, bool) {
 	return -1, false
 }
 
-// LastIndexUint32
-// 从尾部查找
+// LastIndexUint32 returns the index of the last matching element.
+// LastIndexUint32 从尾部查找最后一个匹配元素的索引。
 func LastIndexUint32(slice []uint32, target uint32) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -170,8 +170,8 @@ func LastIndexUint32(slice []uint32, target uint32) (int, bool) {
 	return -1, false
 }
 
-// ReverseUint32
-// 倒序
+// ReverseUint32 reverses elements in place.
+// ReverseUint32 原地倒序元素。
 func ReverseUint32(slice []uint32) {
 	ln := len(slice)
 	if 0 == ln {
@@ -182,8 +182,8 @@ func ReverseUint32(slice []uint32) {
 	}
 }
 
-// EqualUint32
-// 比较
+// EqualUint32 reports whether two slices are equal element-wise.
+// EqualUint32 逐元素比较两个切片是否相等。
 func EqualUint32(a, b []uint32) bool {
 	if len(a) != len(b) {
 		return false
@@ -196,8 +196,8 @@ func EqualUint32(a, b []uint32) bool {
 	return true
 }
 
-// SumUint32
-// 求和
+// SumUint32 returns the sum of all elements.
+// SumUint32 求和所有元素。
 func SumUint32(slice []uint32) uint32 {
 	rs := uint32(0)
 	for _, val := range slice {

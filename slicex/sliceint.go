@@ -1,7 +1,7 @@
 package slicex
 
-// MergeInt
-// 合并
+// MergeInt merges multiple slices into one.
+// MergeInt 合并多个切片为一个。
 func MergeInt(slices ...[]int) []int {
 	ln := len(slices)
 	index := 0
@@ -19,8 +19,8 @@ func MergeInt(slices ...[]int) []int {
 	return rs
 }
 
-// InsertInt
-// 按位置插入
+// InsertInt inserts elements at the specified position.
+// InsertInt 按位置插入元素。
 func InsertInt(slice []int, pos int, target ...int) []int {
 	ln := len(slice)
 	if pos < 0 {
@@ -39,20 +39,20 @@ Start:
 	return rs
 }
 
-// InsertHeadInt
-// 头插入
+// InsertHeadInt inserts elements at the head.
+// InsertHeadInt 在头部插入元素。
 func InsertHeadInt(slice []int, target ...int) []int {
 	return InsertInt(slice, 0, target...)
 }
 
-// InsertTailInt
-// 尾插入
+// InsertTailInt inserts elements at the tail.
+// InsertTailInt 在尾部插入元素。
 func InsertTailInt(slice []int, target ...int) []int {
 	return InsertInt(slice, len(slice), target...)
 }
 
-// RemoveValueInt
-// 按值删除
+// RemoveValueInt removes the first element equal to target.
+// RemoveValueInt 按值删除第一个匹配元素。
 func RemoveValueInt(slice []int, target int) ([]int, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -68,8 +68,8 @@ func RemoveValueInt(slice []int, target int) ([]int, bool) {
 	return nil, false
 }
 
-// RemoveAllValueInt
-// 按值删除
+// RemoveAllValueInt removes all elements equal to target.
+// RemoveAllValueInt 按值删除所有匹配元素。
 func RemoveAllValueInt(slice []int, target int) ([]int, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -86,8 +86,8 @@ func RemoveAllValueInt(slice []int, target int) ([]int, bool) {
 	return cp[:index], true
 }
 
-// RemoveAtInt
-// 按点删除
+// RemoveAtInt removes the element at the specified index.
+// RemoveAtInt 按索引删除元素。
 func RemoveAtInt(slice []int, pos int) ([]int, int, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -100,27 +100,27 @@ func RemoveAtInt(slice []int, pos int) ([]int, int, bool) {
 	return rs, obj, true
 }
 
-// RemoveHeadInt
-// 删除头
+// RemoveHeadInt removes the first element.
+// RemoveHeadInt 删除头部元素。
 func RemoveHeadInt(slice []int) ([]int, int, bool) {
 	return RemoveAtInt(slice, 0)
 }
 
-// RemoveTailInt
-// 删除尾
+// RemoveTailInt removes the last element.
+// RemoveTailInt 删除尾部元素。
 func RemoveTailInt(slice []int) ([]int, int, bool) {
 	return RemoveAtInt(slice, len(slice)-1)
 }
 
-// RemoveFromInt
-// 删除区间
+// RemoveFromInt removes length elements starting at startPos.
+// RemoveFromInt 从 startPos 起删除 length 个元素。
 func RemoveFromInt(slice []int, startPos int, length int) (result []int, removed []int, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeInt(slice, startPos, endPos)
 }
 
-// RemoveRangeInt
-// 删除区间
+// RemoveRangeInt removes elements in [startPos, endPos).
+// RemoveRangeInt 删除 [startPos, endPos) 区间内的元素。
 func RemoveRangeInt(slice []int, startPos int, endPos int) (result []int, removed []int, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -135,15 +135,15 @@ func RemoveRangeInt(slice []int, startPos int, endPos int) (result []int, remove
 	return rs, slice[startPos:endPos], true
 }
 
-// ContainsInt
-// 包含
+// ContainsInt reports whether slice contains target.
+// ContainsInt 判断切片是否包含目标值。
 func ContainsInt(slice []int, target int) bool {
 	_, ok := IndexInt(slice, target)
 	return ok
 }
 
-// IndexInt
-// 从头部查找
+// IndexInt returns the index of the first matching element.
+// IndexInt 从头部查找第一个匹配元素的索引。
 func IndexInt(slice []int, target int) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,8 +156,8 @@ func IndexInt(slice []int, target int) (int, bool) {
 	return -1, false
 }
 
-// LastIndexInt
-// 从尾部查找
+// LastIndexInt returns the index of the last matching element.
+// LastIndexInt 从尾部查找最后一个匹配元素的索引。
 func LastIndexInt(slice []int, target int) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -170,8 +170,8 @@ func LastIndexInt(slice []int, target int) (int, bool) {
 	return -1, false
 }
 
-// ReverseInt
-// 倒序
+// ReverseInt reverses elements in place.
+// ReverseInt 原地倒序元素。
 func ReverseInt(slice []int) {
 	ln := len(slice)
 	if 0 == ln {
@@ -182,8 +182,8 @@ func ReverseInt(slice []int) {
 	}
 }
 
-// EqualInt
-// 比较
+// EqualInt reports whether two slices are equal element-wise.
+// EqualInt 逐元素比较两个切片是否相等。
 func EqualInt(a, b []int) bool {
 	if len(a) != len(b) {
 		return false
@@ -196,8 +196,8 @@ func EqualInt(a, b []int) bool {
 	return true
 }
 
-// SumInt
-// 求和
+// SumInt returns the sum of all elements.
+// SumInt 求和所有元素。
 func SumInt(slice []int) int {
 	rs := 0
 	for _, val := range slice {

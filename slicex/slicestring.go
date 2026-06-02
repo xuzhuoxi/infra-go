@@ -2,8 +2,8 @@ package slicex
 
 import "strings"
 
-// MergeString
-// 合并
+// MergeString merges multiple slices into one.
+// MergeString 合并多个切片为一个。
 func MergeString(slices ...[]string) []string {
 	ln := len(slices)
 	index := 0
@@ -21,8 +21,8 @@ func MergeString(slices ...[]string) []string {
 	return rs
 }
 
-// InsertString
-// 按位置插入
+// InsertString inserts elements at the specified position.
+// InsertString 按位置插入元素。
 func InsertString(slice []string, pos int, target ...string) []string {
 	ln := len(slice)
 	if pos < 0 {
@@ -41,20 +41,20 @@ Start:
 	return rs
 }
 
-// InsertHeadString
-// 头插入
+// InsertHeadString inserts elements at the head.
+// InsertHeadString 在头部插入元素。
 func InsertHeadString(slice []string, target ...string) []string {
 	return InsertString(slice, 0, target...)
 }
 
-// InsertTailString
-// 尾插入
+// InsertTailString inserts elements at the tail.
+// InsertTailString 在尾部插入元素。
 func InsertTailString(slice []string, target ...string) []string {
 	return InsertString(slice, len(slice), target...)
 }
 
-// RemoveValueString
-// 按值删除
+// RemoveValueString removes the first element equal to target.
+// RemoveValueString 按值删除第一个匹配元素。
 func RemoveValueString(slice []string, target string) ([]string, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -70,8 +70,8 @@ func RemoveValueString(slice []string, target string) ([]string, bool) {
 	return nil, false
 }
 
-// RemoveAllValueString
-// 按值删除
+// RemoveAllValueString removes all elements equal to target.
+// RemoveAllValueString 按值删除所有匹配元素。
 func RemoveAllValueString(slice []string, target string) ([]string, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -88,8 +88,8 @@ func RemoveAllValueString(slice []string, target string) ([]string, bool) {
 	return cp[:index], true
 }
 
-// RemoveAtString
-// 按点删除
+// RemoveAtString removes the element at the specified index.
+// RemoveAtString 按索引删除元素。
 func RemoveAtString(slice []string, pos int) ([]string, string, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -102,27 +102,27 @@ func RemoveAtString(slice []string, pos int) ([]string, string, bool) {
 	return rs, obj, true
 }
 
-// RemoveHeadString
-// 删除头
+// RemoveHeadString removes the first element.
+// RemoveHeadString 删除头部元素。
 func RemoveHeadString(slice []string) ([]string, string, bool) {
 	return RemoveAtString(slice, 0)
 }
 
-// RemoveTailString
-// 删除尾
+// RemoveTailString removes the last element.
+// RemoveTailString 删除尾部元素。
 func RemoveTailString(slice []string) ([]string, string, bool) {
 	return RemoveAtString(slice, len(slice)-1)
 }
 
-// RemoveFromString
-// 删除区间
+// RemoveFromString removes length elements starting at startPos.
+// RemoveFromString 从 startPos 起删除 length 个元素。
 func RemoveFromString(slice []string, startPos int, length int) (result []string, removed []string, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeString(slice, startPos, endPos)
 }
 
-// RemoveRangeString
-// 删除区间
+// RemoveRangeString removes elements in [startPos, endPos).
+// RemoveRangeString 删除 [startPos, endPos) 区间内的元素。
 func RemoveRangeString(slice []string, startPos int, endPos int) (result []string, removed []string, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -137,16 +137,17 @@ func RemoveRangeString(slice []string, startPos int, endPos int) (result []strin
 	return rs, slice[startPos:endPos], true
 }
 
-// ContainsString
-// 包含
+// ContainsString reports whether slice contains target.
+// ContainsString 判断切片是否包含目标值。
 func ContainsString(slice []string, target string) bool {
 	_, ok := IndexString(slice, target)
 	return ok
 }
 
-// ContainsCaseString
-// 包含
-// ignoreCase 是否忽略大小写
+// ContainsCaseString reports whether slice contains target, optionally ignoring case.
+// ContainsCaseString 判断切片是否包含目标值，可选忽略大小写。
+// ignoreCase whether to ignore case when comparing.
+// ignoreCase 比较时是否忽略大小写。
 func ContainsCaseString(slice []string, target string, ignoreCase bool) bool {
 	if !ignoreCase {
 		return ContainsString(slice, target)
@@ -155,15 +156,16 @@ func ContainsCaseString(slice []string, target string, ignoreCase bool) bool {
 	return ok
 }
 
-// IndexString
-// 从头部查找
+// IndexString returns the index of the first matching element.
+// IndexString 从头部查找第一个匹配元素的索引。
 func IndexString(slice []string, target string) (int, bool) {
 	return IndexCaseString(slice, target, false)
 }
 
-// IndexCaseString
-// 从头部查找
-// ignoreCase 是否忽略大小写
+// IndexCaseString returns the index of the first matching element, optionally ignoring case.
+// IndexCaseString 从头部查找第一个匹配元素的索引，可选忽略大小写。
+// ignoreCase whether to ignore case when comparing.
+// ignoreCase 比较时是否忽略大小写。
 func IndexCaseString(slice []string, target string, ignoreCase bool) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -184,15 +186,16 @@ func IndexCaseString(slice []string, target string, ignoreCase bool) (int, bool)
 	return -1, false
 }
 
-// LastIndexString
-// 从尾部查找
+// LastIndexString returns the index of the last matching element.
+// LastIndexString 从尾部查找最后一个匹配元素的索引。
 func LastIndexString(slice []string, target string) (int, bool) {
 	return LastIndexCaseString(slice, target, false)
 }
 
-// LastIndexCaseString
-// 从尾部查找
-// ignoreCase 是否忽略大小写
+// LastIndexCaseString returns the index of the last matching element, optionally ignoring case.
+// LastIndexCaseString 从尾部查找最后一个匹配元素的索引，可选忽略大小写。
+// ignoreCase whether to ignore case when comparing.
+// ignoreCase 比较时是否忽略大小写。
 func LastIndexCaseString(slice []string, target string, ignoreCase bool) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -213,8 +216,8 @@ func LastIndexCaseString(slice []string, target string, ignoreCase bool) (int, b
 	return -1, false
 }
 
-// ReverseString
-// 倒序
+// ReverseString reverses elements in place.
+// ReverseString 原地倒序元素。
 func ReverseString(slice []string) {
 	ln := len(slice)
 	if 0 == ln {
@@ -225,8 +228,8 @@ func ReverseString(slice []string) {
 	}
 }
 
-// CopyString
-// 克隆
+// CopyString returns a shallow copy of slice.
+// CopyString 克隆切片（浅拷贝）。
 func CopyString(slice []string) []string {
 	if nil == slice {
 		return nil
@@ -240,8 +243,8 @@ func CopyString(slice []string) []string {
 	return rs
 }
 
-// EqualString
-// 比较
+// EqualString reports whether two slices are equal element-wise.
+// EqualString 逐元素比较两个切片是否相等。
 func EqualString(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
@@ -254,8 +257,8 @@ func EqualString(a, b []string) bool {
 	return true
 }
 
-// ClearDuplicateString
-// 清除重复值
+// ClearDuplicateString removes duplicate strings in place.
+// ClearDuplicateString 原地清除重复字符串。
 func ClearDuplicateString(slice []string) {
 	if nil == slice || len(slice) < 2 {
 		return

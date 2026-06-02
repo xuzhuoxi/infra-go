@@ -4,16 +4,8 @@ import (
 	"github.com/xuzhuoxi/infra-go/lang"
 )
 
-// 一些说明:
-// 对于slice，一但发生扩容(cap增大)则会重新分配内存，新的slice就与源slice脱离关系了，也就是对于下标操作不会再影响源slice了
-// cap不变的,append操作会直接加在len索引后
-//
-// 这里的方法性能都不高，性能消耗在以下几个方面：
-// 1.interface{}在分配内存的效率相对于具体类型较差.
-// 2.返回切片都是重新分配的内存
-
-// MergeT
-// 合并
+// MergeT merges multiple slices into one.
+// MergeT 合并多个切片为一个。
 func MergeT(slices ...[]interface{}) []interface{} {
 	ln := len(slices)
 	index := 0
@@ -31,8 +23,8 @@ func MergeT(slices ...[]interface{}) []interface{} {
 	return rs
 }
 
-// InsertT
-// 按位置插入
+// InsertT inserts elements at the specified position.
+// InsertT 按位置插入元素。
 func InsertT(slice []interface{}, pos int, target ...interface{}) []interface{} {
 	ln := len(slice)
 	if pos < 0 {
@@ -51,20 +43,20 @@ Start:
 	return rs
 }
 
-// InsertHeadT
-// 头插入
+// InsertHeadT inserts elements at the head.
+// InsertHeadT 在头部插入元素。
 func InsertHeadT(slice []interface{}, target ...interface{}) []interface{} {
 	return InsertT(slice, 0, target...)
 }
 
-// InsertTailT
-// 尾插入
+// InsertTailT inserts elements at the tail.
+// InsertTailT 在尾部插入元素。
 func InsertTailT(slice []interface{}, target ...interface{}) []interface{} {
 	return InsertT(slice, len(slice), target...)
 }
 
-// RemoveValueT
-// 按值删除
+// RemoveValueT removes the first element equal to target.
+// RemoveValueT 按值删除第一个匹配元素。
 func RemoveValueT(slice []interface{}, target interface{}) ([]interface{}, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -80,8 +72,8 @@ func RemoveValueT(slice []interface{}, target interface{}) ([]interface{}, bool)
 	return nil, false
 }
 
-// RemoveAllValueT
-// 按值删除
+// RemoveAllValueT removes all elements equal to target.
+// RemoveAllValueT 按值删除所有匹配元素。
 func RemoveAllValueT(slice []interface{}, target interface{}) ([]interface{}, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -98,8 +90,8 @@ func RemoveAllValueT(slice []interface{}, target interface{}) ([]interface{}, bo
 	return cp[:index], true
 }
 
-// RemoveAtT
-// 按点删除
+// RemoveAtT removes the element at the specified index.
+// RemoveAtT 按索引删除元素。
 func RemoveAtT(slice []interface{}, pos int) ([]interface{}, interface{}, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -112,27 +104,27 @@ func RemoveAtT(slice []interface{}, pos int) ([]interface{}, interface{}, bool) 
 	return rs, obj, true
 }
 
-// RemoveHeadT
-// 删除头
+// RemoveHeadT removes the first element.
+// RemoveHeadT 删除头部元素。
 func RemoveHeadT(slice []interface{}) ([]interface{}, interface{}, bool) {
 	return RemoveAtT(slice, 0)
 }
 
-// RemoveTailT
-// 删除尾
+// RemoveTailT removes the last element.
+// RemoveTailT 删除尾部元素。
 func RemoveTailT(slice []interface{}) ([]interface{}, interface{}, bool) {
 	return RemoveAtT(slice, len(slice)-1)
 }
 
-// RemoveFromT
-// 删除区间
+// RemoveFromT removes length elements starting at startPos.
+// RemoveFromT 从 startPos 起删除 length 个元素。
 func RemoveFromT(slice []interface{}, startPos int, length int) (result []interface{}, removed []interface{}, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeT(slice, startPos, endPos)
 }
 
-// RemoveRangeT
-// 删除区间
+// RemoveRangeT removes elements in [startPos, endPos).
+// RemoveRangeT 删除 [startPos, endPos) 区间内的元素。
 func RemoveRangeT(slice []interface{}, startPos int, endPos int) (result []interface{}, removed []interface{}, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -147,15 +139,15 @@ func RemoveRangeT(slice []interface{}, startPos int, endPos int) (result []inter
 	return rs, slice[startPos:endPos], true
 }
 
-// ContainsT
-// 包含
+// ContainsT reports whether slice contains target.
+// ContainsT 判断切片是否包含目标值。
 func ContainsT(slice []interface{}, target interface{}) bool {
 	_, ok := IndexT(slice, target)
 	return ok
 }
 
-// IndexT
-// 从头部查找
+// IndexT returns the index of the first matching element.
+// IndexT 从头部查找第一个匹配元素的索引。
 func IndexT(slice []interface{}, target interface{}) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -168,8 +160,8 @@ func IndexT(slice []interface{}, target interface{}) (int, bool) {
 	return -1, false
 }
 
-// LastIndexT
-// 从尾部查找
+// LastIndexT returns the index of the last matching element.
+// LastIndexT 从尾部查找最后一个匹配元素的索引。
 func LastIndexT(slice []interface{}, target interface{}) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -182,8 +174,8 @@ func LastIndexT(slice []interface{}, target interface{}) (int, bool) {
 	return -1, false
 }
 
-// ReverseT
-// 倒序
+// ReverseT reverses elements in place.
+// ReverseT 原地倒序元素。
 func ReverseT(slice []interface{}) {
 	ln := len(slice)
 	if 0 == ln {
@@ -194,6 +186,8 @@ func ReverseT(slice []interface{}) {
 	}
 }
 
+// CopyT returns a shallow copy of slice.
+// CopyT 克隆切片（浅拷贝）。
 func CopyT(slice []interface{}) []interface{} {
 	if nil == slice {
 		return nil
@@ -207,8 +201,8 @@ func CopyT(slice []interface{}) []interface{} {
 	return rs
 }
 
-// EqualT
-// 比较
+// EqualT reports whether two slices are equal element-wise.
+// EqualT 逐元素比较两个切片是否相等。
 func EqualT(a, b []interface{}) bool {
 	if len(a) != len(b) {
 		return false

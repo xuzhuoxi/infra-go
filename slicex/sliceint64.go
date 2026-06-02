@@ -1,7 +1,7 @@
 package slicex
 
-// MergeInt64
-// 合并
+// MergeInt64 merges multiple slices into one.
+// MergeInt64 合并多个切片为一个。
 func MergeInt64(slices ...[]int64) []int64 {
 	ln := len(slices)
 	index := 0
@@ -19,8 +19,8 @@ func MergeInt64(slices ...[]int64) []int64 {
 	return rs
 }
 
-// InsertInt64
-// 按位置插入
+// InsertInt64 inserts elements at the specified position.
+// InsertInt64 按位置插入元素。
 func InsertInt64(slice []int64, pos int, target ...int64) []int64 {
 	ln := len(slice)
 	if pos < 0 {
@@ -39,20 +39,20 @@ Start:
 	return rs
 }
 
-// InsertHeadInt64
-// 头插入
+// InsertHeadInt64 inserts elements at the head.
+// InsertHeadInt64 在头部插入元素。
 func InsertHeadInt64(slice []int64, target ...int64) []int64 {
 	return InsertInt64(slice, 0, target...)
 }
 
-// InsertTailInt64
-// 尾插入
+// InsertTailInt64 inserts elements at the tail.
+// InsertTailInt64 在尾部插入元素。
 func InsertTailInt64(slice []int64, target ...int64) []int64 {
 	return InsertInt64(slice, len(slice), target...)
 }
 
-// RemoveValueInt64
-// 按值删除
+// RemoveValueInt64 removes the first element equal to target.
+// RemoveValueInt64 按值删除第一个匹配元素。
 func RemoveValueInt64(slice []int64, target int64) ([]int64, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -68,8 +68,8 @@ func RemoveValueInt64(slice []int64, target int64) ([]int64, bool) {
 	return nil, false
 }
 
-// RemoveAllValueInt64
-// 按值删除
+// RemoveAllValueInt64 removes all elements equal to target.
+// RemoveAllValueInt64 按值删除所有匹配元素。
 func RemoveAllValueInt64(slice []int64, target int64) ([]int64, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -86,8 +86,8 @@ func RemoveAllValueInt64(slice []int64, target int64) ([]int64, bool) {
 	return cp[:index], true
 }
 
-// RemoveAtInt64
-// 按点删除
+// RemoveAtInt64 removes the element at the specified index.
+// RemoveAtInt64 按索引删除元素。
 func RemoveAtInt64(slice []int64, pos int) ([]int64, int64, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -100,27 +100,27 @@ func RemoveAtInt64(slice []int64, pos int) ([]int64, int64, bool) {
 	return rs, obj, true
 }
 
-// RemoveHeadInt64
-// 删除头
+// RemoveHeadInt64 removes the first element.
+// RemoveHeadInt64 删除头部元素。
 func RemoveHeadInt64(slice []int64) ([]int64, int64, bool) {
 	return RemoveAtInt64(slice, 0)
 }
 
-// RemoveTailInt64
-// 删除尾
+// RemoveTailInt64 removes the last element.
+// RemoveTailInt64 删除尾部元素。
 func RemoveTailInt64(slice []int64) ([]int64, int64, bool) {
 	return RemoveAtInt64(slice, len(slice)-1)
 }
 
-// RemoveFromInt64
-// 删除区间
+// RemoveFromInt64 removes length elements starting at startPos.
+// RemoveFromInt64 从 startPos 起删除 length 个元素。
 func RemoveFromInt64(slice []int64, startPos int, length int) (result []int64, removed []int64, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeInt64(slice, startPos, endPos)
 }
 
-// RemoveRangeInt64
-// 删除区间
+// RemoveRangeInt64 removes elements in [startPos, endPos).
+// RemoveRangeInt64 删除 [startPos, endPos) 区间内的元素。
 func RemoveRangeInt64(slice []int64, startPos int, endPos int) (result []int64, removed []int64, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -135,15 +135,15 @@ func RemoveRangeInt64(slice []int64, startPos int, endPos int) (result []int64, 
 	return rs, slice[startPos:endPos], true
 }
 
-// ContainsInt64
-// 包含
+// ContainsInt64 reports whether slice contains target.
+// ContainsInt64 判断切片是否包含目标值。
 func ContainsInt64(slice []int64, target int64) bool {
 	_, ok := IndexInt64(slice, target)
 	return ok
 }
 
-// IndexInt64
-// 从头部查找
+// IndexInt64 returns the index of the first matching element.
+// IndexInt64 从头部查找第一个匹配元素的索引。
 func IndexInt64(slice []int64, target int64) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,8 +156,8 @@ func IndexInt64(slice []int64, target int64) (int, bool) {
 	return -1, false
 }
 
-// LastIndexInt64
-// 从尾部查找
+// LastIndexInt64 returns the index of the last matching element.
+// LastIndexInt64 从尾部查找最后一个匹配元素的索引。
 func LastIndexInt64(slice []int64, target int64) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -170,8 +170,8 @@ func LastIndexInt64(slice []int64, target int64) (int, bool) {
 	return -1, false
 }
 
-// ReverseInt64
-// 倒序
+// ReverseInt64 reverses elements in place.
+// ReverseInt64 原地倒序元素。
 func ReverseInt64(slice []int64) {
 	ln := len(slice)
 	if 0 == ln {
@@ -182,8 +182,8 @@ func ReverseInt64(slice []int64) {
 	}
 }
 
-// EqualInt64
-// 比较
+// EqualInt64 reports whether two slices are equal element-wise.
+// EqualInt64 逐元素比较两个切片是否相等。
 func EqualInt64(a, b []int64) bool {
 	if len(a) != len(b) {
 		return false
@@ -196,8 +196,8 @@ func EqualInt64(a, b []int64) bool {
 	return true
 }
 
-// SumInt64
-// 求和
+// SumInt64 returns the sum of all elements.
+// SumInt64 求和所有元素。
 func SumInt64(slice []int64) int64 {
 	rs := int64(0)
 	for _, val := range slice {

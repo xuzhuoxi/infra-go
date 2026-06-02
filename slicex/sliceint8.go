@@ -1,7 +1,7 @@
 package slicex
 
-// MergeInt8
-// 合并
+// MergeInt8 merges multiple slices into one.
+// MergeInt8 合并多个切片为一个。
 func MergeInt8(slices ...[]int8) []int8 {
 	ln := len(slices)
 	index := 0
@@ -19,8 +19,8 @@ func MergeInt8(slices ...[]int8) []int8 {
 	return rs
 }
 
-// InsertInt8
-// 按位置插入
+// InsertInt8 inserts elements at the specified position.
+// InsertInt8 按位置插入元素。
 func InsertInt8(slice []int8, pos int, target ...int8) []int8 {
 	ln := len(slice)
 	if pos < 0 {
@@ -39,20 +39,20 @@ Start:
 	return rs
 }
 
-// InsertHeadInt8
-// 头插入
+// InsertHeadInt8 inserts elements at the head.
+// InsertHeadInt8 在头部插入元素。
 func InsertHeadInt8(slice []int8, target ...int8) []int8 {
 	return InsertInt8(slice, 0, target...)
 }
 
-// InsertTailInt8
-// 尾插入
+// InsertTailInt8 inserts elements at the tail.
+// InsertTailInt8 在尾部插入元素。
 func InsertTailInt8(slice []int8, target ...int8) []int8 {
 	return InsertInt8(slice, len(slice), target...)
 }
 
-// RemoveValueInt8
-// 按值删除
+// RemoveValueInt8 removes the first element equal to target.
+// RemoveValueInt8 按值删除第一个匹配元素。
 func RemoveValueInt8(slice []int8, target int8) ([]int8, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -68,8 +68,8 @@ func RemoveValueInt8(slice []int8, target int8) ([]int8, bool) {
 	return nil, false
 }
 
-// RemoveAllValueInt8
-// 按值删除
+// RemoveAllValueInt8 removes all elements equal to target.
+// RemoveAllValueInt8 按值删除所有匹配元素。
 func RemoveAllValueInt8(slice []int8, target int8) ([]int8, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -86,8 +86,8 @@ func RemoveAllValueInt8(slice []int8, target int8) ([]int8, bool) {
 	return cp[:index], true
 }
 
-// RemoveAtInt8
-// 按点删除
+// RemoveAtInt8 removes the element at the specified index.
+// RemoveAtInt8 按索引删除元素。
 func RemoveAtInt8(slice []int8, pos int) ([]int8, int8, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -100,27 +100,27 @@ func RemoveAtInt8(slice []int8, pos int) ([]int8, int8, bool) {
 	return rs, obj, true
 }
 
-// RemoveHeadInt8
-// 删除头
+// RemoveHeadInt8 removes the first element.
+// RemoveHeadInt8 删除头部元素。
 func RemoveHeadInt8(slice []int8) ([]int8, int8, bool) {
 	return RemoveAtInt8(slice, 0)
 }
 
-// RemoveTailInt8
-// 删除尾
+// RemoveTailInt8 removes the last element.
+// RemoveTailInt8 删除尾部元素。
 func RemoveTailInt8(slice []int8) ([]int8, int8, bool) {
 	return RemoveAtInt8(slice, len(slice)-1)
 }
 
-// RemoveFromInt8
-// 删除区间
+// RemoveFromInt8 removes length elements starting at startPos.
+// RemoveFromInt8 从 startPos 起删除 length 个元素。
 func RemoveFromInt8(slice []int8, startPos int, length int) (result []int8, removed []int8, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeInt8(slice, startPos, endPos)
 }
 
-// RemoveRangeInt8
-// 删除区间
+// RemoveRangeInt8 removes elements in [startPos, endPos).
+// RemoveRangeInt8 删除 [startPos, endPos) 区间内的元素。
 func RemoveRangeInt8(slice []int8, startPos int, endPos int) (result []int8, removed []int8, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -135,15 +135,15 @@ func RemoveRangeInt8(slice []int8, startPos int, endPos int) (result []int8, rem
 	return rs, slice[startPos:endPos], true
 }
 
-// ContainsInt8
-// 包含
+// ContainsInt8 reports whether slice contains target.
+// ContainsInt8 判断切片是否包含目标值。
 func ContainsInt8(slice []int8, target int8) bool {
 	_, ok := IndexInt8(slice, target)
 	return ok
 }
 
-// IndexInt8
-// 从头部查找
+// IndexInt8 returns the index of the first matching element.
+// IndexInt8 从头部查找第一个匹配元素的索引。
 func IndexInt8(slice []int8, target int8) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,8 +156,8 @@ func IndexInt8(slice []int8, target int8) (int, bool) {
 	return -1, false
 }
 
-// LastIndexInt8
-// 从尾部查找
+// LastIndexInt8 returns the index of the last matching element.
+// LastIndexInt8 从尾部查找最后一个匹配元素的索引。
 func LastIndexInt8(slice []int8, target int8) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -170,8 +170,8 @@ func LastIndexInt8(slice []int8, target int8) (int, bool) {
 	return -1, false
 }
 
-// ReverseInt8
-// 倒序
+// ReverseInt8 reverses elements in place.
+// ReverseInt8 原地倒序元素。
 func ReverseInt8(slice []int8) {
 	ln := len(slice)
 	if 0 == ln {
@@ -182,8 +182,8 @@ func ReverseInt8(slice []int8) {
 	}
 }
 
-// EqualInt8
-// 比较
+// EqualInt8 reports whether two slices are equal element-wise.
+// EqualInt8 逐元素比较两个切片是否相等。
 func EqualInt8(a, b []int8) bool {
 	if len(a) != len(b) {
 		return false
@@ -196,8 +196,8 @@ func EqualInt8(a, b []int8) bool {
 	return true
 }
 
-// SumInt8
-// 求和
+// SumInt8 returns the sum of all elements.
+// SumInt8 求和所有元素。
 func SumInt8(slice []int8) int8 {
 	rs := int8(0)
 	for _, val := range slice {

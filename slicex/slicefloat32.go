@@ -1,7 +1,7 @@
 package slicex
 
-// MergeFloat32
-// 合并
+// MergeFloat32 merges multiple slices into one.
+// MergeFloat32 合并多个切片为一个。
 func MergeFloat32(slices ...[]float32) []float32 {
 	ln := len(slices)
 	index := 0
@@ -19,8 +19,8 @@ func MergeFloat32(slices ...[]float32) []float32 {
 	return rs
 }
 
-// InsertFloat32
-// 按位置插入
+// InsertFloat32 inserts elements at the specified position.
+// InsertFloat32 按位置插入元素。
 func InsertFloat32(slice []float32, pos int, target ...float32) []float32 {
 	ln := len(slice)
 	if pos < 0 {
@@ -39,20 +39,20 @@ Start:
 	return rs
 }
 
-// InsertHeadFloat32
-// 头插入
+// InsertHeadFloat32 inserts elements at the head.
+// InsertHeadFloat32 在头部插入元素。
 func InsertHeadFloat32(slice []float32, target ...float32) []float32 {
 	return InsertFloat32(slice, 0, target...)
 }
 
-// InsertTailFloat32
-// 尾插入
+// InsertTailFloat32 inserts elements at the tail.
+// InsertTailFloat32 在尾部插入元素。
 func InsertTailFloat32(slice []float32, target ...float32) []float32 {
 	return InsertFloat32(slice, len(slice), target...)
 }
 
-// RemoveValueFloat32
-// 按值删除
+// RemoveValueFloat32 removes the first element equal to target.
+// RemoveValueFloat32 按值删除第一个匹配元素。
 func RemoveValueFloat32(slice []float32, target float32) ([]float32, bool) {
 	if len(slice) == 0 {
 		return nil, false
@@ -68,8 +68,8 @@ func RemoveValueFloat32(slice []float32, target float32) ([]float32, bool) {
 	return nil, false
 }
 
-// RemoveAllValueFloat32
-// 按值删除
+// RemoveAllValueFloat32 removes all elements equal to target.
+// RemoveAllValueFloat32 按值删除所有匹配元素。
 func RemoveAllValueFloat32(slice []float32, target float32) ([]float32, bool) {
 	sl := len(slice)
 	if sl == 0 {
@@ -86,8 +86,8 @@ func RemoveAllValueFloat32(slice []float32, target float32) ([]float32, bool) {
 	return cp[:index], true
 }
 
-// RemoveAtFloat32
-// 按点删除
+// RemoveAtFloat32 removes the element at the specified index.
+// RemoveAtFloat32 按索引删除元素。
 func RemoveAtFloat32(slice []float32, pos int) ([]float32, float32, bool) {
 	ln := len(slice)
 	if pos < 0 || pos >= ln {
@@ -100,27 +100,27 @@ func RemoveAtFloat32(slice []float32, pos int) ([]float32, float32, bool) {
 	return rs, obj, true
 }
 
-// RemoveHeadFloat32
-// 删除头
+// RemoveHeadFloat32 removes the first element.
+// RemoveHeadFloat32 删除头部元素。
 func RemoveHeadFloat32(slice []float32) ([]float32, float32, bool) {
 	return RemoveAtFloat32(slice, 0)
 }
 
-// RemoveTailFloat32
-// 删除尾
+// RemoveTailFloat32 removes the last element.
+// RemoveTailFloat32 删除尾部元素。
 func RemoveTailFloat32(slice []float32) ([]float32, float32, bool) {
 	return RemoveAtFloat32(slice, len(slice)-1)
 }
 
-// RemoveFromFloat32
-// 删除区间
+// RemoveFromFloat32 removes length elements starting at startPos.
+// RemoveFromFloat32 从 startPos 起删除 length 个元素。
 func RemoveFromFloat32(slice []float32, startPos int, length int) (result []float32, removed []float32, ok bool) {
 	endPos := startPos + length
 	return RemoveRangeFloat32(slice, startPos, endPos)
 }
 
-// RemoveRangeFloat32
-// 删除区间
+// RemoveRangeFloat32 removes elements in [startPos, endPos).
+// RemoveRangeFloat32 删除 [startPos, endPos) 区间内的元素。
 func RemoveRangeFloat32(slice []float32, startPos int, endPos int) (result []float32, removed []float32, ok bool) {
 	if startPos > endPos {
 		startPos, endPos = endPos, startPos
@@ -135,15 +135,15 @@ func RemoveRangeFloat32(slice []float32, startPos int, endPos int) (result []flo
 	return rs, slice[startPos:endPos], true
 }
 
-// ContainsFloat32
-// 包含
+// ContainsFloat32 reports whether slice contains target.
+// ContainsFloat32 判断切片是否包含目标值。
 func ContainsFloat32(slice []float32, target float32) bool {
 	_, ok := IndexFloat32(slice, target)
 	return ok
 }
 
-// IndexFloat32
-// 从头部查找
+// IndexFloat32 returns the index of the first matching element.
+// IndexFloat32 从头部查找第一个匹配元素的索引。
 func IndexFloat32(slice []float32, target float32) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -156,8 +156,8 @@ func IndexFloat32(slice []float32, target float32) (int, bool) {
 	return -1, false
 }
 
-// LastIndexFloat32
-// 从尾部查找
+// LastIndexFloat32 returns the index of the last matching element.
+// LastIndexFloat32 从尾部查找最后一个匹配元素的索引。
 func LastIndexFloat32(slice []float32, target float32) (int, bool) {
 	if nil == slice || len(slice) == 0 {
 		return -1, false
@@ -170,8 +170,8 @@ func LastIndexFloat32(slice []float32, target float32) (int, bool) {
 	return -1, false
 }
 
-// ReverseFloat32
-// 倒序
+// ReverseFloat32 reverses elements in place.
+// ReverseFloat32 原地倒序元素。
 func ReverseFloat32(slice []float32) {
 	ln := len(slice)
 	if 0 == ln {
@@ -182,8 +182,8 @@ func ReverseFloat32(slice []float32) {
 	}
 }
 
-// EqualFloat32
-// 比较
+// EqualFloat32 reports whether two slices are equal element-wise.
+// EqualFloat32 逐元素比较两个切片是否相等。
 func EqualFloat32(a, b []float32) bool {
 	if len(a) != len(b) {
 		return false
@@ -196,8 +196,8 @@ func EqualFloat32(a, b []float32) bool {
 	return true
 }
 
-// SumFloat32
-// 求和
+// SumFloat32 returns the sum of all elements.
+// SumFloat32 求和所有元素。
 func SumFloat32(slice []float32) float32 {
 	rs := float32(0)
 	for _, val := range slice {
