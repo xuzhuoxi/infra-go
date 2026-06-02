@@ -1,8 +1,3 @@
-// Package mgox
-// Created by xuzhuoxi
-// on 2019-06-13.
-// @author xuzhuoxi
-//
 package mgox
 
 import (
@@ -15,6 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// NewMongoDriver creates a driver that manages multiple named MongoDB clients.
+// NewMongoDriver 创建管理多个具名 MongoDB 客户端的驱动。
+//
+// maxClient enables a concurrency limit when greater than zero; zero disables the limit.
+// maxClient 大于 0 时启用并发限制；为 0 时不限制。
 func NewMongoDriver(maxClient int) IMongoDriver {
 	rs := &MongoDriver{}
 	if maxClient > 0 {
@@ -26,17 +26,33 @@ func NewMongoDriver(maxClient int) IMongoDriver {
 	return rs
 }
 
+// IMongoDriver manages the lifecycle of multiple named MongoDB clients.
+// IMongoDriver 管理多个具名 MongoDB 客户端的生命周期。
 type IMongoDriver interface {
 	io.Closer
+	// OpenClient opens a named client with the given options and context.
+	// OpenClient 使用指定选项与 context 打开具名客户端。
 	OpenClient(name string, options *options.ClientOptions, context context.Context) (client IMongoClient, err error)
+	// CloseClient closes and removes a client by name.
+	// CloseClient 按名称关闭并移除客户端。
 	CloseClient(name string) error
+	// NumClient returns the number of open clients.
+	// NumClient 返回已打开客户端数量。
 	NumClient() int
 
+	// GetClient returns a client by name.
+	// GetClient 按名称返回客户端。
 	GetClient(name string) (client IMongoClient, ok bool)
+	// SetMasterClient sets or clears the master client by name.
+	// SetMasterClient 按名称设置或清除主客户端。
 	SetMasterClient(name string) (client IMongoClient, change bool)
+	// MasterClient returns the current master client, or nil if unset.
+	// MasterClient 返回当前主客户端；未设置时返回 nil。
 	MasterClient() IMongoClient
 }
 
+// MongoDriver holds named clients with optional concurrency limiting.
+// MongoDriver 持有具名客户端，并支持可选的并发限制。
 type MongoDriver struct {
 	Clients     []IMongoClient
 	MasterIndex int
@@ -45,6 +61,8 @@ type MongoDriver struct {
 	Lock      sync.RWMutex
 }
 
+// Close disconnects all clients and stops the concurrency limiter.
+// Close 断开所有客户端并停止并发限制器。
 func (d *MongoDriver) Close() error {
 	d.Lock.Lock()
 	defer d.Lock.Unlock()
@@ -57,6 +75,8 @@ func (d *MongoDriver) Close() error {
 	return nil
 }
 
+// OpenClient opens a named client with the given options and context.
+// OpenClient 使用指定选项与 context 打开具名客户端。
 func (d *MongoDriver) OpenClient(name string, options *options.ClientOptions, context context.Context) (client IMongoClient, err error) {
 	d.Lock.Lock()
 	defer d.Lock.Unlock()
@@ -75,6 +95,8 @@ func (d *MongoDriver) OpenClient(name string, options *options.ClientOptions, co
 	return
 }
 
+// CloseClient closes and removes a client by name.
+// CloseClient 按名称关闭并移除客户端。
 func (d *MongoDriver) CloseClient(name string) error {
 	d.Lock.Lock()
 	defer d.Lock.Unlock()
@@ -95,12 +117,16 @@ func (d *MongoDriver) CloseClient(name string) error {
 	return mongox.SessionNilError("MongoDriver.CloseClient name=\"" + name + "\"")
 }
 
+// NumClient returns the number of open clients.
+// NumClient 返回已打开客户端数量。
 func (d *MongoDriver) NumClient() int {
 	d.Lock.RLock()
 	defer d.Lock.RUnlock()
 	return len(d.Clients)
 }
 
+// GetClient returns a client by name.
+// GetClient 按名称返回客户端。
 func (d *MongoDriver) GetClient(name string) (client IMongoClient, ok bool) {
 	d.Lock.RLock()
 	defer d.Lock.RUnlock()
@@ -114,6 +140,8 @@ func (d *MongoDriver) GetClient(name string) (client IMongoClient, ok bool) {
 	return d.Clients[index], true
 }
 
+// SetMasterClient sets or clears the master client by name.
+// SetMasterClient 按名称设置或清除主客户端。
 func (d *MongoDriver) SetMasterClient(name string) (client IMongoClient, change bool) {
 	d.Lock.Lock()
 	defer d.Lock.Unlock()
@@ -131,6 +159,8 @@ func (d *MongoDriver) SetMasterClient(name string) (client IMongoClient, change 
 	return d.Clients[index], change
 }
 
+// MasterClient returns the current master client, or nil if unset.
+// MasterClient 返回当前主客户端；未设置时返回 nil。
 func (d *MongoDriver) MasterClient() IMongoClient {
 	d.Lock.RLock()
 	defer d.Lock.RUnlock()
