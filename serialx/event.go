@@ -1,26 +1,23 @@
-// Package serialx
-// Create on 2023/7/2
-// @author xuzhuoxi
 package serialx
 
 // ISerialManager Events
 const (
 	// Module Events ---------- ---------- ---------- ---------- ----------
 
-	// EventOnSerialModuleStarted
-	// Serial module start finish event
+	// EventOnSerialModuleStarted is dispatched when a serial module finishes starting.
+	// EventOnSerialModuleStarted 在串行模块完成启动时分发。
 	EventOnSerialModuleStarted = "Serial-Module:OnObserverStarted"
-	// EventOnSerialModuleStopped
-	// Serial module stop finish event
+	// EventOnSerialModuleStopped is dispatched when a serial module finishes stopping.
+	// EventOnSerialModuleStopped 在串行模块完成停止时分发。
 	EventOnSerialModuleStopped = "Serial-Module:OnObserverStopped"
 
 	// Manager Events ---------- ---------- ---------- ---------- ----------
 
-	// EventOnSerialManagerStarted
-	// Serial manger start finish event
+	// EventOnSerialManagerStarted is dispatched when all serial modules have started.
+	// EventOnSerialManagerStarted 在全部串行模块启动完成时分发。
 	EventOnSerialManagerStarted = "Serial-Manager:OnManagerStarted"
-	// EventOnSerialManagerStopped
-	// Serial manger stop finish event
+	// EventOnSerialManagerStopped is dispatched when all serial modules have stopped.
+	// EventOnSerialManagerStopped 在全部串行模块停止完成时分发。
 	EventOnSerialManagerStopped = "Serial-Manager:OnManagerStopped"
 )
 
@@ -28,28 +25,28 @@ const (
 const (
 	// Module Events ---------- ---------- ---------- ---------- ----------
 
-	// EventOnStartupModuleSaved
-	// Startup module save finish event
+	// EventOnStartupModuleSaved is dispatched when a startup module finishes saving.
+	// EventOnStartupModuleSaved 在启动模块完成保存时分发。
 	EventOnStartupModuleSaved = "Startup-Module:OnStartupModuleSaved"
-	// EventOnStartupModuleStarted
-	// Startup module start finish event
+	// EventOnStartupModuleStarted is dispatched when a startup module finishes starting.
+	// EventOnStartupModuleStarted 在启动模块完成启动时分发。
 	EventOnStartupModuleStarted = "Startup-Module:OnStartupModuleStarted"
-	// EventOnStartupModuleStopped
-	// Startup module stop finish event
+	// EventOnStartupModuleStopped is dispatched when a startup module finishes stopping.
+	// EventOnStartupModuleStopped 在启动模块完成停止时分发。
 	EventOnStartupModuleStopped = "Startup-Module:OnStartupModuleStopped"
 
 	// Manager Events ---------- ---------- ---------- ---------- ----------
 
-	// EventOnStartupManagerSaved
-	// Startup manger save finish event
+	// EventOnStartupManagerSaved is dispatched when all startup modules have been saved.
+	// EventOnStartupManagerSaved 在全部启动模块保存完成时分发。
 	EventOnStartupManagerSaved = "Startup-Manager:OnStartupManagerSaved"
-	// EventOnStartupManagerStarted
-	// Startup manger start finish event
+	// EventOnStartupManagerStarted is dispatched when all startup modules have started.
+	// EventOnStartupManagerStarted 在全部启动模块启动完成时分发。
 	EventOnStartupManagerStarted = "Startup-Manager:OnStartupManagerStarted"
-	// EventOnStartupManagerStopped
-	// Startup manger stop finish event
+	// EventOnStartupManagerStopped is dispatched when all startup modules have stopped.
+	// EventOnStartupManagerStopped 在全部启动模块停止完成时分发。
 	EventOnStartupManagerStopped = "Startup-Manager:OnStartupManagerStopped"
-	// EventOnStartupManagerRebooted
-	// Startup manger reboot finish event
+	// EventOnStartupManagerRebooted is dispatched when a manager reboot completes.
+	// EventOnStartupManagerRebooted 在管理器重启完成时分发。
 	EventOnStartupManagerRebooted = "Startup-Manager:OnStartupManagerRebooted"
 )
