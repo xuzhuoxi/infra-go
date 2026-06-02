@@ -1,14 +1,9 @@
-// Package osxu
-// Created by xuzhuoxi
-// on 2019-02-18.
-// @author xuzhuoxi
-//
 package osxu
 
 import "os"
 
-// ProcessExist
-// 判断一个进程是否启动
+// ProcessExist reports whether a process with the given PID exists.
+// ProcessExist 判断指定 PID 的进程是否已启动。
 func ProcessExist(pid int) bool {
 	_, err := os.FindProcess(pid)
 	return nil == err
