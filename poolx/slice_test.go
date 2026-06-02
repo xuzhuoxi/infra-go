@@ -1,6 +1,3 @@
-// Package poolx
-// Create on 2025/4/23
-// @author xuzhuoxi
 package poolx
 
 import (

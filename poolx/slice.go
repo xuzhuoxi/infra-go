@@ -1,6 +1,3 @@
-// Package poolx
-// Create on 2025/4/19
-// @author xuzhuoxi
 package poolx
 
 import (
@@ -15,10 +12,14 @@ var (
 	errLenTooLarge     = errors.New("len too large")
 )
 
-// NewByteSlicePool 创建一个字节切片池
-// 如果cap为0，则使用默认值2048
-// 如果重复创建相同cap的池，只返回同一个
+// NewByteSlicePool creates or returns a shared byte slice pool for the given capacity.
+// NewByteSlicePool 创建或返回指定容量的共享字节切片池。
 //
+// cap uses defaultBytePoolCap (2048) when cap is zero or negative.
+// cap 为 0 或非正数时使用默认值 2048。
+//
+// Pools with the same cap share one instance; repeated calls return the same pool.
+// 相同 cap 只维护一个池实例，重复创建返回同一对象。
 func NewByteSlicePool(cap int) IByteSlicePool {
 	if cap <= 0 {
 		cap = defaultBytePoolCap
@@ -40,22 +41,23 @@ func NewByteSlicePool(cap int) IByteSlicePool {
 	return pool
 }
 
-// IByteSlicePool 字节切片池
+// IByteSlicePool is a pool of reusable *[]byte backed by sync.Pool.
+// IByteSlicePool 基于 sync.Pool 的可复用 *[]byte 字节切片池。
 type IByteSlicePool interface {
-	// Cap
-	// 切片实例的设置容量
+	// Cap returns the configured slice capacity of the pool.
+	// Cap 返回池配置的切片容量。
 	Cap() int
-	// Get
-	// 获取一个切片引用
-	// len=0
+	// Get acquires a *[]byte from the pool with length 0.
+	// Get 从池中获取一个 len 为 0 的 *[]byte。
 	Get() *[]byte
-	// GetL
-	// 获取一个切片引用
-	// 切片的len值为l
-	// 如果 ln>cap值，返回一个错误
+	// GetL acquires a *[]byte from the pool with length ln.
+	// GetL 从池中获取长度为 ln 的 *[]byte。
+	//
+	// Returns an error when ln exceeds Cap.
+	// ln 大于 Cap 时返回错误。
 	GetL(ln int) (*[]byte, error)
-	// Put
-	// 归还一个切片引用
+	// Put returns a *[]byte to the pool.
+	// Put 将 *[]byte 归还到池中。
 	Put(bs *[]byte)
 }
 
