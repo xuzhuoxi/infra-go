@@ -1,41 +1,36 @@
 package stringx
 
+// PasswdFlag is a bitmask of allowed password character classes.
+// PasswdFlag 表示密码允许的字符类别位掩码。
 type PasswdFlag int
 
 const (
-	// N 0-9
-	// Numbers 0-9
-	// 数字 0-9
+	// N allows digits 0-9.
+	// N 允许数字 0-9。
 	N PasswdFlag = 1 << iota
-	// L a-z
-	// Lowercase letters a-z
-	// 小写字母 a-z
+	// L allows lowercase letters a-z.
+	// L 允许小写字母 a-z。
 	L
-	// U
-	// Uppercase letter A-Z
-	// 大写字母 A-Z
+	// U allows uppercase letters A-Z.
+	// U 允许大写字母 A-Z。
 	U
-	// S
-	// Symbols found on the keyboard (all keyboard characters not defined as letters or numerals) and spaces
-	// 在键盘上找到的符号（所有未定义为字母或数字的键盘字符）和空格
+	// S allows keyboard symbols and spaces.
+	// S 允许键盘符号（非字母数字的键盘字符）和空格。
 	S
 )
 
 const (
-	// LOrU
-	// Uppercase or lowercase letter
-	// 全部字母
+	// LOrU allows lowercase and uppercase letters.
+	// LOrU 允许大小写字母。
 	LOrU = L | U
-	// DefaultPasswdFlag
-	// Include Number and Letter
-	// 数字和字母
+	// DefaultPasswdFlag requires digits and letters.
+	// DefaultPasswdFlag 默认要求数字和字母。
 	DefaultPasswdFlag            = N | LOrU
 	mask              PasswdFlag = 0x11f
 )
 
-// CheckPassword
-// Check that the password content is legitimate
-// 检查密码内容是否合法
+// CheckPassword validates password length and allowed character classes.
+// CheckPassword 检查密码长度及允许的字符类别是否合法。
 func CheckPassword(pwd string, flag PasswdFlag, minLen int, maxLen int) bool {
 	if minLen > maxLen {
 		minLen, maxLen = maxLen, minLen

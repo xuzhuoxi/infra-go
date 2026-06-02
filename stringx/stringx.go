@@ -38,13 +38,15 @@ func printX(sb *strings.Builder, args ...interface{}) string {
 	return sb.String()
 }
 
-// Print 字符串拼接
+// Print concatenates args into a string using a shared builder.
+// Print 使用共享 builder 将参数拼接成字符串。
 func Print(args ...interface{}) string {
 	builder.Reset()
 	return printX(builder, args...)
 }
 
-// PrintSafe 字符串拼接
+// PrintSafe concatenates args into a string with mutex-protected shared builder.
+// PrintSafe 在互斥锁保护下使用共享 builder 将参数拼接成字符串。
 func PrintSafe(args ...interface{}) string {
 	builderLock.Lock()
 	defer builderLock.Unlock()
@@ -52,8 +54,8 @@ func PrintSafe(args ...interface{}) string {
 	return printX(builder, args...)
 }
 
-// GetRuneCount
-// 取字符串的字符个数
+// GetRuneCount returns the number of Unicode code points in str.
+// GetRuneCount 返回 str 中 Unicode 码点（字符）的个数。
 func GetRuneCount(str string) int {
 	if "" == str {
 		return 0
@@ -61,8 +63,8 @@ func GetRuneCount(str string) int {
 	return utf8.RuneCountInString(str)
 }
 
-// IndexOfString
-// 取单个字符的首位置
+// IndexOfString returns the first rune index of char in s, or -1 if not found.
+// IndexOfString 返回 char 在 s 中首次出现的 rune 索引，未找到返回 -1。
 func IndexOfString(s string, char string) int {
 	if "" == char || "" == s {
 		return -1
@@ -80,8 +82,8 @@ func IndexOfString(s string, char string) int {
 	return -1
 }
 
-// LastIndexOfString
-// 取单个字符的尾位置
+// LastIndexOfString returns the last rune index of char in s, or -1 if not found.
+// LastIndexOfString 返回 char 在 s 中最后一次出现的 rune 索引，未找到返回 -1。
 func LastIndexOfString(s string, char string) int {
 	if "" == char || "" == s {
 		return -1
@@ -99,14 +101,14 @@ func LastIndexOfString(s string, char string) int {
 	return -1
 }
 
-// SubStr
-// 截取子字符串
+// SubStr returns a substring starting at startIndex with the given rune length.
+// SubStr 从 startIndex 起按 rune 长度截取子字符串。
 func SubStr(s string, startIndex, length int) string {
 	return SubString(s, startIndex, startIndex+length)
 }
 
-// SubString
-// 截取子字符串
+// SubString returns the substring from startIndex to endIndex in runes.
+// SubString 按 rune 索引从 startIndex 到 endIndex 截取子字符串。
 func SubString(s string, startIndex, endIndex int) string {
 	runes := []rune(s)
 	if endIndex > len(runes) {
@@ -115,23 +117,24 @@ func SubString(s string, startIndex, endIndex int) string {
 	return string(runes[startIndex:endIndex])
 }
 
-// SubPrefix
-// 截取前部分
+// SubPrefix returns the prefix of s before the rune at index.
+// SubPrefix 返回 s 在 rune index 之前的前缀部分。
 func SubPrefix(s string, index int) string {
 	prefix, _ := CutString(s, index, true)
 	return prefix
 }
 
-// SubSuffix
-// 截取后部分
+// SubSuffix returns the suffix of s from the rune at index onward.
+// SubSuffix 返回 s 从 rune index 起的后缀部分。
 func SubSuffix(s string, index int) string {
 	_, suffix := CutString(s, index, true)
 	return suffix
 }
 
-// CutString
-// 把字符串一分为二
-// 当keepIndex=true是，index所在字符会留在第二个返回字符的第一个
+// CutString splits s into two parts at runeIndex.
+// CutString 在 runeIndex 处把字符串一分为二。
+// When keepIndex is true, the rune at index remains as the first rune of the second return value.
+// 当 keepIndex=true 时，index 所在字符会留在第二个返回字符串的第一个位置。
 func CutString(s string, runeIndex int, keepIndex bool) (string, string) {
 	runes := []rune(s)
 	if runeIndex < 0 {
@@ -147,6 +150,8 @@ func CutString(s string, runeIndex int, keepIndex bool) (string, string) {
 	}
 }
 
+// SplitToken splits str by separator with optional trimming and empty-token filtering.
+// SplitToken 按分隔符拆分字符串，可选去除空白并忽略空 token。
 func SplitToken(str string, separator string, trimTokens bool, ignoreEmptyTokens bool) []string {
 	if len(str) == 0 {
 		return nil
