@@ -1,90 +1,113 @@
 package regexpx
 
-// 参考：http://en.wikipedia.org/wiki/Regular_expression
-// POSIX正则表达式分为Basic Regular Expressions 和 Extended Regular Expressions。
-// ERE增加支持?,+和|，去除了通配符()和{}。而且POSIX正则表达式的标准语法经常坚持使用附加的语法来支持特殊应用。虽然POSIX.2没有实现一些具体的细节，BRE和ERE提供被很多工具使用的标准。
-// BRE要求通配符()和{}写成和\{\}，ERE中无需这样。
-
-//数字相关
 const (
-	// Zero 零
+	// Zero matches a single digit zero.
+	// Zero 匹配单个数字 0。
 	Zero = `^0$`
-	// Digital 数字
+	// Digital matches a single decimal digit.
+	// Digital 匹配单个十进制数字。
 	Digital = `^[0-9]$`
 
-	// PInt 正整数
+	// PInt matches positive integers.
+	// PInt 匹配正整数。
 	PInt = `^[1-9]\d*$`
-	// NInt 负整数
+	// NInt matches negative integers.
+	// NInt 匹配负整数。
 	NInt = `^-[1-9]\d*$`
-	// NNInt 非负整数（正整数 + 0）
+	// NNInt matches non-negative integers (positive integers and zero).
+	// NNInt 匹配非负整数（正整数与 0）。
 	NNInt = `^[1-9]\d*|0$`
-	// NPInt 非正整数（负整数 + 0）
+	// NPInt matches non-positive integers (negative integers and zero).
+	// NPInt 匹配非正整数（负整数与 0）。
 	NPInt = `^-[1-9]\d*|0$`
-	// Int 整数
+	// Int matches integers.
+	// Int 匹配整数。
 	Int = `^-?[1-9]\d*|0$`
 
-	// PFloat 正浮点数
+	// PFloat matches positive floating-point numbers.
+	// PFloat 匹配正浮点数。
 	PFloat = `^[1-9]\d*.\d*|0.\d*[1-9]\d*$`
-	// NFloat 负浮点数
+	// NFloat matches negative floating-point numbers.
+	// NFloat 匹配负浮点数。
 	NFloat = `^-([1-9]\d*.\d*|0.\d*[1-9]\d*)$`
-	// NNFloat 非负浮点数（正浮点数 + 0）
+	// NNFloat matches non-negative floating-point numbers (positive floats and zero).
+	// NNFloat 匹配非负浮点数（正浮点数与 0）。
 	NNFloat = `^[1-9]\d*.\d*|0.\d*[1-9]\d*|0?.0+|0$`
-	// NPFloat 非正浮点数（负浮点数 + 0）
+	// NPFloat matches non-positive floating-point numbers (negative floats and zero).
+	// NPFloat 匹配非正浮点数（负浮点数与 0）。
 	NPFloat = `^(-([1-9]\d*.\d*|0.\d*[1-9]\d*))|0?.0+|0$`
-	// Float 浮点数
+	// Float matches floating-point numbers.
+	// Float 匹配浮点数。
 	Float = `^-?([1-9]\d*.d*|0.\d*[1-9]\d*|0?.0+|0)$`
 )
 
-// 常用
 const (
-	// LowerLetter 小写字母
+	// LowerLetter matches lowercase ASCII letters.
+	// LowerLetter 匹配小写字母。
 	LowerLetter = `[a-z]`
-	// UpperLetter 小写字母
+	// UpperLetter matches uppercase ASCII letters.
+	// UpperLetter 匹配大写字母。
 	UpperLetter = `[A-Z]`
-	// Letter 字母
+	// Letter matches ASCII letters.
+	// Letter 匹配字母。
 	Letter = `[a-zA-Z]`
-	// Space 空白
+	// Space matches whitespace characters.
+	// Space 匹配空白字符。
 	Space = `[\t\n\f\r]`
-	// Work 单词字符
+	// Work matches word characters (digits, letters, underscore).
+	// Work 匹配单词字符（数字、字母、下划线）。
 	Work = `[0-9A-Za-z_]`
 
-	// Chinese 中文字符 [u4e00-u9fa5]
+	// Chinese matches Han script characters.
+	// Chinese 匹配中文字符（\p{Han}）。
 	Chinese = `[\p{Han}]`
-	// DoubleChar
-	// 双字节字符
-	// 包括汉字在内
+	// DoubleChar matches double-byte (non-ASCII) characters including CJK.
+	// DoubleChar 匹配双字节字符（含汉字等非 ASCII）。
 	DoubleChar = `[^x00-xff]`
-	// EmptyLine 空白行
+	// EmptyLine matches blank lines.
+	// EmptyLine 匹配空白行。
 	EmptyLine = `ns*r`
-	// HTML
-	// HTML标记
-	// 上面这个也仅仅能匹配部分，对于复杂的嵌套标记依旧无能为力
+	// HTML matches simple HTML tags (not reliable for deeply nested markup).
+	// HTML 匹配简单 HTML 标记（复杂嵌套标记无法完全覆盖）。
 	HTML = `<(S*?)[^>]*>.*?|<.*? /> `
-	// EmptyHeadTail 首尾空白字符
+	// EmptyHeadTail matches leading or trailing whitespace.
+	// EmptyHeadTail 匹配首尾空白字符。
 	EmptyHeadTail = `^\s*|\s*$ `
-	// EMail Email地址
+	// EMail matches email addresses.
+	// EMail 匹配 Email 地址。
 	EMail = `w[-w.+]*@([A-Za-z0-9][-A-Za-z0-9]+.)+[A-Za-z]{2, 14}`
-	// EMail2 Email地址
+	// EMail2 matches email addresses (alternate pattern).
+	// EMail2 匹配 Email 地址（备用模式）。
 	EMail2 = `w+([-+.]w+)*@w+([-.]w+)*.w+([-.]w+)*`
-	// URL 网址URL
+	// URL matches URLs with optional http/https/ftp/rtsp/mms scheme.
+	// URL 匹配网址 URL（可选 http/https/ftp/rtsp/mms 协议）。
 	URL = `^((https|http|ftp|rtsp|mms)?://)[^s]+`
-	// URL2 网址URL
+	// URL2 matches URLs with a scheme prefix.
+	// URL2 匹配带协议前缀的网址 URL。
 	URL2 = `[a-zA-z]+://[^s]*`
-	// Account 账号 字母开头，允许 5-16 个字节，允许字母数字下划线
+	// Account matches usernames: letter first, 5–16 alphanumeric or underscore.
+	// Account 匹配账号：字母开头，5–16 位字母、数字或下划线。
 	Account = `^[a-zA-Z][a-zA-Z0-9_]{4,15}$`
-	// Nickname 昵称 字母开头，允许 5-16 个字节，允许字母数字下划线
+	// Nickname matches nicknames with letters, digits, underscore, hyphen, or CJK.
+	// Nickname 匹配昵称（字母、数字、下划线、连字符或中文）。
 	Nickname = `[A-Za-z0-9_\-\u4e00-\u9fa5]+`
-	// ChinaPhone1 国内电话号码 匹配形式如 0511-4405222 或 021-87888822
+	// ChinaPhone1 matches mainland phone numbers like 0511-4405222 or 021-87888822.
+	// ChinaPhone1 匹配国内电话号码（如 0511-4405222、021-87888822）。
 	ChinaPhone1 = `\d{3}-\d{8}|\d{4}-\d{7}`
-	// ChinaPhone2 国内电话号码
+	// ChinaPhone2 matches mainland phone numbers (broader format).
+	// ChinaPhone2 匹配国内电话号码（更宽格式）。
 	ChinaPhone2 = `[0-9-()（）]{7,18}`
-	// QQ 腾讯QQ号
+	// QQ matches Tencent QQ numbers.
+	// QQ 匹配腾讯 QQ 号。
 	QQ = `[1-9]([0-9]{5,11})`
-	// ZipCode 中国邮政编码 中国邮政编码为6位数字
+	// ZipCode matches China postal codes (6 digits).
+	// ZipCode 匹配中国邮政编码（6 位数字）。
 	ZipCode = `[1-9]\d{5}(?!\d)`
-	// ChinaIDCard 身份证 中国的身份证为15位或18位
+	// ChinaIDCard matches China ID cards (15 or 18 digits).
+	// ChinaIDCard 匹配中国身份证号（15 或 18 位）。
 	ChinaIDCard = `\d{17}[\d|x]|\d{15}`
-	// IPAddress ip地址
+	// IPAddress matches IPv4 addresses.
+	// IPAddress 匹配 IPv4 地址。
 	IPAddress = `(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)\.(25[0-5]|2[0-4]\d|[0-1]\d{2}|[1-9]?\d)`
 
 	//-------------------------------------
