@@ -1,6 +1,3 @@
-// Package servicex
-// Create on 2023/6/25
-// @author xuzhuoxi
 package servicex
 
 import (
@@ -11,9 +8,13 @@ import (
 )
 
 var (
+	// DefaultManager is the default ServiceManager instance.
+	// DefaultManager 是默认的 ServiceManager 实例。
 	DefaultManager = &ServiceManager{}
 )
 
+// ServiceManager orchestrates configured services through awake, init, data init, and load phases.
+// ServiceManager 按序编排已配置服务的激活、初始化、数据初始化与数据加载流程。
 type ServiceManager struct {
 	logx.LoggerSupport
 	eventx.EventDispatcher
@@ -21,6 +22,8 @@ type ServiceManager struct {
 	endCall *lang.Callback
 }
 
+// Init runs the full service startup pipeline and invokes endCall when loading completes.
+// Init 执行完整的服务启动流水线，并在数据加载完成后调用 endCall。
 func (o *ServiceManager) Init(config *ServiceConfig, endCall lang.FuncCallback) {
 	o.config, o.endCall = config, lang.NewCallback(endCall)
 	o.GetLogger().Infoln("[ServiceManager.Init]", "---------- Start!")
@@ -29,6 +32,8 @@ func (o *ServiceManager) Init(config *ServiceConfig, endCall lang.FuncCallback) 
 	o.startInitServices()
 }
 
+// SetLogStatus enables or disables lifecycle event logging listeners.
+// SetLogStatus 启用或禁用生命周期事件日志监听器。
 func (o *ServiceManager) SetLogStatus(open bool) {
 	if open {
 		o.addListeners()
@@ -37,6 +42,8 @@ func (o *ServiceManager) SetLogStatus(open bool) {
 	}
 }
 
+// SaveServices saves all configured services that implement ISaveDataService.
+// SaveServices 保存全部实现了 ISaveDataService 的已配置服务。
 func (o *ServiceManager) SaveServices() {
 	handler := newSaveDataHandler(o.config, &(o.EventDispatcher))
 	handler.Start(nil)

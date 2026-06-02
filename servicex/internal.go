@@ -1,6 +1,3 @@
-// Package servicex
-// Create on 2023/6/25
-// @author xuzhuoxi
 package servicex
 
 import (
