@@ -2,37 +2,32 @@ package timex
 
 import "time"
 
-// NowUTC
-// returns the current time under UTC
-// 返回UTC下的当前时间
+// NowUTC returns the current time in UTC.
+// NowUTC 返回 UTC 时区下的当前时间。
 func NowUTC() time.Time {
 	return time.Now().In(time.UTC)
 }
 
-// Now
-// returns the current time under loc.
-// 返回loc时区下的当前时间
+// Now returns the current time in loc.
+// Now 返回 loc 时区下的当前时间。
 func Now(loc *time.Location) time.Time {
 	return time.Now().In(loc)
 }
 
-// FromSecondsLocal
-// Generate Time from seconds timestamp, using the Local time zone.
-// 由秒时间戳生成Time，使用本地时区
+// FromSecondsLocal builds time.Time from a second timestamp using the local time zone.
+// FromSecondsLocal 由秒时间戳生成 Time，使用本地时区。
 func FromSecondsLocal(sec int64) time.Time {
 	return time.Unix(sec, 0)
 }
 
-// FromSecondsUTC
-// Generates Time from a second timestamp, using the UTC time zone.
-// 由秒时间戳生成Time，使用UTC时区
+// FromSecondsUTC builds time.Time from a second timestamp using the UTC time zone.
+// FromSecondsUTC 由秒时间戳生成 Time，使用 UTC 时区。
 func FromSecondsUTC(sec int64) time.Time {
 	return FromSecondsLocal(sec).In(time.UTC)
 }
 
-// FromSeconds
-// Generates Time from a second timestamp, using the specified time zone.
-// 由秒时间戳生成Time，使用指定的时区
+// FromSeconds builds time.Time from a second timestamp using the specified time zone.
+// FromSeconds 由秒时间戳生成 Time，使用指定的时区。
 func FromSeconds(sec int64, loc *time.Location) time.Time {
 	if loc == time.Local {
 		return FromSecondsLocal(sec)
@@ -40,23 +35,20 @@ func FromSeconds(sec int64, loc *time.Location) time.Time {
 	return FromSecondsLocal(sec).In(loc)
 }
 
-// FromMillisLocal
-// Generate Time from milliseconds timestamp, using the Local time zone.
-// 由毫秒时间戳生成Time，使用本地时区
+// FromMillisLocal builds time.Time from a millisecond timestamp using the local time zone.
+// FromMillisLocal 由毫秒时间戳生成 Time，使用本地时区。
 func FromMillisLocal(ms int64) time.Time {
 	return time.Unix(0, ms*1e6)
 }
 
-// FromMillisUTC
-// Generates Time from milliseconds timestamp, using the UTC time zone.
-// 由毫秒秒时间戳生成Time，使用UTC时区
+// FromMillisUTC builds time.Time from a millisecond timestamp using the UTC time zone.
+// FromMillisUTC 由毫秒时间戳生成 Time，使用 UTC 时区。
 func FromMillisUTC(ms int64) time.Time {
 	return FromMillisLocal(ms).In(time.UTC)
 }
 
-// FromMillis
-// Generates Time from milliseconds timestamp, using the specified time zone.
-// 由毫秒时间戳生成Time，使用指定的时区
+// FromMillis builds time.Time from a millisecond timestamp using the specified time zone.
+// FromMillis 由毫秒时间戳生成 Time，使用指定的时区。
 func FromMillis(ms int64, loc *time.Location) time.Time {
 	if loc == time.Local {
 		return FromMillisLocal(ms)
@@ -64,23 +56,20 @@ func FromMillis(ms int64, loc *time.Location) time.Time {
 	return FromMillisLocal(ms).In(loc)
 }
 
-// FromNanosLocal
-// Generate Time from nanoseconds timestamp, using the Local time zone.
-// 由纳秒时间戳生成Time，使用本地时区
+// FromNanosLocal builds time.Time from a nanosecond timestamp using the local time zone.
+// FromNanosLocal 由纳秒时间戳生成 Time，使用本地时区。
 func FromNanosLocal(ns int64) time.Time {
 	return time.Unix(0, ns)
 }
 
-// FromNanosUTC
-// Generates Time from nanoseconds timestamp, using the UTC time zone.
-// 由纳秒秒时间戳生成Time，使用UTC时区
+// FromNanosUTC builds time.Time from a nanosecond timestamp using the UTC time zone.
+// FromNanosUTC 由纳秒时间戳生成 Time，使用 UTC 时区。
 func FromNanosUTC(ns int64) time.Time {
 	return FromNanosLocal(ns).In(time.UTC)
 }
 
-// FromNanos
-// Generates Time from nanoseconds timestamp, using the specified time zone.
-// 由纳秒时间戳生成Time，使用指定的时区
+// FromNanos builds time.Time from a nanosecond timestamp using the specified time zone.
+// FromNanos 由纳秒时间戳生成 Time，使用指定的时区。
 func FromNanos(ns int64, loc *time.Location) time.Time {
 	if loc == time.Local {
 		return FromNanosLocal(ns)
