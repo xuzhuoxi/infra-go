@@ -2,8 +2,8 @@
 
 <div align="center">
 
-![Go version](https://img.shields.io/badge/go-%3E%3Dv1.16-9cf)
-[![Tags](https://img.shields.io/badge/tags-1.0.4-green.svg)](https://github.com/xuzhuoxi/infra-go/tags)
+![Go version](https://img.shields.io/badge/go-1.24-9cf)
+[![Tags](https://img.shields.io/badge/tags-v2.0.0-green.svg)](https://github.com/xuzhuoxi/infra-go/tags)
 [![GoDoc](https://godoc.org/github.com/xuzhuoxi/infra-go?status.svg)](https://pkg.go.dev/github.com/xuzhuoxi/infra-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xuzhuoxi/infra-go)](https://goreportcard.com/report/github.com/xuzhuoxi/infra-go)
 [![test](https://github.com/xuzhuoxi/infra-go/actions/workflows/codecov.yml/badge.svg?branch=main&event=push)](https://github.com/xuzhuoxi/infra-go/actions/workflows/codecov.yml)
@@ -15,35 +15,30 @@
 
 </div>
 
-## 📖 Overview
+## 📋 Overview
 
-`infra-go` is a comprehensive Go infrastructure library that provides a wide range of utilities, tools, and components for building robust Go applications. It offers modular, reusable, and extensible solutions for common development tasks including networking, cryptography, image processing, data serialization, and more.
+`infra-go` is a modular Go infrastructure library for building robust applications. It covers networking (TCP/UDP/QUIC/WebSocket/HTTP/RPC), cryptography, image processing, data serialization, file I/O, logging, collections, and more. Packages are designed to be imported independently with minimal coupling.
 
 ### ✨ Key Features
 
-- **🔄 Modular Design**: Organized in package structure for easy import and use
-- **🔗 Low Coupling**: Business-related packages have minimal dependencies
-- **📦 Reusable**: Components can be used independently
-- **🚀 Extensible**: Easy to extend and customize
-- **⚡ Performance**: Optimized for high-performance applications
-- **🛡️ Reliable**: Comprehensive test coverage and error handling
+- **Modular Design**: One package per concern; import only what you need
+- **Low Coupling**: Business packages depend mainly on the standard library and `golang.org/x`
+- **Reusable**: Each component works standalone
+- **Extensible**: Interface-driven design for custom handlers and codecs
+- **Performance-Oriented**: Async JSON codecs, object pools, and efficient binary framing
+- **Reliable**: Broad `_test.go` coverage across packages
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
-- Go 1.16 or higher
+- Go 1.24 or higher
 - Git
 
 ### Installation
 
 ```bash
-# Install the library
-go get github.com/xuzhuoxi/infra-go
-
-# Or using go mod
-go mod init your-project
-go get github.com/xuzhuoxi/infra-go
+go get github.com/xuzhuoxi/infra-go@v2.0.0
 ```
 
 ### Basic Usage
@@ -52,163 +47,275 @@ go get github.com/xuzhuoxi/infra-go
 package main
 
 import (
-    "github.com/xuzhuoxi/infra-go/netx/tcpx"
     "github.com/xuzhuoxi/infra-go/logx"
+    "github.com/xuzhuoxi/infra-go/netx"
+    "github.com/xuzhuoxi/infra-go/netx/tcpx"
 )
 
 func main() {
-    // Initialize logger
     logger := logx.NewLogger()
-    
-    // Create TCP server
-    server := tcpx.NewServer(":8080")
-    
-    // Start server
-    if err := server.Start(); err != nil {
-        logger.Error("Failed to start server:", err)
+    logger.SetConfig(logx.LogConfig{Type: logx.TypeConsole, Level: logx.LevelInfo})
+    logger.Infoln("starting server")
+
+    server := tcpx.NewTCPServer()
+    if err := server.StartServer(netx.SockParams{LocalAddress: ":8080"}); err != nil {
+        logger.Errorln("failed to start server:", err)
     }
 }
 ```
 
-## 🛠️ Technology Stack
+## 📦 Package Reference
 
-### Core Dependencies
-- **Go Standard Library**: Primary foundation
-- **golang.org/x**: Extended functionality
-
-### Key Third-party Libraries
-- **json-iterator/go**: High-performance JSON processing
-- **lucas-clemente/quic-go**: QUIC protocol implementation
-- **nfnt/resize**: Image resizing capabilities
-- **mongo-driver**: MongoDB database driver
-- **golang.org/x/crypto**: Cryptographic functions
-- **golang.org/x/image**: Image processing
-- **golang.org/x/net**: Network utilities
-- **gopkg.in/yaml.v2**: YAML configuration support
+| Package | Description |
+|---------|-------------|
+| `alg/astar` | 2D/3D A* pathfinding and path smoothing |
+| `archivex` | ZIP and TAR archive creation and extraction |
+| `binaryx` | Binary read/write over `io.Reader` / `io.Writer` |
+| `bytex` | Length-prefixed blocks, thread-safe buffers, byte pipelines |
+| `cmdx` | Interactive CLI and extended flag/argument parsing |
+| `cryptox` | Cipher interfaces, hashing, padding, block modes |
+| `cryptox/asymmetric` | RSA key management, PKCS/PEM, hybrid encryption |
+| `cryptox/key` | SHA-256/PBKDF2 key derivation and DH key exchange |
+| `cryptox/symmetric` | AES (CBC/CTR/GCM), DES/3DES, XOR |
+| `encodingx` | Serialization abstractions, buffered codecs, key-value maps |
+| `encodingx/gobx` | Gob encoding handler |
+| `encodingx/jsonx` | JSON encoding handler (json-iterator) |
+| `encodingx/yamlx` | YAML encoding handler |
+| `errorsx` | Domain-specific error types |
+| `eventx` | Lightweight publish-subscribe event dispatcher |
+| `filex` | Cross-platform paths, traversal, copy/move/delete |
+| `graphicx` | Pixel packing, color space conversion, grayscale |
+| `graphicx/blendx` | Photoshop-style image blend modes |
+| `imagex` | Image I/O, pixel buffers, copy/fill, neighborhood ops |
+| `imagex/featurex` | Feature descriptors and histograms |
+| `imagex/filterx` | Convolution filters, blur, grayscale, morphology |
+| `imagex/formatx` | Pluggable image format registry |
+| `imagex/projectionx` | Horizontal/vertical pixel projection statistics |
+| `imagex/resizex` | Lanczos3 resampling resize |
+| `lang` | Value equality, object pools, channel limits, callbacks |
+| `lang/collectionx` | ID-indexed ordered collections |
+| `lang/listx` | `IList` with slice and linked-list implementations |
+| `logx` | Multi-sink logging with levels, rotation, named managers |
+| `mathx` | abs/min/max/clamp, bit ops, random, units, radix |
+| `mathx/gaussx` | 2D Gaussian functions and convolution kernels |
+| `netx` | Unified socket abstractions and pack framing |
+| `netx/httpx` | HTTP client helpers and `ServeMux` server wrapper |
+| `netx/quicx` | QUIC client and server |
+| `netx/rpcx` | Lightweight `net/rpc` wrapper |
+| `netx/tcpx` | TCP client and server |
+| `netx/udpx` | UDP client and server |
+| `netx/wsx` | WebSocket client and server |
+| `osxu` | Process detection and executable path utilities |
+| `poolx` | Reusable object pools (including byte-slice pools) |
+| `regexpx` | Predefined regular expression patterns |
+| `serialx` | Sequential module lifecycle manager |
+| `servicex` | Service lifecycle orchestration (init/data/save pipeline) |
+| `slicex` | Multi-type slice merge/insert/remove/search utilities |
+| `storagex/mongox` | Shared MongoDB error types |
+| `storagex/mongox/mgox` | Official `mongo-driver` multi-client lifecycle |
+| `storagex/mongox/mgo.v2x` | `gopkg.in/mgo.v2` multi-session lifecycle |
+| `storagex/redisx` | Redis storage helpers |
+| `stringx` | Unicode string utilities and password validation |
+| `timex` | Time, timestamp, duration parsing and formatting |
 
 ## 📁 Project Structure
 
 ```
 infra-go/
-├── alg/                    # Common algorithms
-│   └── astar/             # A* pathfinding algorithm (2D/3D)
-├── archivex/              # Archive utilities (tar, zip)
-├── binaryx/               # Binary data serialization
-├── bytex/                 # Byte slice and buffer operations
-├── cmdx/                  # Command line interface utilities
-├── cryptox/               # Cryptography and encryption
-│   ├── asymmetric/        # Asymmetric encryption (RSA, PKCS)
-│   └── symmetric/         # Symmetric encryption (AES, DES, XOR)
-├── encodingx/             # Data encoding/decoding
-│   ├── gobx/             # Gob encoding
-│   ├── jsonx/            # JSON encoding
-│   └── yamlx/            # YAML encoding
-├── errorsx/               # Error handling utilities
-├── eventx/                # Event system
-├── filex/                 # File operations
-├── graphicx/              # Graphics and color processing
-│   └── blendx/           # Image blending modes
-├── imagex/                # Image processing library
-│   ├── featurex/         # Image feature extraction
-│   ├── filterx/          # Image filters and effects
-│   ├── formatx/          # Image format support
-│   └── resizex/          # Image resizing
-├── lang/                  # Language utilities
-│   ├── collectionx/      # Collection utilities
-│   └── listx/            # List implementations
-├── logx/                  # Logging system
-├── mathx/                 # Mathematical utilities
-│   └── gaussx/           # Gaussian functions
-├── netx/                  # Network utilities
-│   ├── httpx/            # HTTP client/server
-│   ├── quicx/            # QUIC protocol
-│   ├── rpcx/             # RPC utilities
-│   ├── tcpx/             # TCP utilities
-│   ├── udpx/             # UDP utilities
-│   └── wsx/              # WebSocket utilities
-├── osxu/                  # Operating system utilities
-├── poolx/                 # Object pooling
-├── regexpx/               # Regular expression utilities
-├── serialx/               # Serialization utilities
-├── servicex/              # Service management
-├── slicex/                # Slice utilities
-├── storagex/              # Storage utilities
-│   ├── mongox/           # MongoDB utilities
-│   └── redisx/           # Redis utilities
-├── stringx/               # String utilities
-├── syncx/                 # Synchronization utilities
-└── timex/                 # Time utilities
+├── alg/
+│   └── astar/                  # A* pathfinding (2D/3D)
+├── archivex/                   # Archive utilities (tar, zip)
+├── binaryx/                    # Binary serialization
+├── bytex/                      # Byte slice and buffer operations
+├── cmdx/                       # Command-line utilities
+├── cryptox/                    # Cryptography core
+│   ├── asymmetric/             # RSA, PKCS
+│   ├── key/                    # Key derivation, DH
+│   └── symmetric/              # AES, DES, XOR
+├── encodingx/                  # Serialization abstractions
+│   ├── gobx/                   # Gob encoding
+│   ├── jsonx/                  # JSON encoding
+│   └── yamlx/                  # YAML encoding
+├── errorsx/                    # Error handling utilities
+├── eventx/                     # Event system
+├── filex/                      # File operations
+├── graphicx/                   # Graphics and color processing
+│   └── blendx/                 # Image blend modes
+├── imagex/                     # Image processing
+│   ├── featurex/               # Feature extraction
+│   ├── filterx/                # Filters and effects
+│   ├── formatx/                # Format registry
+│   │   ├── jpegx/
+│   │   ├── pngx/
+│   │   └── webpx/
+│   ├── projectionx/            # Projection statistics
+│   └── resizex/                # Image resizing
+├── lang/                       # Language utilities
+│   ├── collectionx/            # Ordered collections
+│   └── listx/                  # List implementations
+├── logx/                       # Logging system
+├── mathx/                      # Mathematical utilities
+│   └── gaussx/                 # Gaussian functions
+├── netx/                       # Network core (socket abstractions)
+│   ├── httpx/                  # HTTP client/server
+│   ├── quicx/                  # QUIC protocol
+│   ├── rpcx/                   # RPC utilities
+│   ├── tcpx/                   # TCP utilities
+│   ├── udpx/                   # UDP utilities
+│   └── wsx/                    # WebSocket utilities
+├── osxu/                       # OS utilities
+├── poolx/                      # Object pooling
+├── regexpx/                    # Regular expression utilities
+├── serialx/                    # Serialization lifecycle
+├── servicex/                   # Service management
+├── slicex/                     # Slice utilities
+├── storagex/
+│   ├── mongox/                 # MongoDB shared types
+│   │   ├── mgox/               # mongo-driver wrapper
+│   │   └── mgo.v2x/            # mgo.v2 wrapper
+│   └── redisx/                 # Redis utilities
+├── stringx/                    # String utilities
+└── timex/                      # Time utilities
 ```
 
 ## 📚 Usage Examples
 
-### Network Operations
+### Logging
 
 ```go
-// TCP Server
-import "github.com/xuzhuoxi/infra-go/netx/tcpx"
+import "github.com/xuzhuoxi/infra-go/logx"
 
-server := tcpx.NewServer(":8080")
-server.Start()
+logger := logx.NewLogger()
+logger.SetConfig(logx.LogConfig{Type: logx.TypeConsole, Level: logx.LevelAll})
+logger.Traceln("hello", "world")
 
-// HTTP Client
-import "github.com/xuzhuoxi/infra-go/netx/httpx"
+// Package-level helpers on the default logger
+logx.Infoln("using default logger")
+```
 
-client := httpx.NewClient()
-resp, err := client.Get("https://api.example.com/data")
+### Network — TCP
+
+```go
+import (
+    "github.com/xuzhuoxi/infra-go/netx"
+    "github.com/xuzhuoxi/infra-go/netx/tcpx"
+)
+
+server := tcpx.NewTCPServer()
+server.SetMaxConn(200)
+go server.StartServer(netx.SockParams{LocalAddress: "127.0.0.1:9999"})
+
+client := tcpx.NewTCPClient()
+client.OpenClient(netx.SockParams{RemoteAddress: "127.0.0.1:9999"})
+go client.StartReceiving()
+client.SendPackTo([]byte("hello"))
+client.CloseClient()
+server.StopServer()
+```
+
+### Network — HTTP
+
+```go
+import (
+    "fmt"
+    "net/http"
+
+    "github.com/xuzhuoxi/infra-go/netx/httpx"
+)
+
+// Package-level helpers
+httpx.HttpGet("https://api.example.com/data", func(res *http.Response, body *[]byte) {
+    fmt.Println(res.StatusCode, string(*body))
+})
+
+// Or use a client instance with custom timeout
+client := httpx.NewHttpClient()
+client.HttpGet("https://api.example.com/data", func(res *http.Response, body *[]byte) {
+    fmt.Println(string(*body))
+})
 ```
 
 ### Image Processing
 
 ```go
-// Load and process image
-import "github.com/xuzhuoxi/infra-go/imagex"
+import (
+    "image"
+    "image/color"
 
-img, err := imagex.LoadImage("input.jpg")
-if err != nil {
-    log.Fatal(err)
-}
+    "github.com/xuzhuoxi/infra-go/imagex"
+    "github.com/xuzhuoxi/infra-go/imagex/filterx"
+    "github.com/xuzhuoxi/infra-go/imagex/formatx"
+    "github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx"
 
-// Apply blur filter
-blurred := imagex.ApplyBlur(img, 5.0)
-imagex.SaveImage(blurred, "output.jpg")
+    _ "github.com/xuzhuoxi/infra-go/imagex/formatx/jpegx" // register JPEG codec
+)
+
+// Create and save
+rect := image.Rect(0, 0, 640, 480)
+img := imagex.NewRGBA(rect, color.White)
+imagex.SaveImage(img, "output.jpeg", formatx.JPEG, jpegx.DefaultJPEGOptions)
+
+// Load and apply blur
+src, _, err := imagex.LoadImage("input.png", formatx.PNG)
+dst := imagex.NewRGBA(src.Bounds(), color.Transparent)
+filterx.FastBlur2(src, dst, 5)
 ```
 
-### Cryptography
+### Cryptography — AES
 
 ```go
-// AES encryption
-import "github.com/xuzhuoxi/infra-go/cryptox/symmetric"
+import (
+    "github.com/xuzhuoxi/infra-go/cryptox"
+    "github.com/xuzhuoxi/infra-go/cryptox/symmetric"
+)
 
-key := []byte("your-secret-key-32-bytes-long!")
-data := []byte("Hello, World!")
+key := []byte("your-32-byte-secret-key-here!!")
+plaintext := []byte("Hello, World!")
 
-encrypted, err := symmetric.AESEncrypt(data, key)
+cipher := symmetric.NewAESCipher(key)
+ciphertext, err := cipher.EncryptMode(plaintext, cryptox.CBC)
 if err != nil {
-    log.Fatal(err)
+    panic(err)
 }
+decrypted, err := cipher.DecryptMode(ciphertext, cryptox.CBC)
 ```
 
-### Data Serialization
+### Data Serialization — JSON
 
 ```go
-// JSON encoding
 import "github.com/xuzhuoxi/infra-go/encodingx/jsonx"
 
-data := map[string]interface{}{
-    "name": "John",
-    "age":  30,
-}
+handler := jsonx.NewJsonCodingHandlerAsync()
 
-jsonBytes, err := jsonx.Encode(data)
-if err != nil {
-    log.Fatal(err)
-}
+data := map[string]interface{}{"name": "John", "age": 30}
+jsonBytes, err := handler.HandleEncode(data)
+
+var decoded map[string]interface{}
+err = handler.HandleDecode(jsonBytes, &decoded)
 ```
 
-## 🧪 Testing
+## 🛠️ Technology Stack
 
-Run the test suite:
+### Core
+
+- **Go Standard Library** — primary foundation
+- **golang.org/x** — crypto, image, net extensions
+
+### Third-party Dependencies
+
+| Library | Purpose |
+|---------|---------|
+| [json-iterator/go](https://github.com/json-iterator/go) | High-performance JSON |
+| [quic-go/quic-go](https://github.com/quic-go/quic-go) | QUIC protocol |
+| [nfnt/resize](https://github.com/nfnt/resize) | Image resizing |
+| [mongo-driver](https://go.mongodb.org/mongo-driver) | MongoDB official driver |
+| [gopkg.in/mgo.v2](https://gopkg.in/mgo.v2) | Legacy MongoDB driver wrapper |
+| [golang.org/x/crypto](https://golang.org/x/crypto) | Cryptographic primitives |
+| [golang.org/x/image](https://golang.org/x/image) | Image processing |
+| [golang.org/x/net](https://golang.org/x/net) | Network utilities |
+| [gopkg.in/yaml.v2](https://gopkg.in/yaml.v2) | YAML configuration |
+
+## 🧪 Testing
 
 ```bash
 # Run all tests
@@ -217,72 +324,50 @@ go test ./...
 # Run tests with coverage
 go test -cover ./...
 
-# Run specific package tests
+# Run a specific package
 go test ./netx/tcpx
 ```
 
 ## 📖 Documentation
 
-- [GoDoc](https://pkg.go.dev/github.com/xuzhuoxi/infra-go) - API documentation
-- [Examples](./examples/) - Code examples
-- [Tests](./*/_test.go) - Test files with usage examples
+- [pkg.go.dev](https://pkg.go.dev/github.com/xuzhuoxi/infra-go) — API reference
+- Each package's `doc.go` — design notes and capability overview
+- `*_test.go` files throughout the repo — runnable usage examples
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
+Contributions are welcome. Please:
 
 1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+2. **Create** a feature branch (`git checkout -b feature/my-feature`)
+3. **Commit** your changes with a clear message
+4. **Push** to the branch and **open** a Pull Request
 
-### Development Guidelines
+### Guidelines
 
-- Follow Go coding standards and conventions
+- Follow Go conventions; run `gofmt` before committing
 - Add tests for new functionality
-- Update documentation for API changes
-- Ensure all tests pass before submitting PR
-- Use meaningful commit messages
-
-### Code Style
-
-- Use `gofmt` for code formatting
-- Follow Go naming conventions
-- Add comments for exported functions
-- Keep functions focused and concise
+- Update documentation when changing public APIs
+- Ensure `go test ./...` passes before submitting
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
 
 ## 👥 Authors
 
-- **xuzhuoxi** - *Initial work* - [GitHub](https://github.com/xuzhuoxi)
-
-## 🙏 Acknowledgments
-
-- Go community for excellent tooling and libraries
-- Contributors and users of this project
-- Open source projects that inspired this library
+- **xuzhuoxi** — [GitHub](https://github.com/xuzhuoxi)
 
 ## 📞 Contact
 
 - **Email**: xuzhuoxi@gmail.com or mailxuzhuoxi@163.com
 - **GitHub**: [@xuzhuoxi](https://github.com/xuzhuoxi)
 
-## 🔗 Related Projects
-
-- [Go Standard Library](https://golang.org/pkg/)
-- [golang.org/x](https://golang.org/x/)
-
 ---
 
 <div align="center">
 
-**Made with ❤️ by the Go community**
-
-[![Go](https://img.shields.io/badge/Go-1.16+-blue.svg)](https://golang.org/)
+[![Go](https://img.shields.io/badge/Go-1.24-blue.svg)](https://golang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 </div>
