@@ -3,7 +3,7 @@
 <div align="center">
 
 ![Go version](https://img.shields.io/badge/go-1.24-9cf)
-[![Tags](https://img.shields.io/badge/tags-v2.0.0-green.svg)](https://github.com/xuzhuoxi/infra-go/tags)
+[![Tags](https://img.shields.io/badge/tags-v1.3.0-green.svg)](https://github.com/xuzhuoxi/infra-go/tags)
 [![GoDoc](https://godoc.org/github.com/xuzhuoxi/infra-go?status.svg)](https://pkg.go.dev/github.com/xuzhuoxi/infra-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/xuzhuoxi/infra-go)](https://goreportcard.com/report/github.com/xuzhuoxi/infra-go)
 [![test](https://github.com/xuzhuoxi/infra-go/actions/workflows/codecov.yml/badge.svg?branch=main&event=push)](https://github.com/xuzhuoxi/infra-go/actions/workflows/codecov.yml)
@@ -37,7 +37,7 @@
 
 ### Installation
 
-In Go modules mode, add imports in your code; dependencies are resolved automatically. The current release tag is **v2.0.0**.
+In Go modules mode, add imports in your code; dependencies are resolved automatically. The current release tag is **v1.3.0**.
 
 ```bash
 go mod init your-project   # skip if go.mod already exists
