@@ -37,8 +37,11 @@
 
 ### Installation
 
+In Go modules mode, add imports in your code; dependencies are resolved automatically. The current release tag is **v2.0.0**.
+
 ```bash
-go get github.com/xuzhuoxi/infra-go@v2.0.0
+go mod init your-project   # skip if go.mod already exists
+go mod tidy                # after adding imports
 ```
 
 ### Basic Usage

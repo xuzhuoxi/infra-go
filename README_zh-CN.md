@@ -37,8 +37,11 @@
 
 ### 安装
 
+Go Modules 模式下，在代码中 `import` 即可，依赖会自动解析。当前最新版本标签为 **v2.0.0**。
+
 ```bash
-go get github.com/xuzhuoxi/infra-go@v2.0.0
+go mod init your-project   # 已有 go.mod 可省略
+go mod tidy                # 添加 import 后执行
 ```
 
 ### 基本使用
