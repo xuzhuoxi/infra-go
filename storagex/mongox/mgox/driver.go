@@ -7,7 +7,7 @@ import (
 
 	"github.com/xuzhuoxi/infra-go/lang"
 	"github.com/xuzhuoxi/infra-go/storagex/mongox"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // NewMongoDriver creates a driver that manages multiple named MongoDB clients.

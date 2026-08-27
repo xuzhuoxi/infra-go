@@ -4,9 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // NewIMongoClient creates an IMongoClient backed by MongoClient.
@@ -84,12 +84,12 @@ func (c *MongoClient) Connect() error {
 	if nil != err {
 		return err
 	}
-	names, err := c.Cli.ListDatabaseNames(c.CliContext, bsonx.Doc{})
+	names, err := c.Cli.ListDatabaseNames(c.CliContext, bson.D{})
 	if nil != err {
 		return err
 	}
 	c.DatabaseNames = names
-	return c.connect()
+	return nil
 }
 
 // Disconnect closes the client connection.
@@ -164,11 +164,7 @@ func (c *MongoClient) LocatedDatabase() IMongoDatabase {
 //---------------------------------
 
 func (c *MongoClient) connect() error {
-	client, err := mongo.NewClient(c.Options)
-	if nil != err {
-		return err
-	}
-	err = client.Connect(c.CliContext)
+	client, err := mongo.Connect(c.Options)
 	if nil != err {
 		return err
 	}

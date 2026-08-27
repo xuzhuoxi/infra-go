@@ -3,8 +3,8 @@ package mgox
 import (
 	"context"
 
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/x/bsonx"
+	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 // NewIMongoDatabase creates an IMongoDatabase backed by MongoDatabase.
@@ -65,7 +65,7 @@ type MongoDatabase struct {
 // Connect loads collection names and builds the collection map.
 // Connect 加载集合名称并构建集合映射表。
 func (db *MongoDatabase) Connect() error {
-	names, err := db.DB.ListCollectionNames(db.DBContext, bsonx.Doc{})
+	names, err := db.DB.ListCollectionNames(db.DBContext, bson.D{})
 	if nil != err {
 		return err
 	}
