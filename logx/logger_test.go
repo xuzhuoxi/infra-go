@@ -24,8 +24,8 @@ func TestLogger(t *testing.T) {
 
 func TestLoggerLevelFormat(t *testing.T) {
 	for _, val := range levelFormats {
-		fmt.Printf(val.format)
+		fmt.Print(val.format)
 		fmt.Println(val.prefix)
-		fmt.Printf(defaultFormat)
+		fmt.Print(defaultFormat)
 	}
 }

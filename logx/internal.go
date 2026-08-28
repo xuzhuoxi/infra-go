@@ -227,7 +227,7 @@ func (o *logger) Log(level LogLevel, v ...interface{}) {
 		info.logger.Println(v...)
 	}
 	if logged && enableColorFormat {
-		fmt.Printf(defaultFormat)
+		fmt.Print(defaultFormat)
 	}
 }
 
@@ -249,7 +249,7 @@ func (o *logger) Logf(level LogLevel, format string, v ...interface{}) {
 		info.logger.Printf(format, v...)
 	}
 	if logged && enableColorFormat {
-		fmt.Printf(defaultFormat)
+		fmt.Print(defaultFormat)
 	}
 }
 
@@ -271,7 +271,7 @@ func (o *logger) Logln(level LogLevel, v ...interface{}) {
 		info.logger.Println(v...)
 	}
 	if logged && enableColorFormat {
-		fmt.Printf(defaultFormat)
+		fmt.Print(defaultFormat)
 	}
 }
 
