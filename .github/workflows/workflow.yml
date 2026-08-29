@@ -24,7 +24,7 @@ jobs:
       - name: Run test with coverage
         run: go test -tags=skiptest -v ./... -coverprofile=coverage.txt -covermode=atomic -timeout 10s
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage
           path: coverage.txt
@@ -38,7 +38,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Download coverage artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: coverage
       - name: Upload coverage to Codecov
