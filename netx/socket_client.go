@@ -102,6 +102,9 @@ func (o *SockClientBase) SetPackHandlerContainer(packHandler IPackHandlerContain
 // LocalAddress returns the local address string of the active connection.
 // LocalAddress 返回当前连接的本地地址字符串。
 func (o *SockClientBase) LocalAddress() string {
+	if nil == o.Conn {
+		return o.LocalAddr
+	}
 	return o.Conn.LocalAddr().String()
 }
 

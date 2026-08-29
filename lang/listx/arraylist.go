@@ -6,11 +6,16 @@ import (
 
 // NewArrayList creates a slice-backed list with optional max size and initial capacity.
 // NewArrayList 创建一个基于切片实现的列表，可指定最大长度与初始容量。
-// maxSize: maximum allowed length; initCap: initial slice capacity; requires maxSize >= initCap.
-// maxSize: 列表允许的最大长度；initCap: 底层切片初始容量；要求 maxSize >= initCap。
+// maxSize: maximum allowed length; 0 means unlimited. initCap: initial slice capacity.
+// maxSize: 列表允许的最大长度，0 表示不限制；initCap: 底层切片初始容量。
+// Returns nil if maxSize or initCap is negative. If maxSize > 0 and maxSize < initCap, maxSize is raised to initCap.
+// 若 maxSize 或 initCap 为负数则返回 nil。若 maxSize > 0 且 maxSize < initCap，则将 maxSize 调整为 initCap。
 func NewArrayList(maxSize, initCap int) *ArrayList {
-	if initCap > maxSize {
+	if maxSize < 0 || initCap < 0 {
 		return nil
+	}
+	if maxSize > 0 && initCap > maxSize {
+		maxSize = initCap
 	}
 	rs := &ArrayList{maxSize: maxSize, initCap: initCap}
 	rs.Clear()

@@ -132,7 +132,7 @@ func (c *UDPDialClient) OpenClient(params netx.SockParams) error {
 // CloseClient closes the UDP dial connection.
 // CloseClient 关闭 UDP 拨号连接。
 func (c *UDPDialClient) CloseClient() error {
-	funcName := "[UDPDialClient.Close]"
+	funcName := "[UDPDialClient.CloseClient]"
 	c.ClientMu.Lock()
 	defer c.ClientMu.Unlock()
 	if !c.Opening {
@@ -175,7 +175,17 @@ func (c *UDPListenClient) OpenClient(params netx.SockParams) error {
 	}
 	c.Conn = conn
 	connProxy := &UDPConnAdapter{ReadWriter: conn}
-	connInfo := netx.NewRemoteOnlyConnInfo(conn.LocalAddr().String(), conn.RemoteAddr().String())
+	lAddress := ""
+	rAddress := ""
+	if nil != c.Conn {
+		if nil != c.Conn.LocalAddr() {
+			lAddress = c.Conn.LocalAddr().String()
+		}
+		if nil != c.Conn.RemoteAddr() {
+			rAddress = c.Conn.RemoteAddr().String()
+		}
+	}
+	connInfo := netx.NewRemoteOnlyConnInfo(lAddress, rAddress)
 	c.PackProxy = netx.NewPackSendReceiver(connInfo, connProxy, connProxy, c.PackHandler, UdpDataBlockHandler, c.Logger, true)
 	c.Opening = true
 	c.Logger.Infoln(funcName, "()")

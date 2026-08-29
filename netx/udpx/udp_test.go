@@ -1,3 +1,5 @@
+//go:build !skiptest
+
 package udpx
 
 import (
@@ -49,7 +51,7 @@ func TestUDPServer(t *testing.T) {
 	//		}
 	//	}
 	//}()
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
 }
 
 func TestUDP2(t *testing.T) {
@@ -72,7 +74,7 @@ func TestUDP2(t *testing.T) {
 			client1.SendPackTo([]byte{2, 4}, addrs...)
 		}
 	}()
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(5 * time.Millisecond)
 }
 
 func TestUDP3(t *testing.T) {

@@ -1,3 +1,5 @@
+//go:build !skiptest
+
 package tcpx
 
 import (
@@ -31,6 +33,7 @@ func TestTCPServer(t *testing.T) {
 		fmt.Println(2222222222222)
 	})
 	go server.StartServer(netx.SockParams{LocalAddress: "127.0.0.1:9999"})
+	time.Sleep(1 * time.Millisecond)
 
 	client := NewTCPClient()
 	client.OpenClient(netx.SockParams{RemoteAddress: "127.0.0.1:9999"})

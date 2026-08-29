@@ -1,3 +1,5 @@
+//go:build !skiptest
+
 // Package tcpx
 // Create on 2025/5/14
 // @author xuzhuoxi

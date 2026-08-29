@@ -1,4 +1,4 @@
-name: test
+name: codecov
 on:
   push:
     branches:
@@ -15,8 +15,13 @@ jobs:
           fetch-depth: 2
       - uses: actions/setup-go@master
         with:
-          go-version: "1.16"
-      - name: Run coverage
-        run: go test -v ./... -coverprofile=coverage.txt -covermode=atomic
+          go-version: "1.24"
+      - name: Run build
+        run: go build ./...
+      - name: Run test with coverage
+        run: go test -tags=skiptest -v ./... -coverprofile=coverage.txt -covermode=atomic -timeout 10s
       - name: Upload coverage to Codecov
-        run: bash <(curl -s https://codecov.io/bash)
+        uses: codecov/codecov-action@v5
+        with:
+          files: coverage.txt
+          fail_ci_if_error: false

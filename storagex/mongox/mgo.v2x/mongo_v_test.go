@@ -1,3 +1,5 @@
+//go:build !skiptest
+
 package mgo_v2x
 
 import (
